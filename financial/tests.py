@@ -3,7 +3,8 @@ from django.contrib.auth import get_user_model
 from decimal import Decimal
 from datetime import date, timedelta
 
-from .models import Budget, BudgetLine, AccountingCategory, Expense, Invoice, InvoiceItem, LedgerAccount, JournalEntry, JournalLine
+from .models import Budget, BudgetLine, AccountingCategory, Expense, Invoice, InvoiceItem, LedgerAccount, JournalEntry, JournalLine, Payment
+from .services.reports import profit_and_loss, cash_flow
 
 
 class BudgetTests(TestCase):
@@ -87,3 +88,42 @@ class LedgerTests(TestCase):
 		self.assertFalse(je.is_balanced())
 		with self.assertRaises(ValueError):
 			je.post()
+
+
+class ReportsTests(TestCase):
+	def setUp(self):
+		User = get_user_model()
+		self.user = User.objects.create_user(email='report@example.com', password='password')
+		self.cat = AccountingCategory.objects.create(name='Service', code='SVC')
+		today = date.today()
+		start = today.replace(day=1)
+		end = (start + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+		# Invoice and payment
+		self.invoice = Invoice.objects.create(
+			invoice_number='R-1', customer=self.user, invoice_date=start, due_date=end,
+			billing_name='Rep', billing_email='report@example.com', billing_address='Addr', billing_city='City', billing_postal_code='0000'
+		)
+		InvoiceItem.objects.create(invoice=self.invoice, description='Service Fee', quantity=1, unit_price=Decimal('1200.00'), category=self.cat)
+		# Mark payment completed
+		Payment.objects.create(invoice=self.invoice, amount=Decimal('1200.00'), payment_method='bank_transfer', payment_status='completed', payment_date=start)
+
+		# Expense paid
+		Expense.objects.create(description='Hosting', amount=Decimal('200.00'), expense_type='operational', category=self.cat, expense_date=start, is_paid=True, payment_date=start, created_by=self.user)
+
+	def test_profit_and_loss(self):
+		today = date.today()
+		start = today.replace(day=1)
+		end = (start + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+		pl = profit_and_loss(start, end)
+		self.assertEqual(pl['revenue'], Decimal('1200.00'))
+		self.assertEqual(pl['expenses'], Decimal('200.00'))
+		self.assertEqual(pl['net_profit'], Decimal('1000.00'))
+
+	def test_cash_flow(self):
+		today = date.today()
+		start = today.replace(day=1)
+		end = (start + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+		cf = cash_flow(start, end)
+		self.assertEqual(cf['cash_in'], Decimal('1200.00'))
+		self.assertEqual(cf['cash_out'], Decimal('200.00'))
+		self.assertEqual(cf['net_cash_flow'], Decimal('1000.00'))
