@@ -552,3 +552,17 @@ class JournalLine(models.Model):
 
     def __str__(self):
         return f"{self.account.code} D:{self.debit} C:{self.credit}"
+
+
+class LedgerBalance(models.Model):
+    """Materialized per-account balance for quick queries and trial balance reports."""
+    account = models.OneToOneField(LedgerAccount, on_delete=models.CASCADE, related_name='balance')
+    balance = models.DecimalField("Balance", max_digits=18, decimal_places=2, default=Decimal('0.00'))
+    updated_at = models.DateTimeField("Updated At", auto_now=True)
+
+    class Meta:
+        verbose_name = "Ledger Balance"
+        verbose_name_plural = "Ledger Balances"
+
+    def __str__(self):
+        return f"{self.account.code} - {self.balance}"

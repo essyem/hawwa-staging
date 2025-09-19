@@ -4,6 +4,8 @@ from django.utils import timezone
 
 from ..models import Invoice, InvoiceItem, Payment, Expense
 
+from ..models import LedgerBalance, LedgerAccount
+
 
 def profit_and_loss(start_date, end_date):
     """Return a simple Profit & Loss summary for the period.
@@ -67,3 +69,12 @@ def cash_flow(start_date, end_date):
         'cash_out': cash_out,
         'net_cash_flow': cash_in - cash_out
     }
+
+
+def trial_balance():
+    """Return a list of accounts with their materialized balances for a trial balance."""
+    rows = []
+    for lb in LedgerBalance.objects.select_related('account').all().order_by('account__code'):
+        rows.append({'code': lb.account.code, 'name': lb.account.name, 'balance': lb.balance})
+    total = sum((row['balance'] for row in rows), Decimal('0.00'))
+    return {'rows': rows, 'total': total}

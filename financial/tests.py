@@ -157,3 +157,29 @@ class PostingSignalsTests(TestCase):
 		je = JournalEntry.objects.filter(reference=ref).first()
 		self.assertIsNotNone(je)
 		self.assertTrue(je.is_balanced())
+
+
+class MaterializedBalanceTests(TestCase):
+	def setUp(self):
+		User = get_user_model()
+		self.user = User.objects.create_user(email='bal@example.com', password='password')
+		from .services.posting import _get_or_create_account
+		self.cash = _get_or_create_account('1000', 'Cash')
+		self.rev = _get_or_create_account('4000', 'Revenue')
+
+	def test_balances_updated_on_payment(self):
+		invoice = Invoice.objects.create(invoice_number='MB-1', customer=self.user, invoice_date=date.today(), due_date=date.today(), billing_name='B', billing_email='b@x.com', billing_address='a', billing_city='c', billing_postal_code='000')
+		payment = Payment.objects.create(invoice=invoice, amount=Decimal('500.00'), payment_method='bank_transfer', payment_status='completed', payment_date=timezone.now())
+		# Check LedgerBalance
+		from .models import LedgerBalance
+		lb_cash = LedgerBalance.objects.get(account__code='1000')
+		lb_rev = LedgerBalance.objects.get(account__code='4000')
+		# Cash should have increased by 500, revenue decreased by -500 (credit)
+		self.assertEqual(lb_cash.balance, Decimal('500.00'))
+		self.assertEqual(lb_rev.balance, Decimal('-500.00'))
+
+	def test_trial_balance_report(self):
+		from .services.reports import trial_balance
+		tb = trial_balance()
+		self.assertIn('rows', tb)
+		self.assertIn('total', tb)
