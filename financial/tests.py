@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from decimal import Decimal
 from datetime import date, timedelta
 
-from .models import Budget, BudgetLine, AccountingCategory, Expense, Invoice, InvoiceItem
+from .models import Budget, BudgetLine, AccountingCategory, Expense, Invoice, InvoiceItem, LedgerAccount, JournalEntry, JournalLine
 
 
 class BudgetTests(TestCase):
@@ -61,3 +61,29 @@ class BudgetTests(TestCase):
 		)
 		rem = self.budget.remaining()
 		self.assertEqual(rem, Decimal('9000.00'))
+
+
+class LedgerTests(TestCase):
+	def setUp(self):
+		User = get_user_model()
+		self.user = User.objects.create_user(email='acct@example.com', password='password')
+		# Create ledger accounts
+		self.cash = LedgerAccount.objects.create(code='1000', name='Cash')
+		self.revenue = LedgerAccount.objects.create(code='4000', name='Revenue')
+
+	def test_journal_entry_balanced_post(self):
+		je = JournalEntry.objects.create(reference='TXN-1', date=date.today(), narration='Test')
+		JournalLine.objects.create(entry=je, account=self.cash, debit=Decimal('100.00'))
+		JournalLine.objects.create(entry=je, account=self.revenue, credit=Decimal('100.00'))
+
+		self.assertTrue(je.is_balanced())
+		self.assertTrue(je.post())
+
+	def test_journal_entry_unbalanced_fails(self):
+		je = JournalEntry.objects.create(reference='TXN-2', date=date.today(), narration='Unbalanced')
+		JournalLine.objects.create(entry=je, account=self.cash, debit=Decimal('100.00'))
+		JournalLine.objects.create(entry=je, account=self.revenue, credit=Decimal('50.00'))
+
+		self.assertFalse(je.is_balanced())
+		with self.assertRaises(ValueError):
+			je.post()

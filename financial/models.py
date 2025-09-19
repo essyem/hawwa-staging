@@ -481,3 +481,74 @@ class BudgetLine(models.Model):
         ).aggregate(total=models.Sum('total_amount'))['total'] or 0
 
         return expense_sum + invoice_sum
+
+
+class LedgerAccount(models.Model):
+    """A ledger account for double-entry bookkeeping."""
+    code = models.CharField("Account Code", max_length=32, unique=True)
+    name = models.CharField("Account Name", max_length=200)
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
+    is_active = models.BooleanField("Active", default=True)
+    created_at = models.DateTimeField("Created At", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Ledger Account"
+        verbose_name_plural = "Ledger Accounts"
+        ordering = ['code']
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+class JournalEntry(models.Model):
+    """A journal entry grouping one or more journal lines."""
+    reference = models.CharField("Reference", max_length=100, blank=True)
+    date = models.DateField("Date", default=timezone.now)
+    narration = models.TextField("Narration", blank=True)
+    created_at = models.DateTimeField("Created At", auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Journal Entry"
+        verbose_name_plural = "Journal Entries"
+        ordering = ['-date', '-created_at']
+
+    def __str__(self):
+        return f"JE-{self.pk} {self.reference or ''} {self.date}"
+
+    def total_debits(self):
+        return self.lines.aggregate(total=models.Sum('debit'))['total'] or 0
+
+    def total_credits(self):
+        return self.lines.aggregate(total=models.Sum('credit'))['total'] or 0
+
+    def is_balanced(self):
+        return Decimal(str(self.total_debits())) == Decimal(str(self.total_credits()))
+
+    def post(self):
+        """Mark entry as posted. For now this is a placeholder for future ledger balance updates."""
+        if not self.is_balanced():
+            raise ValueError('JournalEntry is not balanced')
+        # In a full implementation, posting would create/update ledger balances.
+        return True
+
+
+class JournalLine(models.Model):
+    """A single debit/credit line belonging to a JournalEntry."""
+    entry = models.ForeignKey(JournalEntry, on_delete=models.CASCADE, related_name='lines')
+    account = models.ForeignKey(LedgerAccount, on_delete=models.PROTECT, related_name='lines')
+    debit = models.DecimalField("Debit", max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    credit = models.DecimalField("Credit", max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    narration = models.CharField("Narration", max_length=200, blank=True)
+
+    class Meta:
+        verbose_name = "Journal Line"
+        verbose_name_plural = "Journal Lines"
+
+    def clean(self):
+        # Ensure debit and credit are not both set
+        if self.debit > 0 and self.credit > 0:
+            raise ValueError('JournalLine cannot have both debit and credit greater than 0')
+
+    def __str__(self):
+        return f"{self.account.code} D:{self.debit} C:{self.credit}"

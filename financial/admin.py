@@ -13,6 +13,7 @@ from .models import (
     Payment, Expense
 )
 from .models import Budget, BudgetLine
+from .models import LedgerAccount, JournalEntry, JournalLine
 
 # Custom admin actions
 @admin.action(description='Mark selected invoices as sent')
@@ -396,3 +397,36 @@ class BudgetLineAdmin(admin.ModelAdmin):
     list_filter = ('budget', 'category')
     search_fields = ('name',)
     readonly_fields = ('created_at',)
+
+
+@admin.register(LedgerAccount)
+class LedgerAccountAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name', 'is_active', 'created_at')
+    search_fields = ('code', 'name')
+
+
+class JournalLineInline(admin.TabularInline):
+    model = JournalLine
+    extra = 1
+    fields = ('account', 'debit', 'credit', 'narration')
+
+
+@admin.register(JournalEntry)
+class JournalEntryAdmin(admin.ModelAdmin):
+    list_display = ('reference', 'date', 'narration', 'created_at')
+    inlines = [JournalLineInline]
+    readonly_fields = ('created_at',)
+
+    actions = ['post_entries']
+
+    @admin.action(description='Post selected journal entries')
+    def post_entries(self, request, queryset):
+        success = 0
+        failed = 0
+        for entry in queryset:
+            try:
+                entry.post()
+                success += 1
+            except Exception as e:
+                failed += 1
+        messages.info(request, f"Posted {success} entries, {failed} failed.")
