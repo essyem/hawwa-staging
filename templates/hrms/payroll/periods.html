@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load currency_filters %} extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payroll Periods - HRMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-calendar-alt"></i> Payroll Periods</h1>
+    {% if user.is_staff %}
+    <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPeriodModal">
+        <i class="fas fa-plus"></i> Create Period
+    </a>
+    {% endif %}
+</div>
+
+<!-- Period Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Total Periods</h5>
+                        <h3>{{ total_periods|default:"0" }}</h3>
+                    </div>
+                    <i class="fas fa-calendar fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Processing</h5>
+                        <h3>{{ processing_periods|default:"0" }}</h3>
+                    </div>
+                    <i class="fas fa-sync fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Completed</h5>
+                        <h3>{{ completed_periods|default:"0" }}</h3>
+                    </div>
+                    <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">This Month</h5>
+                        <h3>${{ this_month_total|default:"0" }}</h3>
+                    </div>
+                    <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payroll Periods List -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Payroll Periods</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Pay Date</th>
+                        <th>Employees</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for period in payroll_periods %}
+                    <tr>
+                        <td>
+                            <div>
+                                <strong>{{ period.name }}</strong>
+                                <br><small class="text-muted">{{ period.period_type|title }} Period</small>
+                            </div>
+                        </td>
+                        <td>{{ period.start_date|date:"M d, Y" }}</td>
+                        <td>{{ period.end_date|date:"M d, Y" }}</td>
+                        <td>
+                            <div class="{% if period.pay_date|date:'Y-m-d' < today|date:'Y-m-d' and period.status != 'paid' %}text-danger{% endif %}">
+                                {{ period.pay_date|date:"M d, Y" }}
+                                {% if period.pay_date|date:'Y-m-d' < today|date:'Y-m-d' and period.status != 'paid' %}
+                                <br><small class="text-danger">Overdue</small>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ period.employee_count|default:"0" }} employees</span>
+                        </td>
+                        <td>
+                            <strong class="text-success">{{ period.total_amount|currency|default:"0.00 QAR" }}</strong>
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if period.status == 'draft' %}bg-secondary
+                                {% elif period.status == 'processing' %}bg-warning
+                                {% elif period.status == 'approved' %}bg-info
+                                {% elif period.status == 'paid' %}bg-success
+                                {% elif period.status == 'cancelled' %}bg-danger
+                                {% else %}bg-light{% endif %}">
+                                {{ period.get_status_display|default:period.status|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'hrms:payroll_period_detail' period.pk %}" 
+                                   class="btn btn-outline-primary" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if period.status == 'draft' and user.is_staff %}
+                                <a href="#" class="btn btn-outline-success" title="Process Payroll">
+                                    <i class="fas fa-play"></i>
+                                </a>
+                                <a href="#" class="btn btn-outline-warning" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% endif %}
+                                {% if period.status == 'paid' %}
+                                <a href="#" class="btn btn-outline-info" title="Download Report">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h5>No Payroll Periods Found</h5>
+                            <p class="text-muted">Get started by creating your first payroll period.</p>
+                            {% if user.is_staff %}
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPeriodModal">
+                                <i class="fas fa-plus"></i> Create Period
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create Period Modal -->
+<div class="modal fade" id="createPeriodModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Payroll Period</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createPeriodForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="period_name" class="form-label">Period Name</label>
+                        <input type="text" class="form-control" id="period_name" name="name" 
+                               placeholder="e.g., December 2024" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="start_date" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="end_date" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="pay_date" class="form-label">Pay Date</label>
+                        <input type="date" class="form-control" id="pay_date" name="pay_date" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="period_type" class="form-label">Period Type</label>
+                        <select class="form-select" id="period_type" name="period_type" required>
+                            <option value="">Select period type</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="bi_weekly">Bi-Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" 
+                                  placeholder="Optional description for this payroll period"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createPeriod()">Create Period</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function createPeriod() {
+    const form = document.getElementById('createPeriodForm');
+    const formData = new FormData(form);
+    
+    // Here you would typically make an AJAX call to create the period
+    console.log('Creating payroll period...');
+    
+    // For now, just close the modal and show a success message
+    const modal = bootstrap.Modal.getInstance(document.getElementById('createPeriodModal'));
+    modal.hide();
+    
+    // Show success message (you can implement proper toast notifications)
+    alert('Payroll period created successfully!');
+    
+    // Reload the page to show the new period
+    location.reload();
+}
+
+// Auto-fill end date based on start date and period type
+document.getElementById('start_date').addEventListener('change', autoFillEndDate);
+document.getElementById('period_type').addEventListener('change', autoFillEndDate);
+
+function autoFillEndDate() {
+    const startDate = document.getElementById('start_date').value;
+    const periodType = document.getElementById('period_type').value;
+    
+    if (startDate && periodType) {
+        const start = new Date(startDate);
+        let end = new Date(start);
+        
+        switch(periodType) {
+            case 'weekly':
+                end.setDate(start.getDate() + 6);
+                break;
+            case 'bi_weekly':
+                end.setDate(start.getDate() + 13);
+                break;
+            case 'monthly':
+                end.setMonth(start.getMonth() + 1);
+                end.setDate(0); // Last day of the month
+                break;
+            case 'quarterly':
+                end.setMonth(start.getMonth() + 3);
+                end.setDate(0);
+                break;
+        }
+        
+        document.getElementById('end_date').value = end.toISOString().split('T')[0];
+        
+        // Set pay date to 5 days after end date
+        const payDate = new Date(end);
+        payDate.setDate(end.getDate() + 5);
+        document.getElementById('pay_date').value = payDate.toISOString().split('T')[0];
+    }
+}
+</script>
+{% endblock %}

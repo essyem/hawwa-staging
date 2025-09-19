@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Employee List{% endblock %}
+{% block content %}
+<h2>Employees</h2>
+<table class="table table-striped">
+    <thead>
+        <tr><th>Name</th><th>Designation</th><th>Department</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+        {% for emp in employees %}
+        <tr>
+            <td>{{ emp.user.get_full_name }}</td>
+            <td>{{ emp.designation }}</td>
+            <td>{{ emp.department.name }}</td>
+            <td>{{ emp.is_active|yesno:"Active,Inactive" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

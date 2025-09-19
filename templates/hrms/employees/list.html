@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Employees - HRMS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-users text-primary"></i>
+                Employees
+            </h1>
+            {% if user.is_staff %}
+            <a href="{% url 'hrms:employee_add' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Employee
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ search_term }}" placeholder="Name, Email, or Employee ID">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="department" class="form-label">Department</label>
+                        <select class="form-select" id="department" name="department">
+                            <option value="">All Departments</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.id }}" {% if selected_department == dept.id|stringformat:'s' %}selected{% endif %}>
+                                {{ dept.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <a href="{% url 'hrms:employee_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Employee List -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    Employee Directory ({{ employees|length }} of {{ page_obj.paginator.count }})
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if employees %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Employee</th>
+                                <th>Department</th>
+                                <th>Position</th>
+                                <th>Grade</th>
+                                <th>Hire Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in employees %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center me-3">
+                                            <span class="text-white font-weight-bold">
+                                                {{ employee.user.first_name|first }}{{ employee.user.last_name|first }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <div class="font-weight-bold">
+                                                {{ employee.user.get_full_name }}
+                                            </div>
+                                            <div class="text-muted small">
+                                                {{ employee.employee_id }}
+                                            </div>
+                                            <div class="text-muted small">
+                                                {{ employee.user.email }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        {{ employee.department.name }}
+                                    </span>
+                                </td>
+                                <td>{{ employee.position.title }}</td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        {{ employee.grade.name }}
+                                    </span>
+                                </td>
+                                <td>{{ employee.hire_date|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if employee.status == 'active' %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% elif employee.status == 'inactive' %}
+                                        <span class="badge bg-warning">Inactive</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{{ employee.status|title }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'hrms:employee_detail' employee.pk %}" 
+                                           class="btn btn-sm btn-outline-primary" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if user.is_staff %}
+                                        <a href="{% url 'hrms:employee_edit' employee.pk %}" 
+                                           class="btn btn-sm btn-outline-secondary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search_term %}&search={{ search_term }}{% endif %}{% if selected_department %}&department={{ selected_department }}{% endif %}">
+                                    &laquo; First
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_term %}&search={{ search_term }}{% endif %}{% if selected_department %}&department={{ selected_department }}{% endif %}">
+                                    Previous
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if search_term %}&search={{ search_term }}{% endif %}{% if selected_department %}&department={{ selected_department }}{% endif %}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_term %}&search={{ search_term }}{% endif %}{% if selected_department %}&department={{ selected_department }}{% endif %}">
+                                    Next
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_term %}&search={{ search_term }}{% endif %}{% if selected_department %}&department={{ selected_department }}{% endif %}">
+                                    Last &raquo;
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No employees found</h5>
+                    <p class="text-muted">
+                        {% if search_term or selected_department %}
+                            Try adjusting your search criteria.
+                        {% else %}
+                            Get started by adding your first employee.
+                        {% endif %}
+                    </p>
+                    {% if user.is_staff and not search_term and not selected_department %}
+                    <a href="{% url 'hrms:employee_add' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add First Employee
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    
+    .badge {
+        font-size: 0.8em;
+    }
+</style>
+{% endblock %}

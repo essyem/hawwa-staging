@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Training Dashboard - HRMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-graduation-cap"></i> Training Dashboard</h1>
+    {% if user.is_staff %}
+    <a href="{% url 'hrms:training_program_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Training Program
+    </a>
+    {% endif %}
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Active Programs</h5>
+                        <h3>{{ total_programs }}</h3>
+                    </div>
+                    <i class="fas fa-book fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Upcoming Sessions</h5>
+                        <h3>{{ upcoming_sessions|length }}</h3>
+                    </div>
+                    <i class="fas fa-calendar fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">My Enrollments</h5>
+                        <h3>{{ my_enrollments|length }}</h3>
+                    </div>
+                    <i class="fas fa-user-graduate fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Completion Rate</h5>
+                        <h3>85%</h3>
+                    </div>
+                    <i class="fas fa-trophy fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Upcoming Training Sessions -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Upcoming Training Sessions</h5>
+                <a href="{% url 'hrms:training_programs' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if upcoming_sessions %}
+                    {% for session in upcoming_sessions %}
+                    <div class="d-flex align-items-center mb-3 p-3 border rounded">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 50px; height: 50px;">
+                                <i class="fas fa-book text-white"></i>
+                            </div>
+                        </div>
+                        <div class="ms-3 flex-grow-1">
+                            <h6 class="mb-1">{{ session.program.title }}</h6>
+                            <p class="mb-1 text-muted">{{ session.trainer_name }}</p>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> {{ session.start_date|date:"M d, Y" }}
+                                <i class="fas fa-clock ms-2"></i> {{ session.start_date|time:"g:i A" }}
+                                <i class="fas fa-map-marker-alt ms-2"></i> {{ session.location|default:"Online" }}
+                            </small>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <a href="{% url 'hrms:training_enroll' session.program.pk %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-user-plus"></i> Enroll
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h5>No Upcoming Sessions</h5>
+                        <p class="text-muted">There are no upcoming training sessions scheduled.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- My Training Progress -->
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> My Training Progress</h5>
+            </div>
+            <div class="card-body">
+                {% if my_enrollments %}
+                    {% for enrollment in my_enrollments %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <small class="fw-bold">{{ enrollment.session.program.title }}</small>
+                            <span class="badge 
+                                {% if enrollment.completion_status == 'completed' %}bg-success
+                                {% elif enrollment.completion_status == 'in_progress' %}bg-warning
+                                {% else %}bg-secondary{% endif %}">
+                                {{ enrollment.get_completion_status_display }}
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar 
+                                {% if enrollment.completion_status == 'completed' %}bg-success
+                                {% elif enrollment.completion_status == 'in_progress' %}bg-warning
+                                {% else %}bg-secondary{% endif %}" 
+                                style="width: {% if enrollment.completion_status == 'completed' %}100{% elif enrollment.completion_status == 'in_progress' %}50{% else %}0{% endif %}%">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="text-center mt-3">
+                        <a href="{% url 'hrms:my_trainings' %}" class="btn btn-sm btn-outline-primary">
+                            View All My Trainings
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-graduation-cap fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">No enrollments yet</p>
+                        <a href="{% url 'hrms:training_programs' %}" class="btn btn-sm btn-primary mt-2">
+                            Browse Programs
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Training Categories -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tags"></i> Popular Categories</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-primary">Leadership</span>
+                    <span class="badge bg-success">Technical Skills</span>
+                    <span class="badge bg-info">Communication</span>
+                    <span class="badge bg-warning">Project Management</span>
+                    <span class="badge bg-danger">Safety</span>
+                    <span class="badge bg-secondary">Compliance</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

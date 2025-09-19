@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+<h2>Welcome, {{ profile.user.get_full_name }}</h2>
+<p><strong>Designation:</strong> {{ profile.designation }}</p>
+<p><strong>Department:</strong> {{ profile.department.name }}</p>
+<p><strong>Date Joined:</strong> {{ profile.date_joined }}</p>
+
+<h4>Recent Attendance</h4>
+<ul class="list-group">
+    {% for att in recent_attendance %}
+    <li class="list-group-item">{{ att.date }} – {{ att.status }}</li>
+    {% endfor %}
+</ul>
+
+<h4>Recent Leave Requests</h4>
+<ul class="list-group">
+    {% for leave in recent_leaves %}
+    <li class="list-group-item">{{ leave.start_date }} → {{ leave.end_date }} – {{ leave.status }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

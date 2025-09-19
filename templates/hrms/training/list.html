@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Training Programs - HRMS{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Training Programs</h1>
+    <a href="{% url 'hrms:training_program_create' %}" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus fa-sm text-white-50"></i> Create Training Program
+    </a>
+</div>
+
+<!-- Training Overview Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Active Programs</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.active_programs }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-graduation-cap fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Enrolled Employees</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.enrolled_employees }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Completion Rate</div>
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-auto">
+                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{ stats.completion_rate }}%</div>
+                            </div>
+                            <div class="col">
+                                <div class="progress progress-sm mr-2">
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: {{ stats.completion_rate }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Training Hours</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_hours }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Training Programs List -->
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Training Programs</h6>
+                <div class="dropdown no-arrow">
+                    <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow">
+                        <a class="dropdown-item export-btn" href="#" data-format="excel" data-url="{% url 'hrms:training_export' %}">
+                            <i class="fas fa-file-excel fa-sm fa-fw mr-2 text-gray-400"></i> Export to Excel
+                        </a>
+                        <a class="dropdown-item export-btn" href="#" data-format="pdf" data-url="{% url 'hrms:training_export' %}">
+                            <i class="fas fa-file-pdf fa-sm fa-fw mr-2 text-gray-400"></i> Export to PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Search and Filter -->
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search programs...">
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="categoryFilter">
+                            <option value="">All Categories</option>
+                            <option value="Technical">Technical</option>
+                            <option value="Leadership">Leadership</option>
+                            <option value="Compliance">Compliance</option>
+                            <option value="Safety">Safety</option>
+                            <option value="Soft Skills">Soft Skills</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="sortBy">
+                            <option value="name">Sort by Name</option>
+                            <option value="date">Sort by Date</option>
+                            <option value="enrolled">Sort by Enrolled</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Training Programs Grid -->
+                <div class="row">
+                    {% for program in training_programs %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title">{{ program.title }}</h5>
+                                    {% if program.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <p class="card-text text-muted">{{ program.description|truncatewords:15 }}</p>
+                                
+                                <div class="row text-center mb-3">
+                                    <div class="col-4">
+                                        <small class="text-muted">Duration</small>
+                                        <div class="fw-bold">{{ program.duration_hours }}h</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted">Enrolled</small>
+                                        <div class="fw-bold">{{ program.enrollments.count }}</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted">Completed</small>
+                                        <div class="fw-bold">{{ program.completed_count }}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">Progress</small>
+                                        <small class="text-muted">{{ program.completion_percentage }}%</small>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar" style="width: {{ program.completion_percentage }}%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        {% if program.instructor %}
+                                            <small class="text-muted">
+                                                <i class="fas fa-user"></i> {{ program.instructor.get_full_name }}
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'hrms:training_program_detail' program.pk %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'hrms:training_program_update' program.pk %}" class="btn btn-outline-warning btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'hrms:training_program_delete' program.pk %}" class="btn btn-outline-danger btn-sm delete-btn" data-name="{{ program.title }}">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar"></i> {{ program.start_date|date:"M d, Y" }} - {{ program.end_date|date:"M d, Y" }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No training programs found</h5>
+                            <p class="text-muted">Start by creating your first training program.</p>
+                            <a href="{% url 'hrms:training_program_create' %}" class="btn btn-primary">Create Training Program</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <nav aria-label="Training programs pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">&laquo; First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Training Calendar & Quick Actions -->
+    <div class="col-lg-4">
+        <!-- Upcoming Training Sessions -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Upcoming Sessions</h6>
+            </div>
+            <div class="card-body">
+                {% for session in upcoming_sessions %}
+                <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
+                    <div class="flex-shrink-0">
+                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
+                            {{ session.start_date.day }}
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0">{{ session.training_program.title }}</h6>
+                        <small class="text-muted">{{ session.start_date|date:"M d, Y H:i" }}</small>
+                        <small class="d-block text-muted">{{ session.location|default:"Online" }}</small>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-3">
+                    <i class="fas fa-calendar-alt fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">No upcoming sessions</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Training Categories -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Training Categories</h6>
+            </div>
+            <div class="card-body">
+                {% for category in training_categories %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>{{ category.name }}</span>
+                    <span class="badge bg-secondary">{{ category.program_count }}</span>
+                </div>
+                {% empty %}
+                <p class="text-muted">No categories defined</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'hrms:training_program_create' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Create Program
+                    </a>
+                    <a href="{% url 'hrms:training_session_create' %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-calendar-plus"></i> Schedule Session
+                    </a>
+                    <a href="{% url 'hrms:training_enrollment_create' %}" class="btn btn-info btn-sm">
+                        <i class="fas fa-user-plus"></i> Enroll Employee
+                    </a>
+                    <a href="{% url 'hrms:training_reports' %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-chart-bar"></i> Training Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Category filter
+$('#categoryFilter').change(function() {
+    var selectedCategory = $(this).val();
+    var programCards = $('.card');
+    
+    if (selectedCategory === '') {
+        programCards.closest('.col-md-6').show();
+    } else {
+        programCards.each(function() {
+            var card = $(this);
+            var categoryText = card.find('.card-text').text();
+            if (categoryText.includes(selectedCategory)) {
+                card.closest('.col-md-6').show();
+            } else {
+                card.closest('.col-md-6').hide();
+            }
+        });
+    }
+});
+
+// Status filter
+$('#statusFilter').change(function() {
+    var selectedStatus = $(this).val();
+    var programCards = $('.card');
+    
+    if (selectedStatus === '') {
+        programCards.closest('.col-md-6').show();
+    } else {
+        programCards.each(function() {
+            var card = $(this);
+            var statusBadge = card.find('.badge').text();
+            if (statusBadge.includes(selectedStatus)) {
+                card.closest('.col-md-6').show();
+            } else {
+                card.closest('.col-md-6').hide();
+            }
+        });
+    }
+});
+
+// Search functionality for training programs
+$('#searchInput').on('keyup', function() {
+    var value = $(this).val().toLowerCase();
+    var programCards = $('.card');
+    
+    if (value === '') {
+        programCards.closest('.col-md-6').show();
+    } else {
+        programCards.each(function() {
+            var card = $(this);
+            var text = card.text().toLowerCase();
+            if (text.includes(value)) {
+                card.closest('.col-md-6').show();
+            } else {
+                card.closest('.col-md-6').hide();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

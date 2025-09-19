@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Attendance Reports - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .report-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .report-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .filter-card {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+    
+    .attendance-status {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-present {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .status-absent {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .status-late {
+        background-color: #fd7e14;
+        color: white;
+    }
+    
+    .status-partial {
+        background-color: #ffc107;
+        color: black;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-clock text-primary"></i> Attendance Reports
+                    </h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'hrms:dashboard' %}">HRMS</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'hrms:reports' %}">Reports</a></li>
+                            <li class="breadcrumb-item active">Attendance Reports</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="btn-group">
+                    <a href="{% url 'hrms:attendance_dashboard' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-tachometer-alt"></i> Attendance Dashboard
+                    </a>
+                    {% if user.is_staff %}
+                    <button class="btn btn-success" onclick="exportReport()">
+                        <i class="fas fa-download"></i> Export Report
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card filter-card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-filter"></i> Report Filters
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="reportForm">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="start_date" class="form-label">Start Date</label>
+                                <input type="date" name="start_date" id="start_date" class="form-control" 
+                                       value="{{ request.GET.start_date }}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="end_date" class="form-label">End Date</label>
+                                <input type="date" name="end_date" id="end_date" class="form-control" 
+                                       value="{{ request.GET.end_date }}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="department" class="form-label">Department</label>
+                                <select name="department" id="department" class="form-select">
+                                    <option value="">All Departments</option>
+                                    {% for dept in departments %}
+                                    <option value="{{ dept.id }}" {% if request.GET.department == dept.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ dept.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="employee" class="form-label">Employee</label>
+                                <select name="employee" id="employee" class="form-select">
+                                    <option value="">All Employees</option>
+                                    {% for emp in employees %}
+                                    <option value="{{ emp.id }}" {% if request.GET.employee == emp.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ emp.user.get_full_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-light">
+                                    <i class="fas fa-search"></i> Generate Report
+                                </button>
+                                <a href="{% url 'hrms:attendance_report' %}" class="btn btn-outline-light ms-2">
+                                    <i class="fas fa-refresh"></i> Clear Filters
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    {% if attendance_summary %}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card report-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x mb-3"></i>
+                    <h4>{{ attendance_summary.total_employees }}</h4>
+                    <p class="mb-0">Total Employees</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card report-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x mb-3"></i>
+                    <h4>{{ attendance_summary.total_present }}</h4>
+                    <p class="mb-0">Total Present</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card report-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-times-circle fa-2x mb-3"></i>
+                    <h4>{{ attendance_summary.total_absent }}</h4>
+                    <p class="mb-0">Total Absent</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card report-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-2x mb-3"></i>
+                    <h4>{{ attendance_summary.attendance_rate|floatformat:1 }}%</h4>
+                    <p class="mb-0">Attendance Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Attendance Records -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-table"></i> Attendance Records
+                        {% if attendance_records %}
+                        <span class="badge bg-primary">{{ attendance_records|length }}</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if attendance_records %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Department</th>
+                                    <th>Date</th>
+                                    <th>Check In</th>
+                                    <th>Check Out</th>
+                                    <th>Total Hours</th>
+                                    <th>Status</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in attendance_records %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                <span class="text-white">{{ record.employee.user.first_name|first }}{{ record.employee.user.last_name|first }}</span>
+                                            </div>
+                                            <div>
+                                                <strong>{{ record.employee.user.get_full_name }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ record.employee.employee_id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if record.employee.department %}
+                                        <span class="badge bg-info">{{ record.employee.department.name }}</span>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ record.date|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if record.check_in_time %}
+                                        {{ record.check_in_time|time:"H:i" }}
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record.check_out_time %}
+                                        {{ record.check_out_time|time:"H:i" }}
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record.hours_worked %}
+                                        {{ record.hours_worked|floatformat:2 }}h
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="attendance-status status-{{ record.status|lower }}">
+                                            {{ record.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if record.check_in_location %}
+                                        <small class="text-muted">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            {% if record.office_location %}
+                                            {{ record.office_location.office_name }}
+                                            {% else %}
+                                            Remote
+                                            {% endif %}
+                                        </small>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                    <nav aria-label="Attendance records pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}">Last</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Attendance Records Found</h5>
+                        <p class="text-muted">
+                            No attendance records match your current filter criteria.
+                            <br>Try adjusting the date range or removing filters.
+                        </p>
+                        <a href="{% url 'hrms:attendance_dashboard' %}" class="btn btn-primary">
+                            <i class="fas fa-tachometer-alt"></i> View Attendance Dashboard
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportReport() {
+    // Get current filter parameters
+    const form = document.getElementById('reportForm');
+    const formData = new FormData(form);
+    const params = new URLSearchParams(formData);
+    
+    // Add export parameter
+    params.append('export', 'excel');
+    
+    // Create download link
+    const url = '{% url "hrms:attendance_report" %}?' + params.toString();
+    window.open(url, '_blank');
+}
+
+// Set default date range (last 30 days)
+document.addEventListener('DOMContentLoaded', function() {
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    
+    if (!startDateInput.value) {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - 30);
+        
+        startDateInput.value = startDate.toISOString().split('T')[0];
+        endDateInput.value = endDate.toISOString().split('T')[0];
+    }
+});
+</script>
+{% endblock %}

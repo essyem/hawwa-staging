@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Leave Requests{% endblock %}
+{% block content %}
+<h2>Leave Requests</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr><th>Employee</th><th>Dates</th><th>Status</th><th>Reason</th></tr>
+    </thead>
+    <tbody>
+        {% for leave in leaves %}
+        <tr>
+            <td>{{ leave.employee.user.get_full_name }}</td>
+            <td>{{ leave.start_date }} → {{ leave.end_date }}</td>
+            <td>{{ leave.status }}</td>
+            <td>{{ leave.reason }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

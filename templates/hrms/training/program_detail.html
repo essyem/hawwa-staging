@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ program.title }} - Training Programs{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'hrms:training_dashboard' %}">Training</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'hrms:training_programs' %}">Programs</a></li>
+        <li class="breadcrumb-item active">{{ program.title }}</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            {% if program.image %}
+            <img src="{{ program.image.url }}" class="card-img-top" alt="{{ program.title }}" style="height: 300px; object-fit: cover;">
+            {% endif %}
+            
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h1 class="card-title">{{ program.title }}</h1>
+                    <span class="badge fs-6
+                        {% if program.status == 'active' %}bg-success
+                        {% elif program.status == 'upcoming' %}bg-warning
+                        {% else %}bg-secondary{% endif %}">
+                        {{ program.get_status_display }}
+                    </span>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                            <h6>Duration</h6>
+                            <p class="text-muted">{{ program.duration }} hours</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <i class="fas fa-users fa-2x text-success mb-2"></i>
+                            <h6>Enrolled</h6>
+                            <p class="text-muted">{{ program.enrollments.count }} students</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <i class="fas fa-calendar fa-2x text-info mb-2"></i>
+                            <h6>Sessions</h6>
+                            <p class="text-muted">{{ program.sessions.count }} scheduled</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                            <h6>Rating</h6>
+                            <p class="text-muted">4.8/5.0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h5><i class="fas fa-info-circle"></i> Description</h5>
+                <p class="mb-4">{{ program.description|linebreaks }}</p>
+                
+                {% if program.learning_objectives %}
+                <h5><i class="fas fa-bullseye"></i> Learning Objectives</h5>
+                <div class="mb-4">{{ program.learning_objectives|linebreaks }}</div>
+                {% endif %}
+                
+                {% if program.prerequisites %}
+                <h5><i class="fas fa-exclamation-triangle"></i> Prerequisites</h5>
+                <div class="mb-4">{{ program.prerequisites|linebreaks }}</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Training Sessions -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Training Sessions</h5>
+            </div>
+            <div class="card-body">
+                {% if program.sessions.all %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Trainer</th>
+                                    <th>Location</th>
+                                    <th>Capacity</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in program.sessions.all %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ session.start_date|date:"M d, Y" }}</strong><br>
+                                        <small class="text-muted">{{ session.start_date|time:"g:i A" }} - {{ session.end_date|time:"g:i A" }}</small>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-user"></i> {{ session.trainer_name }}
+                                        {% if session.trainer_email %}
+                                        <br><small class="text-muted">{{ session.trainer_email }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-map-marker-alt"></i> {{ session.location|default:"Online" }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">
+                                            {{ session.enrollments.count }}/{{ session.max_capacity|default:"∞" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if session.status == 'scheduled' %}bg-primary
+                                            {% elif session.status == 'in_progress' %}bg-warning
+                                            {% elif session.status == 'completed' %}bg-success
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ session.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if session.status == 'scheduled' and program.status == 'active' %}
+                                        <a href="{% url 'hrms:training_enroll' program.pk %}?session={{ session.pk }}" 
+                                           class="btn btn-sm btn-primary">
+                                            <i class="fas fa-user-plus"></i> Enroll
+                                        </a>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h5>No Sessions Scheduled</h5>
+                        <p class="text-muted">Training sessions for this program will be announced soon.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Enrollment Card -->
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                {% if program.status == 'active' %}
+                    <h5 class="card-title">Ready to Learn?</h5>
+                    <p class="card-text">Join this training program and enhance your skills.</p>
+                    <a href="{% url 'hrms:training_enroll' program.pk %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus"></i> Enroll Now
+                    </a>
+                {% elif program.status == 'upcoming' %}
+                    <h5 class="card-title">Coming Soon</h5>
+                    <p class="card-text">This program will be available soon. Stay tuned!</p>
+                    <button class="btn btn-secondary btn-lg" disabled>
+                        <i class="fas fa-clock"></i> Not Available Yet
+                    </button>
+                {% else %}
+                    <h5 class="card-title">Program Completed</h5>
+                    <p class="card-text">This training program has been completed.</p>
+                    <button class="btn btn-outline-secondary btn-lg" disabled>
+                        <i class="fas fa-check"></i> Completed
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Program Details -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-info"></i> Program Details</h6>
+            </div>
+            <div class="card-body">
+                {% if program.category %}
+                <div class="mb-3">
+                    <strong>Category:</strong>
+                    <span class="badge bg-primary ms-2">{{ program.category }}</span>
+                </div>
+                {% endif %}
+                
+                {% if program.level %}
+                <div class="mb-3">
+                    <strong>Level:</strong>
+                    <span class="badge bg-info ms-2">{{ program.level }}</span>
+                </div>
+                {% endif %}
+                
+                {% if program.created_at %}
+                <div class="mb-3">
+                    <strong>Created:</strong>
+                    <span class="text-muted">{{ program.created_at|date:"M d, Y" }}</span>
+                </div>
+                {% endif %}
+                
+                {% if program.updated_at %}
+                <div class="mb-3">
+                    <strong>Last Updated:</strong>
+                    <span class="text-muted">{{ program.updated_at|date:"M d, Y" }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Related Programs -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-layer-group"></i> Related Programs</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="#" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-arrow-right"></i> Advanced Leadership
+                    </a>
+                    <a href="#" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-arrow-right"></i> Team Management
+                    </a>
+                    <a href="#" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-arrow-right"></i> Project Planning
+                    </a>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'hrms:training_programs' %}" class="btn btn-sm btn-link">
+                        Browse All Programs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

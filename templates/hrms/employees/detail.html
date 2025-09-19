@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ employee.user.get_full_name }} - Employee Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'hrms:dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'hrms:employee_list' %}">Employees</a></li>
+                        <li class="breadcrumb-item active">{{ employee.user.get_full_name }}</li>
+                    </ol>
+                </nav>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-user text-primary"></i>
+                    Employee Details
+                </h1>
+            </div>
+            {% if user.is_staff %}
+            <div class="btn-group">
+                <a href="{% url 'hrms:employee_edit' employee.pk %}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit Employee
+                </a>
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-print"></i> Print Profile</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-download"></i> Export PDF</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash"></i> Deactivate</a></li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Employee Header Card -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="avatar-lg bg-primary rounded-circle d-flex align-items-center justify-content-center">
+                            <span class="text-white h4 mb-0">
+                                {{ employee.user.first_name|first }}{{ employee.user.last_name|first }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h4 class="mb-1">{{ employee.user.get_full_name }}</h4>
+                        <p class="text-muted mb-1">{{ employee.position.title }}</p>
+                        <p class="text-muted mb-0">{{ employee.department.name }}</p>
+                    </div>
+                    <div class="col-auto">
+                        <div class="row g-2 text-center">
+                            <div class="col">
+                                <div class="border rounded p-3">
+                                    <div class="h5 mb-0">{{ employee.employee_id }}</div>
+                                    <small class="text-muted">Employee ID</small>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="border rounded p-3">
+                                    <div class="h5 mb-0">{{ employee.grade.name }}</div>
+                                    <small class="text-muted">Grade</small>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="border rounded p-3">
+                                    <div class="h5 mb-0">
+                                        {% if employee.status == 'active' %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">{{ employee.status|title }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <small class="text-muted">Status</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Tabs -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="employeeTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab">
+                            <i class="fas fa-user"></i> Personal Info
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="employment-tab" data-bs-toggle="tab" data-bs-target="#employment" type="button" role="tab">
+                            <i class="fas fa-briefcase"></i> Employment
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="leaves-tab" data-bs-toggle="tab" data-bs-target="#leaves" type="button" role="tab">
+                            <i class="fas fa-calendar-alt"></i> Leaves
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="training-tab" data-bs-toggle="tab" data-bs-target="#training" type="button" role="tab">
+                            <i class="fas fa-graduation-cap"></i> Training
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="employeeTabsContent">
+                    <!-- Personal Info Tab -->
+                    <div class="tab-pane fade show active" id="personal" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">Basic Information</h6>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td class="fw-bold">Full Name:</td>
+                                        <td>{{ employee.user.get_full_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Email:</td>
+                                        <td>{{ employee.user.email }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Personal Email:</td>
+                                        <td>{{ employee.personal_email|default:"Not provided" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Phone:</td>
+                                        <td>{{ employee.phone_number|default:"Not provided" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Date of Birth:</td>
+                                        <td>{{ employee.date_of_birth|date:"F d, Y"|default:"Not provided" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Gender:</td>
+                                        <td>{{ employee.get_gender_display|default:"Not specified" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Marital Status:</td>
+                                        <td>{{ employee.get_marital_status_display|default:"Not specified" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Nationality:</td>
+                                        <td>{{ employee.nationality|default:"Not provided" }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">Contact Information</h6>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td class="fw-bold">Current Address:</td>
+                                        <td>{{ employee.current_address|default:"Not provided" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Permanent Address:</td>
+                                        <td>{{ employee.permanent_address|default:"Not provided" }}</td>
+                                    </tr>
+                                </table>
+                                
+                                <h6 class="fw-bold mb-3 mt-4">Emergency Contact</h6>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td class="fw-bold">Name:</td>
+                                        <td>{{ employee.emergency_contact_name|default:"Not provided" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Phone:</td>
+                                        <td>{{ employee.emergency_contact_phone|default:"Not provided" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Relationship:</td>
+                                        <td>{{ employee.emergency_contact_relationship|default:"Not provided" }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Employment Tab -->
+                    <div class="tab-pane fade" id="employment" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">Position Details</h6>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td class="fw-bold">Department:</td>
+                                        <td>{{ employee.department.name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Position:</td>
+                                        <td>{{ employee.position.title }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Grade:</td>
+                                        <td>{{ employee.grade.name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Employment Type:</td>
+                                        <td>{{ employee.get_employment_type_display }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Work Location:</td>
+                                        <td>{{ employee.work_location }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Hire Date:</td>
+                                        <td>{{ employee.hire_date|date:"F d, Y" }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">Compensation</h6>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td class="fw-bold">Basic Salary:</td>
+                                        <td>QAR {{ employee.basic_salary|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Housing Allowance:</td>
+                                        <td>QAR {{ employee.housing_allowance|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Transport Allowance:</td>
+                                        <td>QAR {{ employee.transport_allowance|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Other Allowances:</td>
+                                        <td>QAR {{ employee.other_allowances|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr class="border-top">
+                                        <td class="fw-bold">Total Package:</td>
+                                        <td class="fw-bold">QAR {{ employee.basic_salary|add:employee.housing_allowance|add:employee.transport_allowance|add:employee.other_allowances|floatformat:2 }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leaves Tab -->
+                    <div class="tab-pane fade" id="leaves" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">Leave Balance</h6>
+                                {% if leave_balances %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Leave Type</th>
+                                                <th>Entitled</th>
+                                                <th>Used</th>
+                                                <th>Remaining</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for balance in leave_balances %}
+                                            <tr>
+                                                <td>{{ balance.leave_type.name }}</td>
+                                                <td>{{ balance.entitled_days }}</td>
+                                                <td>{{ balance.used_days }}</td>
+                                                <td class="fw-bold">{{ balance.entitled_days|floatformat:0|add:balance.used_days|add:balance.pending_days }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <p class="text-muted">No leave balance information available.</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">Recent Leave Applications</h6>
+                                {% if recent_leaves %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Dates</th>
+                                                <th>Days</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for leave in recent_leaves %}
+                                            <tr>
+                                                <td>{{ leave.leave_type.name }}</td>
+                                                <td>{{ leave.start_date|date:"M d" }} - {{ leave.end_date|date:"M d" }}</td>
+                                                <td>{{ leave.total_days }}</td>
+                                                <td>
+                                                    {% if leave.status == 'approved' %}
+                                                        <span class="badge bg-success">Approved</span>
+                                                    {% elif leave.status == 'pending' %}
+                                                        <span class="badge bg-warning">Pending</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">{{ leave.status|title }}</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <p class="text-muted">No recent leave applications.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Training Tab -->
+                    <div class="tab-pane fade" id="training" role="tabpanel">
+                        <h6 class="fw-bold mb-3">Training Enrollments</h6>
+                        {% if training_enrollments %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Program</th>
+                                        <th>Category</th>
+                                        <th>Enrollment Date</th>
+                                        <th>Status</th>
+                                        <th>Progress</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for enrollment in training_enrollments %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'hrms:training_program_detail' enrollment.program.pk %}" class="text-decoration-none">
+                                                {{ enrollment.program.title }}
+                                            </a>
+                                        </td>
+                                        <td>{{ enrollment.program.category.name }}</td>
+                                        <td>{{ enrollment.enrollment_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ enrollment.status|title }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar" role="progressbar" style="width: {{ enrollment.progress|default:0 }}%">
+                                                    {{ enrollment.progress|default:0 }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No training enrollments found.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .avatar-lg {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .table-borderless td {
+        border: none;
+        padding: 0.5rem 0;
+    }
+    
+    .table-borderless .fw-bold {
+        width: 40%;
+    }
+    
+    .nav-tabs .nav-link {
+        color: #6c757d;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #495057;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}

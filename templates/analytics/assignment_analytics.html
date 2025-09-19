@@ -1,0 +1,774 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Assignment Analytics - Analytics - Hawwa{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-card {
+        border: none;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        transition: var(--transition-normal);
+        background: var(--card-bg);
+        color: var(--text-primary);
+    }
+    
+    .analytics-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .kpi-card {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--card-bg-secondary) 100%);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid var(--card-border);
+        height: 100%;
+    }
+    
+    .kpi-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .kpi-value.success {
+        color: var(--success);
+    }
+    
+    .kpi-value.warning {
+        color: var(--warning);
+    }
+    
+    .kpi-value.primary {
+        color: var(--qatar-maroon);
+    }
+    
+    .kpi-value.info {
+        color: var(--info);
+    }
+    
+    .kpi-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+    
+    .kpi-change {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+    }
+    
+    .change-positive {
+        background: rgba(5, 150, 105, 0.1);
+        color: var(--success);
+    }
+    
+    .change-negative {
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--error);
+    }
+    
+    .change-neutral {
+        background: rgba(107, 114, 128, 0.1);
+        color: var(--text-secondary);
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 350px;
+        padding: 1rem;
+    }
+    
+    .heatmap-cell {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin: 1px;
+        cursor: pointer;
+        transition: var(--transition-fast);
+    }
+    
+    .heatmap-cell:hover {
+        transform: scale(1.1);
+        z-index: 10;
+        position: relative;
+    }
+    
+    .heat-0 { background: #f3f4f6; color: #6b7280; }
+    .heat-1 { background: #fef3c7; color: #92400e; }
+    .heat-2 { background: #fed7aa; color: #ea580c; }
+    .heat-3 { background: #fecaca; color: #dc2626; }
+    .heat-4 { background: #f87171; color: white; }
+    .heat-5 { background: #dc2626; color: white; }
+    
+    .analytics-filter {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .vendor-performance-item {
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        transition: var(--transition-fast);
+    }
+    
+    .vendor-performance-item:hover {
+        border-color: var(--qatar-maroon);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .performance-score {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.875rem;
+        color: white;
+    }
+    
+    .score-excellent { background: var(--success); }
+    .score-good { background: var(--info); }
+    .score-average { background: var(--warning); }
+    .score-poor { background: var(--error); }
+    
+    .efficiency-meter {
+        height: 8px;
+        background: var(--gray-200);
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .efficiency-bar {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.6s ease;
+    }
+    
+    .efficiency-excellent { background: var(--success); }
+    .efficiency-good { background: var(--info); }
+    .efficiency-average { background: var(--warning); }
+    .efficiency-poor { background: var(--error); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">{% trans "Assignment Analytics" %}</h1>
+            <p class="text-muted mb-0">{% trans "Deep insights into assignment patterns and performance" %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-success" onclick="exportAnalytics()">
+                <i class="fas fa-download me-1"></i>{% trans "Export Data" %}
+            </button>
+            <button class="btn btn-outline-primary" onclick="refreshAnalytics()">
+                <i class="fas fa-sync-alt me-1"></i>{% trans "Refresh" %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="analytics-filter">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <label class="form-label">{% trans "Date Range" %}</label>
+                <select class="form-select" id="dateRange">
+                    <option value="7">{% trans "Last 7 Days" %}</option>
+                    <option value="30" selected>{% trans "Last 30 Days" %}</option>
+                    <option value="90">{% trans "Last 3 Months" %}</option>
+                    <option value="365">{% trans "Last Year" %}</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">{% trans "Service Type" %}</label>
+                <select class="form-select" id="serviceType">
+                    <option value="all">{% trans "All Services" %}</option>
+                    <option value="wellness">{% trans "Wellness" %}</option>
+                    <option value="homecare">{% trans "Home Care" %}</option>
+                    <option value="accommodation">{% trans "Accommodation" %}</option>
+                    <option value="nutrition">{% trans "Nutrition" %}</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">{% trans "Priority Level" %}</label>
+                <select class="form-select" id="priorityLevel">
+                    <option value="all">{% trans "All Priorities" %}</option>
+                    <option value="urgent">{% trans "Urgent" %}</option>
+                    <option value="high">{% trans "High" %}</option>
+                    <option value="normal">{% trans "Normal" %}</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">{% trans "Assignment Status" %}</label>
+                <select class="form-select" id="assignmentStatus">
+                    <option value="all">{% trans "All Status" %}</option>
+                    <option value="successful">{% trans "Successful" %}</option>
+                    <option value="failed">{% trans "Failed" %}</option>
+                    <option value="pending">{% trans "Pending" %}</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Performance Indicators -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-value success">{{ assignment_success_rate|default:"94.2" }}%</div>
+                <div class="kpi-label">{% trans "Success Rate" %}</div>
+                <div class="kpi-change change-positive">
+                    <i class="fas fa-arrow-up me-1"></i>+2.1%
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-value primary">{{ avg_assignment_time|default:"1.8" }}{% trans "min" %}</div>
+                <div class="kpi-label">{% trans "Avg Assignment Time" %}</div>
+                <div class="kpi-change change-positive">
+                    <i class="fas fa-arrow-down me-1"></i>-0.3min
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-value info">{{ vendor_utilization|default:"87.5" }}%</div>
+                <div class="kpi-label">{% trans "Vendor Utilization" %}</div>
+                <div class="kpi-change change-positive">
+                    <i class="fas fa-arrow-up me-1"></i>+4.2%
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-value warning">{{ customer_satisfaction|default:"4.7" }}/5</div>
+                <div class="kpi-label">{% trans "Customer Satisfaction" %}</div>
+                <div class="kpi-change change-neutral">
+                    <i class="fas fa-minus me-1"></i>Stable
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Assignment Patterns Chart -->
+        <div class="col-lg-8 mb-4">
+            <div class="analytics-card">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>{% trans "Assignment Patterns" %}
+                    </h6>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" name="chartView" id="hourlyView" checked>
+                        <label class="btn btn-outline-primary" for="hourlyView">{% trans "Hourly" %}</label>
+                        <input type="radio" class="btn-check" name="chartView" id="dailyView">
+                        <label class="btn btn-outline-primary" for="dailyView">{% trans "Daily" %}</label>
+                        <input type="radio" class="btn-check" name="chartView" id="weeklyView">
+                        <label class="btn btn-outline-primary" for="weeklyView">{% trans "Weekly" %}</label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="assignmentPatternsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignment Heatmap -->
+        <div class="col-lg-4 mb-4">
+            <div class="analytics-card">
+                <div class="card-header bg-transparent border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-th me-2"></i>{% trans "Assignment Heatmap" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">{% trans "Hours" %}</small>
+                            <small class="text-muted">{% trans "Days" %}</small>
+                        </div>
+                        <div id="assignmentHeatmap">
+                            <!-- Heatmap will be generated by JavaScript -->
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <small class="text-muted">{% trans "Low" %}</small>
+                            <div class="d-flex gap-1">
+                                <div class="heatmap-cell heat-0"></div>
+                                <div class="heatmap-cell heat-1"></div>
+                                <div class="heatmap-cell heat-2"></div>
+                                <div class="heatmap-cell heat-3"></div>
+                                <div class="heatmap-cell heat-4"></div>
+                                <div class="heatmap-cell heat-5"></div>
+                            </div>
+                            <small class="text-muted">{% trans "High" %}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Vendor Performance Analysis -->
+        <div class="col-lg-6 mb-4">
+            <div class="analytics-card">
+                <div class="card-header bg-transparent border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-users me-2"></i>{% trans "Vendor Performance Analysis" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for vendor in vendor_performance|default:"" %}
+                    <div class="vendor-performance-item">
+                        <div class="d-flex align-items-center">
+                            <div class="performance-score score-excellent me-3">
+                                {{ vendor.score|default:"95" }}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">{{ vendor.name }}</h6>
+                                    <span class="badge bg-success">{{ vendor.assignments|default:"47" }} {% trans "assignments" %}</span>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-4">
+                                        <small class="text-muted">{% trans "Success Rate" %}</small>
+                                        <div>{{ vendor.success_rate|default:"98" }}%</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted">{% trans "Avg Time" %}</small>
+                                        <div>{{ vendor.avg_time|default:"1.2" }}m</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted">{% trans "Rating" %}</small>
+                                        <div>{{ vendor.rating|default:"4.8" }}/5</div>
+                                    </div>
+                                </div>
+                                <div class="efficiency-meter">
+                                    <div class="efficiency-bar efficiency-excellent" style="width: {{ vendor.efficiency|default:"95" }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="vendor-performance-item">
+                        <div class="d-flex align-items-center">
+                            <div class="performance-score score-excellent me-3">95</div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">{{ "Premium Wellness Spa"|default:"Loading..." }}</h6>
+                                    <span class="badge bg-success">47 {% trans "assignments" %}</span>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-4">
+                                        <small class="text-muted">{% trans "Success Rate" %}</small>
+                                        <div>98%</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted">{% trans "Avg Time" %}</small>
+                                        <div>1.2m</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted">{% trans "Rating" %}</small>
+                                        <div>4.8/5</div>
+                                    </div>
+                                </div>
+                                <div class="efficiency-meter">
+                                    <div class="efficiency-bar efficiency-excellent" style="width: 95%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vendor-performance-item">
+                        <div class="d-flex align-items-center">
+                            <div class="performance-score score-good me-3">89</div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">{{ "Elite Home Care"|default:"Loading..." }}</h6>
+                                    <span class="badge bg-success">32 {% trans "assignments" %}</span>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-4">
+                                        <small class="text-muted">{% trans "Success Rate" %}</small>
+                                        <div>94%</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted">{% trans "Avg Time" %}</small>
+                                        <div>2.1m</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted">{% trans "Rating" %}</small>
+                                        <div>4.6/5</div>
+                                    </div>
+                                </div>
+                                <div class="efficiency-meter">
+                                    <div class="efficiency-bar efficiency-good" style="width: 89%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignment Efficiency Trends -->
+        <div class="col-lg-6 mb-4">
+            <div class="analytics-card">
+                <div class="card-header bg-transparent border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-tachometer-alt me-2"></i>{% trans "Efficiency Trends" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="efficiencyTrendsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Analytics Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="analytics-card">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-table me-2"></i>{% trans "Detailed Assignment Analytics" %}
+                    </h6>
+                    <div class="d-flex gap-2">
+                        <input type="search" class="form-control form-control-sm" placeholder="{% trans 'Search assignments...' %}" id="searchAssignments">
+                        <button class="btn btn-sm btn-outline-primary" onclick="exportTableData()">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="analyticsTable">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Date" %}</th>
+                                    <th>{% trans "Booking ID" %}</th>
+                                    <th>{% trans "Service Type" %}</th>
+                                    <th>{% trans "Assigned Vendor" %}</th>
+                                    <th>{% trans "Assignment Time" %}</th>
+                                    <th>{% trans "Success Rate" %}</th>
+                                    <th>{% trans "Customer Rating" %}</th>
+                                    <th>{% trans "Revenue Impact" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ "Mar 19, 2024"|default:"Loading..." }}</td>
+                                    <td><a href="#" class="text-decoration-none">#{{ "HW-2024-001"|default:"..." }}</a></td>
+                                    <td>{{ "Wellness"|default:"..." }}</td>
+                                    <td>{{ "Premium Wellness Spa"|default:"..." }}</td>
+                                    <td>{{ "1.2min"|default:"..." }}</td>
+                                    <td><span class="badge bg-success">{{ "100%"|default:"..." }}</span></td>
+                                    <td>{{ "4.9/5"|default:"..." }}</td>
+                                    <td class="text-success">${{ "450"|default:"..." }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ "Mar 19, 2024"|default:"Loading..." }}</td>
+                                    <td><a href="#" class="text-decoration-none">#{{ "HW-2024-002"|default:"..." }}</a></td>
+                                    <td>{{ "Home Care"|default:"..." }}</td>
+                                    <td>{{ "Elite Home Care"|default:"..." }}</td>
+                                    <td>{{ "2.1min"|default:"..." }}</td>
+                                    <td><span class="badge bg-success">{{ "100%"|default:"..." }}</span></td>
+                                    <td>{{ "4.7/5"|default:"..." }}</td>
+                                    <td class="text-success">${{ "320"|default:"..." }}</td>
+                                </tr>
+                                <!-- More rows would be populated by backend data -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav aria-label="Analytics pagination">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item"><a class="page-link" href="#">{% trans "Previous" %}</a></li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">{% trans "Next" %}</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    generateHeatmap();
+    setupFilters();
+});
+
+let assignmentPatternsChart, efficiencyTrendsChart;
+
+function initializeCharts() {
+    // Assignment Patterns Chart
+    const ctx1 = document.getElementById('assignmentPatternsChart').getContext('2d');
+    assignmentPatternsChart = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+            datasets: [{
+                label: 'Successful Assignments',
+                data: [5, 2, 25, 45, 35, 15],
+                backgroundColor: 'rgba(141, 21, 56, 0.8)',
+                borderColor: 'rgb(141, 21, 56)',
+                borderWidth: 1
+            }, {
+                label: 'Failed Assignments',
+                data: [1, 0, 3, 2, 4, 2],
+                backgroundColor: 'rgba(220, 38, 38, 0.8)',
+                borderColor: 'rgb(220, 38, 38)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Efficiency Trends Chart
+    const ctx2 = document.getElementById('efficiencyTrendsChart').getContext('2d');
+    efficiencyTrendsChart = new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Assignment Efficiency',
+                data: [85, 88, 92, 94],
+                borderColor: 'rgb(30, 58, 138)',
+                backgroundColor: 'rgba(30, 58, 138, 0.1)',
+                tension: 0.4,
+                fill: true
+            }, {
+                label: 'Customer Satisfaction',
+                data: [4.5, 4.6, 4.7, 4.7],
+                borderColor: 'rgb(5, 150, 105)',
+                backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                tension: 0.4,
+                fill: true,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    min: 80,
+                    max: 100
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    min: 4.0,
+                    max: 5.0,
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                }
+            }
+        }
+    });
+}
+
+function generateHeatmap() {
+    const heatmapContainer = document.getElementById('assignmentHeatmap');
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const hours = ['6AM', '9AM', '12PM', '3PM', '6PM', '9PM'];
+    
+    let html = '<div class="heatmap-grid">';
+    
+    // Generate grid
+    for (let hour = 0; hour < hours.length; hour++) {
+        html += '<div class="d-flex align-items-center mb-1">';
+        html += `<div style="width: 40px; font-size: 0.75rem;">${hours[hour]}</div>`;
+        
+        for (let day = 0; day < days.length; day++) {
+            const intensity = Math.floor(Math.random() * 6); // Random intensity 0-5
+            html += `<div class="heatmap-cell heat-${intensity}" title="${days[day]} ${hours[hour]}: ${intensity * 10} assignments"></div>`;
+        }
+        
+        html += '</div>';
+    }
+    
+    // Add day labels
+    html += '<div class="d-flex align-items-center">';
+    html += '<div style="width: 40px;"></div>';
+    days.forEach(day => {
+        html += `<div class="heatmap-cell text-center" style="background: none; font-size: 0.7rem; color: var(--text-muted);">${day}</div>`;
+    });
+    html += '</div>';
+    
+    html += '</div>';
+    heatmapContainer.innerHTML = html;
+}
+
+function setupFilters() {
+    const filters = ['dateRange', 'serviceType', 'priorityLevel', 'assignmentStatus'];
+    
+    filters.forEach(filterId => {
+        document.getElementById(filterId).addEventListener('change', function() {
+            applyFilters();
+        });
+    });
+    
+    // Chart view toggles
+    document.querySelectorAll('input[name="chartView"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            updateChartView(this.value);
+        });
+    });
+    
+    // Search functionality
+    document.getElementById('searchAssignments').addEventListener('input', function() {
+        filterTable(this.value);
+    });
+}
+
+function applyFilters() {
+    const filters = {
+        dateRange: document.getElementById('dateRange').value,
+        serviceType: document.getElementById('serviceType').value,
+        priorityLevel: document.getElementById('priorityLevel').value,
+        assignmentStatus: document.getElementById('assignmentStatus').value
+    };
+    
+    // Show loading state
+    showLoadingState();
+    
+    // Simulate API call
+    setTimeout(() => {
+        hideLoadingState();
+        updateChartsWithFilters(filters);
+        updateHeatmapWithFilters(filters);
+    }, 1000);
+}
+
+function updateChartView(viewType) {
+    let newLabels, newData;
+    
+    switch(viewType) {
+        case 'hourlyView':
+            newLabels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'];
+            newData = [5, 2, 25, 45, 35, 15];
+            break;
+        case 'dailyView':
+            newLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            newData = [45, 52, 48, 61, 55, 38, 42];
+            break;
+        case 'weeklyView':
+            newLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+            newData = [180, 195, 205, 220];
+            break;
+    }
+    
+    assignmentPatternsChart.data.labels = newLabels;
+    assignmentPatternsChart.data.datasets[0].data = newData;
+    assignmentPatternsChart.update();
+}
+
+function updateChartsWithFilters(filters) {
+    // Update charts based on filters
+    console.log('Updating charts with filters:', filters);
+}
+
+function updateHeatmapWithFilters(filters) {
+    // Update heatmap based on filters
+    console.log('Updating heatmap with filters:', filters);
+}
+
+function filterTable(searchTerm) {
+    const table = document.getElementById('analyticsTable');
+    const rows = table.getElementsByTagName('tr');
+    
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const text = row.textContent || row.innerText;
+        
+        if (text.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    }
+}
+
+function exportAnalytics() {
+    alert('{% trans "Exporting analytics data..." %}');
+}
+
+function exportTableData() {
+    alert('{% trans "Exporting table data..." %}');
+}
+
+function refreshAnalytics() {
+    showLoadingState();
+    
+    setTimeout(() => {
+        hideLoadingState();
+        window.location.reload();
+    }, 1000);
+}
+
+function showLoadingState() {
+    document.querySelector('.container-fluid').style.opacity = '0.7';
+}
+
+function hideLoadingState() {
+    document.querySelector('.container-fluid').style.opacity = '1';
+}
+</script>
+{% endblock %}

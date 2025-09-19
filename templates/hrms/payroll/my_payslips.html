@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load currency_filters %} extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Payslips - HRMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-file-invoice-dollar"></i> My Payslips</h1>
+    <div class="d-flex gap-2">
+        <select class="form-select" id="yearFilter" style="width: auto;">
+            <option value="">All Years</option>
+            {% for year in available_years %}
+            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-outline-primary" onclick="downloadAllPayslips()">
+            <i class="fas fa-download"></i> Download All
+        </button>
+    </div>
+</div>
+
+<!-- Annual Summary -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Total Payslips</h5>
+                        <h3>{{ total_payslips }}</h3>
+                    </div>
+                    <i class="fas fa-file-invoice fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">YTD Gross</h5>
+                        <h3>QAR{{ ytd_gross|floatformat:2|default:"0.00" }}</h3>
+                    </div>
+                    <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">YTD Deductions</h5>
+                        <h3>QAR{{ ytd_deductions|floatformat:2|default:"0.00" }}</h3>
+                    </div>
+                    <i class="fas fa-minus-circle fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">YTD Net</h5>
+                        <h3>QAR{{ ytd_net|floatformat:2|default:"0.00" }}</h3>
+                    </div>
+                    <i class="fas fa-hand-holding-usd fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payslips List -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Payslip History</h5>
+    </div>
+    <div class="card-body">
+        {% if payslips %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Pay Period</th>
+                        <th>Pay Date</th>
+                        <th>Basic Salary</th>
+                        <th>Allowances</th>
+                        <th>Overtime</th>
+                        <th>Gross Pay</th>
+                        <th>Deductions</th>
+                        <th>Net Pay</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payslip in payslips %}
+                    <tr>
+                        <td>
+                            <div>
+                                <strong>{{ payslip.pay_period.name }}</strong>
+                                <br><small class="text-muted">
+                                    {{ payslip.pay_period.start_date|date:"M d" }} - {{ payslip.pay_period.end_date|date:"M d, Y" }}
+                                </small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="{% if payslip.pay_period.pay_date|date:'Y-m-d' < today|date:'Y-m-d' and payslip.status != 'paid' %}text-danger{% endif %}">
+                                {{ payslip.pay_period.pay_date|date:"M d, Y" }}
+                            </span>
+                        </td>
+                        <td>QAR{{ payslip.basic_salary|floatformat:2 }}</td>
+                        <td>
+                            {% if payslip.allowances %}
+                            <span class="text-success">QAR{{ payslip.allowances|floatformat:2 }}</span>
+                            {% else %}
+                            <span class="text-muted">QAR 0.00</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if payslip.overtime_pay %}
+                            <span class="text-info">${{ payslip.overtime_pay|floatformat:2 }}</span>
+                            {% else %}
+                            <span class="text-muted">$0.00</span>
+                            {% endif %}
+                        </td>
+                        <td><strong class="text-success">QAR{{ payslip.gross_pay|floatformat:2 }}</strong></td>
+                        <td>
+                            {% if payslip.deductions %}
+                            <span class="text-danger">QAR{{ payslip.deductions|floatformat:2 }}</span>
+                            {% else %}
+                            <span class="text-muted">QAR 0.00</span>
+                            {% endif %}
+                        </td>
+                        <td><strong class="text-primary">QAR{{ payslip.net_pay|floatformat:2 }}</strong></td>
+                        <td>
+                            <span class="badge 
+                                {% if payslip.status == 'draft' %}bg-secondary
+                                {% elif payslip.status == 'processed' %}bg-warning
+                                {% elif payslip.status == 'approved' %}bg-info
+                                {% elif payslip.status == 'paid' %}bg-success
+                                {% else %}bg-light{% endif %}">
+                                {{ payslip.get_status_display|default:payslip.status|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button class="btn btn-outline-primary" onclick="viewPayslip({{ payslip.id }})" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-info" onclick="downloadPayslip({{ payslip.id }})" title="Download PDF">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                {% if payslip.status == 'paid' %}
+                                <button class="btn btn-outline-success" onclick="emailPayslip({{ payslip.id }})" title="Email Copy">
+                                    <i class="fas fa-envelope"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav aria-label="Payslips pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if selected_year %}&year={{ selected_year }}{% endif %}">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_year %}&year={{ selected_year }}{% endif %}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if selected_year %}&year={{ selected_year }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_year %}&year={{ selected_year }}{% endif %}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if selected_year %}&year={{ selected_year }}{% endif %}">Last</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <i class="fas fa-file-invoice-dollar fa-4x text-muted mb-4"></i>
+            <h4>No Payslips Found</h4>
+            <p class="text-muted">
+                {% if selected_year %}
+                No payslips found for {{ selected_year }}. Try selecting a different year.
+                {% else %}
+                You don't have any payslips yet. Check back after your first pay period is processed.
+                {% endif %}
+            </p>
+            {% if selected_year %}
+            <button class="btn btn-primary" onclick="clearYearFilter()">View All Years</button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Payslip Detail Modal -->
+<div class="modal fade" id="payslipModal" tabindex="-1" aria-labelledby="payslipModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="payslipModalLabel">Payslip Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="payslipModalBody">
+                <!-- Payslip details will be loaded here -->
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="downloadFromModal">
+                    <i class="fas fa-download"></i> Download PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Year filter functionality
+document.getElementById('yearFilter').addEventListener('change', function() {
+    const year = this.value;
+    const url = new URL(window.location);
+    if (year) {
+        url.searchParams.set('year', year);
+    } else {
+        url.searchParams.delete('year');
+    }
+    window.location.href = url.toString();
+});
+
+function clearYearFilter() {
+    const url = new URL(window.location);
+    url.searchParams.delete('year');
+    window.location.href = url.toString();
+}
+
+// Payslip actions
+function viewPayslip(payslipId) {
+    const modal = new bootstrap.Modal(document.getElementById('payslipModal'));
+    const modalBody = document.getElementById('payslipModalBody');
+    const downloadBtn = document.getElementById('downloadFromModal');
+    
+    // Show loading spinner
+    modalBody.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading payslip details...</p>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // Set download button action
+    downloadBtn.onclick = () => downloadPayslip(payslipId);
+    
+    // Fetch payslip details (you would implement this endpoint)
+    fetch(`/hrms/payroll/payslip/${payslipId}/detail/`)
+        .then(response => response.text())
+        .then(html => {
+            modalBody.innerHTML = html;
+        })
+        .catch(error => {
+            modalBody.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Error loading payslip details. Please try again.
+                </div>
+            `;
+            console.error('Error loading payslip:', error);
+        });
+}
+
+function downloadPayslip(payslipId) {
+    // Create a temporary link to download the payslip PDF
+    const link = document.createElement('a');
+    link.href = `/hrms/payroll/payslip/${payslipId}/pdf/`;
+    link.download = `payslip_${payslipId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function emailPayslip(payslipId) {
+    if (confirm('Send a copy of this payslip to your registered email address?')) {
+        fetch(`/hrms/payroll/payslip/${payslipId}/email/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Payslip has been sent to your email address.');
+            } else {
+                alert('Error sending payslip. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error sending payslip. Please try again.');
+        });
+    }
+}
+
+function downloadAllPayslips() {
+    const year = document.getElementById('yearFilter').value;
+    let url = '/hrms/payroll/my-payslips/download-all/';
+    if (year) {
+        url += `?year=${year}`;
+    }
+    
+    // Create a temporary link to download all payslips
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `payslips_${year || 'all'}.zip`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Auto-highlight current month's payslip
+document.addEventListener('DOMContentLoaded', function() {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    
+    // Add highlighting to current month's payslip if it exists
+    const tableRows = document.querySelectorAll('tbody tr');
+    tableRows.forEach(row => {
+        const payDateCell = row.querySelector('td:nth-child(2)');
+        if (payDateCell) {
+            const payDateText = payDateCell.textContent.trim();
+            const payDate = new Date(payDateText);
+            
+            if (payDate.getMonth() === currentMonth && payDate.getFullYear() === currentYear) {
+                row.classList.add('table-warning');
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

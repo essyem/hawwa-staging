@@ -1,0 +1,512 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block title %}Payroll Dashboard - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-money-check"></i> Payroll Dashboard</h1>
+    {% if user.is_staff %}
+    <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-plus"></i> Payroll Actions
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#"><i class="fas fa-calendar-plus"></i> New Pay Period</a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-calculator"></i> Run Payroll</a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-file-export"></i> Generate Reports</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> Payroll Settings</a></li>
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Current Pay Period Info -->
+<div class="alert alert-info mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h5 class="alert-heading mb-2">
+                <i class="fas fa-calendar-alt"></i> Current Pay Period: {{ current_period.name|default:"December 2024" }}
+            </h5>
+            <p class="mb-0">
+                <strong>Period:</strong> {{ current_period.start_date|date:"M d"|default:"Dec 1" }} - {{ current_period.end_date|date:"M d, Y"|default:"Dec 31, 2024" }}
+                <span class="ms-3">
+                    <strong>Pay Date:</strong> {{ current_period.pay_date|date:"M d, Y"|default:"Jan 5, 2025" }}
+                </span>
+                <span class="ms-3">
+                    <strong>Status:</strong> 
+                    <span class="badge bg-warning">{{ current_period.status|default:"Processing" }}</span>
+                </span>
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_staff %}
+            <a href="#" class="btn btn-outline-primary">
+                <i class="fas fa-edit"></i> Manage Period
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Payroll Summary Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Payroll (This Month)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_payroll|currency }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Employees Paid</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.employees_paid }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Average Salary</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.average_salary|currency }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Approvals</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.pending_approvals }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Payroll Entries -->
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Payroll Entries</h6>
+                <div class="dropdown no-arrow">
+                    <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow">
+                        <a class="dropdown-item export-btn" href="#" data-format="excel" data-url="{% url 'hrms:payroll_export' %}">
+                            <i class="fas fa-file-excel fa-sm fa-fw mr-2 text-gray-400"></i> Export to Excel
+                        </a>
+                        <a class="dropdown-item export-btn" href="#" data-format="pdf" data-url="{% url 'hrms:payroll_export' %}">
+                            <i class="fas fa-file-pdf fa-sm fa-fw mr-2 text-gray-400"></i> Export to PDF
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% url 'hrms:payroll_bulk_process' %}">
+                            <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i> Bulk Process
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Filter and Search -->
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search employees...">
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="monthFilter">
+                            <option value="">All Months</option>
+                            {% for month in months %}
+                            <option value="{{ month.value }}" {% if month.value == current_month %}selected{% endif %}>
+                                {{ month.label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="Processed">Processed</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="departmentFilter">
+                            <option value="">All Departments</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.name }}">{{ dept.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Payroll Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover searchable-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all"></th>
+                                <th>Employee</th>
+                                <th>Department</th>
+                                <th>Pay Period</th>
+                                <th>Gross Salary</th>
+                                <th>Deductions</th>
+                                <th>Net Salary</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payroll in payroll_entries %}
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox" value="{{ payroll.id }}"></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if payroll.employee.photo %}
+                                            <img src="{{ payroll.employee.photo.url }}" class="avatar-sm rounded-circle me-2" alt="Employee">
+                                        {% else %}
+                                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                {{ payroll.employee.first_name|first }}{{ payroll.employee.last_name|first }}
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <h6 class="mb-0">{{ payroll.employee.get_full_name }}</h6>
+                                            <small class="text-muted">{{ payroll.employee.employee_id }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="department-cell">{{ payroll.employee.department.name }}</td>
+                                <td>{{ payroll.pay_period_start|date:"M d" }} - {{ payroll.pay_period_end|date:"M d, Y" }}</td>
+                                <td class="text-success font-weight-bold">{{ payroll.gross_salary|currency }}</td>
+                                <td class="text-danger">{{ payroll.total_deductions|currency }}</td>
+                                <td class="text-primary font-weight-bold">{{ payroll.net_salary|currency }}</td>
+                                <td>
+                                    {% if payroll.status == 'Paid' %}
+                                        <span class="badge bg-success">{{ payroll.status }}</span>
+                                    {% elif payroll.status == 'Approved' %}
+                                        <span class="badge bg-info">{{ payroll.status }}</span>
+                                    {% elif payroll.status == 'Processed' %}
+                                        <span class="badge bg-warning">{{ payroll.status }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ payroll.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'hrms:payroll_detail' payroll.pk %}" class="btn btn-outline-primary btn-sm" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if payroll.status != 'Paid' %}
+                                        <a href="{% url 'hrms:payroll_update' payroll.pk %}" class="btn btn-outline-warning btn-sm" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% endif %}
+                                        <a href="{% url 'hrms:payroll_slip' payroll.pk %}" class="btn btn-outline-info btn-sm" title="Pay Slip" target="_blank">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-money-check-alt fa-3x mb-3"></i>
+                                        <h5>No payroll entries found</h5>
+                                        <p>Start by processing payroll for employees.</p>
+                                        <a href="{% url 'hrms:payroll_create' %}" class="btn btn-primary">Process Payroll</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <nav aria-label="Payroll pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">&laquo; First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Payroll Actions & Summary -->
+    <div class="col-lg-4">
+        <!-- Monthly Summary -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Monthly Summary</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="monthlySummaryChart"></canvas>
+                </div>
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Basic Salary:</span>
+                        <span class="font-weight-bold">{{ monthly_summary.basic_salary|currency }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Allowances:</span>
+                        <span class="text-success">{{ monthly_summary.allowances|currency }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Deductions:</span>
+                        <span class="text-danger">-{{ monthly_summary.deductions|currency }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span class="font-weight-bold">Net Total:</span>
+                        <span class="font-weight-bold text-primary">{{ monthly_summary.net_total|currency }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'hrms:payroll_create' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Process New Payroll
+                    </a>
+                    <a href="{% url 'hrms:payroll_bulk_process' %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-cogs"></i> Bulk Process
+                    </a>
+                    <a href="{% url 'hrms:payroll_approve_pending' %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-check"></i> Approve Pending ({{ stats.pending_approvals }})
+                    </a>
+                    <a href="{% url 'hrms:payroll_reports' %}" class="btn btn-info btn-sm">
+                        <i class="fas fa-chart-bar"></i> Generate Reports
+                    </a>
+                    <a href="{% url 'hrms:payroll_settings' %}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-cog"></i> Payroll Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Payroll Dates -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Upcoming Payroll Dates</h6>
+            </div>
+            <div class="card-body">
+                {% for date in upcoming_payroll_dates %}
+                <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
+                    <div class="flex-shrink-0">
+                        <div class="avatar-sm bg-warning text-white rounded-circle d-flex align-items-center justify-content-center">
+                            {{ date.day }}
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0">{{ date.type }}</h6>
+                        <small class="text-muted">{{ date.date|date:"M d, Y" }}</small>
+                        <small class="d-block text-muted">{{ date.description }}</small>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-3">
+                    <i class="fas fa-calendar-check fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">No upcoming dates</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Department Wise Summary -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Department Summary</h6>
+            </div>
+            <div class="card-body">
+                {% for dept in department_summary %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <span class="font-weight-bold">{{ dept.name }}</span>
+                        <small class="d-block text-muted">{{ dept.employee_count }} employees</small>
+                    </div>
+                    <span class="text-primary font-weight-bold">{{ dept.total_payroll|currency_short }}</span>
+                </div>
+                {% empty %}
+                <p class="text-muted">No data available</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Actions Modal -->
+<div class="modal fade" id="bulk-actions" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bulk Payroll Actions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>You have selected <span id="bulk-count">0</span> payroll entry(ies).</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success" onclick="bulkAction('approve')">
+                        <i class="fas fa-check"></i> Approve Selected
+                    </button>
+                    <button class="btn btn-info" onclick="bulkAction('process_payment')">
+                        <i class="fas fa-money-bill-wave"></i> Process Payment
+                    </button>
+                    <button class="btn btn-warning" onclick="bulkAction('generate_slips')">
+                        <i class="fas fa-file-pdf"></i> Generate Pay Slips
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Chart data (would be passed from view context)
+var monthlySummaryData = {
+    labels: ['Basic Salary', 'Allowances', 'Deductions'],
+    datasets: [{
+        data: [{{ monthly_summary.basic_salary }}, {{ monthly_summary.allowances }}, {{ monthly_summary.deductions }}],
+        backgroundColor: ['#4e73df', '#1cc88a', '#e74a3b']
+    }]
+};
+
+// Initialize chart
+if (document.getElementById('monthlySummaryChart')) {
+    new Chart(document.getElementById('monthlySummaryChart'), {
+        type: 'doughnut',
+        data: monthlySummaryData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function bulkAction(action) {
+    var selectedIds = [];
+    $('.row-checkbox:checked').each(function() {
+        selectedIds.push($(this).val());
+    });
+    
+    if (selectedIds.length === 0) {
+        showAlert('Please select at least one payroll entry.', 'warning');
+        return;
+    }
+    
+    var confirmMessage = 'Are you sure you want to ' + action.replace('_', ' ') + ' ' + selectedIds.length + ' payroll entry(ies)?';
+    
+    if (confirm(confirmMessage)) {
+        $.post('{% url "hrms:payroll_bulk_action" %}', {
+            'action': action,
+            'ids': selectedIds,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        }, function(response) {
+            if (response.success) {
+                showAlert(response.message, 'success');
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        });
+    }
+    
+    $('#bulk-actions').modal('hide');
+}
+
+// Month filter
+$('#monthFilter').change(function() {
+    var selectedMonth = $(this).val();
+    // Implement month filtering logic
+    window.location.href = '?month=' + selectedMonth;
+});
+</script>
+{% endblock %}

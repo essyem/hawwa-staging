@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Attendance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .attendance-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .clock-display {
+            background: linear-gradient(45deg, #2196F3, #21CBF3);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .time {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .date {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .attendance-btn {
+            width: 100%;
+            height: 80px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 15px;
+            border: none;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .check-in-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+        
+        .check-out-btn {
+            background: linear-gradient(45deg, #f44336, #da190b);
+            color: white;
+        }
+        
+        .attendance-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .attendance-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-card {
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .status-checked-in {
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .status-checked-out {
+            background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .location-status {
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+        
+        .location-valid {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .location-invalid {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .employee-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="attendance-card">
+                    <!-- Header -->
+                    <div class="text-center mb-4">
+                        <h2><i class="fas fa-clock"></i> Time Attendance</h2>
+                        <p class="text-muted">Employee Check In/Out System</p>
+                    </div>
+                    
+                    <!-- Clock Display -->
+                    <div class="clock-display">
+                        <div class="time" id="current-time">00:00:00</div>
+                        <div class="date" id="current-date">January 1, 2025</div>
+                    </div>
+                    
+                    <!-- Employee Info -->
+                    <div class="employee-info">
+                        <h5><i class="fas fa-user"></i> Employee Information</h5>
+                        <p><strong>Name:</strong> <span id="employee-name">{{ user.get_full_name|default:user.username }}</span></p>
+                        <p><strong>Employee ID:</strong> <span id="employee-id">{% if employee_profile %}{{ employee_profile.employee_id }}{% else %}{{ user.username }}{% endif %}</span></p>
+                        <p><strong>Department:</strong> <span id="employee-dept">{% if employee_profile and employee_profile.department %}{{ employee_profile.department.name }}{% else %}Not Set{% endif %}</span></p>
+                    </div>
+                    
+                    <!-- Alerts -->
+                    <div id="alert-container"></div>
+                    
+                    <!-- Current Status -->
+                    <div id="current-status" class="status-card">
+                        <h5><i class="fas fa-info-circle"></i> Current Status</h5>
+                        <p id="status-text">Getting status...</p>
+                    </div>
+                    
+                    <!-- Location Status -->
+                    <div id="location-status" class="location-status">
+                        <i class="fas fa-map-marker-alt"></i> <span id="location-text">Checking location...</span>
+                    </div>
+                    
+                    <!-- Loading Spinner -->
+                    <div id="loading" class="loading text-center">
+                        <div class="spinner"></div>
+                        <p>Processing...</p>
+                    </div>
+                    
+                    <!-- Attendance Buttons -->
+                    <div class="mt-4">
+                        <button id="check-in-btn" class="attendance-btn check-in-btn" onclick="checkIn()" disabled>
+                            <i class="fas fa-sign-in-alt"></i> CHECK IN
+                        </button>
+                        
+                        <button id="check-out-btn" class="attendance-btn check-out-btn" onclick="checkOut()" disabled>
+                            <i class="fas fa-sign-out-alt"></i> CHECK OUT
+                        </button>
+                    </div>
+                    
+                    <!-- Today's Summary -->
+                    <div class="mt-4" id="today-summary">
+                        <h5><i class="fas fa-calendar-day"></i> Today's Summary</h5>
+                        <div class="row">
+                            <div class="col-6">
+                                <small>Check In:</small><br>
+                                <strong id="today-checkin">--:--</strong>
+                            </div>
+                            <div class="col-6">
+                                <small>Check Out:</small><br>
+                                <strong id="today-checkout">--:--</strong>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-6">
+                                <small>Hours Worked:</small><br>
+                                <strong id="today-hours">0.00</strong>
+                            </div>
+                            <div class="col-6">
+                                <small>Status:</small><br>
+                                <strong id="today-status">Not Started</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Configuration
+        const OFFICE_LOCATIONS = [
+            {
+                name: "Head Office",
+                latitude: 25.2854,  // Doha, Qatar coordinates
+                longitude: 51.5310,
+                radius: 50 // 50 meters
+            },
+            {
+                name: "Branch Office",
+                latitude: 25.2760,  // Alternative location
+                longitude: 51.5200,
+                radius: 50
+            }
+        ];
+        
+        let currentPosition = null;
+        let isLocationValid = false;
+        let attendanceStatus = {
+            isCheckedIn: false,
+            checkInTime: null,
+            checkOutTime: null
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            checkCurrentStatus();
+            requestLocation();
+        });
+        
+        // Update clock
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+            const dateStr = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            document.getElementById('current-time').textContent = timeStr;
+            document.getElementById('current-date').textContent = dateStr;
+        }
+        
+        // Request user location
+        function requestLocation() {
+            if (!navigator.geolocation) {
+                showAlert('Geolocation is not supported by this browser.', 'danger');
+                return;
+            }
+            
+            document.getElementById('location-text').textContent = 'Getting your location...';
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    currentPosition = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                    checkLocationValidity();
+                },
+                function(error) {
+                    let message = 'Unable to get your location. ';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            message += 'Location access denied by user.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message += 'Location information unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            message += 'Location request timed out.';
+                            break;
+                    }
+                    showAlert(message, 'warning');
+                    document.getElementById('location-text').textContent = 'Location unavailable';
+                    updateLocationStatus(false);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 60000
+                }
+            );
+        }
+        
+        // Check if current location is within office premises
+        function checkLocationValidity() {
+            if (!currentPosition) {
+                isLocationValid = false;
+                updateLocationStatus(false);
+                return;
+            }
+            
+            let isWithinRange = false;
+            let nearestOffice = null;
+            let minDistance = Infinity;
+            
+            for (let office of OFFICE_LOCATIONS) {
+                const distance = calculateDistance(
+                    currentPosition.latitude,
+                    currentPosition.longitude,
+                    office.latitude,
+                    office.longitude
+                );
+                
+                if (distance <= office.radius) {
+                    isWithinRange = true;
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        nearestOffice = office;
+                    }
+                }
+            }
+            
+            isLocationValid = isWithinRange;
+            updateLocationStatus(isLocationValid, nearestOffice, minDistance);
+            updateButtonStates();
+        }
+        
+        // Calculate distance between two points
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000; // Earth's radius in meters
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        
+        // Update location status display
+        function updateLocationStatus(isValid, office = null, distance = null) {
+            const statusDiv = document.getElementById('location-status');
+            const textSpan = document.getElementById('location-text');
+            
+            if (isValid && office) {
+                statusDiv.className = 'location-status location-valid';
+                textSpan.textContent = `You are at ${office.name} (${Math.round(distance)}m from center)`;
+            } else if (currentPosition) {
+                statusDiv.className = 'location-status location-invalid';
+                textSpan.textContent = 'You are outside the office premises (50m required)';
+            } else {
+                statusDiv.className = 'location-status location-invalid';
+                textSpan.textContent = 'Location unavailable';
+            }
+        }
+        
+        // Check current attendance status
+        function checkCurrentStatus() {
+            fetch('/hrms/attendance/api/status/')
+                .then(response => response.json())
+                .then(data => {
+                    attendanceStatus = data;
+                    updateStatusDisplay();
+                    updateTodaySummary();
+                    updateButtonStates();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Unable to get attendance status', 'warning');
+                });
+        }
+        
+        // Update status display
+        function updateStatusDisplay() {
+            const statusDiv = document.getElementById('current-status');
+            const statusText = document.getElementById('status-text');
+            
+            if (attendanceStatus.isCheckedIn) {
+                statusDiv.className = 'status-card status-checked-in';
+                statusText.textContent = `Checked in at ${attendanceStatus.checkInTime}`;
+            } else {
+                statusDiv.className = 'status-card status-checked-out';
+                statusText.textContent = attendanceStatus.checkOutTime ? 
+                    `Checked out at ${attendanceStatus.checkOutTime}` : 
+                    'Not checked in today';
+            }
+        }
+        
+        // Update today's summary
+        function updateTodaySummary() {
+            document.getElementById('today-checkin').textContent = 
+                attendanceStatus.checkInTime || '--:--';
+            document.getElementById('today-checkout').textContent = 
+                attendanceStatus.checkOutTime || '--:--';
+            document.getElementById('today-hours').textContent = 
+                attendanceStatus.hoursWorked || '0.00';
+            document.getElementById('today-status').textContent = 
+                attendanceStatus.status || 'Not Started';
+        }
+        
+        // Update button states
+        function updateButtonStates() {
+            const checkInBtn = document.getElementById('check-in-btn');
+            const checkOutBtn = document.getElementById('check-out-btn');
+            
+            // Enable/disable based on location and status
+            checkInBtn.disabled = !isLocationValid || attendanceStatus.isCheckedIn;
+            checkOutBtn.disabled = !isLocationValid || !attendanceStatus.isCheckedIn;
+        }
+        
+        // Check in function
+        function checkIn() {
+            if (!isLocationValid) {
+                showAlert('You must be within 50 meters of the office to check in', 'danger');
+                return;
+            }
+            
+            if (attendanceStatus.isCheckedIn) {
+                showAlert('You are already checked in', 'warning');
+                return;
+            }
+            
+            showLoading(true);
+            
+            const data = {
+                action: 'check_in',
+                latitude: currentPosition.latitude,
+                longitude: currentPosition.longitude,
+                timestamp: new Date().toISOString()
+            };
+            
+            fetch('/hrms/attendance/api/checkin/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+                if (data.success) {
+                    showAlert('Successfully checked in!', 'success');
+                    checkCurrentStatus(); // Refresh status
+                } else {
+                    showAlert(data.message || 'Check in failed', 'danger');
+                }
+            })
+            .catch(error => {
+                showLoading(false);
+                console.error('Error:', error);
+                showAlert('Check in failed. Please try again.', 'danger');
+            });
+        }
+        
+        // Check out function
+        function checkOut() {
+            if (!isLocationValid) {
+                showAlert('You must be within 50 meters of the office to check out', 'danger');
+                return;
+            }
+            
+            if (!attendanceStatus.isCheckedIn) {
+                showAlert('You must check in first', 'warning');
+                return;
+            }
+            
+            showLoading(true);
+            
+            const data = {
+                action: 'check_out',
+                latitude: currentPosition.latitude,
+                longitude: currentPosition.longitude,
+                timestamp: new Date().toISOString()
+            };
+            
+            fetch('/hrms/attendance/api/checkout/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+                if (data.success) {
+                    showAlert('Successfully checked out!', 'success');
+                    checkCurrentStatus(); // Refresh status
+                } else {
+                    showAlert(data.message || 'Check out failed', 'danger');
+                }
+            })
+            .catch(error => {
+                showLoading(false);
+                console.error('Error:', error);
+                showAlert('Check out failed. Please try again.', 'danger');
+            });
+        }
+        
+        // Show/hide loading
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+        
+        // Show alert
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alert-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Refresh location every 30 seconds
+        setInterval(function() {
+            if (navigator.geolocation) {
+                requestLocation();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

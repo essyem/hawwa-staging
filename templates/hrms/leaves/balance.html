@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Leave Balance - HRMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-calendar-check"></i> Leave Balance</h1>
+    <a href="{% url 'hrms:leave_apply' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Apply for Leave
+    </a>
+</div>
+
+<!-- Current Year Summary -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Leave Balance Summary - {{ current_year }}</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for balance in leave_balances %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 border-start border-4 border-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h6 class="card-title">{{ balance.leave_type.name }}</h6>
+                            <span class="badge bg-primary">{{ balance.leave_type.code }}</span>
+                        </div>
+                        
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <div class="border-end">
+                                    <h5 class="mb-0 text-info">{{ balance.allocated_days }}</h5>
+                                    <small class="text-muted">Allocated</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border-end">
+                                    <h5 class="mb-0 text-warning">{{ balance.used_days }}</h5>
+                                    <small class="text-muted">Used</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <h5 class="mb-0 text-success">{{ balance.remaining_days }}</h5>
+                                <small class="text-muted">Remaining</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small>Usage</small>
+                                <small>{{ balance.used_percentage|floatformat:1 }}%</small>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar 
+                                    {% if balance.used_percentage >= 90 %}bg-danger
+                                    {% elif balance.used_percentage >= 70 %}bg-warning
+                                    {% else %}bg-success{% endif %}" 
+                                    style="width: {{ balance.used_percentage }}%">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Leave Type Details -->
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                {% if balance.leave_type.max_consecutive_days %}
+                                Max consecutive: {{ balance.leave_type.max_consecutive_days }} days<br>
+                                {% endif %}
+                                {% if balance.leave_type.carry_forward %}
+                                <i class="fas fa-check text-success"></i> Carry forward allowed
+                                {% else %}
+                                <i class="fas fa-times text-danger"></i> No carry forward
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{% url 'hrms:leave_apply' %}?type={{ balance.leave_type.id }}" 
+                           class="btn btn-outline-primary btn-sm w-100">
+                            <i class="fas fa-plus"></i> Apply {{ balance.leave_type.name }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                    <h4>No Leave Balance Information</h4>
+                    <p class="text-muted">Leave balances have not been set up for your account yet.</p>
+                    <p class="text-muted">Please contact HR for assistance.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent Leave History -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Leave Applications</h5>
+        <a href="{% url 'hrms:leave_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body">
+        {% if recent_applications %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Leave Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Days</th>
+                        <th>Status</th>
+                        <th>Applied Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for application in recent_applications %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-info">{{ application.leave_type.name }}</span>
+                        </td>
+                        <td>{{ application.start_date|date:"M d, Y" }}</td>
+                        <td>{{ application.end_date|date:"M d, Y" }}</td>
+                        <td>
+                            <span class="badge bg-light text-dark">{{ application.total_days }} days</span>
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if application.status == 'approved' %}bg-success
+                                {% elif application.status == 'rejected' %}bg-danger
+                                {% elif application.status == 'pending' %}bg-warning
+                                {% else %}bg-secondary{% endif %}">
+                                {{ application.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ application.applied_on|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+            <h5>No Recent Applications</h5>
+            <p class="text-muted">You haven't applied for any leave recently.</p>
+            <a href="{% url 'hrms:leave_apply' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Apply for Leave
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Leave Policy Information -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Leave Policy Information</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-calendar-alt"></i> General Guidelines</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Submit leave applications at least 3 days in advance</li>
+                    <li><i class="fas fa-check text-success"></i> Attach supporting documents for medical leave</li>
+                    <li><i class="fas fa-check text-success"></i> Maximum 30 days of annual leave per year</li>
+                    <li><i class="fas fa-check text-success"></i> Unused leave may be carried forward (policy dependent)</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6><i class="fas fa-clock"></i> Important Deadlines</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-calendar text-info"></i> Year-end leave submission: December 15th</li>
+                    <li><i class="fas fa-calendar text-info"></i> Carry-forward deadline: January 31st</li>
+                    <li><i class="fas fa-calendar text-info"></i> Medical leave documentation: Within 5 days</li>
+                    <li><i class="fas fa-calendar text-info"></i> Emergency leave: Report within 24 hours</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <div class="alert alert-info">
+                <h6><i class="fas fa-lightbulb"></i> Pro Tips</h6>
+                <ul class="mb-0">
+                    <li>Plan your leave in advance to ensure smooth workflow</li>
+                    <li>Coordinate with your team before applying for extended leave</li>
+                    <li>Check your leave balance regularly to avoid surprises</li>
+                    <li>Contact HR if you have questions about leave policies</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

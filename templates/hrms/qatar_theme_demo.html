@@ -1,0 +1,256 @@
+<!-- Qatar HRMS Welcome Component -->
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Qatar-themed Hero Section -->
+            <div class="card border-0 glass-effect mb-4" style="background: var(--gradient-primary); color: white;">
+                <div class="card-body text-center py-5">
+                    <div class="d-flex justify-content-center align-items-center mb-3">
+                        <div class="qatar-flag-colors me-3">
+                            <div class="flag-stripe bg-qatar" style="width: 40px; height: 6px; margin-bottom: 2px;"></div>
+                            <div class="flag-stripe" style="width: 40px; height: 6px; background: white;"></div>
+                        </div>
+                        <h1 class="display-4 fw-bold mb-0">مرحباً - Welcome</h1>
+                        <div class="qatar-flag-colors ms-3">
+                            <div class="flag-stripe bg-qatar" style="width: 40px; height: 6px; margin-bottom: 2px;"></div>
+                            <div class="flag-stripe" style="width: 40px; height: 6px; background: white;"></div>
+                        </div>
+                    </div>
+                    <p class="lead mb-4">Qatar Human Resource Management System</p>
+                    <p class="fs-5 mb-4">نظام إدارة الموارد البشرية لدولة قطر</p>
+                    
+                    <div class="row text-center mt-4">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="feature-stat">
+                                <i class="fas fa-users fa-2x mb-2"></i>
+                                <h4>Employee Management</h4>
+                                <p class="small">إدارة الموظفين</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="feature-stat">
+                                <i class="fas fa-clock fa-2x mb-2"></i>
+                                <h4>Attendance Tracking</h4>
+                                <p class="small">تتبع الحضور</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="feature-stat">
+                                <i class="fas fa-graduation-cap fa-2x mb-2"></i>
+                                <h4>Training Programs</h4>
+                                <p class="small">برامج التدريب</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="feature-stat">
+                                <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                                <h4>Reports & Analytics</h4>
+                                <p class="small">التقارير والتحليلات</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Theme Demo Cards -->
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-qatar text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-palette"></i> Qatar Theme Features
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Qatar flag-inspired colors</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Dark/Light mode toggle</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Smooth animations</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Accessibility features</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Professional design</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary btn-sm" onclick="window.qatarTheme.toggleTheme()">
+                                <i class="fas fa-adjust"></i> Try Theme Toggle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-star"></i> Enhanced Features
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Sample Form Control</label>
+                                <input type="text" class="form-control" placeholder="Enhanced focus effects">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Select Dropdown</label>
+                                <select class="form-select">
+                                    <option>Option 1</option>
+                                    <option>Option 2</option>
+                                </select>
+                            </div>
+                            <div class="progress mb-3">
+                                <div class="progress-bar" style="width: 75%">75%</div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <span class="badge bg-success">Active</span>
+                            <span class="badge bg-warning ms-1">Pending</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-tools"></i> Quick Actions
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" onclick="QatarUtils.showNotification('Welcome to Qatar HRMS!', 'success')">
+                                    <i class="fas fa-bell"></i> Show Notification
+                                </button>
+                                <button class="btn btn-secondary" data-tooltip="This button has a tooltip">
+                                    <i class="fas fa-info-circle"></i> Hover for Tooltip
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="QatarUtils.scrollTo('body', 0)">
+                                    <i class="fas fa-arrow-up"></i> Scroll to Top
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted">
+                            <small>
+                                <i class="fas fa-keyboard"></i> 
+                                Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd> to toggle theme
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Table with Enhanced Styling -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-table"></i> Enhanced Table Example
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Status</th>
+                                    <th>Salary (QAR)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>EMP001</td>
+                                    <td>Ahmed Al-Mansouri</td>
+                                    <td>IT Department</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td id="salary-1">8500</td>
+                                </tr>
+                                <tr>
+                                    <td>EMP002</td>
+                                    <td>Fatima Al-Zahra</td>
+                                    <td>HR Department</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td id="salary-2">7200</td>
+                                </tr>
+                                <tr>
+                                    <td>EMP003</td>
+                                    <td>Mohammed Al-Thani</td>
+                                    <td>Finance</td>
+                                    <td><span class="badge bg-warning">On Leave</span></td>
+                                    <td id="salary-3">9100</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Examples -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Success!</strong> Your profile has been updated successfully.
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Info:</strong> New training sessions are now available.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Format salary values in the table
+document.addEventListener('DOMContentLoaded', function() {
+    // Format salaries in QAR
+    document.querySelectorAll('[id^="salary-"]').forEach(cell => {
+        const amount = parseFloat(cell.textContent);
+        if (!isNaN(amount) && window.QatarUtils) {
+            cell.textContent = window.QatarUtils.formatCurrency(amount);
+        }
+    });
+});
+</script>
+
+<style>
+.feature-stat {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: var(--transition-normal);
+}
+
+.feature-stat:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.qatar-flag-colors {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.flag-stripe {
+    border-radius: 1px;
+}
+
+kbd {
+    background: var(--gray-600);
+    color: white;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+}
+
+[data-theme="dark"] kbd {
+    background: var(--gray-400);
+    color: var(--gray-900);
+}
+</style>

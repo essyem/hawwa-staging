@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% block hrms_title %}HRMS{% endblock %} - Hawwa{% endblock %}
+
+{% block extra_css %}
+<style>
+/* HRMS-specific styles */
+.hrms-card {
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-normal);
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.hrms-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.hrms-stat-card {
+    background: linear-gradient(135deg, var(--gradient-primary));
+    color: white;
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.hrms-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.hrms-stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.hrms-nav-tabs {
+    border-bottom: 2px solid var(--border-color);
+}
+
+.hrms-nav-tabs .nav-link {
+    color: var(--text-secondary);
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: none;
+    padding: 0.75rem 1rem;
+    margin-right: 1rem;
+}
+
+.hrms-nav-tabs .nav-link:hover {
+    color: var(--qatar-maroon);
+    border-bottom-color: var(--qatar-maroon);
+    background: none;
+}
+
+.hrms-nav-tabs .nav-link.active {
+    color: var(--qatar-maroon);
+    border-bottom-color: var(--qatar-maroon);
+    background: none;
+    font-weight: 600;
+}
+
+.employee-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.department-badge {
+    background: var(--qatar-gold);
+    color: var(--qatar-maroon);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-active {
+    background: rgba(5, 150, 105, 0.1);
+    color: var(--success);
+}
+
+.status-inactive {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--text-secondary);
+}
+
+.status-pending {
+    background: rgba(217, 119, 6, 0.1);
+    color: var(--warning);
+}
+
+.status-approved {
+    background: rgba(5, 150, 105, 0.1);
+    color: var(--success);
+}
+
+.status-rejected {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--error);
+}
+
+.hrms-breadcrumb {
+    background: none;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.hrms-breadcrumb .breadcrumb-item {
+    color: var(--text-secondary);
+}
+
+.hrms-breadcrumb .breadcrumb-item.active {
+    color: var(--text-primary);
+}
+
+.hrms-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+    color: var(--text-muted);
+}
+
+.hrms-action-btn {
+    border-radius: var(--radius-md);
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: var(--transition-fast);
+}
+
+.hrms-table {
+    background: var(--card-bg);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.hrms-table th {
+    background: var(--card-bg-secondary);
+    border: none;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 1rem;
+}
+
+.hrms-table td {
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.hrms-table tbody tr:hover {
+    background: var(--card-bg-secondary);
+}
+
+.qar-amount {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-weight: 600;
+    color: var(--success);
+}
+
+.attendance-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.attendance-present {
+    background: var(--success);
+}
+
+.attendance-absent {
+    background: var(--error);
+}
+
+.attendance-late {
+    background: var(--warning);
+}
+
+.attendance-halfday {
+    background: var(--info);
+}
+
+.performance-meter {
+    width: 100%;
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.performance-meter-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--error) 0%, var(--warning) 50%, var(--success) 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.hrms-sidebar {
+    background: var(--card-bg);
+    border-right: 1px solid var(--border-color);
+    height: calc(100vh - 76px);
+    position: sticky;
+    top: 76px;
+}
+
+.hrms-sidebar .nav-link {
+    color: var(--text-secondary);
+    padding: 0.75rem 1rem;
+    border-radius: 0;
+    border-left: 3px solid transparent;
+}
+
+.hrms-sidebar .nav-link:hover {
+    background: var(--card-bg-secondary);
+    color: var(--text-primary);
+    border-left-color: var(--qatar-maroon);
+}
+
+.hrms-sidebar .nav-link.active {
+    background: var(--card-bg-secondary);
+    color: var(--qatar-maroon);
+    border-left-color: var(--qatar-maroon);
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .hrms-sidebar {
+        height: auto;
+        position: relative;
+        top: 0;
+    }
+    
+    .hrms-stat-value {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- HRMS Breadcrumb -->
+    {% block hrms_breadcrumb %}
+    <nav aria-label="breadcrumb" class="hrms-breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'hrms:dashboard' %}" class="text-decoration-none">
+                    <i class="fas fa-users me-1"></i>{% trans "HRMS" %}
+                </a>
+            </li>
+            {% block breadcrumb_items %}{% endblock %}
+        </ol>
+    </nav>
+    {% endblock %}
+
+    <!-- HRMS Page Header -->
+    {% block hrms_header %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">{% block page_title %}{% trans "HR Management System" %}{% endblock %}</h1>
+            {% block page_subtitle %}
+            <p class="text-muted mb-0">{% trans "Manage employees, departments, and HR operations" %}</p>
+            {% endblock %}
+        </div>
+        {% block page_actions %}{% endblock %}
+    </div>
+    {% endblock %}
+
+    <!-- HRMS Content -->
+    {% block hrms_content %}
+    <div class="row">
+        <!-- Sidebar Navigation (optional) -->
+        {% block hrms_sidebar %}{% endblock %}
+        
+        <!-- Main Content -->
+        <div class="{% if hrms_sidebar %}col-lg-9{% else %}col-12{% endif %}">
+            {% block main_content %}{% endblock %}
+        </div>
+    </div>
+    {% endblock %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// HRMS-specific JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips for HRMS elements
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Auto-refresh functionality for real-time data
+    if (document.querySelector('[data-auto-refresh]')) {
+        const refreshInterval = document.querySelector('[data-auto-refresh]').dataset.autoRefresh;
+        if (refreshInterval && refreshInterval > 0) {
+            setInterval(() => {
+                // Refresh specific data elements
+                refreshHRMSData();
+            }, refreshInterval * 1000);
+        }
+    }
+    
+    // Performance meter animations
+    document.querySelectorAll('.performance-meter-fill').forEach(meter => {
+        const percentage = meter.dataset.percentage || 0;
+        setTimeout(() => {
+            meter.style.width = percentage + '%';
+        }, 500);
+    });
+    
+    // QAR currency formatting
+    document.querySelectorAll('.qar-amount').forEach(element => {
+        const amount = parseFloat(element.textContent.replace(/[^\d.-]/g, ''));
+        if (!isNaN(amount)) {
+            element.textContent = formatQAR(amount);
+        }
+    });
+});
+
+function refreshHRMSData() {
+    // Placeholder for real-time data refresh
+    // This can be implemented to fetch updated attendance, notifications, etc.
+}
+
+function formatQAR(amount) {
+    return new Intl.NumberFormat('en-QA', {
+        style: 'currency',
+        currency: 'QAR',
+        minimumFractionDigits: 2
+    }).format(amount);
+}
+
+function showHRMSToast(message, type = 'info') {
+    // Create toast notification for HRMS actions
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close ms-2" onclick="this.parentElement.remove()"></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.remove();
+        }
+    }, 3000);
+}
+</script>
+{% endblock %}

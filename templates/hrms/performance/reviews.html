@@ -1,0 +1,416 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Performance Reviews - HRMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-clipboard-list"></i> Performance Reviews</h1>
+    {% if user.is_staff %}
+    <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-plus"></i> New Review
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Individual Review</a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-users"></i> Team Review</a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-sync"></i> 360° Review</a></li>
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Review Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="search" class="form-label">Search Reviews</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       placeholder="Search by employee or reviewer..." value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-2">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Status</option>
+                    <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="in_progress" {% if request.GET.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                    <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="overdue" {% if request.GET.status == 'overdue' %}selected{% endif %}>Overdue</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="period" class="form-label">Review Period</label>
+                <select class="form-select" id="period" name="period">
+                    <option value="">All Periods</option>
+                    <option value="q1" {% if request.GET.period == 'q1' %}selected{% endif %}>Q1 2024</option>
+                    <option value="q2" {% if request.GET.period == 'q2' %}selected{% endif %}>Q2 2024</option>
+                    <option value="q3" {% if request.GET.period == 'q3' %}selected{% endif %}>Q3 2024</option>
+                    <option value="q4" {% if request.GET.period == 'q4' %}selected{% endif %}>Q4 2024</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="rating" class="form-label">Rating</label>
+                <select class="form-select" id="rating" name="rating">
+                    <option value="">All Ratings</option>
+                    <option value="5" {% if request.GET.rating == '5' %}selected{% endif %}>5 - Excellent</option>
+                    <option value="4" {% if request.GET.rating == '4' %}selected{% endif %}>4 - Good</option>
+                    <option value="3" {% if request.GET.rating == '3' %}selected{% endif %}>3 - Average</option>
+                    <option value="2" {% if request.GET.rating == '2' %}selected{% endif %}>2 - Below Average</option>
+                    <option value="1" {% if request.GET.rating == '1' %}selected{% endif %}>1 - Poor</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                    <a href="{% url 'hrms:performance_reviews' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-refresh"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Review Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="text-primary">{{ total_reviews }}</h5>
+                <p class="mb-0 text-muted">Total Reviews</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="text-warning">{{ pending_reviews }}</h5>
+                <p class="mb-0 text-muted">Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="text-success">{{ completed_reviews }}</h5>
+                <p class="mb-0 text-muted">Completed</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="text-info">{{ average_rating|floatformat:1 }}</h5>
+                <p class="mb-0 text-muted">Average Rating</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reviews Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Performance Reviews</h5>
+        <div class="btn-group btn-group-sm" role="group">
+            <input type="radio" class="btn-check" name="view" id="viewTable" checked>
+            <label class="btn btn-outline-primary" for="viewTable">
+                <i class="fas fa-table"></i> Table
+            </label>
+            
+            <input type="radio" class="btn-check" name="view" id="viewCards">
+            <label class="btn btn-outline-primary" for="viewCards">
+                <i class="fas fa-th"></i> Cards
+            </label>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <!-- Table View -->
+        <div id="tableView" class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Employee</th>
+                        <th>Reviewer</th>
+                        <th>Review Period</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Rating</th>
+                        <th>Due Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if reviews %}
+                        {% for review in reviews %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if review.employee.profile.photo %}
+                                    <img src="{{ review.employee.profile.photo.url }}" alt="{{ review.employee.get_full_name }}" 
+                                         class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                         style="width: 32px; height: 32px;">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold">{{ review.employee.get_full_name }}</div>
+                                        <small class="text-muted">{{ review.employee.profile.position.title|default:"Employee" }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <div class="fw-bold">{{ review.reviewer.get_full_name }}</div>
+                                    <small class="text-muted">{{ review.reviewer.profile.position.title|default:"Manager" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">{{ review.review_period }}</span>
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if review.review_type == 'annual' %}bg-primary
+                                    {% elif review.review_type == 'quarterly' %}bg-info
+                                    {% elif review.review_type == '360' %}bg-warning
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ review.get_review_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if review.status == 'completed' %}bg-success
+                                    {% elif review.status == 'in_progress' %}bg-warning
+                                    {% elif review.status == 'overdue' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ review.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if review.overall_rating %}
+                                <div class="d-flex align-items-center">
+                                    <span class="fw-bold me-1">{{ review.overall_rating }}</span>
+                                    <div class="text-warning">
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= review.overall_rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if review.due_date %}
+                                <div class="{% if review.status == 'overdue' %}text-danger{% elif review.due_date|timeuntil == '0 minutes' %}text-warning{% endif %}">
+                                    {{ review.due_date|date:"M d, Y" }}
+                                    {% if review.due_date|timeuntil != '0 minutes' %}
+                                    <br><small class="text-muted">{{ review.due_date|timeuntil }} left</small>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{% url 'hrms:performance_review_detail' review.pk %}" 
+                                       class="btn btn-outline-primary" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if review.status != 'completed' and user.is_staff %}
+                                    <a href="{% url 'hrms:performance_review_edit' review.pk %}" 
+                                       class="btn btn-outline-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% endif %}
+                                    {% if review.status == 'completed' %}
+                                    <a href="{% url 'hrms:performance_review_pdf' review.pk %}" 
+                                       class="btn btn-outline-success" title="Download PDF">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <i class="fas fa-clipboard fa-3x text-muted mb-3"></i>
+                                <h5>No Performance Reviews Found</h5>
+                                <p class="text-muted">
+                                    {% if request.GET.search or request.GET.status or request.GET.period %}
+                                        No reviews match your search criteria.
+                                    {% else %}
+                                        No performance reviews have been created yet.
+                                    {% endif %}
+                                </p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Cards View (Initially Hidden) -->
+        <div id="cardsView" class="p-4" style="display: none;">
+            <div class="row">
+                {% for review in reviews %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="d-flex align-items-center">
+                                    {% if review.employee.profile.photo %}
+                                    <img src="{{ review.employee.profile.photo.url }}" alt="{{ review.employee.get_full_name }}" 
+                                         class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                         style="width: 50px; height: 50px;">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="mb-0">{{ review.employee.get_full_name }}</h6>
+                                        <small class="text-muted">{{ review.employee.profile.position.title|default:"Employee" }}</small>
+                                    </div>
+                                </div>
+                                <span class="badge 
+                                    {% if review.status == 'completed' %}bg-success
+                                    {% elif review.status == 'in_progress' %}bg-warning
+                                    {% elif review.status == 'overdue' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ review.get_status_display }}
+                                </span>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted">Reviewer:</small>
+                                    <div class="fw-bold">{{ review.reviewer.get_full_name }}</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Period:</small>
+                                    <div class="fw-bold">{{ review.review_period }}</div>
+                                </div>
+                            </div>
+                            
+                            {% if review.overall_rating %}
+                            <div class="mb-3">
+                                <small class="text-muted">Overall Rating:</small>
+                                <div class="d-flex align-items-center">
+                                    <span class="fw-bold me-2">{{ review.overall_rating }}/5</span>
+                                    <div class="text-warning">
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= review.overall_rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'hrms:performance_review_detail' review.pk %}" 
+                                   class="btn btn-outline-primary btn-sm flex-grow-1">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                                {% if review.status == 'completed' %}
+                                <a href="{% url 'hrms:performance_review_pdf' review.pk %}" 
+                                   class="btn btn-success btn-sm">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if review.due_date %}
+                        <div class="card-footer">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> Due: {{ review.due_date|date:"M d, Y" }}
+                                {% if review.due_date|timeuntil != '0 minutes' %}
+                                ({{ review.due_date|timeuntil }} left)
+                                {% endif %}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if reviews.has_other_pages %}
+<nav aria-label="Reviews pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if reviews.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ reviews.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.period %}&period={{ request.GET.period }}{% endif %}{% if request.GET.rating %}&rating={{ request.GET.rating }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </a>
+            </li>
+        {% endif %}
+        
+        {% for num in reviews.paginator.page_range %}
+            {% if reviews.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > reviews.number|add:'-3' and num < reviews.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.period %}&period={{ request.GET.period }}{% endif %}{% if request.GET.rating %}&rating={{ request.GET.rating }}{% endif %}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if reviews.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ reviews.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.period %}&period={{ request.GET.period }}{% endif %}{% if request.GET.rating %}&rating={{ request.GET.rating }}{% endif %}">
+                    Next <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // View Toggle
+    const viewTable = document.getElementById('viewTable');
+    const viewCards = document.getElementById('viewCards');
+    const tableView = document.getElementById('tableView');
+    const cardsView = document.getElementById('cardsView');
+    
+    viewTable.addEventListener('change', function() {
+        if (this.checked) {
+            tableView.style.display = 'block';
+            cardsView.style.display = 'none';
+        }
+    });
+    
+    viewCards.addEventListener('change', function() {
+        if (this.checked) {
+            tableView.style.display = 'none';
+            cardsView.style.display = 'block';
+        }
+    });
+});
+</script>
+{% endblock %}

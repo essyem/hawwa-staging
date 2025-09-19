@@ -1,0 +1,429 @@
+{% extends 'hrms_base.html' %}
+{% load i18n %}
+
+{% block title %}My Attendance Log{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h1>My Attendance Log</h1>
+
+    <p>Total records: {{ total_records|default:0 }}</p>
+    <p>Present days: {{ present_days|default:0 }}</p>
+    <p>Attendance %: {{ attendance_percentage|default:0 }}%</p>
+
+    <form method="get" class="filters">
+      <label for="date_from">From</label>
+      <input type="date" name="date_from" id="date_from" value="{{ date_from }}">
+      <label for="date_to">To</label>
+      <input type="date" name="date_to" id="date_to" value="{{ date_to }}">
+      <label for="status">Status</label>
+      <select name="status" id="status">
+        <option value="">All</option>
+        <option value="present" {% if status_filter=='present' %}selected{% endif %}>Present</option>
+        <option value="late" {% if status_filter=='late' %}selected{% endif %}>Late</option>
+        <option value="absent" {% if status_filter=='absent' %}selected{% endif %}>Absent</option>
+      </select>
+      <button type="submit">Filter</button>
+    </form>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Check In</th>
+          <th>Check Out</th>
+          <th>Hours</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in attendance_records %}
+        <tr>
+          <td>{{ a.date }}</td>
+          <td>{{ a.check_in|default:'-' }}</td>
+          <td>{{ a.check_out|default:'-' }}</td>
+          <td>{{ a.hours_worked|default:'0.00' }}</td>
+          <td>{{ a.get_status_display }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No attendance records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if is_paginated %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
+{% extends 'base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block title %}My Attendance Log - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .attendance-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #8D1538, #A91E47);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .attendance-table {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+    
+    .table th {
+        background: linear-gradient(45deg, #8D1538, #A91E47);
+        color: white;
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+    }
+    
+    .table td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-color: #f0f0f0;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .status-present {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-late {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-absent {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-pending {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .time-display {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .hours-worked {
+        background: #e3f2fd;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-weight: 600;
+        color: #1976d2;
+    }
+    
+    .filter-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-clock"></i> My Attendance Log</h1>
+                <div>
+                    <a href="{% url 'hrms:user_attendance' %}" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Clock In/Out
+                    </a>
+                    <a href="{% url 'hrms:attendance_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_records }}</div>
+                <div class="stat-label">Total Records</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ present_days }}</div>
+                <div class="stat-label">Present Days</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ late_days }}</div>
+                <div class="stat-label">Late Days</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ attendance_percentage }}%</div>
+                <div class="stat-label">Attendance Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Info -->
+    {% if employee %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="attendance-card">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h4><i class="fas fa-user"></i> {{ employee.user.first_name }} {{ employee.user.last_name }}</h4>
+                        <p class="mb-0">
+                            <strong>Employee ID:</strong> {{ employee.employee_id }} |
+                            <strong>Department:</strong> {{ employee.department.name|default:"Not Assigned" }} |
+                            <strong>Position:</strong> {{ employee.position.title|default:"Not Assigned" }}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-outline-primary" onclick="window.print()">
+                            <i class="fas fa-print"></i> Print Log
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Filter Options -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-card">
+                <form method="get" class="row align-items-center">
+                    <div class="col-md-3">
+                        <label>From Date:</label>
+                        <input type="date" name="from_date" class="form-control" value="{{ request.GET.from_date }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label>To Date:</label>
+                        <input type="date" name="to_date" class="form-control" value="{{ request.GET.to_date }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label>Status:</label>
+                        <select name="status" class="form-control">
+                            <option value="">All Status</option>
+                            <option value="present" {% if request.GET.status == 'present' %}selected{% endif %}>Present</option>
+                            <option value="late" {% if request.GET.status == 'late' %}selected{% endif %}>Late</option>
+                            <option value="absent" {% if request.GET.status == 'absent' %}selected{% endif %}>Absent</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label>&nbsp;</label><br>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                        <a href="{% url 'hrms:my_attendance_log' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Records Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="attendance-table">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-calendar"></i> Date</th>
+                            <th><i class="fas fa-sign-in-alt"></i> Check In</th>
+                            <th><i class="fas fa-sign-out-alt"></i> Check Out</th>
+                            <th><i class="fas fa-clock"></i> Hours Worked</th>
+                            <th><i class="fas fa-info-circle"></i> Status</th>
+                            <th><i class="fas fa-map-marker-alt"></i> Location</th>
+                            <th><i class="fas fa-cog"></i> Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in attendance_records %}
+                        <tr>
+                            <td class="fw-bold">
+                                {{ record.date|date:"M d, Y" }}<br>
+                                <small class="text-muted">{{ record.date|date:"l" }}</small>
+                            </td>
+                            <td>
+                                {% if record.check_in %}
+                                    <span class="time-display">{{ record.check_in|time:"H:i" }}</span>
+                                {% else %}
+                                    <span class="text-muted">--:--</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if record.check_out %}
+                                    <span class="time-display">{{ record.check_out|time:"H:i" }}</span>
+                                {% else %}
+                                    <span class="text-muted">--:--</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if record.hours_worked %}
+                                    <span class="hours-worked">{{ record.hours_worked }} hrs</span>
+                                {% else %}
+                                    <span class="text-muted">0.0 hrs</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ record.status }}">
+                                    {% if record.status == 'present' %}
+                                        <i class="fas fa-check"></i> Present
+                                    {% elif record.status == 'late' %}
+                                        <i class="fas fa-clock"></i> Late
+                                    {% elif record.status == 'absent' %}
+                                        <i class="fas fa-times"></i> Absent
+                                    {% else %}
+                                        <i class="fas fa-question"></i> {{ record.status|title }}
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% if record.is_remote %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-home"></i> Remote
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-building"></i> Office
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if record.check_in and record.check_out %}
+                                    <span class="badge bg-success">Complete</span>
+                                {% elif record.check_in %}
+                                    <span class="badge bg-warning">Ongoing</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">No Data</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No attendance records found</h5>
+                                <p class="text-muted">Start tracking your attendance by using the clock in/out feature.</p>
+                                <a href="{% url 'hrms:user_attendance' %}" class="btn btn-primary">
+                                    <i class="fas fa-play"></i> Start Attendance Tracking
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Attendance log pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">&laquo; First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-submit form on date change
+        const dateInputs = document.querySelectorAll('input[type="date"], select[name="status"]');
+        dateInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                // Auto-submit could be enabled here if desired
+                // this.form.submit();
+            });
+        });
+    });
+</script>
+{% endblock %}
