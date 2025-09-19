@@ -402,3 +402,82 @@ class Expense(models.Model):
         self.is_paid = True
         self.payment_date = timezone.now().date()
         self.save()
+
+
+class Budget(models.Model):
+    """Budget header representing a budget period and owner."""
+    name = models.CharField("Budget Name", max_length=200)
+    start_date = models.DateField("Start Date")
+    end_date = models.DateField("End Date")
+    currency = models.CharField("Currency", max_length=10, default='QAR')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                   null=True, blank=True, related_name='budgets_created')
+    created_at = models.DateTimeField("Created At", auto_now_add=True)
+    updated_at = models.DateTimeField("Updated At", auto_now=True)
+
+    class Meta:
+        verbose_name = "Budget"
+        verbose_name_plural = "Budgets"
+        ordering = ['-start_date']
+
+    def __str__(self):
+        return f"{self.name} ({self.start_date} - {self.end_date})"
+
+    def total_allocated(self):
+        return self.lines.aggregate(total=models.Sum('amount'))['total'] or 0
+
+    def total_spent(self):
+        # Sum expenses and invoice items that fall within budget period
+        expense_sum = Expense.objects.filter(
+            expense_date__gte=self.start_date,
+            expense_date__lte=self.end_date
+        ).aggregate(total=models.Sum('amount'))['total'] or 0
+
+        # InvoiceItem total_amount via related Invoice date
+        invoice_sum = InvoiceItem.objects.filter(
+            invoice__invoice_date__gte=self.start_date,
+            invoice__invoice_date__lte=self.end_date
+        ).aggregate(total=models.Sum('total_amount'))['total'] or 0
+
+        return expense_sum + invoice_sum
+
+    def remaining(self):
+        return (self.total_allocated() or 0) - (self.total_spent() or 0)
+
+
+class BudgetLine(models.Model):
+    """Individual budget line tied to a Budget and optionally a category."""
+    budget = models.ForeignKey(Budget, on_delete=models.CASCADE, related_name='lines')
+    name = models.CharField("Line Name", max_length=200)
+    category = models.ForeignKey(AccountingCategory, on_delete=models.SET_NULL,
+                                 null=True, blank=True, related_name='budget_lines')
+    amount = models.DecimalField("Amount", max_digits=12, decimal_places=2)
+    notes = models.TextField("Notes", blank=True)
+    created_at = models.DateTimeField("Created At", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Budget Line"
+        verbose_name_plural = "Budget Lines"
+        ordering = ['-amount']
+
+    def __str__(self):
+        return f"{self.name} - {self.amount} {self.budget.currency}"
+
+    def spent(self):
+        """Calculate spent amount for this line by category within budget period."""
+        if not self.category:
+            return 0
+
+        expense_sum = Expense.objects.filter(
+            category=self.category,
+            expense_date__gte=self.budget.start_date,
+            expense_date__lte=self.budget.end_date
+        ).aggregate(total=models.Sum('amount'))['total'] or 0
+
+        invoice_sum = InvoiceItem.objects.filter(
+            category=self.category,
+            invoice__invoice_date__gte=self.budget.start_date,
+            invoice__invoice_date__lte=self.budget.end_date
+        ).aggregate(total=models.Sum('total_amount'))['total'] or 0
+
+        return expense_sum + invoice_sum

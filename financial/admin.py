@@ -12,6 +12,7 @@ from .models import (
     AccountingCategory, TaxRate, Invoice, InvoiceItem, 
     Payment, Expense
 )
+from .models import Budget, BudgetLine
 
 # Custom admin actions
 @admin.action(description='Mark selected invoices as sent')
@@ -353,3 +354,45 @@ class ExpenseAdmin(admin.ModelAdmin):
         if not change:  # Only set on creation
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
+
+
+@admin.register(Budget)
+class BudgetAdmin(admin.ModelAdmin):
+    list_display = ('name', 'start_date', 'end_date', 'currency', 'total_allocated_display', 'total_spent_display', 'remaining_display')
+    list_filter = ('start_date', 'end_date')
+    search_fields = ('name',)
+    readonly_fields = ('created_at', 'updated_at')
+    inlines = []
+
+    def total_allocated_display(self, obj):
+        return format_html('<strong>{}</strong>', f'{obj.total_allocated():.2f}')
+    total_allocated_display.short_description = 'Allocated'
+
+    def total_spent_display(self, obj):
+        return format_html('<strong>QAR {}</strong>', f'{obj.total_spent():.2f}')
+    total_spent_display.short_description = 'Spent'
+
+    def remaining_display(self, obj):
+        rem = obj.remaining() or 0
+        color = 'green' if rem >= 0 else 'red'
+        return format_html('<span style="color: {};">{:.2f}</span>', color, rem)
+    remaining_display.short_description = 'Remaining'
+
+
+class BudgetLineInline(admin.TabularInline):
+    model = BudgetLine
+    extra = 1
+    fields = ('name', 'category', 'amount', 'spent_display')
+    readonly_fields = ('spent_display',)
+
+    def spent_display(self, obj):
+        return f"{obj.spent():.2f}"
+    spent_display.short_description = 'Spent'
+
+
+@admin.register(BudgetLine)
+class BudgetLineAdmin(admin.ModelAdmin):
+    list_display = ('name', 'budget', 'category', 'amount', 'spent')
+    list_filter = ('budget', 'category')
+    search_fields = ('name',)
+    readonly_fields = ('created_at',)
