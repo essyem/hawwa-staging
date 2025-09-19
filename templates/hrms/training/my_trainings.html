@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Trainings - HRMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-user-graduate"></i> My Trainings</h1>
+    <a href="{% url 'hrms:training_programs' %}" class="btn btn-primary">
+        <i class="fas fa-search"></i> Browse Programs
+    </a>
+</div>
+
+<!-- Training Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Total Enrollments</h5>
+                        <h3>{{ total_enrollments }}</h3>
+                    </div>
+                    <i class="fas fa-user-graduate fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Completed</h5>
+                        <h3>{{ completed_count }}</h3>
+                    </div>
+                    <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">In Progress</h5>
+                        <h3>{{ in_progress_count }}</h3>
+                    </div>
+                    <i class="fas fa-spinner fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Total Hours</h5>
+                        <h3>{{ total_hours }}</h3>
+                    </div>
+                    <i class="fas fa-clock fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Tabs -->
+<ul class="nav nav-tabs mb-4" id="trainingTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" 
+                type="button" role="tab" aria-controls="all" aria-selected="true">
+            <i class="fas fa-list"></i> All Trainings
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" 
+                type="button" role="tab" aria-controls="upcoming" aria-selected="false">
+            <i class="fas fa-calendar-plus"></i> Upcoming
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="in-progress-tab" data-bs-toggle="tab" data-bs-target="#in-progress" 
+                type="button" role="tab" aria-controls="in-progress" aria-selected="false">
+            <i class="fas fa-play"></i> In Progress
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" 
+                type="button" role="tab" aria-controls="completed" aria-selected="false">
+            <i class="fas fa-check"></i> Completed
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="trainingTabsContent">
+    <!-- All Trainings -->
+    <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+        {% if enrollments %}
+            <div class="row">
+                {% for enrollment in enrollments %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title">{{ enrollment.session.program.title }}</h5>
+                                <span class="badge 
+                                    {% if enrollment.completion_status == 'completed' %}bg-success
+                                    {% elif enrollment.completion_status == 'in_progress' %}bg-warning
+                                    {% elif enrollment.completion_status == 'upcoming' %}bg-info
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ enrollment.get_completion_status_display }}
+                                </span>
+                            </div>
+                            
+                            <p class="card-text text-muted">{{ enrollment.session.program.description|truncatewords:15 }}</p>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar"></i> 
+                                    {{ enrollment.session.start_date|date:"M d, Y" }}
+                                    <span class="ms-2">
+                                        <i class="fas fa-clock"></i> 
+                                        {{ enrollment.session.start_date|time:"g:i A" }}
+                                    </span>
+                                </small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt"></i> 
+                                    {{ enrollment.session.location|default:"Online" }}
+                                    <span class="ms-2">
+                                        <i class="fas fa-user"></i> 
+                                        {{ enrollment.session.trainer_name }}
+                                    </span>
+                                </small>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            {% if enrollment.completion_status != 'upcoming' %}
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small class="fw-bold">Progress</small>
+                                    <small>
+                                        {% if enrollment.completion_status == 'completed' %}100%
+                                        {% elif enrollment.completion_status == 'in_progress' %}{{ enrollment.progress_percentage|default:50 }}%
+                                        {% else %}0%{% endif %}
+                                    </small>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar 
+                                        {% if enrollment.completion_status == 'completed' %}bg-success
+                                        {% elif enrollment.completion_status == 'in_progress' %}bg-warning
+                                        {% else %}bg-secondary{% endif %}" 
+                                        style="width: {% if enrollment.completion_status == 'completed' %}100{% elif enrollment.completion_status == 'in_progress' %}{{ enrollment.progress_percentage|default:50 }}{% else %}0{% endif %}%">
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="d-flex gap-2 mt-auto">
+                                <a href="{% url 'hrms:training_program_detail' enrollment.session.program.pk %}" 
+                                   class="btn btn-outline-primary btn-sm flex-grow-1">
+                                    <i class="fas fa-eye"></i> View Program
+                                </a>
+                                {% if enrollment.completion_status == 'completed' and enrollment.certificate %}
+                                <a href="{{ enrollment.certificate.url }}" target="_blank" 
+                                   class="btn btn-success btn-sm">
+                                    <i class="fas fa-certificate"></i> Certificate
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if enrollment.enrolled_at %}
+                        <div class="card-footer">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-plus"></i> Enrolled: {{ enrollment.enrolled_at|date:"M d, Y" }}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-graduation-cap fa-4x text-muted mb-3"></i>
+                    <h4>No Training Enrollments</h4>
+                    <p class="text-muted">You haven't enrolled in any training programs yet.</p>
+                    <a href="{% url 'hrms:training_programs' %}" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Browse Training Programs
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Upcoming Trainings -->
+    <div class="tab-pane fade" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
+        {% with upcoming_enrollments as filtered_enrollments %}
+            {% include 'hrms/training/enrollment_cards.html' %}
+        {% endwith %}
+    </div>
+    
+    <!-- In Progress Trainings -->
+    <div class="tab-pane fade" id="in-progress" role="tabpanel" aria-labelledby="in-progress-tab">
+        {% with in_progress_enrollments as filtered_enrollments %}
+            {% include 'hrms/training/enrollment_cards.html' %}
+        {% endwith %}
+    </div>
+    
+    <!-- Completed Trainings -->
+    <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+        {% with completed_enrollments as filtered_enrollments %}
+            {% include 'hrms/training/enrollment_cards.html' %}
+        {% endwith %}
+    </div>
+</div>
+
+<!-- Certificates Section -->
+{% if certificates %}
+<div class="card mt-5">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-certificate"></i> My Certificates</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for certificate in certificates %}
+            <div class="col-md-4 mb-3">
+                <div class="card border-warning">
+                    <div class="card-body text-center">
+                        <i class="fas fa-award fa-3x text-warning mb-3"></i>
+                        <h6 class="card-title">{{ certificate.program_title }}</h6>
+                        <p class="card-text text-muted">{{ certificate.completion_date|date:"M d, Y" }}</p>
+                        <a href="{{ certificate.file.url }}" target="_blank" class="btn btn-warning btn-sm">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh progress for in-progress trainings
+    setInterval(function() {
+        // You can add AJAX calls here to update progress bars
+    }, 30000); // Every 30 seconds
+});
+</script>
+{% endblock %}

@@ -1,0 +1,575 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Attendance List - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .attendance-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .attendance-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .status-present { background-color: #d4edda; color: #155724; }
+    .status-absent { background-color: #f8d7da; color: #721c24; }
+    .status-late { background-color: #fff3cd; color: #856404; }
+    .status-partial { background-color: #d1ecf1; color: #0c5460; }
+    
+    .time-display {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        background-color: #f8f9fa;
+        padding: 4px 8px;
+        border-radius: 4px;
+    }
+    
+    .employee-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        font-size: 14px;
+    }
+    
+    .filter-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-list text-primary"></i> Attendance List
+                    </h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'hrms:dashboard' %}">HRMS</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'hrms:attendance_dashboard' %}">Attendance</a></li>
+                            <li class="breadcrumb-item active">Attendance List</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="btn-group">
+                    <a href="{% url 'hrms:attendance_dashboard' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="{% url 'hrms:attendance_report' %}" class="btn btn-outline-success">
+                        <i class="fas fa-chart-bar"></i> Reports
+                    </a>
+                    {% if user.is_staff %}
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bulkActionModal">
+                        <i class="fas fa-tasks"></i> Bulk Actions
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="p-4">
+            <h5 class="mb-3">
+                <i class="fas fa-filter"></i> Filter Attendance Records
+            </h5>
+            <form method="get" id="filterForm">
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" name="date" id="date" class="form-control" 
+                               value="{{ request.GET.date|default:today }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="status" class="form-label">Status</label>
+                        <select name="status" id="status" class="form-select">
+                            <option value="">All Status</option>
+                            <option value="present" {% if request.GET.status == 'present' %}selected{% endif %}>Present</option>
+                            <option value="absent" {% if request.GET.status == 'absent' %}selected{% endif %}>Absent</option>
+                            <option value="late" {% if request.GET.status == 'late' %}selected{% endif %}>Late</option>
+                            <option value="partial" {% if request.GET.status == 'partial' %}selected{% endif %}>Partial Day</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="department" class="form-label">Department</label>
+                        <select name="department" id="department" class="form-select">
+                            <option value="">All Departments</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.id }}" {% if request.GET.department == dept.id|stringformat:"s" %}selected{% endif %}>
+                                {{ dept.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="search" class="form-label">Search Employee</label>
+                        <input type="text" name="search" id="search" class="form-control" 
+                               placeholder="Name or Employee ID" value="{{ request.GET.search }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-light">
+                                <i class="fas fa-search"></i> Filter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <a href="{% url 'hrms:attendance_list' %}" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-refresh"></i> Clear All Filters
+                        </a>
+                        <span class="ms-3 text-light">
+                            <i class="fas fa-info-circle"></i>
+                            Showing {{ attendance_records|length }} of {{ total_count }} records
+                        </span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    {% if attendance_stats %}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card attendance-card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <h4>{{ attendance_stats.present_count }}</h4>
+                    <p class="mb-0">Present Today</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card attendance-card bg-danger text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-times-circle fa-2x mb-2"></i>
+                    <h4>{{ attendance_stats.absent_count }}</h4>
+                    <p class="mb-0">Absent Today</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card attendance-card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x mb-2"></i>
+                    <h4>{{ attendance_stats.late_count }}</h4>
+                    <p class="mb-0">Late Arrivals</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card attendance-card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-2x mb-2"></i>
+                    <h4>{{ attendance_stats.attendance_rate|floatformat:1 }}%</h4>
+                    <p class="mb-0">Attendance Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Attendance Records -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card attendance-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users"></i> 
+                        Attendance Records
+                        {% if filtered_date %}
+                        for {{ filtered_date|date:"F d, Y" }}
+                        {% endif %}
+                    </h5>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary" onclick="toggleView('table')">
+                            <i class="fas fa-table"></i> Table
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="toggleView('grid')">
+                            <i class="fas fa-th"></i> Grid
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if attendance_records %}
+                    
+                    <!-- Table View -->
+                    <div id="tableView" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    {% if user.is_staff %}
+                                    <th width="50">
+                                        <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                                    </th>
+                                    {% endif %}
+                                    <th>Employee</th>
+                                    <th>Department</th>
+                                    <th>Check In</th>
+                                    <th>Check Out</th>
+                                    <th>Total Hours</th>
+                                    <th>Status</th>
+                                    <th>Location</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in attendance_records %}
+                                <tr>
+                                    {% if user.is_staff %}
+                                    <td>
+                                        <input type="checkbox" name="selectedRecords" value="{{ record.id }}" class="record-checkbox">
+                                    </td>
+                                    {% endif %}
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="employee-avatar bg-primary me-2">
+                                                {{ record.employee.user.first_name|first }}{{ record.employee.user.last_name|first }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ record.employee.user.get_full_name }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ record.employee.employee_id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if record.employee.department %}
+                                        <span class="badge bg-secondary">{{ record.employee.department.name }}</span>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record.check_in_time %}
+                                        <span class="time-display">{{ record.check_in_time|time:"H:i" }}</span>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record.check_out_time %}
+                                        <span class="time-display">{{ record.check_out_time|time:"H:i" }}</span>
+                                        {% else %}
+                                        <span class="text-warning">
+                                            <i class="fas fa-clock"></i> Still working
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record.hours_worked %}
+                                        <strong>{{ record.hours_worked|floatformat:2 }}h</strong>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-{{ record.status|lower }}">
+                                            {% if record.status == 'present' %}
+                                            <i class="fas fa-check"></i>
+                                            {% elif record.status == 'absent' %}
+                                            <i class="fas fa-times"></i>
+                                            {% elif record.status == 'late' %}
+                                            <i class="fas fa-clock"></i>
+                                            {% elif record.status == 'partial' %}
+                                            <i class="fas fa-clock"></i>
+                                            {% endif %}
+                                            {{ record.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if record.office_location %}
+                                        <small class="text-muted">
+                                            <i class="fas fa-building"></i> {{ record.office_location.office_name }}
+                                        </small>
+                                        {% elif record.check_in_location %}
+                                        <small class="text-muted">
+                                            <i class="fas fa-map-marker-alt"></i> Remote
+                                        </small>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="#" class="btn btn-outline-primary" 
+                                               data-bs-toggle="tooltip" title="View Details"
+                                               onclick="viewDetails({{ record.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if user.is_staff %}
+                                            <a href="#" class="btn btn-outline-warning" 
+                                               data-bs-toggle="tooltip" title="Edit Record"
+                                               onclick="editRecord({{ record.id }})">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Grid View (Initially Hidden) -->
+                    <div id="gridView" class="row" style="display: none;">
+                        {% for record in attendance_records %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card attendance-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="employee-avatar bg-primary me-3">
+                                            {{ record.employee.user.first_name|first }}{{ record.employee.user.last_name|first }}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ record.employee.user.get_full_name }}</h6>
+                                            <small class="text-muted">{{ record.employee.employee_id }}</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label small text-muted">Check In</label>
+                                            <div class="time-display">
+                                                {% if record.check_in_time %}
+                                                {{ record.check_in_time|time:"H:i" }}
+                                                {% else %}
+                                                -
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small text-muted">Check Out</label>
+                                            <div class="time-display">
+                                                {% if record.check_out_time %}
+                                                {{ record.check_out_time|time:"H:i" }}
+                                                {% else %}
+                                                Working
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="status-badge status-{{ record.status|lower }}">
+                                            {{ record.get_status_display }}
+                                        </span>
+                                        {% if record.hours_worked %}
+                                        <small class="text-muted">{{ record.hours_worked|floatformat:2 }}h</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                    <nav aria-label="Attendance list pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}">Last</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Attendance Records Found</h5>
+                        <p class="text-muted">
+                            No attendance records match your current filter criteria.
+                            <br>Try adjusting the filters or selecting a different date.
+                        </p>
+                        <div class="mt-3">
+                            <a href="{% url 'hrms:attendance_list' %}" class="btn btn-primary me-2">
+                                <i class="fas fa-refresh"></i> Clear Filters
+                            </a>
+                            <a href="{% url 'hrms:attendance_dashboard' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-tachometer-alt"></i> View Dashboard
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Action Modal -->
+{% if user.is_staff %}
+<div class="modal fade" id="bulkActionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bulk Actions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Select records from the table and choose an action:</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="bulkExport()">
+                        <i class="fas fa-download"></i> Export Selected Records
+                    </button>
+                    <button class="btn btn-warning" onclick="bulkEdit()">
+                        <i class="fas fa-edit"></i> Bulk Edit Status
+                    </button>
+                    <button class="btn btn-danger" onclick="bulkDelete()">
+                        <i class="fas fa-trash"></i> Delete Selected Records
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// View toggle functionality
+function toggleView(viewType) {
+    const tableView = document.getElementById('tableView');
+    const gridView = document.getElementById('gridView');
+    
+    if (viewType === 'table') {
+        tableView.style.display = 'block';
+        gridView.style.display = 'none';
+    } else {
+        tableView.style.display = 'none';
+        gridView.style.display = 'block';
+    }
+}
+
+// Select all functionality
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.record-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+}
+
+// Bulk actions
+function bulkExport() {
+    const selected = getSelectedRecords();
+    if (selected.length === 0) {
+        alert('Please select at least one record.');
+        return;
+    }
+    
+    const params = new URLSearchParams();
+    selected.forEach(id => params.append('ids', id));
+    params.append('export', 'excel');
+    
+    window.open('{% url "hrms:attendance_list" %}?' + params.toString(), '_blank');
+}
+
+function bulkEdit() {
+    const selected = getSelectedRecords();
+    if (selected.length === 0) {
+        alert('Please select at least one record.');
+        return;
+    }
+    
+    // Implement bulk edit functionality
+    console.log('Bulk edit for records:', selected);
+}
+
+function bulkDelete() {
+    const selected = getSelectedRecords();
+    if (selected.length === 0) {
+        alert('Please select at least one record.');
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to delete ${selected.length} records?`)) {
+        // Implement bulk delete functionality
+        console.log('Bulk delete for records:', selected);
+    }
+}
+
+function getSelectedRecords() {
+    const checkboxes = document.querySelectorAll('.record-checkbox:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+// View and edit functions
+function viewDetails(recordId) {
+    // Implement view details functionality
+    console.log('View details for record:', recordId);
+}
+
+function editRecord(recordId) {
+    // Implement edit record functionality
+    console.log('Edit record:', recordId);
+}
+
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

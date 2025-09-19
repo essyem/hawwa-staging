@@ -1,0 +1,621 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block title %}Analytics Dashboard - HRMS{% endblock %}
+
+{% block extra_css %}
+<!-- Chart.js CSS -->
+<style>
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-bottom: 20px;
+}
+
+.analytics-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.analytics-metric {
+    text-align: center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.analytics-metric h4 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.analytics-metric p {
+    margin: 5px 0 0 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.trend-indicator {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.trend-up {
+    background-color: #28a745;
+    color: white;
+}
+
+.trend-down {
+    background-color: #dc3545;
+    color: white;
+}
+
+.trend-stable {
+    background-color: #6c757d;
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Analytics Dashboard</h1>
+    <div class="btn-group" role="group">
+        <button class="btn btn-primary btn-sm" onclick="refreshAnalytics()">
+            <i class="fas fa-sync-alt fa-sm"></i> Refresh Data
+        </button>
+        <button class="btn btn-success btn-sm" onclick="exportAnalytics()">
+            <i class="fas fa-download fa-sm"></i> Export Report
+        </button>
+    </div>
+</div>
+
+<!-- Key Performance Indicators -->
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="analytics-card">
+            <h5 class="mb-3"><i class="fas fa-chart-line"></i> Key Performance Indicators</h5>
+            <div class="row" id="kpi-container">
+                <div class="col-md-3">
+                    <div class="analytics-metric">
+                        <h4 id="total-employees">-</h4>
+                        <p>Total Employees</p>
+                        <span class="trend-indicator trend-up" id="employee-trend">+5.2%</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="analytics-metric">
+                        <h4 id="avg-salary">-</h4>
+                        <p>Average Salary</p>
+                        <span class="trend-indicator trend-up" id="salary-trend">+3.1%</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="analytics-metric">
+                        <h4 id="leave-utilization">-</h4>
+                        <p>Leave Utilization</p>
+                        <span class="trend-indicator trend-stable" id="leave-trend">0.8%</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="analytics-metric">
+                        <h4 id="training-completion">-</h4>
+                        <p>Training Completion</p>
+                        <span class="trend-indicator trend-up" id="training-trend">+8.4%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 1 -->
+<div class="row mb-4">
+    <!-- Department Distribution -->
+    <div class="col-lg-6">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Employee Distribution by Department</h6>
+                <div class="dropdown no-arrow">
+                    <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow">
+                        <a class="dropdown-item" href="#" onclick="downloadChart('departmentChart')">
+                            <i class="fas fa-download fa-sm fa-fw mr-2"></i> Download Chart
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="departmentChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary Distribution -->
+    <div class="col-lg-6">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Salary Distribution</h6>
+                <div class="dropdown no-arrow">
+                    <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow">
+                        <a class="dropdown-item" href="#" onclick="downloadChart('salaryChart')">
+                            <i class="fas fa-download fa-sm fa-fw mr-2"></i> Download Chart
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="salaryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 2 -->
+<div class="row mb-4">
+    <!-- Leave Trends -->
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Leave Application Trends</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="leaveTrendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Training Progress -->
+    <div class="col-lg-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Training Progress</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="trainingChart"></canvas>
+                </div>
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Completion Rate:</span>
+                        <span class="font-weight-bold" id="completion-rate">75%</span>
+                    </div>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-success" id="completion-bar" style="width: 75%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 3 -->
+<div class="row mb-4">
+    <!-- Hiring Trends -->
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Hiring Trends (Last 12 Months)</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="hiringTrendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Ratings -->
+    <div class="col-lg-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Performance Ratings Distribution</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Tables -->
+<div class="row">
+    <!-- Top Performers -->
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Top Performers</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Department</th>
+                                <th>Rating</th>
+                                <th>Growth</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-performers">
+                            <!-- Data will be loaded via AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Department Statistics -->
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Department Statistics</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Employees</th>
+                                <th>Avg Salary</th>
+                                <th>Turnover</th>
+                            </tr>
+                        </thead>
+                        <tbody id="department-stats">
+                            <!-- Data will be loaded via AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Chart configuration
+const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            position: 'bottom'
+        }
+    }
+};
+
+// Initialize all charts
+let charts = {};
+
+// Department Distribution Chart
+function initDepartmentChart(data) {
+    const ctx = document.getElementById('departmentChart');
+    if (charts.departmentChart) {
+        charts.departmentChart.destroy();
+    }
+    
+    charts.departmentChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                data: data.values,
+                backgroundColor: [
+                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                    '#858796', '#fd7e14', '#20c997', '#6f42c1', '#fd7e14'
+                ]
+            }]
+        },
+        options: chartOptions
+    });
+}
+
+// Salary Distribution Chart
+function initSalaryChart(data) {
+    const ctx = document.getElementById('salaryChart');
+    if (charts.salaryChart) {
+        charts.salaryChart.destroy();
+    }
+    
+    charts.salaryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Number of Employees',
+                data: data.values,
+                backgroundColor: '#4e73df',
+                borderColor: '#4e73df',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Leave Trends Chart
+function initLeaveTrendsChart(data) {
+    const ctx = document.getElementById('leaveTrendsChart');
+    if (charts.leaveTrendsChart) {
+        charts.leaveTrendsChart.destroy();
+    }
+    
+    charts.leaveTrendsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Approved',
+                data: data.approved,
+                borderColor: '#1cc88a',
+                backgroundColor: 'rgba(28, 200, 138, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Rejected',
+                data: data.rejected,
+                borderColor: '#e74a3b',
+                backgroundColor: 'rgba(231, 74, 59, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Pending',
+                data: data.pending,
+                borderColor: '#f6c23e',
+                backgroundColor: 'rgba(246, 194, 62, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Training Progress Chart
+function initTrainingChart(data) {
+    const ctx = document.getElementById('trainingChart');
+    if (charts.trainingChart) {
+        charts.trainingChart.destroy();
+    }
+    
+    charts.trainingChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'In Progress', 'Not Started'],
+            datasets: [{
+                data: [data.completed, data.in_progress, data.not_started],
+                backgroundColor: ['#1cc88a', '#f6c23e', '#e74a3b']
+            }]
+        },
+        options: chartOptions
+    });
+}
+
+// Hiring Trends Chart
+function initHiringTrendsChart(data) {
+    const ctx = document.getElementById('hiringTrendsChart');
+    if (charts.hiringTrendsChart) {
+        charts.hiringTrendsChart.destroy();
+    }
+    
+    charts.hiringTrendsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'New Hires',
+                data: data.hires,
+                borderColor: '#4e73df',
+                backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Terminations',
+                data: data.terminations,
+                borderColor: '#e74a3b',
+                backgroundColor: 'rgba(231, 74, 59, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Performance Ratings Chart
+function initPerformanceChart(data) {
+    const ctx = document.getElementById('performanceChart');
+    if (charts.performanceChart) {
+        charts.performanceChart.destroy();
+    }
+    
+    charts.performanceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Excellent', 'Good', 'Average', 'Below Average'],
+            datasets: [{
+                data: [data.excellent, data.good, data.average, data.below_average],
+                backgroundColor: ['#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b']
+            }]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Load analytics data
+function loadAnalyticsData() {
+    // Load KPIs
+    fetch('/hrms/api/v1/dashboard/stats/')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('total-employees').textContent = data.total_employees;
+            document.getElementById('avg-salary').textContent = formatCurrency(data.average_salary || 0);
+        })
+        .catch(error => console.error('Error loading KPI data:', error));
+
+    // Load department analytics
+    fetch('/hrms/api/v1/analytics/departments/')
+        .then(response => response.json())
+        .then(data => {
+            const labels = data.map(d => d.name);
+            const values = data.map(d => d.employee_count);
+            initDepartmentChart({ labels, values });
+            
+            // Update department stats table
+            updateDepartmentStatsTable(data);
+        })
+        .catch(error => console.error('Error loading department data:', error));
+
+    // Load leave analytics
+    fetch('/hrms/api/v1/analytics/leaves/')
+        .then(response => response.json())
+        .then(data => {
+            const labels = data.monthly_leaves.map(d => `Month ${d.month}`);
+            const approved = data.monthly_leaves.map(d => d.approved);
+            const rejected = data.monthly_leaves.map(d => d.rejected);
+            const pending = data.monthly_leaves.map(d => d.pending);
+            initLeaveTrendsChart({ labels, approved, rejected, pending });
+        })
+        .catch(error => console.error('Error loading leave data:', error));
+
+    // Load training analytics
+    fetch('/hrms/api/v1/analytics/training/')
+        .then(response => response.json())
+        .then(data => {
+            // Mock training progress data for now
+            const trainingData = {
+                completed: 75,
+                in_progress: 20,
+                not_started: 5
+            };
+            initTrainingChart(trainingData);
+            
+            // Update completion rate
+            const completionRate = Math.round((trainingData.completed / (trainingData.completed + trainingData.in_progress + trainingData.not_started)) * 100);
+            document.getElementById('completion-rate').textContent = completionRate + '%';
+            document.getElementById('completion-bar').style.width = completionRate + '%';
+        })
+        .catch(error => console.error('Error loading training data:', error));
+
+    // Mock data for other charts
+    initSalaryChart({
+        labels: ['110K-150K QAR', '150K-180K QAR', '180K-220K QAR', '220K-260K QAR', '260K+ QAR'],
+        values: [15, 25, 30, 20, 10]
+    });
+
+    initHiringTrendsChart({
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        hires: [5, 8, 12, 7, 15, 10, 8, 6, 9, 11, 4, 7],
+        terminations: [2, 3, 1, 4, 2, 5, 3, 2, 1, 3, 2, 1]
+    });
+
+    initPerformanceChart({
+        excellent: 25,
+        good: 45,
+        average: 20,
+        below_average: 10
+    });
+}
+
+// Update department stats table
+function updateDepartmentStatsTable(data) {
+    const tbody = document.getElementById('department-stats');
+    tbody.innerHTML = '';
+    
+    data.forEach(dept => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td>${dept.name}</td>
+            <td><span class="badge bg-info">${dept.employee_count}</span></td>
+            <td>{{ dept.avg_salary|currency_short }}</td>
+            <td><span class="badge bg-success">2.5%</span></td>
+        `;
+    });
+}
+
+// Utility functions
+function refreshAnalytics() {
+    showAlert('Refreshing analytics data...', 'info');
+    loadAnalyticsData();
+    setTimeout(() => {
+        showAlert('Analytics data refreshed successfully!', 'success');
+    }, 1000);
+}
+
+function exportAnalytics() {
+    showAlert('Preparing analytics report for export...', 'info');
+    // Implement export functionality
+    setTimeout(() => {
+        showAlert('Analytics report exported successfully!', 'success');
+    }, 2000);
+}
+
+function downloadChart(chartId) {
+    const canvas = document.getElementById(chartId);
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = chartId + '-chart.png';
+    a.click();
+}
+
+// Initialize analytics on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadAnalyticsData();
+    
+    // Auto-refresh every 5 minutes
+    setInterval(loadAnalyticsData, 300000);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - HRMS{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'hrms/css/style.css' %}" rel="stylesheet">
+<style>
+    .form-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    .form-section .card-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        font-weight: 600;
+    }
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+    .help-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">{{ title }}</h1>
+            <p class="text-muted mb-0">Training Management</p>
+        </div>
+        <div>
+            <a href="{% url 'hrms:training_programs' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Programs
+            </a>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.title.id_for_label }}" class="form-label required-field">
+                                            Training Title
+                                        </label>
+                                        {{ form.title }}
+                                        {% if form.title.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.title.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="help-text">Enter the full title of the training program</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.code.id_for_label }}" class="form-label required-field">
+                                            Program Code
+                                        </label>
+                                        {{ form.code }}
+                                        {% if form.code.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.code.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="help-text">Unique identifier for the training program</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.category.id_for_label }}" class="form-label required-field">
+                                            Category
+                                        </label>
+                                        {{ form.category }}
+                                        {% if form.category.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.category.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.training_type.id_for_label }}" class="form-label">
+                                            Training Type
+                                        </label>
+                                        {{ form.training_type }}
+                                        {% if form.training_type.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.training_type.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">
+                                    Description
+                                </label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.description.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="help-text">Provide a detailed description of the training program</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Training Details -->
+                <div class="form-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Training Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="{{ form.objectives.id_for_label }}" class="form-label">
+                                    Learning Objectives
+                                </label>
+                                {{ form.objectives }}
+                                {% if form.objectives.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.objectives.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="help-text">What will participants learn from this training?</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.prerequisites.id_for_label }}" class="form-label">
+                                    Prerequisites
+                                </label>
+                                {{ form.prerequisites }}
+                                {% if form.prerequisites.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.prerequisites.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="help-text">Any requirements or prior knowledge needed</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.materials.id_for_label }}" class="form-label">
+                                    Training Materials
+                                </label>
+                                {{ form.materials }}
+                                {% if form.materials.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.materials.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="help-text">List of materials, resources, or tools needed</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Configuration -->
+                <div class="form-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Configuration</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="{{ form.duration_hours.id_for_label }}" class="form-label required-field">
+                                    Duration (Hours)
+                                </label>
+                                {{ form.duration_hours }}
+                                {% if form.duration_hours.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.duration_hours.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.max_participants.id_for_label }}" class="form-label">
+                                    Max Participants
+                                </label>
+                                {{ form.max_participants }}
+                                {% if form.max_participants.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.max_participants.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="help-text">Leave blank for unlimited</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.level.id_for_label }}" class="form-label">
+                                    Level
+                                </label>
+                                {{ form.level }}
+                                {% if form.level.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.level.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.cost_per_participant.id_for_label }}" class="form-label">
+                                    Cost per Participant
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.cost_per_participant }}
+                                </div>
+                                {% if form.cost_per_participant.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.cost_per_participant.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="help-text">Leave blank if free</div>
+                            </div>
+
+                            <hr>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    {{ form.is_mandatory }}
+                                    <label class="form-check-label" for="{{ form.is_mandatory.id_for_label }}">
+                                        Mandatory Training
+                                    </label>
+                                </div>
+                                <div class="help-text">Required for all eligible employees</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                        Active Program
+                                    </label>
+                                </div>
+                                <div class="help-text">Available for enrollment</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-body text-center">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-2">
+                            <i class="fas fa-save me-2"></i>
+                            {% if object %}Update{% else %}Create{% endif %} Program
+                        </button>
+                        <a href="{% url 'hrms:training_programs' %}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Form validation
+    $('.needs-validation').on('submit', function(event) {
+        if (!this.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        $(this).addClass('was-validated');
+    });
+
+    // Add form-control class to all form fields
+    $('input[type="text"], input[type="number"], input[type="email"], select, textarea').addClass('form-control');
+    $('input[type="checkbox"]').addClass('form-check-input');
+
+    // Auto-generate code from title
+    $('#id_title').on('blur', function() {
+        var title = $(this).val();
+        var codeField = $('#id_code');
+        
+        if (title && !codeField.val()) {
+            var code = title.toUpperCase()
+                           .replace(/[^A-Z0-9\s]/g, '')
+                           .replace(/\s+/g, '_')
+                           .substring(0, 10);
+            codeField.val(code);
+        }
+    });
+
+    // Character count for text areas
+    $('textarea').each(function() {
+        var maxLength = $(this).attr('maxlength');
+        if (maxLength) {
+            var counter = $('<div class="text-muted small text-end mt-1">0 / ' + maxLength + ' characters</div>');
+            $(this).after(counter);
+            
+            $(this).on('input', function() {
+                var length = $(this).val().length;
+                counter.text(length + ' / ' + maxLength + ' characters');
+                
+                if (length > maxLength * 0.9) {
+                    counter.removeClass('text-muted').addClass('text-warning');
+                } else {
+                    counter.removeClass('text-warning').addClass('text-muted');
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

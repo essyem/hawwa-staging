@@ -1,0 +1,1060 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Live Attendance - HRMS{% endblock %}
+
+{% block extra_css %}
+<!-- Leaflet CSS for Maps -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .attendance-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-top: 1rem;
+    }
+    
+    .clock-display {
+        background: linear-gradient(45deg, #8D1538, #A91E47);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .time {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .date {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+    
+    .attendance-btn {
+        width: 100%;
+        height: 80px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        border-radius: 15px;
+        border: none;
+        margin: 10px 0;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .check-in-btn {
+        background: linear-gradient(45deg, #4CAF50, #45a049);
+        color: white;
+    }
+    
+    .check-out-btn {
+        background: linear-gradient(45deg, #f44336, #da190b);
+        color: white;
+    }
+    
+    .attendance-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .attendance-btn:disabled {
+        background: #cccccc !important;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .status-card {
+        border-radius: 10px;
+        padding: 1rem;
+        margin: 10px 0;
+        text-align: center;
+    }
+    
+    .status-checked-in {
+        background: linear-gradient(45deg, #d4edda, #c3e6cb);
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+    
+    .status-checked-out {
+        background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    
+    .location-status {
+        font-size: 0.9rem;
+        margin-top: 1rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+    }
+    
+    .location-valid {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+    
+    .location-invalid {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .loading {
+        display: none;
+    }
+    
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #8D1538;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .employee-info {
+        background: var(--bs-light);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #8D1538;
+    }
+    
+    .map-container {
+        height: 400px;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 1rem 0;
+        border: 2px solid #8D1538;
+    }
+    
+    #attendance-map {
+        height: 100%;
+        width: 100%;
+    }
+    
+    .map-legend {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 10px;
+        font-size: 0.85rem;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin: 5px 0;
+    }
+    
+    .legend-color {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .office-marker { background: #8D1538; }
+    .user-marker { background: #4CAF50; }
+    .range-marker { background: rgba(141, 21, 56, 0.2); border: 2px solid #8D1538; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-map-marker-alt text-primary"></i>
+                    Live Attendance System
+                </h1>
+                <div>
+                    <a href="{% url 'hrms:my_attendance_log' %}" class="btn btn-info me-2">
+                        <i class="fas fa-history"></i> My Attendance Log
+                    </a>
+                    <button class="btn btn-outline-primary" onclick="refreshLocation()">
+                        <i class="fas fa-refresh"></i> Refresh Location
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Left Column - Controls -->
+        <div class="col-lg-6">
+            <div class="attendance-card">
+                <!-- Clock Display -->
+                <div class="clock-display">
+                    <div class="time" id="current-time">00:00:00</div>
+                    <div class="date" id="current-date">January 1, 2025</div>
+                </div>
+                
+                <!-- Employee Info -->
+                <div class="employee-info">
+                    <h5><i class="fas fa-user"></i> Employee Information</h5>
+                    <p><strong>Name:</strong> <span id="employee-name">{{ user.get_full_name|default:user.username }}</span></p>
+                    <p><strong>Employee ID:</strong> <span id="employee-id">{% if user.employeeprofile %}{{ user.employeeprofile.employee_id }}{% else %}{{ user.username }}{% endif %}</span></p>
+                    <p><strong>Department:</strong> <span id="employee-dept">{% if user.employeeprofile and user.employeeprofile.department %}{{ user.employeeprofile.department.name }}{% else %}Not Set{% endif %}</span></p>
+                </div>
+                
+                <!-- Alerts -->
+                <div id="alert-container"></div>
+                
+                <!-- Current Status -->
+                <div id="current-status" class="status-card">
+                    <h5><i class="fas fa-info-circle"></i> Current Status</h5>
+                    <p id="status-text">Getting status...</p>
+                </div>
+                
+                <!-- Location Status -->
+                <div id="location-status" class="location-status">
+                    <i class="fas fa-map-marker-alt"></i> <span id="location-text">Checking location...</span>
+                </div>
+                
+                <!-- Loading Spinner -->
+                <div id="loading" class="loading text-center">
+                    <div class="spinner"></div>
+                    <p>Processing...</p>
+                </div>
+                
+                <!-- Session Type Selection -->
+                <div class="mt-4" id="session-options" style="display:none;">
+                    <h6><i class="fas fa-cog"></i> Check-in Options</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="session-type" class="form-label">Session Type:</label>
+                            <select id="session-type" class="form-select">
+                                <option value="work">Work Session</option>
+                                <option value="meeting">Business Meeting</option>
+                                <option value="break">Break/Personal</option>
+                                <option value="lunch">Lunch Break</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="session-reason" class="form-label">Reason (Optional):</label>
+                            <input type="text" id="session-reason" class="form-control" placeholder="e.g., Meeting with client">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Attendance Buttons -->
+                <div class="mt-4">
+                    <button id="check-in-btn" class="attendance-btn check-in-btn" onclick="checkIn()" disabled>
+                        <i class="fas fa-sign-in-alt"></i> CHECK IN
+                    </button>
+                    
+                    <button id="check-out-btn" class="attendance-btn check-out-btn" onclick="checkOut()" disabled>
+                        <i class="fas fa-sign-out-alt"></i> CHECK OUT
+                    </button>
+                </div>
+                
+                <!-- Current Session Info -->
+                <div class="mt-4" id="current-session" style="display:none;">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-clock"></i> Current Session</h6>
+                        <div id="current-session-details"></div>
+                    </div>
+                </div>
+                
+                <!-- Today's Sessions -->
+                <div class="mt-4" id="sessions-today" style="display:none;">
+                    <h5><i class="fas fa-history"></i> Today's Sessions</h5>
+                    <div id="sessions-list"></div>
+                </div>
+                
+                <!-- Today's Summary -->
+                <div class="mt-4" id="today-summary">
+                    <h5><i class="fas fa-calendar-day"></i> Today's Summary</h5>
+                    <div class="row">
+                        <div class="col-4">
+                            <small>Total Hours:</small><br>
+                            <strong id="today-hours">0.00</strong>
+                        </div>
+                        <div class="col-4">
+                            <small>Sessions:</small><br>
+                            <strong id="total-sessions">0</strong>
+                        </div>
+                        <div class="col-4">
+                            <small>Status:</small><br>
+                            <strong id="today-status">Ready</strong>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6">
+                            <small>First Check In:</small><br>
+                            <strong id="today-checkin">--:--</strong>
+                        </div>
+                        <div class="col-6">
+                            <small>Last Check Out:</small><br>
+                            <strong id="today-checkout">--:--</strong>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6">
+                            <small>Hours Worked:</small><br>
+                            <strong id="today-hours">0.00</strong>
+                        </div>
+                        <div class="col-6">
+                            <small>Status:</small><br>
+                            <strong id="today-status">Not Started</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Live Map -->
+        <div class="col-lg-6">
+            <div class="attendance-card">
+                <h5><i class="fas fa-map"></i> Live Location Map</h5>
+                <p class="text-muted">Your current location relative to office premises</p>
+                
+                <div class="map-container">
+                    <div id="attendance-map"></div>
+                </div>
+                
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <span class="legend-color office-marker"></span>
+                        Office Locations
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color user-marker"></span>
+                        Your Current Location
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color range-marker"></span>
+                        50m Check-in Range
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <small><strong>Distance to nearest office:</strong> <span id="distance-display">Calculating...</span></small>
+                </div>
+                
+                <!-- Debug Information Panel -->
+                <div class="mt-3" style="background: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 0.8rem;">
+                    <strong>Location Debug Info:</strong><br>
+                    <span id="user-coordinates">Your coordinates: Loading...</span><br>
+                    <span id="office-coordinates">Nearest office: Loading...</span><br>
+                    <span id="accuracy-info">GPS accuracy: Loading...</span>
+                </div>
+                
+                <!-- Location Testing Panel -->
+                <div class="mt-3" style="background: #e3f2fd; padding: 10px; border-radius: 5px; border: 1px solid #2196F3;">
+                    <strong>📍 Location Options:</strong><br>
+                    <button class="btn btn-sm btn-info mt-1" onclick="simulateOfficeLocation()">
+                        📍 Simulate At Office
+                    </button>
+                    <button class="btn btn-sm btn-warning mt-1" onclick="simulateRemoteLocation()">
+                        🌍 Simulate Remote Location
+                    </button>
+                    <button class="btn btn-sm btn-secondary mt-1" onclick="useRealLocation()">
+                        📱 Use Real GPS
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet JS for Maps -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Configuration - Get office locations from database
+    // Ensure OFFICE_LOCATIONS defaults to an empty array to avoid a JS syntax error
+    // when the template variable is not provided by the view.
+    const OFFICE_LOCATIONS = {{ office_locations|default:"[]"|safe }};
+    
+    let map = null;
+    let userMarker = null;
+    let officeMarkers = [];
+    let rangeCircles = [];
+    let currentPosition = null;
+    let isLocationValid = false;
+    let attendanceStatus = {
+        isCheckedIn: false,
+        checkInTime: null,
+        checkOutTime: null
+    };
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        updateClock();
+        setInterval(updateClock, 1000);
+        initializeMap();
+        checkCurrentStatus();
+        requestLocation();
+    });
+    
+    // Initialize map
+    function initializeMap() {
+        // Center on Qatar
+        map = L.map('attendance-map').setView([25.2854, 51.5310], 13);
+        
+        // Add Qatar-themed tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Add office locations
+        OFFICE_LOCATIONS.forEach(function(office, index) {
+            // Office marker
+            const officeMarker = L.marker([office.latitude, office.longitude], {
+                icon: L.divIcon({
+                    className: 'custom-div-icon',
+                    html: "<div style='background-color:#8D1538;' class='marker-pin'></div><i class='fas fa-building' style='color:#8D1538;'></i>",
+                    iconSize: [30, 42],
+                    iconAnchor: [15, 42]
+                })
+            }).addTo(map);
+            
+            officeMarker.bindPopup(`<b>${office.name}</b><br>Check-in radius: ${office.radius}m`);
+            officeMarkers.push(officeMarker);
+            
+            // Range circle
+            const rangeCircle = L.circle([office.latitude, office.longitude], {
+                color: '#8D1538',
+                fillColor: '#8D1538',
+                fillOpacity: 0.2,
+                radius: office.radius
+            }).addTo(map);
+            
+            rangeCircles.push(rangeCircle);
+        });
+    }
+    
+    // Update clock
+    function updateClock() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+        const dateStr = now.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        document.getElementById('current-time').textContent = timeStr;
+        document.getElementById('current-date').textContent = dateStr;
+    }
+    
+    // Request user location
+    function requestLocation() {
+        if (!navigator.geolocation) {
+            showAlert('Geolocation is not supported by this browser.', 'danger');
+            return;
+        }
+        
+        document.getElementById('location-text').textContent = 'Getting your location...';
+        
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                currentPosition = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy
+                };
+                updateUserLocationOnMap();
+                checkLocationValidity();
+            },
+            function(error) {
+                let message = 'Unable to get your location. ';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        message += 'Location access denied by user.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        message += 'Location information unavailable.';
+                        break;
+                    case error.TIMEOUT:
+                        message += 'Location request timed out.';
+                        break;
+                }
+                showAlert(message, 'warning');
+                document.getElementById('location-text').textContent = 'Location unavailable';
+                updateLocationStatus(false);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 60000
+            }
+        );
+    }
+    
+    // Update user location on map
+    function updateUserLocationOnMap() {
+        if (!currentPosition || !map) return;
+        
+        // Remove existing user marker
+        if (userMarker) {
+            map.removeLayer(userMarker);
+        }
+        
+        // Add new user marker
+        userMarker = L.marker([currentPosition.latitude, currentPosition.longitude], {
+            icon: L.divIcon({
+                className: 'custom-div-icon',
+                html: "<div style='background-color:#4CAF50;' class='marker-pin'></div><i class='fas fa-user' style='color:#4CAF50;'></i>",
+                iconSize: [30, 42],
+                iconAnchor: [15, 42]
+            })
+        }).addTo(map);
+        
+        userMarker.bindPopup(`<b>Your Location</b><br>Accuracy: ${Math.round(currentPosition.accuracy)}m`);
+        
+        // Center map on user location
+        map.setView([currentPosition.latitude, currentPosition.longitude], 16);
+    }
+    
+    // Check if current location is within office premises
+    function checkLocationValidity() {
+        if (!currentPosition) {
+            isLocationValid = false;
+            updateLocationStatus(false);
+            return;
+        }
+        
+        let isWithinRange = false;
+        let nearestOffice = null;
+        let minDistance = Infinity;
+        
+            // Update distance display and debug information (guard against missing nearestOffice)
+            if (nearestOffice) {
+                document.getElementById('distance-display').textContent = `${Math.round(minDistance)}m to ${nearestOffice.name}`;
+
+                document.getElementById('user-coordinates').textContent = 
+                    `Your coordinates: ${currentPosition.latitude.toFixed(6)}\u00b0N, ${currentPosition.longitude.toFixed(6)}\u00b0E (${convertToDMS(currentPosition.latitude, currentPosition.longitude)})`;
+                document.getElementById('office-coordinates').textContent = 
+                    `Nearest office: ${nearestOffice.latitude.toFixed(6)}\u00b0N, ${nearestOffice.longitude.toFixed(6)}\u00b0E (${convertToDMS(nearestOffice.latitude, nearestOffice.longitude)})`;
+            } else {
+                document.getElementById('distance-display').textContent = 'No office locations configured';
+                document.getElementById('user-coordinates').textContent = 
+                    `Your coordinates: ${currentPosition.latitude.toFixed(6)}\u00b0N, ${currentPosition.longitude.toFixed(6)}\u00b0E (${convertToDMS(currentPosition.latitude, currentPosition.longitude)})`;
+                document.getElementById('office-coordinates').textContent = 'Nearest office: N/A';
+            }
+            document.getElementById('accuracy-info').textContent = 
+                `GPS accuracy: \u00b1${Math.round(currentPosition.accuracy)}m`;
+            }
+            
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestOffice = office;
+            }
+        }
+        
+        isLocationValid = isWithinRange;
+        updateLocationStatus(isLocationValid, nearestOffice, minDistance);
+        updateButtonStates();
+        
+        // Update distance display
+        document.getElementById('distance-display').textContent = `${Math.round(minDistance)}m to ${nearestOffice.name}`;
+        
+        // Update debug information
+        document.getElementById('user-coordinates').textContent = 
+            `Your coordinates: ${currentPosition.latitude.toFixed(6)}°N, ${currentPosition.longitude.toFixed(6)}°E (${convertToDMS(currentPosition.latitude, currentPosition.longitude)})`;
+        document.getElementById('office-coordinates').textContent = 
+            `Nearest office: ${nearestOffice.latitude.toFixed(6)}°N, ${nearestOffice.longitude.toFixed(6)}°E (${convertToDMS(nearestOffice.latitude, nearestOffice.longitude)})`;
+        document.getElementById('accuracy-info').textContent = 
+            `GPS accuracy: ±${Math.round(currentPosition.accuracy)}m`;
+    }
+    
+    // Calculate distance between two points
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371000; // Earth's radius in meters
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+    
+    // Update location status display
+    function updateLocationStatus(isValid, office = null, distance = null) {
+        const statusDiv = document.getElementById('location-status');
+        const textSpan = document.getElementById('location-text');
+        
+        if (isValid && office) {
+            statusDiv.className = 'location-status location-valid';
+            textSpan.textContent = `✅ You are within range of ${office.name}`;
+        } else if (currentPosition && office) {
+            statusDiv.className = 'location-status location-invalid';
+            textSpan.textContent = `❌ You are ${Math.round(distance)}m from ${office.name} (50m required)`;
+        } else {
+            statusDiv.className = 'location-status location-invalid';
+            textSpan.textContent = 'Location unavailable';
+        }
+    }
+    
+    // Refresh location
+    function refreshLocation() {
+        requestLocation();
+    }
+    
+    // Check current attendance status
+    function checkCurrentStatus() {
+        fetch('/hrms/attendance/api/status/')
+            .then(response => response.json())
+            .then(data => {
+                attendanceStatus = data;
+                updateStatusDisplay();
+                updateTodaySummary();
+                updateButtonStates();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Show mock data for testing
+                attendanceStatus = {
+                    isCheckedIn: false,
+                    checkInTime: null,
+                    checkOutTime: null,
+                    hoursWorked: '0.00',
+                    status: 'Not Started'
+                };
+                updateStatusDisplay();
+                updateTodaySummary();
+                updateButtonStates();
+            });
+    }
+    
+    // Update status display
+    function updateStatusDisplay() {
+        const statusDiv = document.getElementById('current-status');
+        const statusText = document.getElementById('status-text');
+        
+        if (attendanceStatus.isCheckedIn) {
+            statusDiv.className = 'status-card status-checked-in';
+            statusText.textContent = `${attendanceStatus.status || 'Working'}`;
+        } else {
+            statusDiv.className = 'status-card status-checked-out';
+            statusText.textContent = attendanceStatus.status || 'Ready to Check-in';
+        }
+        
+        // Show session options after sign in and before sign out
+        const sessionOptions = document.getElementById('session-options');
+        if (!attendanceStatus.isCheckedIn) {
+            // Show for check-in
+            sessionOptions.style.display = 'block';
+        } else {
+            // Show for check-out
+            sessionOptions.style.display = 'block';
+        }
+        
+        // Update current session display
+        updateCurrentSession();
+        
+        // Update sessions list
+        updateSessionsList();
+    }
+    
+    // Update current session display
+    function updateCurrentSession() {
+        const currentSessionDiv = document.getElementById('current-session');
+        const currentSessionDetails = document.getElementById('current-session-details');
+        
+        if (attendanceStatus.isCheckedIn && attendanceStatus.currentSession) {
+            const session = attendanceStatus.currentSession;
+            currentSessionDetails.innerHTML = `
+                <strong>${session.sessionType}</strong> since ${session.checkIn}<br>
+                ${session.reason ? `<small class="text-muted">Reason: ${session.reason}</small>` : ''}
+            `;
+            currentSessionDiv.style.display = 'block';
+        } else {
+            currentSessionDiv.style.display = 'none';
+        }
+    }
+    
+    // Update sessions list
+    function updateSessionsList() {
+        const sessionsDiv = document.getElementById('sessions-today');
+        const sessionsList = document.getElementById('sessions-list');
+        
+        if (attendanceStatus.sessionsToday && attendanceStatus.sessionsToday.length > 0) {
+            let sessionsHtml = '';
+            attendanceStatus.sessionsToday.forEach(session => {
+                const badgeClass = session.isOngoing ? 'bg-success' : 'bg-secondary';
+                const duration = session.isOngoing ? 'Ongoing' : session.duration;
+                
+                sessionsHtml += `
+                    <div class="session-item mb-2 p-2 border rounded">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${session.sessionType}</strong>
+                                <span class="badge ${badgeClass} ms-2">${duration}</span>
+                                <br>
+                                <small class="text-muted">${session.checkIn} - ${session.checkOut || 'Ongoing'}</small>
+                                ${session.reason ? `<br><small class="text-muted">Reason: ${session.reason}</small>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            sessionsList.innerHTML = sessionsHtml;
+            sessionsDiv.style.display = 'block';
+        } else {
+            sessionsDiv.style.display = 'none';
+        }
+    }
+    
+    // Update today's summary
+    function updateTodaySummary() {
+        document.getElementById('today-checkin').textContent = 
+            (attendanceStatus.sessionsToday && attendanceStatus.sessionsToday.length > 0) 
+                ? attendanceStatus.sessionsToday[0].checkIn : '--:--';
+        
+        document.getElementById('today-checkout').textContent = 
+            (attendanceStatus.sessionsToday && attendanceStatus.sessionsToday.length > 0) 
+                ? (attendanceStatus.sessionsToday[attendanceStatus.sessionsToday.length - 1].checkOut || '--:--') : '--:--';
+        
+        document.getElementById('today-hours').textContent = 
+            attendanceStatus.hoursWorked || '0.00';
+        
+        document.getElementById('total-sessions').textContent = 
+            attendanceStatus.totalSessions || '0';
+        
+        document.getElementById('today-status').textContent = 
+            attendanceStatus.status || 'Ready';
+    }
+    
+    // Update button states
+    function updateButtonStates() {
+        const checkInBtn = document.getElementById('check-in-btn');
+        const checkOutBtn = document.getElementById('check-out-btn');
+        
+        // Enable/disable based on location and status
+        checkInBtn.disabled = !isLocationValid || attendanceStatus.isCheckedIn;
+        checkOutBtn.disabled = !isLocationValid || !attendanceStatus.isCheckedIn;
+    }
+    
+    // Check in function
+    function checkIn() {
+        console.log('Check-in button clicked');
+        console.log('isLocationValid:', isLocationValid);
+        console.log('attendanceStatus.isCheckedIn:', attendanceStatus.isCheckedIn);
+        console.log('currentPosition:', currentPosition);
+        
+        if (!isLocationValid) {
+            showAlert('You must be within 50 meters of an office to check in', 'danger');
+            return;
+        }
+        
+        if (attendanceStatus.isCheckedIn) {
+            showAlert('You already have an ongoing session. Please check out first.', 'warning');
+            return;
+        }
+        
+        if (!currentPosition || !currentPosition.latitude || !currentPosition.longitude) {
+            showAlert('Unable to determine your location. Please try refreshing.', 'warning');
+            return;
+        }
+        
+
+        // Get session details
+        const sessionType = document.getElementById('session-type').value;
+        const sessionReason = document.getElementById('session-reason').value;
+        if (!sessionType) {
+            showAlert('Please select a session type before checking in.', 'warning');
+            return;
+        }
+        
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                         document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                         '{{ csrf_token }}';
+        
+        console.log('CSRF Token:', csrfToken);
+        console.log('Session Type:', sessionType);
+        console.log('Session Reason:', sessionReason);
+        
+        showLoading(true);
+        
+        // Call the enhanced check-in API
+        fetch('{% url "hrms:check_in_api" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                latitude: currentPosition.latitude,
+                longitude: currentPosition.longitude,
+                session_type: sessionType,
+                reason: sessionReason,
+                timestamp: new Date().toISOString()
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            showLoading(false);
+            
+            if (data.success) {
+                // Immediately update local state
+                attendanceStatus.isCheckedIn = true;
+                attendanceStatus.checkInTime = data.checkInTime;
+                attendanceStatus.status = 'Working';
+                
+                updateStatusDisplay();
+                updateTodaySummary();
+                updateButtonStates();
+                
+                showAlert(`✅ ${data.message}`, 'success');
+                
+                // Refresh status from server to ensure consistency
+                setTimeout(() => {
+                    checkCurrentStatus();
+                }, 1000);
+            } else {
+                showAlert(`❌ ${data.message}`, 'danger');
+            }
+        })
+        .catch(error => {
+            showLoading(false);
+            console.error('Check in error:', error);
+            showAlert('❌ Error during check in. Please try again.', 'danger');
+        });
+    }
+    
+    // Check out function
+    function checkOut() {
+        console.log('Check-out button clicked');
+        console.log('isLocationValid:', isLocationValid);
+        console.log('attendanceStatus.isCheckedIn:', attendanceStatus.isCheckedIn);
+        console.log('currentPosition:', currentPosition);
+        
+        if (!isLocationValid) {
+            showAlert('You must be within 50 meters of an office to check out', 'danger');
+            return;
+        }
+        
+        if (!attendanceStatus.isCheckedIn) {
+            showAlert('You must check in first', 'warning');
+            return;
+        }
+        
+        if (!currentPosition || !currentPosition.latitude || !currentPosition.longitude) {
+            showAlert('Unable to determine your location. Please try refreshing.', 'warning');
+            return;
+        }
+        
+        // Get session details
+        const sessionType = document.getElementById('session-type').value;
+        const sessionReason = document.getElementById('session-reason').value;
+        if (!sessionType) {
+            showAlert('Please select a session type before checking out.', 'warning');
+            return;
+        }
+
+        console.log('All checks passed, starting check-out...');
+        showLoading(true);
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                         document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                         '{{ csrf_token }}';
+        console.log('CSRF Token for checkout:', csrfToken);
+        console.log('About to call check-out API...');
+        // Call the real checkout API
+        fetch('{% url "hrms:check_out_api" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                latitude: currentPosition.latitude,
+                longitude: currentPosition.longitude,
+                session_type: sessionType,
+                reason: sessionReason,
+                timestamp: new Date().toISOString()
+            })
+        })
+        .then(response => {
+            console.log('Check-out API response received:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Check-out API data:', data);
+            showLoading(false);
+            
+            if (data.success) {
+                attendanceStatus.isCheckedIn = false;
+                attendanceStatus.checkOutTime = data.checkOutTime;
+                attendanceStatus.hoursWorked = data.hoursWorked;
+                attendanceStatus.status = 'Completed';
+                
+                updateStatusDisplay();
+                updateTodaySummary();
+                updateButtonStates();
+                
+                showAlert(`✅ ${data.message}`, 'success');
+            } else {
+                showAlert(`❌ ${data.message}`, 'danger');
+            }
+        })
+        .catch(error => {
+            showLoading(false);
+            console.error('Check out error:', error);
+            showAlert('❌ Error during check out. Please try again.', 'danger');
+        });
+    }
+    
+    // Show/hide loading
+    function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+    
+    // Show alert
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alert-container');
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        alertContainer.appendChild(alertDiv);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+    
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Convert decimal degrees to DMS format
+    function convertToDMS(lat, lng) {
+        function toDMS(coord, isLat) {
+            const absolute = Math.abs(coord);
+            const degrees = Math.floor(absolute);
+            const minutesFloat = (absolute - degrees) * 60;
+            const minutes = Math.floor(minutesFloat);
+            const seconds = ((minutesFloat - minutes) * 60).toFixed(1);
+            
+            const direction = coord >= 0 ? (isLat ? 'N' : 'E') : (isLat ? 'S' : 'W');
+            return `${degrees}°${minutes}'${seconds}"${direction}`;
+        }
+        
+        return `${toDMS(lat, true)} ${toDMS(lng, false)}`;
+    }
+    
+    // Refresh location every 30 seconds
+    setInterval(function() {
+        if (navigator.geolocation) {
+            requestLocation();
+        }
+    }, 30000);
+    
+    // Testing functions for Adam Hill (EMP0047)
+    function simulateOfficeLocation() {
+        currentPosition = {
+            latitude: 25.281472,  // Exact office coordinates
+            longitude: 51.506889,
+            accuracy: 5  // High accuracy
+        };
+        updateUserLocationOnMap();
+        checkLocationValidity();
+        showAlert('🧪 Simulated location: At Qatar Head Office', 'info');
+    }
+    
+    function simulateRemoteLocation() {
+        currentPosition = {
+            latitude: 25.250000,  // About 3.5km away
+            longitude: 51.550000,
+            accuracy: 10
+        };
+        updateUserLocationOnMap();
+        checkLocationValidity();
+        showAlert('🧪 Simulated location: Remote (3.5km from office)', 'info');
+    }
+    
+    function useRealLocation() {
+        requestLocation();
+        showAlert('📱 Using real GPS location', 'info');
+    }
+
+    // Auto-simulate location via URL query for dev/testing: ?gps=office|remote|real
+    (function autoSimulateFromQuery() {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const gps = params.get('gps');
+            if (!gps) return;
+            // Give the page a short moment to initialize map and elements
+            setTimeout(() => {
+                if (gps === 'office') {
+                    simulateOfficeLocation();
+                } else if (gps === 'remote') {
+                    simulateRemoteLocation();
+                } else if (gps === 'real') {
+                    useRealLocation();
+                }
+            }, 600);
+        } catch (e) {
+            console.warn('autoSimulateFromQuery failed', e);
+        }
+    })();
+</script>
+
+<style>
+.marker-pin {
+    width: 20px;
+    height: 20px;
+    border-radius: 50% 50% 50% 0;
+    position: absolute;
+    transform: rotate(-45deg);
+    left: 50%;
+    top: 50%;
+    margin: -15px 0 0 -15px;
+}
+
+.custom-div-icon i {
+    position: absolute;
+    width: 22px;
+    text-align: center;
+    left: 0;
+    right: 0;
+    margin: 10px auto;
+    font-size: 11px;
+}
+</style>
+{% endblock %}

@@ -52,6 +52,7 @@ urlpatterns = [
     path('admin-dashboard/', include('admin_dashboard.urls', namespace='admin_dashboard')),
     path('reporting/', include('reporting.urls', namespace='reporting')),
     path('analytics/', include('analytics.urls', namespace='analytics')),
+    path('hrms/', include('hrms.urls', namespace='hrms')),
     
     # API URLs
     path('api/v1/', include('api.urls')),

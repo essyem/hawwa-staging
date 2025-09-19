@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Departments{% endblock %}
+{% block content %}
+<h2>Departments</h2>
+<ul class="list-group">
+    {% for dept in departments %}
+    <li class="list-group-item">{{ dept.name }} – {{ dept.description }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

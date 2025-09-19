@@ -1,0 +1,164 @@
+<!-- Training Enrollment Cards Template -->
+{% load static %}
+
+{% if filtered_enrollments %}
+    <div class="row">
+        {% for enrollment in filtered_enrollments %}
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 text-truncate me-2">{{ enrollment.session.program.title }}</h6>
+                        <span class="badge 
+                            {% if enrollment.completion_status == 'completed' %}bg-success
+                            {% elif enrollment.completion_status == 'in_progress' %}bg-warning
+                            {% elif enrollment.completion_status == 'failed' %}bg-danger
+                            {% else %}bg-secondary{% endif %}">
+                            {{ enrollment.get_completion_status_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="card-body">
+                        <!-- Program Information -->
+                        <div class="mb-3">
+                            <h6 class="text-primary">
+                                <i class="fas fa-calendar-alt"></i> 
+                                {{ enrollment.session.program.title }}
+                            </h6>
+                            <p class="text-muted small mb-2">{{ enrollment.session.program.description|truncatewords:15 }}</p>
+                        </div>
+                        
+                        <!-- Session Details -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">Start Date</small>
+                                <div class="fw-bold">{{ enrollment.session.start_date|date:"M d, Y" }}</div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">End Date</small>
+                                <div class="fw-bold">{{ enrollment.session.end_date|date:"M d, Y" }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">Duration</small>
+                                <div class="fw-bold">{{ enrollment.session.program.duration_hours }}h</div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Level</small>
+                                <div class="fw-bold">{{ enrollment.session.program.get_level_display }}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Information -->
+                        {% if enrollment.completion_status == 'in_progress' or enrollment.completion_status == 'completed' %}
+                            <div class="mb-3">
+                                <small class="text-muted">Progress</small>
+                                <div class="progress mt-1" style="height: 8px;">
+                                    <div class="progress-bar 
+                                        {% if enrollment.completion_status == 'completed' %}bg-success
+                                        {% else %}bg-warning{% endif %}" 
+                                        role="progressbar" 
+                                        style="width: {% if enrollment.completion_status == 'completed' %}100{% elif enrollment.completion_status == 'in_progress' %}60{% else %}0{% endif %}%">
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Score Display -->
+                        {% if enrollment.score %}
+                            <div class="mb-3">
+                                <small class="text-muted">Score</small>
+                                <div class="fw-bold text-{% if enrollment.score >= 80 %}success{% elif enrollment.score >= 60 %}warning{% else %}danger{% endif %}">
+                                    {{ enrollment.score }}%
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Attendance Status -->
+                        <div class="mb-3">
+                            <small class="text-muted">Attendance</small>
+                            <div>
+                                <span class="badge 
+                                    {% if enrollment.attendance_status == 'attended' %}bg-success
+                                    {% elif enrollment.attendance_status == 'partial' %}bg-warning
+                                    {% elif enrollment.attendance_status == 'absent' %}bg-danger
+                                    {% elif enrollment.attendance_status == 'cancelled' %}bg-secondary
+                                    {% else %}bg-info{% endif %}">
+                                    {{ enrollment.get_attendance_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Certificate Information -->
+                        {% if enrollment.certificate_issued %}
+                            <div class="mb-3">
+                                <div class="text-success">
+                                    <i class="fas fa-certificate"></i> 
+                                    Certificate Issued
+                                    {% if enrollment.certificate_number %}
+                                        <br><small class="text-muted">{{ enrollment.certificate_number }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Enrollment Date -->
+                        <div class="mb-3">
+                            <small class="text-muted">Enrolled on {{ enrollment.enrollment_date|date:"M d, Y" }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <!-- Action Buttons -->
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'hrms:training_program_detail' enrollment.session.program.pk %}" 
+                                   class="btn btn-outline-primary" title="View Program">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                
+                                {% if enrollment.completion_status == 'not_started' or enrollment.completion_status == 'in_progress' %}
+                                    <button class="btn btn-outline-success" title="Mark Progress">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                {% endif %}
+                                
+                                {% if enrollment.certificate_issued %}
+                                    <button class="btn btn-outline-info" title="Download Certificate">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Training Type Badge -->
+                            <span class="badge bg-light text-dark">{{ enrollment.session.program.get_training_type_display }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <!-- Empty State -->
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-graduation-cap fa-4x text-muted mb-3"></i>
+            <h4>No Training Enrollments</h4>
+            <p class="text-muted">
+                {% if 'upcoming' in request.resolver_match.url_name %}
+                    You don't have any upcoming training sessions.
+                {% elif 'progress' in request.resolver_match.url_name %}
+                    You don't have any training sessions in progress.
+                {% elif 'completed' in request.resolver_match.url_name %}
+                    You haven't completed any training sessions yet.
+                {% else %}
+                    You haven't enrolled in any training programs yet.
+                {% endif %}
+            </p>
+            <a href="{% url 'hrms:training_programs' %}" class="btn btn-primary">
+                <i class="fas fa-search"></i> Browse Training Programs
+            </a>
+        </div>
+    </div>
+{% endif %}

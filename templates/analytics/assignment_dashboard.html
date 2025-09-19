@@ -1,0 +1,659 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Smart Assignment Dashboard - Analytics - Hawwa{% endblock %}
+
+{% block extra_css %}
+<style>
+    .assignment-card {
+        border: none;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        transition: var(--transition-normal);
+        background: var(--card-bg);
+        color: var(--text-primary);
+    }
+    
+    .assignment-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .status-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 1rem;
+    }
+    
+    .status-pending {
+        background: rgba(217, 119, 6, 0.1);
+        color: var(--warning);
+    }
+    
+    .status-assigned {
+        background: rgba(5, 150, 105, 0.1);
+        color: var(--success);
+    }
+    
+    .status-failed {
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--error);
+    }
+    
+    .status-processing {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--info);
+    }
+    
+    .vendor-card {
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        transition: var(--transition-fast);
+        cursor: pointer;
+    }
+    
+    .vendor-card:hover {
+        border-color: var(--qatar-maroon);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .vendor-card.selected {
+        border-color: var(--qatar-maroon);
+        background: rgba(141, 21, 56, 0.05);
+    }
+    
+    .score-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+    
+    .score-excellent {
+        background: var(--success);
+        color: white;
+    }
+    
+    .score-good {
+        background: var(--info);
+        color: white;
+    }
+    
+    .score-average {
+        background: var(--warning);
+        color: white;
+    }
+    
+    .score-poor {
+        background: var(--error);
+        color: white;
+    }
+    
+    .assignment-timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+    
+    .assignment-timeline::before {
+        content: '';
+        position: absolute;
+        left: 0.5rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--border-color);
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -1.5rem;
+        top: 0.5rem;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--qatar-maroon);
+    }
+    
+    .auto-assign-panel {
+        background: linear-gradient(135deg, var(--gradient-primary));
+        border-radius: var(--radius-lg);
+        color: white;
+        padding: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">{% trans "Smart Assignment Dashboard" %}</h1>
+            <p class="text-muted mb-0">{% trans "Intelligent vendor assignment system for optimal service delivery" %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success" onclick="runAutoAssignment()">
+                <i class="fas fa-magic me-1"></i>{% trans "Auto Assign" %}
+            </button>
+            <button class="btn btn-outline-primary" onclick="refreshAssignments()">
+                <i class="fas fa-sync-alt me-1"></i>{% trans "Refresh" %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="assignment-card h-100 text-center p-3">
+                <div class="text-primary mb-2">
+                    <i class="fas fa-clock fa-2x"></i>
+                </div>
+                <h4 class="mb-1">{{ pending_assignments|default:"23" }}</h4>
+                <p class="text-muted mb-0">{% trans "Pending Assignments" %}</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="assignment-card h-100 text-center p-3">
+                <div class="text-success mb-2">
+                    <i class="fas fa-check-circle fa-2x"></i>
+                </div>
+                <h4 class="mb-1">{{ successful_assignments|default:"187" }}</h4>
+                <p class="text-muted mb-0">{% trans "Successful Today" %}</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="assignment-card h-100 text-center p-3">
+                <div class="text-warning mb-2">
+                    <i class="fas fa-robot fa-2x"></i>
+                </div>
+                <h4 class="mb-1">{{ auto_assignment_rate|default:"89" }}%</h4>
+                <p class="text-muted mb-0">{% trans "Auto Assignment Rate" %}</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="assignment-card h-100 text-center p-3">
+                <div class="text-info mb-2">
+                    <i class="fas fa-tachometer-alt fa-2x"></i>
+                </div>
+                <h4 class="mb-1">{{ avg_assignment_time|default:"1.2" }}{% trans "min" %}</h4>
+                <p class="text-muted mb-0">{% trans "Avg Assignment Time" %}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Pending Assignments -->
+        <div class="col-lg-8 mb-4">
+            <div class="assignment-card">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>{% trans "Pending Assignments" %}
+                    </h6>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm" id="priorityFilter">
+                            <option value="all">{% trans "All Priorities" %}</option>
+                            <option value="urgent">{% trans "Urgent" %}</option>
+                            <option value="high">{% trans "High" %}</option>
+                            <option value="normal">{% trans "Normal" %}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Booking" %}</th>
+                                    <th>{% trans "Service" %}</th>
+                                    <th>{% trans "Priority" %}</th>
+                                    <th>{% trans "Requirements" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                    <th>{% trans "Action" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingAssignmentsTable">
+                                {% for assignment in pending_assignments_list|default:"" %}
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <strong>#{{ assignment.booking_number }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ assignment.client_name }}</small>
+                                        </div>
+                                    </td>
+                                    <td>{{ assignment.service_type }}</td>
+                                    <td>
+                                        <span class="badge {% if assignment.priority == 'urgent' %}bg-danger{% elif assignment.priority == 'high' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                            {{ assignment.priority|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small>{{ assignment.requirements|truncatechars:30 }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-pending">{% trans "Pending" %}</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" onclick="assignVendor({{ assignment.id }})">
+                                            <i class="fas fa-user-plus"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <strong>#{{ "HW-2024-001"|default:"Loading..." }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ "Sarah Johnson"|default:"Loading..." }}</small>
+                                        </div>
+                                    </td>
+                                    <td>{{ "Wellness Spa"|default:"Loading..." }}</td>
+                                    <td><span class="badge bg-warning">{{ "High"|default:"Loading..." }}</span></td>
+                                    <td><small>{{ "Postpartum wellness package"|default:"Loading..." }}</small></td>
+                                    <td><span class="status-badge status-pending">{% trans "Pending" %}</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" onclick="assignVendor(1)">
+                                            <i class="fas fa-user-plus"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <strong>#{{ "HW-2024-002"|default:"Loading..." }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ "Maria Garcia"|default:"Loading..." }}</small>
+                                        </div>
+                                    </td>
+                                    <td>{{ "Home Care"|default:"Loading..." }}</td>
+                                    <td><span class="badge bg-danger">{{ "Urgent"|default:"Loading..." }}</span></td>
+                                    <td><small>{{ "24/7 newborn care support"|default:"Loading..." }}</small></td>
+                                    <td><span class="status-badge status-pending">{% trans "Pending" %}</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" onclick="assignVendor(2)">
+                                            <i class="fas fa-user-plus"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Smart Assignment Panel -->
+        <div class="col-lg-4 mb-4">
+            <div class="auto-assign-panel mb-4">
+                <h6 class="text-white mb-3">
+                    <i class="fas fa-magic me-2"></i>{% trans "Auto Assignment Engine" %}
+                </h6>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>{% trans "Success Rate" %}</span>
+                    <strong>{{ auto_success_rate|default:"94.2" }}%</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>{% trans "Assignments Today" %}</span>
+                    <strong>{{ assignments_today|default:"47" }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-4">
+                    <span>{% trans "Queue Processing" %}</span>
+                    <strong>{{ queue_status|default:"Active" }}</strong>
+                </div>
+                <button class="btn btn-light w-100" onclick="runAutoAssignment()">
+                    <i class="fas fa-magic me-2"></i>{% trans "Run Auto Assignment" %}
+                </button>
+            </div>
+
+            <!-- Top Performing Vendors -->
+            <div class="assignment-card">
+                <div class="card-header bg-transparent border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-star me-2"></i>{% trans "Top Vendors" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for vendor in top_vendors|default:"" %}
+                    <div class="vendor-card" onclick="selectVendor({{ vendor.id }})">
+                        <div class="d-flex align-items-center">
+                            <div class="score-circle score-excellent me-3">
+                                {{ vendor.score|default:"95" }}
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ vendor.name }}</h6>
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">{{ vendor.specialization }}</small>
+                                    <small class="text-success">
+                                        <i class="fas fa-check-circle me-1"></i>{{ vendor.completion_rate|default:"98" }}%
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="vendor-card" onclick="selectVendor(1)">
+                        <div class="d-flex align-items-center">
+                            <div class="score-circle score-excellent me-3">95</div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ "Premium Wellness Spa"|default:"Loading..." }}</h6>
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">{{ "Wellness & Spa"|default:"Loading..." }}</small>
+                                    <small class="text-success">
+                                        <i class="fas fa-check-circle me-1"></i>98%
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vendor-card" onclick="selectVendor(2)">
+                        <div class="d-flex align-items-center">
+                            <div class="score-circle score-good me-3">92</div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ "Elite Home Care"|default:"Loading..." }}</h6>
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">{{ "Home Care"|default:"Loading..." }}</small>
+                                    <small class="text-success">
+                                        <i class="fas fa-check-circle me-1"></i>95%
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Assignment History -->
+    <div class="row">
+        <div class="col-12">
+            <div class="assignment-card">
+                <div class="card-header bg-transparent border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>{% trans "Recent Assignment Activity" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="assignment-timeline">
+                        {% for activity in recent_activity|default:"" %}
+                        <div class="timeline-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ activity.action }}</strong>
+                                    <p class="mb-1">{{ activity.description }}</p>
+                                    <small class="text-muted">{{ activity.timestamp }}</small>
+                                </div>
+                                <span class="status-badge status-{{ activity.status }}">{{ activity.status|title }}</span>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="timeline-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ "Auto Assignment Complete"|default:"Loading..." }}</strong>
+                                    <p class="mb-1">{{ "Booking #HW-2024-001 assigned to Premium Wellness Spa"|default:"Loading..." }}</p>
+                                    <small class="text-muted">{{ "2 minutes ago"|default:"Loading..." }}</small>
+                                </div>
+                                <span class="status-badge status-assigned">{{ "Assigned"|default:"Loading..." }}</span>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ "Manual Assignment"|default:"Loading..." }}</strong>
+                                    <p class="mb-1">{{ "Booking #HW-2024-002 assigned to Elite Home Care"|default:"Loading..." }}</p>
+                                    <small class="text-muted">{{ "5 minutes ago"|default:"Loading..." }}</small>
+                                </div>
+                                <span class="status-badge status-assigned">{{ "Assigned"|default:"Loading..." }}</span>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ "Assignment Failed"|default:"Loading..." }}</strong>
+                                    <p class="mb-1">{{ "No available vendors for urgent booking #HW-2024-003"|default:"Loading..." }}</p>
+                                    <small class="text-muted">{{ "8 minutes ago"|default:"Loading..." }}</small>
+                                </div>
+                                <span class="status-badge status-failed">{{ "Failed"|default:"Loading..." }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assignment Modal -->
+<div class="modal fade" id="assignmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Assign Vendor" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="vendorSelectionContent">
+                    <!-- Vendor selection content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                <button type="button" class="btn btn-primary" onclick="confirmAssignment()">{% trans "Assign Vendor" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedVendorId = null;
+let selectedBookingId = null;
+
+function runAutoAssignment() {
+    // Show loading state
+    showLoadingState('{% trans "Running auto assignment..." %}');
+    
+    // Make API call
+    fetch('{% url "analytics:auto_assign_pending_bookings" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoadingState();
+        if (data.success) {
+            showSuccessMessage(`{% trans "Successfully assigned" %} ${data.assigned_count} {% trans "bookings" %}`);
+            refreshAssignments();
+        } else {
+            showErrorMessage(data.message || '{% trans "Auto assignment failed" %}');
+        }
+    })
+    .catch(error => {
+        hideLoadingState();
+        showErrorMessage('{% trans "Error running auto assignment" %}');
+    });
+}
+
+function assignVendor(bookingId) {
+    selectedBookingId = bookingId;
+    loadVendorOptions(bookingId);
+    new bootstrap.Modal(document.getElementById('assignmentModal')).show();
+}
+
+function selectVendor(vendorId) {
+    selectedVendorId = vendorId;
+    // Update UI to show selection
+    document.querySelectorAll('.vendor-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+}
+
+function loadVendorOptions(bookingId) {
+    // Load suitable vendors for the booking
+    document.getElementById('vendorSelectionContent').innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> {% trans "Loading vendors..." %}</div>';
+    
+    // Simulate API call
+    setTimeout(() => {
+        document.getElementById('vendorSelectionContent').innerHTML = `
+            <div class="vendor-card" onclick="selectVendorInModal(1)">
+                <div class="d-flex align-items-center">
+                    <div class="score-circle score-excellent me-3">95</div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">Premium Wellness Spa</h6>
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Available: 2 hours</small>
+                            <small class="text-success">Match: 98%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="vendor-card" onclick="selectVendorInModal(2)">
+                <div class="d-flex align-items-center">
+                    <div class="score-circle score-good me-3">89</div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">Elite Wellness Center</h6>
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Available: 4 hours</small>
+                            <small class="text-success">Match: 85%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }, 500);
+}
+
+function selectVendorInModal(vendorId) {
+    selectedVendorId = vendorId;
+    document.querySelectorAll('#vendorSelectionContent .vendor-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+}
+
+function confirmAssignment() {
+    if (!selectedVendorId || !selectedBookingId) {
+        showErrorMessage('{% trans "Please select a vendor" %}');
+        return;
+    }
+    
+    // Make assignment API call
+    showLoadingState('{% trans "Assigning vendor..." %}');
+    
+    setTimeout(() => {
+        hideLoadingState();
+        bootstrap.Modal.getInstance(document.getElementById('assignmentModal')).hide();
+        showSuccessMessage('{% trans "Vendor assigned successfully!" %}');
+        refreshAssignments();
+    }, 1000);
+}
+
+function refreshAssignments() {
+    // Refresh the assignments table
+    showLoadingState('{% trans "Refreshing assignments..." %}');
+    
+    setTimeout(() => {
+        hideLoadingState();
+        // Reload table data
+        window.location.reload();
+    }, 1000);
+}
+
+function showLoadingState(message) {
+    // Create loading overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'loadingOverlay';
+    overlay.innerHTML = `
+        <div class="d-flex align-items-center justify-content-center h-100" style="background: rgba(255,255,255,0.8); position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;">
+            <div class="text-center">
+                <div class="spinner-border text-primary mb-2" role="status"></div>
+                <div>${message}</div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+function hideLoadingState() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+function showSuccessMessage(message) {
+    // Show success toast
+    const toast = document.createElement('div');
+    toast.className = 'toast show';
+    toast.innerHTML = `
+        <div class="toast-body bg-success text-white">
+            <i class="fas fa-check me-2"></i>${message}
+        </div>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function showErrorMessage(message) {
+    // Show error toast
+    const toast = document.createElement('div');
+    toast.className = 'toast show';
+    toast.innerHTML = `
+        <div class="toast-body bg-danger text-white">
+            <i class="fas fa-times me-2"></i>${message}
+        </div>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up filter listeners
+    document.getElementById('priorityFilter').addEventListener('change', function() {
+        // Filter table based on priority
+        const selectedPriority = this.value;
+        // Implementation for filtering would go here
+    });
+});
+</script>
+{% endblock %}

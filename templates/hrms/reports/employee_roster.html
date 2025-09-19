@@ -1,0 +1,398 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block title %}Employee Roster Report - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .report-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+    
+    .filter-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .employee-table {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .table th {
+        background: #f8f9fa;
+        border: none;
+        color: #495057;
+        font-weight: 600;
+        padding: 1rem 0.75rem;
+    }
+    
+    .table td {
+        border: none;
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+    }
+    
+    .table tbody tr {
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .status-badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .export-buttons .btn {
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .print-only {
+        display: none;
+    }
+    
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        
+        .print-only {
+            display: block;
+        }
+        
+        .report-header {
+            background: #333 !important;
+            -webkit-print-color-adjust: exact;
+        }
+        
+        .table {
+            font-size: 12px;
+        }
+        
+        .container-fluid {
+            padding: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Report Header -->
+    <div class="report-header text-center">
+        <h1 class="mb-2">
+            <i class="fas fa-users me-2"></i>
+            Employee Roster Report
+        </h1>
+        <p class="mb-0">Comprehensive list of all active employees</p>
+        <div class="print-only mt-3">
+            <p>Generated on: {{ request.user.get_full_name }} - {% now "F d, Y g:i A" %}</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-card no-print">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="department" class="form-label">Department</label>
+                <select name="department" id="department" class="form-select">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept.id }}" {% if dept.id|stringformat:"s" == selected_department %}selected{% endif %}>
+                            {{ dept.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search Employee</label>
+                <input type="text" name="search" id="search" class="form-control" 
+                       placeholder="Name or Employee ID" value="{{ search_query }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i> Filter
+                    </button>
+                    <a href="{% url 'hrms:employee_roster_report' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-refresh me-1"></i> Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Export Buttons -->
+    <div class="export-buttons mb-3 no-print">
+        <button onclick="window.print()" class="btn btn-outline-primary">
+            <i class="fas fa-print me-1"></i> Print Report
+        </button>
+        <button onclick="exportToExcel()" class="btn btn-outline-success">
+            <i class="fas fa-file-excel me-1"></i> Export to Excel
+        </button>
+        <button onclick="exportToPDF()" class="btn btn-outline-danger">
+            <i class="fas fa-file-pdf me-1"></i> Export to PDF
+        </button>
+    </div>
+
+    <!-- Results Summary -->
+    <div class="mb-3">
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="mb-0">
+                    Total Employees: <span class="text-primary">{{ page_obj.paginator.count }}</span>
+                </h5>
+            </div>
+            <div class="col-md-6 text-end no-print">
+                {% if page_obj.has_other_pages %}
+                    <nav aria-label="Employee pagination">
+                        <ul class="pagination pagination-sm justify-content-end mb-0">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if selected_department %}&department={{ selected_department }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        &laquo; First
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_department %}&department={{ selected_department }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        Previous
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_department %}&department={{ selected_department }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        Next
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if selected_department %}&department={{ selected_department }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        Last &raquo;
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Table -->
+    <div class="employee-table">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="employeeTable">
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Full Name</th>
+                        <th>Department</th>
+                        <th>Position</th>
+                        <th>Grade</th>
+                        <th>Start Date</th>
+                        <th>Contact</th>
+                        <th class="no-print">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                        <tr>
+                            <td>
+                                <strong>{{ employee.employee_id|default:"N/A" }}</strong>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-2">
+                                        {% if employee.profile_picture %}
+                                            <img src="{{ employee.profile_picture.url }}" 
+                                                 alt="{{ employee.user.get_full_name }}"
+                                                 class="rounded-circle" style="width: 32px; height: 32px;">
+                                        {% else %}
+                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                                                 style="width: 32px; height: 32px; font-size: 14px;">
+                                                {{ employee.user.first_name|first }}{{ employee.user.last_name|first }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <strong>{{ employee.user.get_full_name }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ employee.user.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">
+                                    {{ employee.department.name|default:"Unassigned" }}
+                                </span>
+                            </td>
+                            <td>{{ employee.position.title|default:"N/A" }}</td>
+                            <td>{{ employee.grade.name|default:"N/A" }}</td>
+                            <td>
+                                {% if employee.start_date %}
+                                    {{ employee.start_date|date:"M d, Y" }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if employee.phone %}
+                                    <div>
+                                        <i class="fas fa-phone text-muted me-1"></i>
+                                        {{ employee.phone }}
+                                    </div>
+                                {% endif %}
+                                {% if employee.emergency_contact %}
+                                    <div>
+                                        <small class="text-muted">
+                                            Emergency: {{ employee.emergency_contact }}
+                                        </small>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="no-print">
+                                <span class="status-badge status-{{ employee.status }}">
+                                    {{ employee.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fas fa-users fa-3x mb-3"></i>
+                                    <p>No employees found matching your criteria.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bottom Pagination -->
+    {% if page_obj.has_other_pages %}
+        <div class="mt-4 no-print">
+            <nav aria-label="Employee pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if selected_department %}&department={{ selected_department }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                &laquo; First
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_department %}&department={{ selected_department }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                Previous
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if selected_department %}&department={{ selected_department }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_department %}&department={{ selected_department }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                Next
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if selected_department %}&department={{ selected_department }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                Last &raquo;
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function exportToExcel() {
+        // Create a simple CSV export for Excel compatibility
+        let csv = 'Employee ID,Full Name,Department,Position,Grade,Start Date,Phone,Status\n';
+        
+        {% for employee in employees %}
+            csv += '"{{ employee.employee_id|default:"N/A" }}",';
+            csv += '"{{ employee.user.get_full_name }}",';
+            csv += '"{{ employee.department.name|default:"Unassigned" }}",';
+            csv += '"{{ employee.position.title|default:"N/A" }}",';
+            csv += '"{{ employee.grade.name|default:"N/A" }}",';
+            csv += '"{% if employee.start_date %}{{ employee.start_date|date:"Y-m-d" }}{% else %}N/A{% endif %}",';
+            csv += '"{{ employee.phone|default:"" }}",';
+            csv += '"{{ employee.get_status_display }}"\n';
+        {% endfor %}
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'employee_roster_' + new Date().toISOString().split('T')[0] + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+    
+    function exportToPDF() {
+        // Simple PDF export by opening print dialog
+        window.print();
+    }
+    
+    // Auto-submit form when department changes
+    document.getElementById('department').addEventListener('change', function() {
+        this.form.submit();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,622 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load hrms_filters %}
+
+{% block title %}Time & Attendance - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .clock-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        text-align: center;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .clock-time {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .clock-date {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+    
+    .clock-btn {
+        background: rgba(255,255,255,0.2);
+        border: 2px solid rgba(255,255,255,0.3);
+        color: white;
+        font-size: 1.1rem;
+        padding: 12px 30px;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        margin: 5px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .clock-btn:hover {
+        background: rgba(255,255,255,0.3);
+        border-color: rgba(255,255,255,0.5);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .clock-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .status-badge {
+        font-size: 1.1rem;
+        padding: 8px 20px;
+        border-radius: 20px;
+        margin-top: 15px;
+        display: inline-block;
+    }
+    
+    .attendance-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
+    }
+    
+    .attendance-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+    
+    .location-info {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 10px;
+    }
+    
+    .time-display {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-clock"></i> Time & Attendance</h1>
+        <div class="btn-group">
+            <a href="{% url 'hrms:attendance_list' %}" class="btn btn-outline-primary">
+                <i class="fas fa-list"></i> View Records
+            </a>
+            <a href="{% url 'hrms:timesheet' %}" class="btn btn-outline-info">
+                <i class="fas fa-calendar-week"></i> Timesheet
+            </a>
+            {% if user.is_staff %}
+            <a href="{% url 'hrms:attendance_reports' %}" class="btn btn-outline-success">
+                <i class="fas fa-chart-bar"></i> Reports
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Clock In/Out Section -->
+        <div class="col-lg-6">
+            <div class="clock-card">
+                <div class="clock-time" id="currentTime">--:--:--</div>
+                <div class="clock-date" id="currentDate">Loading...</div>
+                
+                {% if employee %}
+                    {% if today_attendance %}
+                        <div class="mt-3">
+                            {% if today_attendance.check_in and not today_attendance.check_out %}
+                                <div class="status-badge bg-success">
+                                    <i class="fas fa-clock"></i> Clocked In at {{ today_attendance.check_in|time:"H:i" }}
+                                </div>
+                            {% elif today_attendance.check_in and today_attendance.check_out %}
+                                <div class="status-badge bg-primary">
+                                    <i class="fas fa-check-circle"></i> Work Complete ({{ today_attendance.duration_display }})
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button class="btn clock-btn" id="clockInBtn" 
+                                    {% if today_attendance.check_in %}disabled{% endif %}>
+                                <i class="fas fa-sign-in-alt"></i> Clock In
+                            </button>
+                            <button class="btn clock-btn" id="clockOutBtn" 
+                                    {% if not today_attendance.check_in or today_attendance.check_out %}disabled{% endif %}>
+                                <i class="fas fa-sign-out-alt"></i> Clock Out
+                            </button>
+                        </div>
+                        
+                        {% if today_attendance.check_in %}
+                        <div class="location-info mt-3">
+                            <i class="fas fa-map-marker-alt"></i> Location tracking enabled
+                            {% if today_attendance.is_remote %}
+                                <span class="badge bg-info ms-2">Remote Work</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="mt-4">
+                            <button class="btn clock-btn" id="clockInBtn">
+                                <i class="fas fa-sign-in-alt"></i> Clock In
+                            </button>
+                            <button class="btn clock-btn" id="clockOutBtn" disabled>
+                                <i class="fas fa-sign-out-alt"></i> Clock Out
+                            </button>
+                        </div>
+                        <div class="location-info mt-3">
+                            <i class="fas fa-info-circle"></i> Click Clock In to start your workday
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="status-badge bg-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Employee profile required
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Today's Summary -->
+        <div class="col-lg-6">
+            <div class="card attendance-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-day"></i> Today's Summary</h5>
+                </div>
+                <div class="card-body">
+                    {% if today_attendance %}
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="stat-icon text-success">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                </div>
+                                <h6>Check In</h6>
+                                <div class="time-display">
+                                    {{ today_attendance.check_in|time:"H:i"|default:"--:--" }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="stat-icon text-danger">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                </div>
+                                <h6>Check Out</h6>
+                                <div class="time-display">
+                                    {{ today_attendance.check_out|time:"H:i"|default:"--:--" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h6>Hours Worked</h6>
+                                <div class="h4 text-primary">{{ today_attendance.duration_display }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h6>Status</h6>
+                                <span class="badge 
+                                    {% if today_attendance.status == 'present' %}bg-success
+                                    {% elif today_attendance.status == 'late' %}bg-warning
+                                    {% elif today_attendance.status == 'early_departure' %}bg-info
+                                    {% elif today_attendance.status == 'remote' %}bg-primary
+                                    {% else %}bg-secondary
+                                    {% endif %}">
+                                    {{ today_attendance.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if today_attendance.overtime_hours > 0 %}
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-clock"></i> 
+                        Overtime: <strong>{{ today_attendance.overtime_hours }} hours</strong>
+                    </div>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                        <p>No attendance record for today</p>
+                        <small>Clock in to start tracking your time</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if user.is_staff %}
+    <!-- Admin Dashboard Stats -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card attendance-card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5>Present Today</h5>
+                            <h2>{{ present_today }}</h2>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card attendance-card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5>Absent Today</h5>
+                            <h2>{{ absent_today }}</h2>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-user-times"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card attendance-card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5>Late Today</h5>
+                            <h2>{{ late_today }}</h2>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card attendance-card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5>Pending Requests</h5>
+                            <h2>{{ pending_requests }}</h2>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Attendance Activity -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card attendance-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-history"></i> Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_attendance %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Check In</th>
+                                    <th>Check Out</th>
+                                    <th>Status</th>
+                                    <th>Hours</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in recent_attendance %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                {{ record.employee.user.first_name|first }}{{ record.employee.user.last_name|first }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">{{ record.employee.user.get_full_name }}</div>
+                                                <small class="text-muted">{{ record.employee.employee_id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="time-display">{{ record.check_in|time:"H:i"|default:"--:--" }}</td>
+                                    <td class="time-display">{{ record.check_out|time:"H:i"|default:"--:--" }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if record.status == 'present' %}bg-success
+                                            {% elif record.status == 'late' %}bg-warning
+                                            {% elif record.status == 'early_departure' %}bg-info
+                                            {% elif record.status == 'remote' %}bg-primary
+                                            {% else %}bg-secondary
+                                            {% endif %}">
+                                            {{ record.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="time-display">{{ record.duration_display }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                        <p>No recent activity</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card attendance-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="{% url 'hrms:attendance_request_create' %}" class="btn btn-outline-primary w-100 mb-2">
+                                <i class="fas fa-plus"></i> Request Adjustment
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'hrms:timesheet' %}" class="btn btn-outline-info w-100 mb-2">
+                                <i class="fas fa-calendar-week"></i> View Timesheet
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'hrms:attendance_requests' %}" class="btn btn-outline-warning w-100 mb-2">
+                                <i class="fas fa-clipboard-list"></i> My Requests
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'hrms:attendance_list' %}" class="btn btn-outline-success w-100 mb-2">
+                                <i class="fas fa-history"></i> History
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Location Permission Modal -->
+<div class="modal fade" id="locationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Location Access</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>We need access to your location to verify your attendance. This helps ensure accurate time tracking.</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Your location data is only used for attendance verification and is not shared.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="allowLocationBtn">Allow Location</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Update clock every second
+    function updateClock() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { 
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        const dateString = now.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        $('#currentTime').text(timeString);
+        $('#currentDate').text(dateString);
+    }
+    
+    // Update clock immediately and then every second
+    updateClock();
+    setInterval(updateClock, 1000);
+    
+    // Location variables
+    let userLocation = null;
+    let locationWatchId = null;
+    
+    // Get user location
+    function getCurrentLocation() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject(new Error('Geolocation is not supported'));
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                position => resolve(position),
+                error => reject(error),
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 }
+            );
+        });
+    }
+    
+    // Clock In/Out functionality
+    async function handleClockAction(action) {
+        const btn = $(`#${action}Btn`);
+        const originalText = btn.html();
+        
+        // Show loading
+        btn.prop('disabled', true);
+        btn.html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+        
+        try {
+            // Get location if available
+            let locationData = {};
+            try {
+                const position = await getCurrentLocation();
+                locationData = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy
+                };
+                
+                // Reverse geocoding (optional - you can implement this)
+                // locationData.address = await reverseGeocode(latitude, longitude);
+            } catch (locationError) {
+                console.log('Location access denied or unavailable:', locationError);
+                // Continue without location
+            }
+            
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('action', action);
+            formData.append('csrfmiddlewaretoken', $('[name=csrfmiddlewaretoken]').val());
+            
+            // Add location data if available
+            if (locationData.latitude) {
+                formData.append('latitude', locationData.latitude);
+                formData.append('longitude', locationData.longitude);
+                formData.append('accuracy', locationData.accuracy);
+            }
+            
+            // Send request
+            const response = await fetch('{% url "hrms:clock_inout" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Show success message
+                showAlert(data.message, 'success');
+                
+                // Update UI
+                if (action === 'clockIn') {
+                    $('#clockInBtn').prop('disabled', true);
+                    $('#clockOutBtn').prop('disabled', false);
+                } else {
+                    $('#clockOutBtn').prop('disabled', true);
+                }
+                
+                // Reload page after 2 seconds to show updated data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                showAlert(data.message, 'error');
+            }
+            
+        } catch (error) {
+            console.error('Clock action error:', error);
+            showAlert('An error occurred. Please try again.', 'error');
+        } finally {
+            // Restore button
+            btn.prop('disabled', false);
+            btn.html(originalText);
+        }
+    }
+    
+    // Clock button handlers
+    $('#clockInBtn').click(() => handleClockAction('clock_in'));
+    $('#clockOutBtn').click(() => handleClockAction('clock_out'));
+    
+    // Location modal handlers
+    $('#allowLocationBtn').click(async function() {
+        try {
+            await getCurrentLocation();
+            $('#locationModal').modal('hide');
+        } catch (error) {
+            console.error('Location permission error:', error);
+            showAlert('Location access is required for attendance tracking.', 'warning');
+        }
+    });
+    
+    // Utility function for showing alerts
+    function showAlert(message, type) {
+        const alertClass = type === 'success' ? 'alert-success' : 
+                          type === 'error' ? 'alert-danger' : 
+                          type === 'warning' ? 'alert-warning' : 'alert-info';
+        
+        const alertHtml = `
+            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 
+                                   type === 'error' ? 'exclamation-circle' : 
+                                   type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        $('.container-fluid').prepend(alertHtml);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            $('.alert').first().fadeOut();
+        }, 5000);
+    }
+    
+    // Add CSRF token to all AJAX requests
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                xhr.setRequestHeader("X-CSRFToken", $('[name=csrfmiddlewaretoken]').val());
+            }
+        }
+    });
+});
+</script>
+
+<!-- Add CSRF token -->
+{% csrf_token %}
+{% endblock %}

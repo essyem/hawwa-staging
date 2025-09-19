@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Request Attendance Correction - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .request-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 0.5rem;
+    }
+    
+    .form-card {
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-edit text-primary"></i> Request Attendance Correction
+                    </h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'hrms:dashboard' %}">HRMS</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'hrms:attendance_dashboard' %}">Attendance</a></li>
+                            <li class="breadcrumb-item active">Request Correction</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="{% url 'hrms:attendance_dashboard' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Back to Attendance
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card form-card">
+                <div class="card-header request-card">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clipboard-list"></i> Attendance Correction Request
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="requestForm">
+                        {% csrf_token %}
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="date" class="form-label">Date</label>
+                                <input type="date" name="date" id="date" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="request_type" class="form-label">Request Type</label>
+                                <select name="request_type" id="request_type" class="form-select" required>
+                                    <option value="">Select Type</option>
+                                    <option value="missing_check_in">Missing Check In</option>
+                                    <option value="missing_check_out">Missing Check Out</option>
+                                    <option value="wrong_time">Wrong Time</option>
+                                    <option value="absent_correction">Absent Correction</option>
+                                    <option value="late_correction">Late Correction</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="check_in_time" class="form-label">Correct Check In Time</label>
+                                <input type="time" name="check_in_time" id="check_in_time" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="check_out_time" class="form-label">Correct Check Out Time</label>
+                                <input type="time" name="check_out_time" id="check_out_time" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="mb-3 mt-3">
+                            <label for="reason" class="form-label">Reason for Request</label>
+                            <textarea name="reason" id="reason" class="form-control" rows="4" 
+                                      placeholder="Please explain why this correction is needed..." required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="supporting_document" class="form-label">Supporting Document (Optional)</label>
+                            <input type="file" name="supporting_document" id="supporting_document" class="form-control"
+                                   accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                            <div class="form-text">Upload any supporting documents (medical certificate, travel documents, etc.)</div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'hrms:attendance_dashboard' %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Submit Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set today as default date
+    const dateInput = document.getElementById('date');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+    
+    // Set max date to today
+    dateInput.max = today;
+    
+    // Handle request type change
+    const requestType = document.getElementById('request_type');
+    const checkInTime = document.getElementById('check_in_time');
+    const checkOutTime = document.getElementById('check_out_time');
+    
+    requestType.addEventListener('change', function() {
+        const value = this.value;
+        
+        // Reset required attributes
+        checkInTime.required = false;
+        checkOutTime.required = false;
+        
+        // Set required based on request type
+        switch(value) {
+            case 'missing_check_in':
+                checkInTime.required = true;
+                break;
+            case 'missing_check_out':
+                checkOutTime.required = true;
+                break;
+            case 'wrong_time':
+                checkInTime.required = true;
+                checkOutTime.required = true;
+                break;
+            case 'absent_correction':
+                checkInTime.required = true;
+                checkOutTime.required = true;
+                break;
+        }
+    });
+});
+</script>
+{% endblock %}

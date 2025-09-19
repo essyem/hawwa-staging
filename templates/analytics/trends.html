@@ -1,0 +1,452 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Performance Trends - Analytics - Hawwa{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-card {
+        border: none;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        transition: var(--transition-normal);
+        background: var(--card-bg);
+        color: var(--text-primary);
+    }
+    
+    .analytics-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 400px;
+        padding: 1rem;
+    }
+    
+    .trend-indicator {
+        font-size: 0.875rem;
+        font-weight: 600;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-sm);
+    }
+    
+    .trend-up {
+        background: rgba(5, 150, 105, 0.1);
+        color: var(--success);
+    }
+    
+    .trend-down {
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--error);
+    }
+    
+    .trend-stable {
+        background: rgba(107, 114, 128, 0.1);
+        color: var(--text-secondary);
+    }
+    
+    .metric-card {
+        background: linear-gradient(135deg, var(--card-bg) 0%, var(--card-bg-secondary) 100%);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid var(--card-border);
+    }
+    
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--qatar-maroon);
+    }
+    
+    .metric-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">{% trans "Performance Trends" %}</h1>
+            <p class="text-muted mb-0">{% trans "Analyze vendor performance and booking trends over time" %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <select id="timeRangeSelect" class="form-select" style="width: auto;">
+                <option value="7">{% trans "Last 7 Days" %}</option>
+                <option value="30" selected>{% trans "Last 30 Days" %}</option>
+                <option value="90">{% trans "Last 3 Months" %}</option>
+                <option value="365">{% trans "Last Year" %}</option>
+            </select>
+            <button class="btn btn-outline-primary" onclick="refreshTrends()">
+                <i class="fas fa-sync-alt me-1"></i>{% trans "Refresh" %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-value" id="avgBookingTime">{{ avg_booking_time|default:"2.4" }}</div>
+                <div class="metric-label">{% trans "Avg Response Time (hrs)" %}</div>
+                <div class="trend-indicator trend-up mt-2">
+                    <i class="fas fa-arrow-up me-1"></i>{% trans "12% faster" %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-value" id="completionRate">{{ completion_rate|default:"94" }}%</div>
+                <div class="metric-label">{% trans "Completion Rate" %}</div>
+                <div class="trend-indicator trend-up mt-2">
+                    <i class="fas fa-arrow-up me-1"></i>{% trans "5% increase" %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-value" id="avgRating">{{ avg_rating|default:"4.7" }}</div>
+                <div class="metric-label">{% trans "Average Rating" %}</div>
+                <div class="trend-indicator trend-stable mt-2">
+                    <i class="fas fa-minus me-1"></i>{% trans "Stable" %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-value" id="totalRevenue">${{ total_revenue|default:"24,560" }}</div>
+                <div class="metric-label">{% trans "Revenue" %}</div>
+                <div class="trend-indicator trend-up mt-2">
+                    <i class="fas fa-arrow-up me-1"></i>{% trans "18% growth" %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Booking Trends Chart -->
+        <div class="col-lg-8 mb-4">
+            <div class="card analytics-card">
+                <div class="card-header d-flex justify-content-between align-items-center bg-transparent border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>{% trans "Booking Trends" %}
+                    </h6>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" name="chartType" id="lineChart" checked>
+                        <label class="btn btn-outline-primary" for="lineChart">{% trans "Line" %}</label>
+                        <input type="radio" class="btn-check" name="chartType" id="barChart">
+                        <label class="btn btn-outline-primary" for="barChart">{% trans "Bar" %}</label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="bookingTrendsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Type Distribution -->
+        <div class="col-lg-4 mb-4">
+            <div class="card analytics-card">
+                <div class="card-header bg-transparent border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>{% trans "Service Distribution" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="serviceDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics Row -->
+    <div class="row mb-4">
+        <!-- Vendor Performance Comparison -->
+        <div class="col-lg-6 mb-4">
+            <div class="card analytics-card">
+                <div class="card-header bg-transparent border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-users me-2"></i>{% trans "Top Performing Vendors" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Vendor" %}</th>
+                                    <th>{% trans "Bookings" %}</th>
+                                    <th>{% trans "Rating" %}</th>
+                                    <th>{% trans "Revenue" %}</th>
+                                    <th>{% trans "Trend" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vendorPerformanceTable">
+                                {% for vendor in top_vendors|default:"" %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-2">{{ vendor.name|first }}</div>
+                                            <span>{{ vendor.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-primary">{{ vendor.bookings }}</span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <span class="me-1">{{ vendor.rating }}</span>
+                                            <div class="star-rating-sm">
+                                                {% for i in "12345" %}
+                                                    <i class="fas fa-star {% if forloop.counter <= vendor.rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>${{ vendor.revenue }}</td>
+                                    <td>
+                                        <span class="trend-indicator trend-up">
+                                            <i class="fas fa-arrow-up"></i>
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td>{{ "Premium Wellness Spa"|default:"Loading..." }}</td>
+                                    <td><span class="badge bg-primary">{{ "247"|default:"..." }}</span></td>
+                                    <td>{{ "4.9"|default:"..." }}</td>
+                                    <td>${{ "12,450"|default:"..." }}</td>
+                                    <td><span class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i></span></td>
+                                </tr>
+                                <tr>
+                                    <td>{{ "Elite Home Care"|default:"Loading..." }}</td>
+                                    <td><span class="badge bg-primary">{{ "198"|default:"..." }}</span></td>
+                                    <td>{{ "4.8"|default:"..." }}</td>
+                                    <td>${{ "8,920"|default:"..." }}</td>
+                                    <td><span class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i></span></td>
+                                </tr>
+                                <tr>
+                                    <td>{{ "Luxury Retreat"|default:"Loading..." }}</td>
+                                    <td><span class="badge bg-primary">{{ "156"|default:"..." }}</span></td>
+                                    <td>{{ "4.7"|default:"..." }}</td>
+                                    <td>${{ "7,230"|default:"..." }}</td>
+                                    <td><span class="trend-indicator trend-stable"><i class="fas fa-minus"></i></span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Satisfaction Trends -->
+        <div class="col-lg-6 mb-4">
+            <div class="card analytics-card">
+                <div class="card-header bg-transparent border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-heart me-2"></i>{% trans "Customer Satisfaction" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="satisfactionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export and Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card analytics-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">{% trans "Export Trends Data" %}</h6>
+                            <p class="text-muted mb-0">{% trans "Download performance trends for further analysis" %}</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-success" onclick="exportTrends('excel')">
+                                <i class="fas fa-file-excel me-1"></i>{% trans "Excel" %}
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="exportTrends('pdf')">
+                                <i class="fas fa-file-pdf me-1"></i>{% trans "PDF" %}
+                            </button>
+                            <button class="btn btn-outline-info" onclick="exportTrends('csv')">
+                                <i class="fas fa-file-csv me-1"></i>{% trans "CSV" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize charts
+    initializeBookingTrendsChart();
+    initializeServiceDistributionChart();
+    initializeSatisfactionChart();
+    
+    // Set up event listeners
+    document.getElementById('timeRangeSelect').addEventListener('change', refreshTrends);
+    document.querySelectorAll('input[name="chartType"]').forEach(radio => {
+        radio.addEventListener('change', updateChartType);
+    });
+});
+
+let bookingTrendsChart, serviceDistributionChart, satisfactionChart;
+
+function initializeBookingTrendsChart() {
+    const ctx = document.getElementById('bookingTrendsChart').getContext('2d');
+    bookingTrendsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+            datasets: [{
+                label: 'Bookings',
+                data: [65, 59, 80, 81, 56, 55, 70],
+                borderColor: 'rgb(141, 21, 56)',
+                backgroundColor: 'rgba(141, 21, 56, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Completed',
+                data: [60, 55, 75, 77, 52, 50, 65],
+                borderColor: 'rgb(30, 58, 138)',
+                backgroundColor: 'rgba(30, 58, 138, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function initializeServiceDistributionChart() {
+    const ctx = document.getElementById('serviceDistributionChart').getContext('2d');
+    serviceDistributionChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Wellness', 'Home Care', 'Accommodation', 'Nutrition'],
+            datasets: [{
+                data: [35, 30, 20, 15],
+                backgroundColor: [
+                    'rgb(141, 21, 56)',
+                    'rgb(30, 58, 138)',
+                    'rgb(5, 150, 105)',
+                    'rgb(217, 119, 6)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+}
+
+function initializeSatisfactionChart() {
+    const ctx = document.getElementById('satisfactionChart').getContext('2d');
+    satisfactionChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Satisfaction Score',
+                data: [4.5, 4.7, 4.6, 4.8],
+                backgroundColor: 'rgba(141, 21, 56, 0.8)',
+                borderColor: 'rgb(141, 21, 56)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5
+                }
+            }
+        }
+    });
+}
+
+function refreshTrends() {
+    // Show loading state
+    showLoadingState();
+    
+    // Simulate API call
+    setTimeout(() => {
+        hideLoadingState();
+        // Update charts with new data
+        updateChartsData();
+    }, 1000);
+}
+
+function updateChartType() {
+    const selectedType = document.querySelector('input[name="chartType"]:checked').id;
+    const newType = selectedType === 'lineChart' ? 'line' : 'bar';
+    
+    if (bookingTrendsChart) {
+        bookingTrendsChart.config.type = newType;
+        bookingTrendsChart.update();
+    }
+}
+
+function exportTrends(format) {
+    // Simulate export functionality
+    alert(`Exporting trends data as ${format.toUpperCase()}...`);
+}
+
+function showLoadingState() {
+    document.querySelector('.container-fluid').style.opacity = '0.7';
+}
+
+function hideLoadingState() {
+    document.querySelector('.container-fluid').style.opacity = '1';
+}
+
+function updateChartsData() {
+    // Update with new data from API
+    console.log('Charts updated with new data');
+}
+</script>
+{% endblock %}

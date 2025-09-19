@@ -1,0 +1,415 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Custom Reports - HRMS{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'hrms/css/reports.css' %}" rel="stylesheet">
+<style>
+    .report-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .report-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .report-type-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">Custom Reports</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'hrms:dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'hrms:reports' %}">Reports</a></li>
+                            <li class="breadcrumb-item active">Custom Reports</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="{% url 'hrms:custom_report_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create New Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Total Reports</h5>
+                            <h2 class="mb-0">{{ total_reports }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-bar fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">My Reports</h5>
+                            <h2 class="mb-0">{{ my_reports }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-chart fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Public Reports</h5>
+                            <h2 class="mb-0">{{ reports|length }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-globe fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Scheduled Reports</h5>
+                            <h2 class="mb-0">5</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="fas fa-filter"></i> Filter Reports</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row">
+                        <div class="col-md-3">
+                            <label for="report_type" class="form-label">Report Type</label>
+                            <select name="report_type" id="report_type" class="form-select">
+                                <option value="">All Types</option>
+                                <option value="employee">Employee Reports</option>
+                                <option value="payroll">Payroll Reports</option>
+                                <option value="attendance">Attendance Reports</option>
+                                <option value="leave">Leave Reports</option>
+                                <option value="training">Training Reports</option>
+                                <option value="performance">Performance Reports</option>
+                                <option value="custom">Custom Reports</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="created_by" class="form-label">Created By</label>
+                            <select name="created_by" id="created_by" class="form-select">
+                                <option value="">All Users</option>
+                                <option value="me">My Reports</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" name="search" id="search" class="form-control" placeholder="Search reports...">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i> Filter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Grid -->
+    <div class="row">
+        {% for report in reports %}
+        <div class="col-md-4 mb-4">
+            <div class="card report-card position-relative">
+                <div class="report-type-badge">
+                    {% if report.report_type == 'employee' %}
+                    <span class="badge bg-primary">Employee</span>
+                    {% elif report.report_type == 'payroll' %}
+                    <span class="badge bg-success">Payroll</span>
+                    {% elif report.report_type == 'attendance' %}
+                    <span class="badge bg-warning">Attendance</span>
+                    {% elif report.report_type == 'leave' %}
+                    <span class="badge bg-info">Leave</span>
+                    {% elif report.report_type == 'training' %}
+                    <span class="badge bg-secondary">Training</span>
+                    {% elif report.report_type == 'performance' %}
+                    <span class="badge bg-danger">Performance</span>
+                    {% else %}
+                    <span class="badge bg-dark">Custom</span>
+                    {% endif %}
+                </div>
+                
+                <div class="card-body">
+                    <h5 class="card-title">{{ report.name }}</h5>
+                    <p class="card-text text-muted">{{ report.description|truncatechars:100 }}</p>
+                    
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <small class="text-muted">Fields</small>
+                            <div class="fw-bold">{{ report.fields|length|default:0 }}</div>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">Exports</small>
+                            <div class="fw-bold">{{ report.export_formats|length|default:0 }}</div>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">Version</small>
+                            <div class="fw-bold">{{ report.version }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-user"></i> {{ report.created_by.get_full_name|default:report.created_by.username }}
+                            <br>
+                            <i class="fas fa-calendar"></i> {{ report.created_at|date:"M d, Y" }}
+                        </small>
+                    </div>
+                    
+                    {% if report.is_public %}
+                    <div class="mb-2">
+                        <span class="badge bg-success"><i class="fas fa-globe"></i> Public</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-footer bg-transparent">
+                    <div class="btn-group w-100" role="group">
+                        <a href="{% url 'hrms:custom_report_view' report.pk %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="runReport({{ report.pk }})">
+                            <i class="fas fa-play"></i> Run
+                        </button>
+                        {% if report.created_by == request.user or request.user.is_superuser %}
+                        <a href="#" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No custom reports found</h4>
+                <p class="text-muted">Create your first custom report to get started.</p>
+                <a href="{% url 'hrms:custom_report_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create Custom Report
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Reports pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Run Report Modal -->
+<div class="modal fade" id="runReportModal" tabindex="-1" aria-labelledby="runReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="runReportModalLabel">Run Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="runReportForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="export_format" class="form-label">Export Format</label>
+                            <select name="export_format" id="export_format" class="form-select" required>
+                                <option value="csv">CSV</option>
+                                <option value="excel">Excel</option>
+                                <option value="pdf">PDF</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="period" class="form-label">Period</label>
+                            <select name="period" id="period" class="form-select">
+                                <option value="current_month">Current Month</option>
+                                <option value="last_month">Last Month</option>
+                                <option value="current_quarter">Current Quarter</option>
+                                <option value="last_quarter">Last Quarter</option>
+                                <option value="current_year">Current Year</option>
+                                <option value="last_year">Last Year</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-cog fa-spin d-none" id="loadingIcon"></i>
+                            <i class="fas fa-download" id="downloadIcon"></i>
+                            Generate Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentReportId = null;
+
+function runReport(reportId) {
+    currentReportId = reportId;
+    $('#runReportModal').modal('show');
+}
+
+$('#runReportForm').on('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        template_id: currentReportId,
+        format: $('#export_format').val(),
+        period: $('#period').val(),
+        report_type: 'custom'
+    };
+    
+    // Show loading state
+    $('#loadingIcon').removeClass('d-none');
+    $('#downloadIcon').addClass('d-none');
+    
+    $.ajax({
+        url: '{% url "hrms:export_report_ajax" %}',
+        method: 'POST',
+        data: JSON.stringify(formData),
+        contentType: 'application/json',
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(response) {
+            if (response.success) {
+                // Hide modal
+                $('#runReportModal').modal('hide');
+                
+                // Download the file
+                window.open(response.download_url, '_blank');
+                
+                // Show success message
+                showAlert('success', 'Report generated successfully!');
+            } else {
+                showAlert('danger', 'Error: ' + response.error);
+            }
+        },
+        error: function() {
+            showAlert('danger', 'An error occurred while generating the report.');
+        },
+        complete: function() {
+            // Hide loading state
+            $('#loadingIcon').addClass('d-none');
+            $('#downloadIcon').removeClass('d-none');
+        }
+    });
+});
+
+function showAlert(type, message) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    
+    // Remove existing alerts
+    $('.alert').remove();
+    
+    // Add new alert at the top of the container
+    $('.container-fluid').prepend(alertHtml);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+
+// Auto-submit filter form
+$('#report_type, #created_by').change(function() {
+    $(this).closest('form').submit();
+});
+</script>
+{% endblock %}

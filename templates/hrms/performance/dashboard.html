@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Performance Dashboard - HRMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-chart-line"></i> Performance Dashboard</h1>
+    {% if user.is_staff %}
+    <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-plus"></i> New Review
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Individual Review</a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-users"></i> Team Review</a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-bullseye"></i> Goal Setting</a></li>
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Performance Overview -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Overall Rating</h5>
+                        <h3>{{ user_performance.overall_rating|default:"4.2" }}/5.0</h3>
+                    </div>
+                    <i class="fas fa-star fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Goals Achieved</h5>
+                        <h3>{{ goals_achieved|default:"8" }}/{{ total_goals|default:"10" }}</h3>
+                    </div>
+                    <i class="fas fa-bullseye fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Pending Reviews</h5>
+                        <h3>{{ pending_reviews|default:"2" }}</h3>
+                    </div>
+                    <i class="fas fa-clipboard-list fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Team Average</h5>
+                        <h3>{{ team_average|default:"4.0" }}/5.0</h3>
+                    </div>
+                    <i class="fas fa-users fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Performance Trends -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-chart-area"></i> Performance Trends</h5>
+                <div class="btn-group btn-group-sm" role="group">
+                    <input type="radio" class="btn-check" name="period" id="period6m" checked>
+                    <label class="btn btn-outline-primary" for="period6m">6M</label>
+                    
+                    <input type="radio" class="btn-check" name="period" id="period1y">
+                    <label class="btn btn-outline-primary" for="period1y">1Y</label>
+                    
+                    <input type="radio" class="btn-check" name="period" id="period2y">
+                    <label class="btn btn-outline-primary" for="period2y">2Y</label>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart" height="300"></canvas>
+            </div>
+        </div>
+        
+        <!-- Recent Reviews -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-history"></i> Recent Performance Reviews</h5>
+                <a href="{% url 'hrms:performance_reviews' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_reviews %}
+                    {% for review in recent_reviews %}
+                    <div class="d-flex align-items-center mb-3 p-3 border rounded">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 50px; height: 50px;">
+                                <i class="fas fa-clipboard-check text-white"></i>
+                            </div>
+                        </div>
+                        <div class="ms-3 flex-grow-1">
+                            <h6 class="mb-1">{{ review.title|default:"Performance Review" }}</h6>
+                            <p class="mb-1 text-muted">Reviewer: {{ review.reviewer.get_full_name }}</p>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> {{ review.review_date|date:"M d, Y" }}
+                                <i class="fas fa-star ms-2"></i> {{ review.overall_rating }}/5.0
+                            </small>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <span class="badge 
+                                {% if review.status == 'completed' %}bg-success
+                                {% elif review.status == 'in_progress' %}bg-warning
+                                {% else %}bg-secondary{% endif %}">
+                                {{ review.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-clipboard fa-3x text-muted mb-3"></i>
+                        <h5>No Recent Reviews</h5>
+                        <p class="text-muted">No performance reviews have been conducted recently.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Goals and Actions -->
+    <div class="col-lg-4">
+        <!-- Current Goals -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-bullseye"></i> Current Goals</h5>
+                <a href="#" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-plus"></i> Add Goal
+                </a>
+            </div>
+            <div class="card-body">
+                {% if current_goals %}
+                    {% for goal in current_goals %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <small class="fw-bold">{{ goal.title }}</small>
+                            <span class="badge 
+                                {% if goal.progress >= 100 %}bg-success
+                                {% elif goal.progress >= 75 %}bg-info
+                                {% elif goal.progress >= 50 %}bg-warning
+                                {% else %}bg-danger{% endif %}">
+                                {{ goal.progress }}%
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar 
+                                {% if goal.progress >= 100 %}bg-success
+                                {% elif goal.progress >= 75 %}bg-info
+                                {% elif goal.progress >= 50 %}bg-warning
+                                {% else %}bg-danger{% endif %}" 
+                                style="width: {{ goal.progress }}%">
+                            </div>
+                        </div>
+                        <small class="text-muted">Due: {{ goal.due_date|date:"M d, Y" }}</small>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-bullseye fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">No active goals</p>
+                        <a href="#" class="btn btn-sm btn-primary mt-2">
+                            Set Goals
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Action Items -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tasks"></i> Action Items</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-bold">Complete Q4 Self-Assessment</div>
+                            <small class="text-muted">Due in 3 days</small>
+                        </div>
+                        <span class="badge bg-warning">Pending</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-bold">Schedule 1:1 with Manager</div>
+                            <small class="text-muted">This week</small>
+                        </div>
+                        <span class="badge bg-info">In Progress</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-bold">Update Development Plan</div>
+                            <small class="text-muted">Monthly review</small>
+                        </div>
+                        <span class="badge bg-secondary">Upcoming</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Performance Insights -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Performance Insights</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-chart-line"></i> 
+                    <strong>Trending Up:</strong> Your performance has improved by 15% this quarter.
+                </div>
+                <div class="alert alert-success">
+                    <i class="fas fa-trophy"></i> 
+                    <strong>Top Performer:</strong> You're in the top 20% of your department.
+                </div>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <strong>Focus Area:</strong> Consider improving communication skills.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Performance Chart
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'My Performance',
+                data: [3.8, 4.0, 4.1, 4.2, 4.3, 4.2],
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Team Average',
+                data: [3.9, 3.8, 3.9, 4.0, 4.0, 4.0],
+                borderColor: '#6c757d',
+                backgroundColor: 'rgba(108, 117, 125, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

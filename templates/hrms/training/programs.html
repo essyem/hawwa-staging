@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Training Programs - HRMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-book"></i> Training Programs</h1>
+    {% if user.is_staff %}
+    <a href="{% url 'hrms:training_program_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Program
+    </a>
+    {% endif %}
+</div>
+
+<!-- Filters and Search -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search Programs</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       placeholder="Search by title or description..." value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-3">
+                <label for="category" class="form-label">Category</label>
+                <select class="form-select" id="category" name="category">
+                    <option value="">All Categories</option>
+                    <option value="leadership" {% if request.GET.category == 'leadership' %}selected{% endif %}>Leadership</option>
+                    <option value="technical" {% if request.GET.category == 'technical' %}selected{% endif %}>Technical Skills</option>
+                    <option value="communication" {% if request.GET.category == 'communication' %}selected{% endif %}>Communication</option>
+                    <option value="safety" {% if request.GET.category == 'safety' %}selected{% endif %}>Safety</option>
+                    <option value="compliance" {% if request.GET.category == 'compliance' %}selected{% endif %}>Compliance</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Status</option>
+                    <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="upcoming" {% if request.GET.status == 'upcoming' %}selected{% endif %}>Upcoming</option>
+                    <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Programs Grid -->
+<div class="row">
+    {% if training_programs %}
+        {% for program in training_programs %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100">
+                {% if program.image %}
+                <img src="{{ program.image.url }}" class="card-img-top" alt="{{ program.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="fas fa-graduation-cap fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title">{{ program.title }}</h5>
+                        <span class="badge 
+                            {% if program.status == 'active' %}bg-success
+                            {% elif program.status == 'upcoming' %}bg-warning
+                            {% else %}bg-secondary{% endif %}">
+                            {{ program.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <p class="card-text text-muted">{{ program.description|truncatewords:20 }}</p>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-clock"></i> {{ program.duration }} hours
+                            <span class="ms-2">
+                                <i class="fas fa-users"></i> {{ program.enrollments.count }} enrolled
+                            </span>
+                        </small>
+                    </div>
+                    
+                    {% if program.category %}
+                    <div class="mb-3">
+                        <span class="badge bg-light text-dark">{{ program.category }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-auto">
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'hrms:training_program_detail' program.pk %}" 
+                               class="btn btn-outline-primary flex-grow-1">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                            {% if program.status == 'active' %}
+                            <a href="{% url 'hrms:training_enroll' program.pk %}" 
+                               class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i> Enroll
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if program.next_session %}
+                <div class="card-footer">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar"></i> Next session: {{ program.next_session.start_date|date:"M d, Y" }}
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-book fa-4x text-muted mb-3"></i>
+                    <h4>No Training Programs Found</h4>
+                    <p class="text-muted">
+                        {% if request.GET.search or request.GET.category or request.GET.status %}
+                            No programs match your search criteria. Try adjusting your filters.
+                        {% else %}
+                            There are no training programs available at the moment.
+                        {% endif %}
+                    </p>
+                    {% if request.GET.search or request.GET.category or request.GET.status %}
+                    <a href="{% url 'hrms:training_programs' %}" class="btn btn-primary">
+                        <i class="fas fa-refresh"></i> Clear Filters
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Pagination -->
+{% if training_programs.has_other_pages %}
+<nav aria-label="Training programs pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if training_programs.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ training_programs.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </a>
+            </li>
+        {% endif %}
+        
+        {% for num in training_programs.paginator.page_range %}
+            {% if training_programs.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > training_programs.number|add:'-3' and num < training_programs.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if training_programs.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ training_programs.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                    Next <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

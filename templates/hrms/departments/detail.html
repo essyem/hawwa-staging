@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ department.name }} - Department Details{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">{{ department.name }}</h1>
+    <div class="btn-group" role="group">
+        <a href="{% url 'hrms:department_update' department.pk %}" class="btn btn-warning btn-sm">
+            <i class="fas fa-edit fa-sm text-white-50"></i> Edit Department
+        </a>
+        <a href="{% url 'hrms:department_list' %}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to List
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Department Information -->
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Department Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Department Name</label>
+                            <h5>{{ department.name }}</h5>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Department Code</label>
+                            <p class="mb-0">{{ department.code }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Location</label>
+                            <p class="mb-0">{{ department.location|default:"Not specified" }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Status</label>
+                            <div>
+                                {% if department.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Department Manager</label>
+                            {% if department.manager %}
+                                <div class="d-flex align-items-center">
+                                    {% if department.manager.photo %}
+                                        <img src="{{ department.manager.photo.url }}" class="avatar-lg rounded-circle me-3" alt="Manager">
+                                    {% else %}
+                                        <div class="avatar-lg bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                            {{ department.manager.first_name|first }}{{ department.manager.last_name|first }}
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="mb-0">{{ department.manager.get_full_name }}</h6>
+                                        <small class="text-muted">{{ department.manager.email }}</small>
+                                        <small class="d-block text-muted">{{ department.manager.phone|default:"No phone" }}</small>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No manager assigned</p>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Budget</label>
+                            <p class="mb-0">
+                                {% if department.budget %}
+                                    <strong>${{ department.budget|floatformat:2 }}</strong>
+                                {% else %}
+                                    <span class="text-muted">Not set</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Created Date</label>
+                            <p class="mb-0">{{ department.created_at|date:"M d, Y" }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Last Updated</label>
+                            <p class="mb-0">{{ department.updated_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if department.description %}
+                <div class="mt-4">
+                    <label class="form-label text-muted">Description</label>
+                    <p>{{ department.description|linebreaksbr }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Department Employees -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Department Employees ({{ employees.count }})</h6>
+                <a href="{% url 'hrms:employee_add' %}?department={{ department.id }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus fa-sm"></i> Add Employee
+                </a>
+            </div>
+            <div class="card-body">
+                {% if employees %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Position</th>
+                                    <th>Employment Type</th>
+                                    <th>Hire Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for employee in employees %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if employee.photo %}
+                                                <img src="{{ employee.photo.url }}" class="avatar-sm rounded-circle me-2" alt="Employee">
+                                            {% else %}
+                                                <div class="avatar-sm bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                    {{ employee.first_name|first }}{{ employee.last_name|first }}
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">{{ employee.get_full_name }}</h6>
+                                                <small class="text-muted">{{ employee.employee_id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ employee.position.title|default:"Not assigned" }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ employee.get_employment_type_display }}</span>
+                                    </td>
+                                    <td>{{ employee.hire_date|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if employee.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'hrms:employee_detail' employee.pk %}" class="btn btn-outline-primary btn-sm" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'hrms:employee_edit' employee.pk %}" class="btn btn-outline-warning btn-sm" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No employees in this department</h5>
+                        <p class="text-muted">Start by adding employees to this department.</p>
+                        <a href="{% url 'hrms:employee_add' %}?department={{ department.id }}" class="btn btn-primary">Add Employee</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Department Statistics -->
+    <div class="col-lg-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Department Statistics</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="border-start border-primary ps-3">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Employees</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ employees.count }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="border-start border-success ps-3">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Active Employees</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_employees_count }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="border-start border-info ps-3">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Full-time</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ fulltime_count }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="border-start border-warning ps-3">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Part-time</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ parttime_count }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Activities</h6>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for activity in recent_activities %}
+                    <div class="timeline-item mb-3">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="avatar-sm bg-{{ activity.type|default:'primary' }} text-white rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-{{ activity.icon|default:'info' }}"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">{{ activity.title }}</h6>
+                                <p class="text-muted mb-1">{{ activity.description }}</p>
+                                <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-clock fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">No recent activities</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'hrms:employee_add' %}?department={{ department.id }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-user-plus"></i> Add Employee
+                    </a>
+                    <a href="{% url 'hrms:department_update' department.pk %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Edit Department
+                    </a>
+                    <a href="#" class="btn btn-info btn-sm export-btn" data-format="pdf" data-url="{% url 'hrms:department_report' department.pk %}">
+                        <i class="fas fa-file-pdf"></i> Generate Report
+                    </a>
+                    <a href="{% url 'hrms:department_list' %}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-list"></i> All Departments
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,760 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title|default:"Employee Form" }} - HRMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>
+            <i class="fas fa-user"></i> {{ title|default:"Employee Form" }}
+        </h2>
+    </div>
+    <div class="col-md-6 text-end">
+        <a href="{% url 'hrms:employee_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+        {% if object and object.pk %}
+        <a href="{% url 'hrms:employee_detail' object.pk %}" class="btn btn-outline-info">
+            <i class="fas fa-eye"></i> View Details
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Employee Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Please correct the following errors:</strong>
+                        <ul class="mb-0 mt-2">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                <li>{{ field|title }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <!-- User Account Information (for new employees) -->
+                    {% if not object or not object.pk %}
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-user-plus"></i> User Account Details</h6>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name <span class="text-danger">*</span></label>
+                                {{ form.first_name }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name <span class="text-danger">*</span></label>
+                                {{ form.last_name }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.username.id_for_label }}" class="form-label">Username <span class="text-danger">*</span></label>
+                                {{ form.username }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">Email <span class="text-danger">*</span></label>
+                                {{ form.email }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.employee_id.id_for_label }}" class="form-label">Employee ID <span class="text-danger">*</span></label>
+                                {{ form.employee_id }}
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    {% endif %}
+
+                    <!-- Personal Information -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-user"></i> Personal Information</h6>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">Date of Birth</label>
+                                {{ form.date_of_birth }}
+                                {% if form.date_of_birth.help_text %}
+                                <div class="form-text">{{ form.date_of_birth.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.place_of_birth.id_for_label }}" class="form-label">Place of Birth</label>
+                                {{ form.place_of_birth }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.nationality.id_for_label }}" class="form-label">Nationality</label>
+                                {{ form.nationality }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.gender.id_for_label }}" class="form-label">Gender</label>
+                                {{ form.gender }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.marital_status.id_for_label }}" class="form-label">Marital Status</label>
+                                {{ form.marital_status }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.blood_group.id_for_label }}" class="form-label">Blood Group</label>
+                                {{ form.blood_group }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.personal_email.id_for_label }}" class="form-label">Personal Email</label>
+                                {{ form.personal_email }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.photo.id_for_label }}" class="form-label">Photo</label>
+                                {{ form.photo }}
+                                <div class="form-text">Upload employee photo (JPG, PNG)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Identity Documents -->
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-id-card"></i> Identity Documents</h6>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.qatar_id.id_for_label }}" class="form-label">Qatar ID Number</label>
+                                {{ form.qatar_id }}
+                                <div class="form-text">Qatar National ID number</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.qatar_id_expiry.id_for_label }}" class="form-label">Qatar ID Expiry Date</label>
+                                {{ form.qatar_id_expiry }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.passport_number.id_for_label }}" class="form-label">Passport Number</label>
+                                {{ form.passport_number }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.passport_expiry.id_for_label }}" class="form-label">Passport Expiry Date</label>
+                                {{ form.passport_expiry }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.passport_issue_country.id_for_label }}" class="form-label">Passport Issue Country</label>
+                                {{ form.passport_issue_country }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.national_id.id_for_label }}" class="form-label">National ID</label>
+                                {{ form.national_id }}
+                                <div class="form-text">If different from Qatar ID</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-phone"></i> Contact Information</h6>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.phone_number.id_for_label }}" class="form-label">Phone Number</label>
+                                {{ form.phone_number }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.emergency_contact_name.id_for_label }}" class="form-label">Emergency Contact Name</label>
+                                {{ form.emergency_contact_name }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.emergency_contact_phone.id_for_label }}" class="form-label">Emergency Contact Phone</label>
+                                {{ form.emergency_contact_phone }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.emergency_contact_relationship.id_for_label }}" class="form-label">Emergency Contact Relationship</label>
+                                {{ form.emergency_contact_relationship }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Address Information -->
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-map-marker-alt"></i> Address Information</h6>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.current_address.id_for_label }}" class="form-label">Current Address</label>
+                                {{ form.current_address }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.permanent_address.id_for_label }}" class="form-label">Permanent Address</label>
+                                {{ form.permanent_address }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Employment Information -->
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-briefcase"></i> Employment Information</h6>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.department.id_for_label }}" class="form-label">Department</label>
+                                {{ form.department }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.position.id_for_label }}" class="form-label">Position</label>
+                                {{ form.position }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.grade.id_for_label }}" class="form-label">Grade</label>
+                                {{ form.grade }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.employment_type.id_for_label }}" class="form-label">Employment Type</label>
+                                {{ form.employment_type }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.work_location.id_for_label }}" class="form-label">Work Location</label>
+                                {{ form.work_location }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.hire_date.id_for_label }}" class="form-label">Hire Date</label>
+                                {{ form.hire_date }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Salary Information -->
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-money-bill-wave"></i> Salary Information</h6>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.basic_salary.id_for_label }}" class="form-label">Basic Salary</label>
+                                {{ form.basic_salary }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.housing_allowance.id_for_label }}" class="form-label">Housing Allowance</label>
+                                {{ form.housing_allowance }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.transport_allowance.id_for_label }}" class="form-label">Transport Allowance</label>
+                                {{ form.transport_allowance }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.other_allowances.id_for_label }}" class="form-label">Other Allowances</label>
+                                {{ form.other_allowances }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if object and object.pk %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label">Employment Status</label>
+                                {{ form.status }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Education Information -->
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-graduation-cap"></i> Education Information</h6>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> Add employee's educational background. You can add multiple education records.
+                            </div>
+                            
+                            <div id="education-forms">
+                                <div class="education-form-template border rounded p-3 mb-3" style="background-color: #f8f9fa;">
+                                    <h6 class="mb-3"><i class="fas fa-plus-circle text-success"></i> Education Record #1</h6>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Education Level <span class="text-danger">*</span></label>
+                                            <select class="form-select" name="education_level_1">
+                                                <option value="">Select Education Level</option>
+                                                {% for level in education_levels %}
+                                                    <option value="{{ level.id }}">{{ level.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Institution Name <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="institution_name_1" placeholder="e.g., Qatar University">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Field of Study</label>
+                                            <input type="text" class="form-control" name="field_of_study_1" placeholder="e.g., Computer Science">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Degree Title</label>
+                                            <input type="text" class="form-control" name="degree_title_1" placeholder="e.g., Bachelor of Computer Science">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Start Month</label>
+                                            <select class="form-select" name="start_month_1">
+                                                <option value="">Month</option>
+                                                <option value="1">January</option>
+                                                <option value="2">February</option>
+                                                <option value="3">March</option>
+                                                <option value="4">April</option>
+                                                <option value="5">May</option>
+                                                <option value="6">June</option>
+                                                <option value="7">July</option>
+                                                <option value="8">August</option>
+                                                <option value="9">September</option>
+                                                <option value="10">October</option>
+                                                <option value="11">November</option>
+                                                <option value="12">December</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Start Year</label>
+                                            <input type="number" class="form-control" name="start_year_1" min="1950" max="2030" placeholder="2020">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">End Month</label>
+                                            <select class="form-select" name="end_month_1">
+                                                <option value="">Month</option>
+                                                <option value="1">January</option>
+                                                <option value="2">February</option>
+                                                <option value="3">March</option>
+                                                <option value="4">April</option>
+                                                <option value="5">May</option>
+                                                <option value="6">June</option>
+                                                <option value="7">July</option>
+                                                <option value="8">August</option>
+                                                <option value="9">September</option>
+                                                <option value="10">October</option>
+                                                <option value="11">November</option>
+                                                <option value="12">December</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">End Year</label>
+                                            <input type="number" class="form-control" name="end_year_1" min="1950" max="2030" placeholder="2024">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Grade/GPA</label>
+                                            <input type="text" class="form-control" name="grade_gpa_1" placeholder="e.g., 3.5 GPA or First Class">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Country</label>
+                                            <input type="text" class="form-control" name="country_1" placeholder="e.g., Qatar">
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="is_current_1" id="is_current_1">
+                                                <label class="form-check-label" for="is_current_1">
+                                                    Currently studying (leave end date empty)
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="btn btn-outline-success btn-sm" id="add-education">
+                                <i class="fas fa-plus"></i> Add Another Education Record
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Documents Information -->
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-file-upload"></i> Document Uploads</h6>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> Upload important documents. Files should be in PDF, JPG, or PNG format (max 5MB each).
+                            </div>
+                            
+                            <div id="document-forms">
+                                <div class="document-form-template border rounded p-3 mb-3" style="background-color: #f8f9fa;">
+                                    <h6 class="mb-3"><i class="fas fa-file text-primary"></i> Document #1</h6>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Document Type <span class="text-danger">*</span></label>
+                                            <select class="form-select" name="document_type_1">
+                                                <option value="">Select Document Type</option>
+                                                {% for doc_type in document_types %}
+                                                    <option value="{{ doc_type.id }}" data-has-expiry="{{ doc_type.has_expiry }}">
+                                                        {{ doc_type.name }} ({{ doc_type.get_category_display }})
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Document Title</label>
+                                            <input type="text" class="form-control" name="document_title_1" placeholder="e.g., Qatar ID Copy">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Document Number</label>
+                                            <input type="text" class="form-control" name="document_number_1" placeholder="e.g., 12345678901">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Upload File <span class="text-danger">*</span></label>
+                                            <input type="file" class="form-control" name="document_file_1" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                            <div class="form-text">Supported formats: PDF, JPG, PNG, DOC, DOCX (Max: 5MB)</div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Issue Date</label>
+                                            <input type="date" class="form-control" name="issue_date_1">
+                                        </div>
+                                        <div class="col-md-6 mb-3 expiry-field" style="display: none;">
+                                            <label class="form-label">Expiry Date</label>
+                                            <input type="date" class="form-control" name="expiry_date_1">
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">Notes</label>
+                                            <textarea class="form-control" name="document_notes_1" rows="2" placeholder="Additional notes about this document..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="add-document">
+                                <i class="fas fa-plus"></i> Add Another Document
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="{% url 'hrms:employee_list' %}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> 
+                                    {% if object and object.pk %}Update Employee{% else %}Create Employee{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced form handling with validation and UX improvements
+document.addEventListener('DOMContentLoaded', function() {
+    // Add form-control class to all form inputs
+    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="number"], input[type="file"], textarea, select');
+    inputs.forEach(function(input) {
+        if (!input.classList.contains('form-control') && !input.classList.contains('form-select')) {
+            if (input.tagName.toLowerCase() === 'select') {
+                input.classList.add('form-select');
+            } else {
+                input.classList.add('form-control');
+            }
+        }
+    });
+
+    // Add required field indicators
+    const requiredFields = document.querySelectorAll('input[required], select[required], textarea[required]');
+    requiredFields.forEach(function(field) {
+        const label = document.querySelector(`label[for="${field.id}"]`);
+        if (label && !label.innerHTML.includes('*')) {
+            label.innerHTML += ' <span class="text-danger">*</span>';
+        }
+    });
+
+    // Form validation feedback
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            let hasErrors = false;
+            
+            // Clear previous error states
+            inputs.forEach(function(input) {
+                input.classList.remove('is-invalid');
+            });
+
+            // Validate required fields
+            requiredFields.forEach(function(field) {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    hasErrors = true;
+                }
+            });
+
+            // Email validation
+            const emailFields = document.querySelectorAll('input[type="email"]');
+            emailFields.forEach(function(email) {
+                if (email.value && !isValidEmail(email.value)) {
+                    email.classList.add('is-invalid');
+                    hasErrors = true;
+                }
+            });
+
+            // Date validation (not in future for birth date)
+            const birthDate = document.querySelector('input[name="date_of_birth"]');
+            if (birthDate && birthDate.value) {
+                const birthDateValue = new Date(birthDate.value);
+                const today = new Date();
+                if (birthDateValue > today) {
+                    birthDate.classList.add('is-invalid');
+                    hasErrors = true;
+                }
+            }
+
+            // Passport expiry validation (should be in future)
+            const passportExpiry = document.querySelector('input[name="passport_expiry"]');
+            if (passportExpiry && passportExpiry.value) {
+                const expiryDate = new Date(passportExpiry.value);
+                const today = new Date();
+                if (expiryDate <= today) {
+                    passportExpiry.classList.add('is-invalid');
+                    hasErrors = true;
+                }
+            }
+
+            // Qatar ID expiry validation (should be in future)
+            const qatarIdExpiry = document.querySelector('input[name="qatar_id_expiry"]');
+            if (qatarIdExpiry && qatarIdExpiry.value) {
+                const expiryDate = new Date(qatarIdExpiry.value);
+                const today = new Date();
+                if (expiryDate <= today) {
+                    qatarIdExpiry.classList.add('is-invalid');
+                    hasErrors = true;
+                }
+            }
+
+            if (hasErrors) {
+                e.preventDefault();
+                // Scroll to first error
+                const firstError = document.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+                
+                // Show general error message
+                showAlert('Please correct the highlighted errors before submitting.', 'danger');
+            }
+        });
+    }
+
+    // Real-time validation feedback
+    inputs.forEach(function(input) {
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid') && this.value.trim()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    });
+
+    // File input validation
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    fileInputs.forEach(function(fileInput) {
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                // Check file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    this.classList.add('is-invalid');
+                    showAlert('File size should not exceed 5MB.', 'warning');
+                    this.value = '';
+                } else {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            }
+        });
+    });
+
+    // Helper functions
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    function showAlert(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const form = document.querySelector('form');
+        form.insertBefore(alertDiv, form.firstChild);
+        
+        // Auto dismiss after 5 seconds
+        setTimeout(function() {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+
+    // Auto-generate employee ID if empty
+    const employeeIdField = document.querySelector('input[name="employee_id"]');
+    if (employeeIdField && !employeeIdField.value) {
+        const timestamp = Date.now().toString().slice(-6);
+        employeeIdField.value = 'EMP' + timestamp;
+    }
+
+    // Auto-fill username from first and last name
+    const firstNameField = document.querySelector('input[name="first_name"]');
+    const lastNameField = document.querySelector('input[name="last_name"]');
+    const usernameField = document.querySelector('input[name="username"]');
+
+    if (firstNameField && lastNameField && usernameField) {
+        function generateUsername() {
+            const firstName = firstNameField.value.trim().toLowerCase();
+            const lastName = lastNameField.value.trim().toLowerCase();
+            
+            if (firstName && lastName && !usernameField.value) {
+                usernameField.value = firstName + '.' + lastName;
+            }
+        }
+
+        firstNameField.addEventListener('blur', generateUsername);
+        lastNameField.addEventListener('blur', generateUsername);
+    }
+});
+</script>
+{% endblock %}

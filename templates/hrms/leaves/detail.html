@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Leave Application Details - HRMS{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'hrms:dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'hrms:leave_list' %}">Leave Applications</a></li>
+        <li class="breadcrumb-item active">Application Details</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Application Details -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-calendar-times"></i> Leave Application Details</h5>
+                <span class="badge fs-6
+                    {% if object.status == 'approved' %}bg-success
+                    {% elif object.status == 'rejected' %}bg-danger
+                    {% elif object.status == 'pending' %}bg-warning
+                    {% else %}bg-secondary{% endif %}">
+                    {{ object.get_status_display }}
+                </span>
+            </div>
+            <div class="card-body">
+                <!-- Employee Information -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Employee Information</h6>
+                        <div class="d-flex align-items-center mb-3">
+                            {% if object.employee.profile.photo %}
+                            <img src="{{ object.employee.profile.photo.url }}" alt="{{ object.employee.get_full_name }}" 
+                                 class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-user text-white fa-2x"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h5 class="mb-0">{{ object.employee.get_full_name }}</h5>
+                                <p class="text-muted mb-1">{{ object.employee.profile.position.title|default:"Employee" }}</p>
+                                <small class="text-muted">{{ object.employee.profile.employee_id }}</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">Department:</small>
+                                <div class="fw-bold">{{ object.employee.profile.department.name|default:"N/A" }}</div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Manager:</small>
+                                <div class="fw-bold">{{ object.employee.profile.manager.get_full_name|default:"N/A" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Leave Details</h6>
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <small class="text-muted">Leave Type:</small>
+                                <div class="fw-bold">
+                                    <span class="badge bg-info">{{ object.leave_type.name }}</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Total Days:</small>
+                                <div class="fw-bold">{{ object.total_days }} days</div>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <small class="text-muted">Start Date:</small>
+                                <div class="fw-bold">{{ object.start_date|date:"M d, Y" }}</div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">End Date:</small>
+                                <div class="fw-bold">{{ object.end_date|date:"M d, Y" }}</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <small class="text-muted">Applied On:</small>
+                                <div class="fw-bold">{{ object.applied_on|date:"M d, Y g:i A" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reason -->
+                {% if object.reason %}
+                <div class="mb-4">
+                    <h6 class="text-muted"><i class="fas fa-comment"></i> Reason for Leave</h6>
+                    <div class="p-3 bg-light rounded">
+                        {{ object.reason|linebreaks }}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Approval Information -->
+                {% if object.status != 'pending' %}
+                <div class="mb-4">
+                    <h6 class="text-muted">
+                        <i class="fas fa-{% if object.status == 'approved' %}check-circle text-success{% else %}times-circle text-danger{% endif %}"></i>
+                        Approval Information
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted">{% if object.status == 'approved' %}Approved{% else %}Rejected{% endif %} By:</small>
+                            <div class="fw-bold">{{ object.approved_by.get_full_name|default:"N/A" }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted">Date:</small>
+                            <div class="fw-bold">{{ object.approved_date|date:"M d, Y g:i A"|default:"N/A" }}</div>
+                        </div>
+                    </div>
+                    {% if object.approval_comments %}
+                    <div class="mt-3">
+                        <small class="text-muted">Comments:</small>
+                        <div class="p-3 bg-light rounded">
+                            {{ object.approval_comments|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <!-- Supporting Documents -->
+                {% if object.supporting_documents %}
+                <div class="mb-4">
+                    <h6 class="text-muted"><i class="fas fa-paperclip"></i> Supporting Documents</h6>
+                    <div class="list-group">
+                        <a href="{{ object.supporting_documents.url }}" target="_blank" class="list-group-item list-group-item-action">
+                            <i class="fas fa-file-alt me-2"></i>
+                            {{ object.supporting_documents.name|split:"/"}}
+                            <span class="float-end">
+                                <i class="fas fa-external-link-alt"></i>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Actions -->
+        {% if object.status == 'pending' and user.is_staff %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-cog"></i> Actions</h6>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'hrms:leave_approve' object.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="approval_comments" class="form-label">Comments</label>
+                        <textarea class="form-control" id="approval_comments" name="approval_comments" 
+                                  rows="3" placeholder="Add approval/rejection comments..."></textarea>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" name="action" value="approve" class="btn btn-success">
+                            <i class="fas fa-check"></i> Approve Leave
+                        </button>
+                        <button type="submit" name="action" value="reject" class="btn btn-danger">
+                            <i class="fas fa-times"></i> Reject Leave
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Leave Balance -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-calendar-check"></i> Leave Balance</h6>
+            </div>
+            <div class="card-body">
+                {% if leave_balance %}
+                <div class="text-center mb-3">
+                    <h4 class="text-primary">{{ leave_balance.remaining_days }}</h4>
+                    <p class="text-muted mb-0">Days Remaining</p>
+                    <small class="text-muted">{{ object.leave_type.name }}</small>
+                </div>
+                
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="border-end">
+                            <h6 class="mb-0">{{ leave_balance.allocated_days }}</h6>
+                            <small class="text-muted">Allocated</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border-end">
+                            <h6 class="mb-0">{{ leave_balance.used_days }}</h6>
+                            <small class="text-muted">Used</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <h6 class="mb-0">{{ leave_balance.remaining_days }}</h6>
+                        <small class="text-muted">Remaining</small>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" 
+                             style="width: {{ leave_balance.used_percentage }}%"></div>
+                    </div>
+                    <small class="text-muted">{{ leave_balance.used_percentage|floatformat:1 }}% used</small>
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                    <p class="text-muted">No leave balance information available</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'hrms:leave_list' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-list"></i> Back to Leave List
+                    </a>
+                    <a href="{% url 'hrms:leave_apply' %}" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-plus"></i> Apply for New Leave
+                    </a>
+                    <a href="{% url 'hrms:leave_balance' %}" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-calendar-check"></i> View All Balances
+                    </a>
+                    <button onclick="window.print()" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-print"></i> Print Application
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .btn, .card-header .btn-group, nav {
+        display: none !important;
+    }
+}
+</style>
+{% endblock %}

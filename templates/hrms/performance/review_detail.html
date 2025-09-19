@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review Details - {{ review.employee.get_full_name }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'hrms:performance_dashboard' %}">Performance</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'hrms:performance_reviews' %}">Reviews</a></li>
+        <li class="breadcrumb-item active">{{ review.employee.get_full_name }}</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Review Header -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-4">
+                    {% if review.employee.profile.photo %}
+                    <img src="{{ review.employee.profile.photo.url }}" alt="{{ review.employee.get_full_name }}" 
+                         class="rounded-circle me-4" style="width: 80px; height: 80px; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-4" 
+                         style="width: 80px; height: 80px;">
+                        <i class="fas fa-user text-white fa-2x"></i>
+                    </div>
+                    {% endif %}
+                    <div class="flex-grow-1">
+                        <h2 class="mb-1">{{ review.employee.get_full_name }}</h2>
+                        <p class="text-muted mb-2">{{ review.employee.profile.position.title|default:"Employee" }}</p>
+                        <div class="d-flex align-items-center">
+                            <span class="badge me-2
+                                {% if review.status == 'completed' %}bg-success
+                                {% elif review.status == 'in_progress' %}bg-warning
+                                {% elif review.status == 'overdue' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ review.get_status_display }}
+                            </span>
+                            <span class="badge bg-light text-dark me-2">{{ review.review_period }}</span>
+                            <span class="badge 
+                                {% if review.review_type == 'annual' %}bg-primary
+                                {% elif review.review_type == 'quarterly' %}bg-info
+                                {% elif review.review_type == '360' %}bg-warning
+                                {% else %}bg-secondary{% endif %}">
+                                {{ review.get_review_type_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        {% if review.overall_rating %}
+                        <div class="mb-2">
+                            <h3 class="mb-0">{{ review.overall_rating }}/5</h3>
+                            <div class="text-warning">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= review.overall_rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        <small class="text-muted">Overall Rating</small>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Reviewer</h6>
+                        <p class="mb-0">{{ review.reviewer.get_full_name }}</p>
+                        <small class="text-muted">{{ review.reviewer.profile.position.title|default:"Manager" }}</small>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Review Date</h6>
+                        <p class="mb-0">{{ review.review_date|date:"M d, Y" }}</p>
+                        <small class="text-muted">{{ review.review_date|timesince }} ago</small>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Due Date</h6>
+                        {% if review.due_date %}
+                        <p class="mb-0">{{ review.due_date|date:"M d, Y" }}</p>
+                        <small class="{% if review.status == 'overdue' %}text-danger{% elif review.due_date|timeuntil == '0 minutes' %}text-warning{% else %}text-muted{% endif %}">
+                            {% if review.due_date|timeuntil != '0 minutes' %}
+                                {{ review.due_date|timeuntil }} left
+                            {% else %}
+                                Overdue
+                            {% endif %}
+                        </small>
+                        {% else %}
+                        <p class="mb-0 text-muted">Not set</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Performance Categories -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Performance Categories</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <h6>Technical Skills</h6>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="progress flex-grow-1 me-3" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: {{ review.technical_rating|default:80 }}%"></div>
+                            </div>
+                            <span class="fw-bold">{{ review.technical_rating|default:"4.0" }}/5</span>
+                        </div>
+                        <small class="text-muted">Strong technical competency with room for advanced skills development.</small>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h6>Communication</h6>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="progress flex-grow-1 me-3" style="height: 8px;">
+                                <div class="progress-bar bg-info" style="width: {{ review.communication_rating|default:75 }}%"></div>
+                            </div>
+                            <span class="fw-bold">{{ review.communication_rating|default:"3.8" }}/5</span>
+                        </div>
+                        <small class="text-muted">Good verbal and written communication. Focus on presentation skills.</small>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h6>Leadership</h6>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="progress flex-grow-1 me-3" style="height: 8px;">
+                                <div class="progress-bar bg-warning" style="width: {{ review.leadership_rating|default:70 }}%"></div>
+                            </div>
+                            <span class="fw-bold">{{ review.leadership_rating|default:"3.5" }}/5</span>
+                        </div>
+                        <small class="text-muted">Shows potential in leadership. Consider mentorship opportunities.</small>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h6>Problem Solving</h6>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="progress flex-grow-1 me-3" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: {{ review.problem_solving_rating|default:85 }}%"></div>
+                            </div>
+                            <span class="fw-bold">{{ review.problem_solving_rating|default:"4.3" }}/5</span>
+                        </div>
+                        <small class="text-muted">Excellent analytical skills and creative problem-solving approach.</small>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h6>Teamwork</h6>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="progress flex-grow-1 me-3" style="height: 8px;">
+                                <div class="progress-bar bg-primary" style="width: {{ review.teamwork_rating|default:90 }}%"></div>
+                            </div>
+                            <span class="fw-bold">{{ review.teamwork_rating|default:"4.5" }}/5</span>
+                        </div>
+                        <small class="text-muted">Outstanding team player. Actively supports colleagues and collaboration.</small>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h6>Initiative</h6>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="progress flex-grow-1 me-3" style="height: 8px;">
+                                <div class="progress-bar bg-info" style="width: {{ review.initiative_rating|default:78 }}%"></div>
+                            </div>
+                            <span class="fw-bold">{{ review.initiative_rating|default:"3.9" }}/5</span>
+                        </div>
+                        <small class="text-muted">Takes ownership of tasks. Could be more proactive in suggesting improvements.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Review Comments -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-comments"></i> Review Comments</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h6><i class="fas fa-thumbs-up text-success"></i> Strengths</h6>
+                    <p>{{ review.strengths|default:"John consistently demonstrates strong technical skills and is a reliable team member. His problem-solving abilities have been particularly valuable in recent projects, and he shows genuine dedication to quality work. His positive attitude and willingness to help colleagues make him a valued team contributor." }}</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h6><i class="fas fa-exclamation-triangle text-warning"></i> Areas for Improvement</h6>
+                    <p>{{ review.improvements|default:"Communication skills, particularly in presenting ideas to larger groups, could benefit from development. Additionally, taking more initiative in proposing process improvements and actively seeking leadership opportunities would support career growth." }}</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h6><i class="fas fa-bullseye text-primary"></i> Goals for Next Period</h6>
+                    <ul>
+                        <li>Complete advanced communication training course</li>
+                        <li>Lead at least one small project or initiative</li>
+                        <li>Mentor a junior team member</li>
+                        <li>Attend industry conference or professional development event</li>
+                        <li>Improve technical certification in relevant area</li>
+                    </ul>
+                </div>
+                
+                <div class="mb-4">
+                    <h6><i class="fas fa-lightbulb text-info"></i> Development Recommendations</h6>
+                    <p>{{ review.development_plan|default:"Recommend enrollment in leadership development program. Consider rotation opportunity in different department to broaden experience. Regular 1:1 meetings to discuss progress and provide mentoring support." }}</p>
+                </div>
+                
+                {% if review.additional_comments %}
+                <div class="mb-4">
+                    <h6><i class="fas fa-sticky-note text-secondary"></i> Additional Comments</h6>
+                    <p>{{ review.additional_comments }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Employee Response -->
+        {% if review.employee_response %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-reply"></i> Employee Response</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ review.employee_response }}</p>
+                <small class="text-muted">
+                    <i class="fas fa-clock"></i> Submitted: {{ review.response_date|date:"M d, Y" }}
+                </small>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-cog"></i> Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if review.status != 'completed' and user.is_staff %}
+                    <a href="{% url 'hrms:performance_review_edit' review.pk %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Edit Review
+                    </a>
+                    {% endif %}
+                    
+                    {% if review.status == 'completed' %}
+                    <a href="{% url 'hrms:performance_review_pdf' review.pk %}" class="btn btn-success">
+                        <i class="fas fa-file-pdf"></i> Download PDF
+                    </a>
+                    {% endif %}
+                    
+                    <a href="#" class="btn btn-outline-primary">
+                        <i class="fas fa-share"></i> Share Review
+                    </a>
+                    
+                    {% if user == review.employee %}
+                    <a href="#" class="btn btn-outline-info">
+                        <i class="fas fa-reply"></i> Add Response
+                    </a>
+                    {% endif %}
+                    
+                    <a href="#" class="btn btn-outline-secondary">
+                        <i class="fas fa-print"></i> Print Review
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Review History -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-history"></i> Review History</h6>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Review Created</h6>
+                            <p class="mb-1 text-muted">{{ review.created_at|date:"M d, Y" }}</p>
+                            <small class="text-muted">Initial review setup</small>
+                        </div>
+                    </div>
+                    
+                    {% if review.status == 'in_progress' or review.status == 'completed' %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-warning"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Review Started</h6>
+                            <p class="mb-1 text-muted">{{ review.started_at|date:"M d, Y"|default:"In progress..." }}</p>
+                            <small class="text-muted">Performance evaluation begun</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if review.status == 'completed' %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Review Completed</h6>
+                            <p class="mb-1 text-muted">{{ review.completed_at|date:"M d, Y" }}</p>
+                            <small class="text-muted">Final review submitted</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Related Information -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-info-circle"></i> Related Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted">Employee ID:</small>
+                    <div class="fw-bold">{{ review.employee.profile.employee_id|default:"EMP001" }}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">Department:</small>
+                    <div class="fw-bold">{{ review.employee.profile.department.name|default:"Engineering" }}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">Hire Date:</small>
+                    <div class="fw-bold">{{ review.employee.profile.hire_date|date:"M d, Y"|default:"Jan 15, 2020" }}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">Years of Service:</small>
+                    <div class="fw-bold">{{ review.employee.profile.years_of_service|default:"4" }} years</div>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">Previous Review:</small>
+                    <div class="fw-bold">Q2 2024 - 4.1/5</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #e9ecef;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid #0d6efd;
+}
+</style>
+{% endblock %}

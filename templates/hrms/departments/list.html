@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Departments - HRMS{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Departments</h1>
+    <a href="{% url 'hrms:department_add' %}" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus fa-sm text-white-50"></i> Add Department
+    </a>
+</div>
+
+<div class="row">
+    <!-- Departments Overview -->
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Department Overview</h6>
+                <div class="dropdown no-arrow">
+                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow">
+                        <a class="dropdown-item" href="{% url 'hrms:department_list' %}">
+                            <i class="fas fa-sync fa-sm fa-fw mr-2 text-gray-400"></i> Refresh List
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Export Options:</h6>
+                        <span class="dropdown-item-text text-muted">
+                            <i class="fas fa-info-circle fa-sm fa-fw mr-2"></i> Export functionality coming soon
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Search and Filter -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search departments...">
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="sortBy">
+                            <option value="name">Sort by Name</option>
+                            <option value="employees">Sort by Employee Count</option>
+                            <option value="created">Sort by Created Date</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Departments Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover searchable-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all"></th>
+                                <th>Department</th>
+                                <th>Manager</th>
+                                <th>Employees</th>
+                                <th>Budget</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for department in departments %}
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox" value="{{ department.id }}"></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                            {{ department.name|first }}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ department.name }}</h6>
+                                            <small class="text-muted">{{ department.code }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if department.manager %}
+                                        <div class="d-flex align-items-center">
+                                            {% if department.manager.photo %}
+                                                <img src="{{ department.manager.photo.url }}" class="avatar-sm rounded-circle me-2" alt="Manager">
+                                            {% else %}
+                                                <div class="avatar-sm bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                    {{ department.manager.first_name|first }}{{ department.manager.last_name|first }}
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <span>{{ department.manager.get_full_name }}</span>
+                                                <small class="d-block text-muted">{{ department.manager.email }}</small>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">No Manager</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ department.employees.count }}</span>
+                                </td>
+                                <td>
+                                    {% if department.budget %}
+                                        ${{ department.budget|floatformat:0 }}
+                                    {% else %}
+                                        <span class="text-muted">Not set</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ department.location|default:"Not specified" }}</td>
+                                <td>
+                                    {% if department.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'hrms:department_detail' department.pk %}" class="btn btn-outline-primary btn-sm" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'hrms:department_update' department.pk %}" class="btn btn-outline-warning btn-sm" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'hrms:department_delete' department.pk %}" class="btn btn-outline-danger btn-sm delete-btn" title="Delete" data-name="{{ department.name }}">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-building fa-3x mb-3"></i>
+                                        <h5>No departments found</h5>
+                                        <p>Start by creating your first department.</p>
+                                        <a href="{% url 'hrms:department_add' %}" class="btn btn-primary">Add Department</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <nav aria-label="Department pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">&laquo; First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Actions Modal -->
+<div class="modal fade" id="bulk-actions" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bulk Actions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>You have selected <span id="bulk-count">0</span> department(s).</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success" onclick="bulkAction('activate')">
+                        <i class="fas fa-check"></i> Activate Selected
+                    </button>
+                    <button class="btn btn-warning" onclick="bulkAction('deactivate')">
+                        <i class="fas fa-pause"></i> Deactivate Selected
+                    </button>
+                    <button class="btn btn-danger" onclick="bulkAction('delete')">
+                        <i class="fas fa-trash"></i> Delete Selected
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function bulkAction(action) {
+    var selectedIds = [];
+    $('.row-checkbox:checked').each(function() {
+        selectedIds.push($(this).val());
+    });
+    
+    if (selectedIds.length === 0) {
+        showAlert('Please select at least one department.', 'warning');
+        return;
+    }
+    
+    var confirmMessage = 'Are you sure you want to ' + action + ' ' + selectedIds.length + ' department(s)?';
+    if (action === 'delete') {
+        confirmMessage += ' This action cannot be undone.';
+    }
+    
+    if (confirm(confirmMessage)) {
+        $.post('{% url "hrms:department_bulk_action" %}', {
+            'action': action,
+            'ids': selectedIds,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        }, function(response) {
+            if (response.success) {
+                showAlert(response.message, 'success');
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        });
+    }
+    
+    $('#bulk-actions').modal('hide');
+}
+
+// Status filter
+$('#statusFilter').change(function() {
+    var selectedStatus = $(this).val();
+    var tableRows = $('.searchable-table tbody tr');
+    
+    if (selectedStatus === '') {
+        tableRows.show();
+    } else {
+        tableRows.each(function() {
+            var row = $(this);
+            var statusCell = row.find('.badge');
+            if (statusCell.text().includes(selectedStatus)) {
+                row.show();
+            } else {
+                row.hide();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
