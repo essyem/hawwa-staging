@@ -2,9 +2,11 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from decimal import Decimal
 from datetime import date, timedelta
+from django.utils import timezone
 
 from .models import Budget, BudgetLine, AccountingCategory, Expense, Invoice, InvoiceItem, LedgerAccount, JournalEntry, JournalLine, Payment
 from .services.reports import profit_and_loss, cash_flow
+from .services.posting import create_payment_journal, create_expense_journal
 
 
 class BudgetTests(TestCase):
@@ -127,3 +129,31 @@ class ReportsTests(TestCase):
 		self.assertEqual(cf['cash_in'], Decimal('1200.00'))
 		self.assertEqual(cf['cash_out'], Decimal('200.00'))
 		self.assertEqual(cf['net_cash_flow'], Decimal('1000.00'))
+
+
+class PostingSignalsTests(TestCase):
+	def setUp(self):
+		User = get_user_model()
+		self.user = User.objects.create_user(email='post@example.com', password='password')
+		self.cat = AccountingCategory.objects.create(name='Service', code='SVC2')
+		# Create initial ledger accounts if not present
+		from .services.posting import _get_or_create_account
+		_get_or_create_account('1000', 'Cash')
+		_get_or_create_account('4000', 'Revenue')
+		_get_or_create_account('5000', 'Expenses')
+
+	def test_payment_triggers_journal(self):
+		invoice = Invoice.objects.create(invoice_number='P-1', customer=self.user, invoice_date=date.today(), due_date=date.today(), billing_name='B', billing_email='b@x.com', billing_address='a', billing_city='c', billing_postal_code='000')
+		payment = Payment.objects.create(invoice=invoice, amount=Decimal('300.00'), payment_method='bank_transfer', payment_status='completed', payment_date=timezone.now())
+		# JournalEntry with reference payment:{id} created
+		ref = f"payment:{payment.id}"
+		je = JournalEntry.objects.filter(reference=ref).first()
+		self.assertIsNotNone(je)
+		self.assertTrue(je.is_balanced())
+
+	def test_expense_triggers_journal(self):
+		expense = Expense.objects.create(description='TestE', amount=Decimal('150.00'), expense_type='operational', category=self.cat, expense_date=date.today(), is_paid=True, payment_date=timezone.now(), created_by=self.user)
+		ref = f"expense:{expense.id}"
+		je = JournalEntry.objects.filter(reference=ref).first()
+		self.assertIsNotNone(je)
+		self.assertTrue(je.is_balanced())
