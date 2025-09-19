@@ -1,0 +1,536 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ vendor.business_name }} Analytics - Hawwa{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" rel="stylesheet">
+<style>
+    .vendor-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .analytics-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: transform 0.2s ease-in-out;
+    }
+    .analytics-card:hover {
+        transform: translateY(-2px);
+    }
+    .metric-card {
+        text-align: center;
+        padding: 1.5rem;
+    }
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .metric-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .score-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
+        margin: 0 auto 1rem;
+    }
+    .score-excellent { background: linear-gradient(135deg, #28a745, #20c997); }
+    .score-good { background: linear-gradient(135deg, #17a2b8, #20c997); }
+    .score-average { background: linear-gradient(135deg, #ffc107, #fd7e14); }
+    .score-poor { background: linear-gradient(135deg, #dc3545, #fd1d53); }
+    
+    .performance-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .badge-improving { background-color: #d4edda; color: #155724; }
+    .badge-stable { background-color: #d1ecf1; color: #0c5460; }
+    .badge-declining { background-color: #f8d7da; color: #721c24; }
+    
+    .certification-card {
+        border: 2px solid #28a745;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    }
+    
+    .timeline-item {
+        border-left: 3px solid #4e73df;
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 0;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background-color: #4e73df;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 1rem 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Vendor Header -->
+    <div class="vendor-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-2">{{ vendor.business_name }}</h1>
+                <p class="mb-2">
+                    <i class="fas fa-map-marker-alt me-2"></i>{{ vendor.city }}, {{ vendor.state }}
+                </p>
+                <p class="mb-0">
+                    <i class="fas fa-tools me-2"></i>{{ vendor.get_primary_service_display|default:"Multiple Services" }}
+                    {% if vendor.phone %}
+                        <span class="ms-3"><i class="fas fa-phone me-2"></i>{{ vendor.phone }}</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                {% if latest_score %}
+                    <div class="score-circle {% if latest_score.overall_score >= 90 %}score-excellent{% elif latest_score.overall_score >= 80 %}score-good{% elif latest_score.overall_score >= 70 %}score-average{% else %}score-poor{% endif %}">
+                        {{ latest_score.overall_score|floatformat:0 }}
+                    </div>
+                    <p class="mb-0">Quality Score</p>
+                {% else %}
+                    <div class="score-circle score-average">
+                        N/A
+                    </div>
+                    <p class="mb-0">No Score Yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card analytics-card metric-card">
+                <div class="metric-value text-primary">{{ aggregated_metrics.total_bookings|floatformat:0 }}</div>
+                <div class="metric-label">Total Bookings</div>
+                <small class="text-muted">Last {{ date_range.start|timesince:date_range.end }}</small>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card analytics-card metric-card">
+                <div class="metric-value text-success">{{ aggregated_metrics.completion_rate|floatformat:1 }}%</div>
+                <div class="metric-label">Completion Rate</div>
+                <small class="text-muted">{{ aggregated_metrics.total_bookings|floatformat:0 }} total bookings</small>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card analytics-card metric-card">
+                <div class="metric-value text-info">${{ aggregated_metrics.total_revenue|floatformat:0|intcomma }}</div>
+                <div class="metric-label">Total Revenue</div>
+                <small class="text-muted">{{ date_range.start|timesince:date_range.end }} period</small>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card analytics-card metric-card">
+                <div class="metric-value text-warning">{{ aggregated_metrics.avg_rating|floatformat:1 }}/5</div>
+                <div class="metric-label">Average Rating</div>
+                <small class="text-muted">{{ aggregated_metrics.repeat_customer_rate|floatformat:1 }}% repeat rate</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card analytics-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Performance Over Time</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card analytics-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quality Score History</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="qualityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Row -->
+    <div class="row">
+        <!-- Quality Scores History -->
+        <div class="col-xl-4 col-lg-6 mb-4">
+            <div class="card analytics-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Quality Scores</h6>
+                </div>
+                <div class="card-body">
+                    {% if quality_scores %}
+                        {% for score in quality_scores %}
+                        <div class="timeline-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ score.overall_score|floatformat:1 }}/100</strong>
+                                    <div class="small text-muted">
+                                        {{ score.calculated_at|date:"M j, Y" }}
+                                    </div>
+                                </div>
+                                <span class="performance-badge {% if score.overall_score >= 90 %}badge-improving{% elif score.overall_score >= 70 %}badge-stable{% else %}badge-declining{% endif %}">
+                                    {% if score.overall_score >= 90 %}Excellent{% elif score.overall_score >= 80 %}Good{% elif score.overall_score >= 70 %}Average{% else %}Needs Improvement{% endif %}
+                                </span>
+                            </div>
+                            <div class="mt-2">
+                                <div class="row text-center">
+                                    <div class="col-3">
+                                        <small class="text-muted">Customer</small><br>
+                                        <strong>{{ score.customer_satisfaction_score|floatformat:1 }}</strong>
+                                    </div>
+                                    <div class="col-3">
+                                        <small class="text-muted">Response</small><br>
+                                        <strong>{{ score.response_time_score|floatformat:1 }}</strong>
+                                    </div>
+                                    <div class="col-3">
+                                        <small class="text-muted">Completion</small><br>
+                                        <strong>{{ score.completion_rate_score|floatformat:1 }}</strong>
+                                    </div>
+                                    <div class="col-3">
+                                        <small class="text-muted">Repeat</small><br>
+                                        <strong>{{ score.repeat_customer_score|floatformat:1 }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">No quality scores available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Rankings -->
+        <div class="col-xl-4 col-lg-6 mb-4">
+            <div class="card analytics-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">Rankings</h6>
+                </div>
+                <div class="card-body">
+                    {% if rankings %}
+                        {% for ranking in rankings %}
+                        <div class="timeline-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong># {{ ranking.overall_rank }}</strong> of {{ ranking.total_vendors }}
+                                    <div class="small text-muted">
+                                        {{ ranking.ranking_date|date:"M j, Y" }}
+                                        {% if ranking.service_category %}
+                                            - {{ ranking.service_category.name }}
+                                        {% else %}
+                                            - Overall
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="small">Quality: {{ ranking.quality_score|floatformat:1 }}</div>
+                                    <div class="small">Satisfaction: {{ ranking.customer_satisfaction_score|floatformat:1 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">No rankings available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Certifications -->
+        <div class="col-xl-4 col-lg-12 mb-4">
+            <div class="card analytics-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">Active Certifications</h6>
+                </div>
+                <div class="card-body">
+                    {% if certifications %}
+                        {% for cert in certifications %}
+                        <div class="certification-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ cert.certification_type|title }}</h6>
+                                    <p class="mb-1 text-muted">{{ cert.description }}</p>
+                                    <small class="text-success">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        Awarded: {{ cert.awarded_date|date:"M j, Y" }}
+                                    </small>
+                                    {% if cert.expires_at %}
+                                        <br><small class="text-warning">
+                                            <i class="fas fa-clock me-1"></i>
+                                            Expires: {{ cert.expires_at|date:"M j, Y" }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                                <i class="fas fa-certificate fa-2x text-warning"></i>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-certificate fa-3x mb-3 text-muted"></i>
+                            <p>No active certifications</p>
+                            <small>Vendor can earn certifications by maintaining high quality scores</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card analytics-card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-primary w-100" onclick="downloadVendorReport()">
+                                <i class="fas fa-download me-2"></i>Download Report
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-outline-info w-100" onclick="updateVendorScores()">
+                                <i class="fas fa-sync me-2"></i>Update Scores
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'vendors:vendor_detail' vendor.id %}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-user me-2"></i>View Profile
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'analytics:dashboard' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+<script>
+// Chart configurations
+let performanceChart;
+let qualityChart;
+
+// Initialize charts when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+});
+
+function initializeCharts() {
+    // Performance Chart
+    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+    const performanceData = {{ chart_data.performance_metrics|safe }};
+    
+    performanceChart = new Chart(performanceCtx, {
+        type: 'line',
+        data: {
+            labels: performanceData.map(item => {
+                const date = new Date(item.date);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }),
+            datasets: [
+                {
+                    label: 'Bookings',
+                    data: performanceData.map(item => item.bookings),
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Completion Rate (%)',
+                    data: performanceData.map(item => item.completion_rate),
+                    borderColor: '#1cc88a',
+                    backgroundColor: 'rgba(28, 200, 138, 0.1)',
+                    yAxisID: 'y1'
+                },
+                {
+                    label: 'Rating',
+                    data: performanceData.map(item => item.rating),
+                    borderColor: '#f6c23e',
+                    backgroundColor: 'rgba(246, 194, 62, 0.1)',
+                    yAxisID: 'y2'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Bookings'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Completion Rate (%)'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                    max: 100
+                },
+                y2: {
+                    type: 'linear',
+                    display: false,
+                    max: 5
+                }
+            }
+        }
+    });
+
+    // Quality Score Chart
+    const qualityCtx = document.getElementById('qualityChart').getContext('2d');
+    const qualityData = {{ chart_data.quality_history|safe }};
+    
+    qualityChart = new Chart(qualityCtx, {
+        type: 'line',
+        data: {
+            labels: qualityData.map(item => {
+                const date = new Date(item.date);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }),
+            datasets: [{
+                label: 'Quality Score',
+                data: qualityData.map(item => item.score),
+                borderColor: '#e74a3b',
+                backgroundColor: 'rgba(231, 74, 59, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Score'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+// Action functions
+function downloadVendorReport() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+    btn.disabled = true;
+    
+    // This would trigger a vendor-specific report generation
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        alert('Vendor report is being generated. Download will start shortly.');
+    }, 2000);
+}
+
+function updateVendorScores() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+    btn.disabled = true;
+    
+    // This would trigger quality score recalculation for this vendor
+    fetch(`{% url 'analytics:api_vendor_performance' vendor.id %}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'update_scores' })
+    })
+    .then(response => response.json())
+    .then(data => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        alert('Vendor scores updated successfully!');
+        location.reload();
+    })
+    .catch(error => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        console.error('Error updating scores:', error);
+        alert('Error updating scores. Please try again.');
+    });
+}
+</script>
+{% endblock %}

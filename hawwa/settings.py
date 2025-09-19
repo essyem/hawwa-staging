@@ -58,13 +58,12 @@ LOCAL_APPS = [
     'vendors',
     'ai_buddy',
     'wellness',
-    'api',
     'payments',
-    'admin_dashboard',
-    # Phase 1: Business Modules
-    'financial',
     'reporting',
+    'admin_dashboard',
     'operations',
+    'analytics',
+    'financial',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

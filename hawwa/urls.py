@@ -51,6 +51,7 @@ urlpatterns = [
     path('ai-buddy/', include('ai_buddy.urls', namespace='ai_buddy')),
     path('admin-dashboard/', include('admin_dashboard.urls', namespace='admin_dashboard')),
     path('reporting/', include('reporting.urls', namespace='reporting')),
+    path('analytics/', include('analytics.urls', namespace='analytics')),
     
     # API URLs
     path('api/v1/', include('api.urls')),

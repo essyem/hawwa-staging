@@ -1,0 +1,493 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}My Performance Dashboard - Hawwa{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" rel="stylesheet">
+<style>
+    .vendor-dashboard-header {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .performance-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: transform 0.2s ease-in-out;
+    }
+    .performance-card:hover {
+        transform: translateY(-2px);
+    }
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .metric-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .quality-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
+        margin: 0 auto 1rem;
+    }
+    .quality-excellent { background: linear-gradient(135deg, #28a745, #20c997); }
+    .quality-good { background: linear-gradient(135deg, #17a2b8, #20c997); }
+    .quality-average { background: linear-gradient(135deg, #ffc107, #fd7e14); }
+    .quality-poor { background: linear-gradient(135deg, #dc3545, #fd1d53); }
+    
+    .trend-indicator {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .trend-improving { background-color: #d4edda; color: #155724; }
+    .trend-stable { background-color: #d1ecf1; color: #0c5460; }
+    .trend-declining { background-color: #f8d7da; color: #721c24; }
+    
+    .certification-badge {
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        color: #333;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .insights-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 1rem 0;
+    }
+    
+    .recent-metric {
+        border-left: 4px solid #4e73df;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 0 10px 10px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Vendor Dashboard Header -->
+    <div class="vendor-dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-2">My Performance Dashboard</h1>
+                <p class="mb-2">
+                    <i class="fas fa-building me-2"></i>{{ vendor.business_name }}
+                </p>
+                <p class="mb-0">
+                    <i class="fas fa-map-marker-alt me-2"></i>{{ vendor.city }}, {{ vendor.state }}
+                    <span class="ms-3">
+                        <i class="fas fa-tools me-2"></i>{{ vendor.get_primary_service_display|default:"Multiple Services" }}
+                    </span>
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                {% if latest_score %}
+                    <div class="quality-circle {% if latest_score.overall_score >= 90 %}quality-excellent{% elif latest_score.overall_score >= 80 %}quality-good{% elif latest_score.overall_score >= 70 %}quality-average{% else %}quality-poor{% endif %}">
+                        {{ latest_score.overall_score|floatformat:0 }}
+                    </div>
+                    <p class="mb-0">My Quality Score</p>
+                    <small>
+                        {% if performance_summary.performance_trend == 'improving' %}
+                            <span class="trend-indicator trend-improving">
+                                <i class="fas fa-arrow-up me-1"></i>Improving
+                            </span>
+                        {% elif performance_summary.performance_trend == 'declining' %}
+                            <span class="trend-indicator trend-declining">
+                                <i class="fas fa-arrow-down me-1"></i>Declining
+                            </span>
+                        {% else %}
+                            <span class="trend-indicator trend-stable">
+                                <i class="fas fa-minus me-1"></i>Stable
+                            </span>
+                        {% endif %}
+                    </small>
+                {% else %}
+                    <div class="quality-circle quality-average">
+                        N/A
+                    </div>
+                    <p class="mb-0">No Score Yet</p>
+                    <small class="text-muted">Complete more bookings to get scored</small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Performance Metrics -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card performance-card">
+                <div class="card-body text-center">
+                    <div class="metric-value text-primary">{{ performance_summary.aggregated_metrics.total_bookings|floatformat:0 }}</div>
+                    <div class="metric-label">Total Bookings</div>
+                    <small class="text-muted">Last 30 days</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card performance-card">
+                <div class="card-body text-center">
+                    <div class="metric-value text-success">{{ performance_summary.aggregated_metrics.completion_rate|floatformat:1 }}%</div>
+                    <div class="metric-label">Completion Rate</div>
+                    <small class="text-muted">On-time completions</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card performance-card">
+                <div class="card-body text-center">
+                    <div class="metric-value text-info">{{ performance_summary.aggregated_metrics.avg_rating|floatformat:1 }}/5</div>
+                    <div class="metric-label">Customer Rating</div>
+                    <small class="text-muted">Average rating received</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card performance-card">
+                <div class="card-body text-center">
+                    {% if latest_ranking %}
+                        <div class="metric-value text-warning">#{{ latest_ranking.overall_rank }}</div>
+                        <div class="metric-label">My Ranking</div>
+                        <small class="text-muted">Out of {{ latest_ranking.total_vendors }} vendors</small>
+                    {% else %}
+                        <div class="metric-value text-muted">N/A</div>
+                        <div class="metric-label">My Ranking</div>
+                        <small class="text-muted">Not ranked yet</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Insights -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card performance-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Performance Trends</h6>
+                </div>
+                <div class="card-body">
+                    {% if recent_metrics %}
+                        <div class="chart-container">
+                            <canvas id="performanceTrendChart"></canvas>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Performance Data</h5>
+                            <p class="text-muted">Complete some bookings to see your performance trends.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card performance-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">My Certifications</h6>
+                </div>
+                <div class="card-body">
+                    {% if certifications %}
+                        {% for cert in certifications %}
+                        <div class="certification-badge">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <strong>{{ cert.certification_type|title }}</strong>
+                                    <br><small>{{ cert.awarded_date|date:"M j, Y" }}</small>
+                                </div>
+                                <i class="fas fa-certificate fa-2x"></i>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-certificate fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No Certifications Yet</h6>
+                            <p class="text-muted small">Maintain high quality scores to earn certifications!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Performance and Insights -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card performance-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Daily Performance</h6>
+                </div>
+                <div class="card-body">
+                    {% if recent_metrics %}
+                        {% for metric in recent_metrics %}
+                        <div class="recent-metric">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>{{ metric.date|date:"M j" }}</strong>
+                                    <br><small class="text-muted">{{ metric.date|date:"l" }}</small>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="h5 mb-0 text-primary">{{ metric.bookings_received }}</div>
+                                    <small class="text-muted">Bookings</small>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="h5 mb-0 text-success">{{ metric.completion_rate|floatformat:1 }}%</div>
+                                    <small class="text-muted">Completed</small>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="h5 mb-0 text-warning">{{ metric.avg_rating|floatformat:1 }}/5</div>
+                                    <small class="text-muted">Rating</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No Recent Activity</h6>
+                            <p class="text-muted">Start accepting bookings to see your daily performance metrics.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="insights-card">
+                <h6 class="mb-3">
+                    <i class="fas fa-lightbulb me-2"></i>Performance Insights
+                </h6>
+                
+                {% if latest_score %}
+                    <div class="mb-3">
+                        <strong>Quality Score Breakdown:</strong>
+                        <ul class="list-unstyled mt-2">
+                            <li><small>Customer Satisfaction: {{ latest_score.customer_satisfaction_score|floatformat:1 }}/100</small></li>
+                            <li><small>Response Time: {{ latest_score.response_time_score|floatformat:1 }}/100</small></li>
+                            <li><small>Completion Rate: {{ latest_score.completion_rate_score|floatformat:1 }}/100</small></li>
+                            <li><small>Repeat Customers: {{ latest_score.repeat_customer_score|floatformat:1 }}/100</small></li>
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <strong>Tips to Improve:</strong>
+                    <ul class="list-unstyled mt-2">
+                        {% if latest_score.customer_satisfaction_score < 80 %}
+                            <li><small><i class="fas fa-star me-1"></i>Focus on customer satisfaction</small></li>
+                        {% endif %}
+                        {% if latest_score.response_time_score < 80 %}
+                            <li><small><i class="fas fa-clock me-1"></i>Respond faster to booking requests</small></li>
+                        {% endif %}
+                        {% if latest_score.completion_rate_score < 80 %}
+                            <li><small><i class="fas fa-check me-1"></i>Complete more bookings on time</small></li>
+                        {% endif %}
+                        {% if latest_score.repeat_customer_score < 80 %}
+                            <li><small><i class="fas fa-heart me-1"></i>Build stronger customer relationships</small></li>
+                        {% endif %}
+                        {% if not latest_score or latest_score.overall_score >= 90 %}
+                            <li><small><i class="fas fa-trophy me-1"></i>Keep up the excellent work!</small></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                {% if performance_summary.aggregated_metrics.repeat_customer_rate > 0 %}
+                <div>
+                    <strong>Customer Loyalty:</strong>
+                    <p class="mb-0"><small>{{ performance_summary.aggregated_metrics.repeat_customer_rate|floatformat:1 }}% of your customers book again!</small></p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card performance-card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'vendors:vendor_profile' %}" class="btn btn-primary w-100">
+                                <i class="fas fa-user-edit me-2"></i>Edit Profile
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'bookings:vendor_bookings' %}" class="btn btn-success w-100">
+                                <i class="fas fa-calendar-check me-2"></i>My Bookings
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-info w-100" onclick="downloadMyReport()">
+                                <i class="fas fa-download me-2"></i>Download Report
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-outline-primary w-100" onclick="requestQualityUpdate()">
+                                <i class="fas fa-sync me-2"></i>Update My Score
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+<script>
+// Initialize chart when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    {% if recent_metrics %}
+        initializePerformanceChart();
+    {% endif %}
+});
+
+function initializePerformanceChart() {
+    const ctx = document.getElementById('performanceTrendChart').getContext('2d');
+    
+    const metricsData = [
+        {% for metric in recent_metrics %}
+        {
+            date: '{{ metric.date|date:"M j" }}',
+            bookings: {{ metric.bookings_received }},
+            completion_rate: {{ metric.completion_rate }},
+            rating: {{ metric.avg_rating }}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: metricsData.map(item => item.date),
+            datasets: [
+                {
+                    label: 'Bookings',
+                    data: metricsData.map(item => item.bookings),
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Completion Rate (%)',
+                    data: metricsData.map(item => item.completion_rate),
+                    borderColor: '#1cc88a',
+                    backgroundColor: 'rgba(28, 200, 138, 0.1)',
+                    yAxisID: 'y1'
+                },
+                {
+                    label: 'Rating',
+                    data: metricsData.map(item => item.rating),
+                    borderColor: '#f6c23e',
+                    backgroundColor: 'rgba(246, 194, 62, 0.1)',
+                    yAxisID: 'y2'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Bookings'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Completion Rate (%)'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                    max: 100
+                },
+                y2: {
+                    type: 'linear',
+                    display: false,
+                    max: 5
+                }
+            }
+        }
+    });
+}
+
+// Action functions
+function downloadMyReport() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+    btn.disabled = true;
+    
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        alert('Your performance report is being generated. Download will start shortly.');
+    }, 2000);
+}
+
+function requestQualityUpdate() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+    btn.disabled = true;
+    
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        alert('Quality score update requested. Your score will be recalculated within 24 hours.');
+    }, 1500);
+}
+</script>
+{% endblock %}

@@ -39,6 +39,15 @@ class Service(models.Model):
     price = models.DecimalField(_("Price"), max_digits=10, decimal_places=2)
     duration = models.DurationField(_("Duration"), help_text=_("Expected duration of the service"))
     category = models.ForeignKey(ServiceCategory, related_name="services", on_delete=models.CASCADE)
+    vendor_profile = models.ForeignKey(
+        'vendors.VendorProfile', 
+        related_name="services", 
+        on_delete=models.CASCADE,
+        verbose_name=_("Vendor"),
+        help_text=_("The vendor/service provider offering this service"),
+        null=True,
+        blank=True
+    )
     image = models.ImageField(_("Service Image"), upload_to='services/', blank=True, null=True)
     status = models.CharField(_("Availability Status"), max_length=20, choices=AVAILABILITY_STATUS, default='available')
     featured = models.BooleanField(_("Featured Service"), default=False)
