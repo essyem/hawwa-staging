@@ -308,3 +308,24 @@ class FoodProviderRegistrationForm(UserRegistrationForm):
             food_profile.save()
             
         return user
+
+
+class ProfileForm(forms.ModelForm):
+    """Form for updating a user's basic profile, including avatar upload."""
+    profile_picture = forms.ImageField(required=False, widget=forms.ClearableFileInput)
+
+    class Meta:
+        model = User
+        fields = (
+            'first_name', 'last_name', 'phone', 'profile_picture',
+            'address', 'city', 'state', 'country', 'postal_code',
+            'receive_emails', 'receive_sms'
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            css_class = 'form-control'
+            if isinstance(field.widget, forms.CheckboxInput):
+                css_class = 'form-check-input'
+            field.widget.attrs.update({'class': css_class})

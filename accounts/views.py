@@ -19,6 +19,9 @@ from .profile_models import (
     WellnessProviderProfile, MeditationConsultantProfile, MentalHealthConsultantProfile,
     FoodProviderProfile
 )
+from .forms import ProfileForm
+from django.views.generic.edit import UpdateView
+from django.urls import reverse
 
 class RegisterView(TemplateView):
     """View to choose which type of user to register as."""
@@ -200,3 +203,21 @@ class ProfileView(TemplateView):
             context['profile'] = FoodProviderProfile.objects.get(user=user)
             
         return context
+
+
+@method_decorator(login_required, name='dispatch')
+class ProfileUpdateView(UpdateView):
+    """View to edit user profile including avatar upload."""
+    model = User
+    form_class = ProfileForm
+    template_name = 'accounts/profile_edit.html'
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, _('Your profile has been updated.'))
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('accounts:profile')

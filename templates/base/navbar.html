@@ -86,6 +86,12 @@
                        <i class="fas fa-envelope me-1"></i>{% trans "Contact" %}
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.app_name == 'vendors' %}active{% endif %}" 
+                       href="{% url 'vendors:dashboard' %}">
+                       <i class="fas fa-store me-1"></i>{% trans "Vendors" %}
+                    </a>
+                </li>
             </ul>
             
             <!-- Authentication Links -->
@@ -103,8 +109,10 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" href="{% url 'bookings:booking_dashboard' %}">
                             <i class="fas fa-tachometer-alt me-2"></i>{% trans "Dashboard" %}</a></li>
-                        <li><a class="dropdown-item" href="#">
+                        <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
                             <i class="fas fa-user me-2"></i>{% trans "My Profile" %}</a></li>
+                        <li><a class="dropdown-item" href="{% url 'accounts:profile_edit' %}">
+                            <i class="fas fa-user-edit me-2"></i>{% trans "Edit Profile" %}</a></li>
                         <li><a class="dropdown-item" href="{% url 'bookings:booking_list' %}">
                             <i class="fas fa-calendar me-2"></i>{% trans "My Bookings" %}</a></li>
                         <li><a class="dropdown-item" href="{% url 'ai_buddy:home' %}">

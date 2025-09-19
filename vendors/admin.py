@@ -8,6 +8,8 @@ from .models import (
     VendorProfile, VendorDocument, VendorAvailability, 
     VendorBlackoutDate, VendorPayment, VendorAnalytics
 )
+import csv
+from django.http import HttpResponse
 
 
 @admin.register(VendorProfile)
@@ -63,24 +65,57 @@ class VendorProfileAdmin(admin.ModelAdmin):
     completion_rate_display.short_description = _('Completion Rate')
     
     actions = ['verify_vendors', 'activate_vendors', 'suspend_vendors']
-    
+
     def verify_vendors(self, request, queryset):
         """Bulk verify vendors"""
         updated = queryset.update(verified=True, verification_date=timezone.now())
         self.message_user(request, f'{updated} vendors verified successfully.')
     verify_vendors.short_description = _('Verify selected vendors')
-    
+
     def activate_vendors(self, request, queryset):
         """Bulk activate vendors"""
         updated = queryset.update(status='active')
         self.message_user(request, f'{updated} vendors activated successfully.')
     activate_vendors.short_description = _('Activate selected vendors')
-    
+
     def suspend_vendors(self, request, queryset):
         """Bulk suspend vendors"""
         updated = queryset.update(status='suspended')
         self.message_user(request, f'{updated} vendors suspended successfully.')
     suspend_vendors.short_description = _('Suspend selected vendors')
+
+
+def _export_vendors_csv(queryset):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="vendors_export.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Business Name', 'User', 'Status', 'Verified', 'Average Rating', 'Total Bookings', 'Joined Date'])
+
+    for v in queryset.select_related('user'):
+        writer.writerow([
+            v.business_name,
+            v.user.get_full_name() or v.user.email,
+            v.status,
+            'Yes' if v.verified else 'No',
+            f'{v.average_rating:.2f}',
+            v.total_bookings,
+            v.joined_date,
+        ])
+
+    return response
+
+
+def notify_vendors_stub(modeladmin, request, queryset):
+    """Stub action to notify selected vendors (e.g., email/SMS)"""
+    # In production, integrate with the notification system; here we just show a message
+    count = queryset.count()
+    modeladmin.message_user(request, f'Notification queued for {count} vendors (stub).')
+notify_vendors_stub.short_description = _('Notify selected vendors (stub)')
+
+
+def export_vendors_csv(modeladmin, request, queryset):
+    return _export_vendors_csv(queryset)
+export_vendors_csv.short_description = _('Export selected vendors to CSV')
 
 
 @admin.register(VendorDocument)

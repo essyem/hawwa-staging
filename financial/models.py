@@ -402,3 +402,175 @@ class Expense(models.Model):
         self.is_paid = True
         self.payment_date = timezone.now().date()
         self.save()
+
+
+class Budget(models.Model):
+    """Budget header representing a budget period and owner."""
+    name = models.CharField("Budget Name", max_length=200)
+    start_date = models.DateField("Start Date")
+    end_date = models.DateField("End Date")
+    currency = models.CharField("Currency", max_length=10, default='QAR')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                   null=True, blank=True, related_name='budgets_created')
+    created_at = models.DateTimeField("Created At", auto_now_add=True)
+    updated_at = models.DateTimeField("Updated At", auto_now=True)
+
+    class Meta:
+        verbose_name = "Budget"
+        verbose_name_plural = "Budgets"
+        ordering = ['-start_date']
+
+    def __str__(self):
+        return f"{self.name} ({self.start_date} - {self.end_date})"
+
+    def total_allocated(self):
+        return self.lines.aggregate(total=models.Sum('amount'))['total'] or 0
+
+    def total_spent(self):
+        # Sum expenses and invoice items that fall within budget period
+        expense_sum = Expense.objects.filter(
+            expense_date__gte=self.start_date,
+            expense_date__lte=self.end_date
+        ).aggregate(total=models.Sum('amount'))['total'] or 0
+
+        # InvoiceItem total_amount via related Invoice date
+        invoice_sum = InvoiceItem.objects.filter(
+            invoice__invoice_date__gte=self.start_date,
+            invoice__invoice_date__lte=self.end_date
+        ).aggregate(total=models.Sum('total_amount'))['total'] or 0
+
+        return expense_sum + invoice_sum
+
+    def remaining(self):
+        return (self.total_allocated() or 0) - (self.total_spent() or 0)
+
+
+class BudgetLine(models.Model):
+    """Individual budget line tied to a Budget and optionally a category."""
+    budget = models.ForeignKey(Budget, on_delete=models.CASCADE, related_name='lines')
+    name = models.CharField("Line Name", max_length=200)
+    category = models.ForeignKey(AccountingCategory, on_delete=models.SET_NULL,
+                                 null=True, blank=True, related_name='budget_lines')
+    amount = models.DecimalField("Amount", max_digits=12, decimal_places=2)
+    notes = models.TextField("Notes", blank=True)
+    created_at = models.DateTimeField("Created At", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Budget Line"
+        verbose_name_plural = "Budget Lines"
+        ordering = ['-amount']
+
+    def __str__(self):
+        return f"{self.name} - {self.amount} {self.budget.currency}"
+
+    def spent(self):
+        """Calculate spent amount for this line by category within budget period."""
+        if not self.category:
+            return 0
+
+        expense_sum = Expense.objects.filter(
+            category=self.category,
+            expense_date__gte=self.budget.start_date,
+            expense_date__lte=self.budget.end_date
+        ).aggregate(total=models.Sum('amount'))['total'] or 0
+
+        invoice_sum = InvoiceItem.objects.filter(
+            category=self.category,
+            invoice__invoice_date__gte=self.budget.start_date,
+            invoice__invoice_date__lte=self.budget.end_date
+        ).aggregate(total=models.Sum('total_amount'))['total'] or 0
+
+        return expense_sum + invoice_sum
+
+
+class LedgerAccount(models.Model):
+    """A ledger account for double-entry bookkeeping."""
+    code = models.CharField("Account Code", max_length=32, unique=True)
+    name = models.CharField("Account Name", max_length=200)
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
+    ACCOUNT_TYPE_CHOICES = (
+        ('asset', 'Asset'),
+        ('liability', 'Liability'),
+        ('equity', 'Equity'),
+        ('revenue', 'Revenue'),
+        ('expense', 'Expense'),
+    )
+    account_type = models.CharField("Account Type", max_length=20, choices=ACCOUNT_TYPE_CHOICES, default='asset')
+    is_active = models.BooleanField("Active", default=True)
+    created_at = models.DateTimeField("Created At", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Ledger Account"
+        verbose_name_plural = "Ledger Accounts"
+        ordering = ['code']
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+class JournalEntry(models.Model):
+    """A journal entry grouping one or more journal lines."""
+    reference = models.CharField("Reference", max_length=100, blank=True)
+    date = models.DateField("Date", default=timezone.now)
+    narration = models.TextField("Narration", blank=True)
+    created_at = models.DateTimeField("Created At", auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Journal Entry"
+        verbose_name_plural = "Journal Entries"
+        ordering = ['-date', '-created_at']
+
+    def __str__(self):
+        return f"JE-{self.pk} {self.reference or ''} {self.date}"
+
+    def total_debits(self):
+        return self.lines.aggregate(total=models.Sum('debit'))['total'] or 0
+
+    def total_credits(self):
+        return self.lines.aggregate(total=models.Sum('credit'))['total'] or 0
+
+    def is_balanced(self):
+        return Decimal(str(self.total_debits())) == Decimal(str(self.total_credits()))
+
+    def post(self):
+        """Mark entry as posted. For now this is a placeholder for future ledger balance updates."""
+        if not self.is_balanced():
+            raise ValueError('JournalEntry is not balanced')
+        # In a full implementation, posting would create/update ledger balances.
+        return True
+
+
+class JournalLine(models.Model):
+    """A single debit/credit line belonging to a JournalEntry."""
+    entry = models.ForeignKey(JournalEntry, on_delete=models.CASCADE, related_name='lines')
+    account = models.ForeignKey(LedgerAccount, on_delete=models.PROTECT, related_name='lines')
+    debit = models.DecimalField("Debit", max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    credit = models.DecimalField("Credit", max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    narration = models.CharField("Narration", max_length=200, blank=True)
+
+    class Meta:
+        verbose_name = "Journal Line"
+        verbose_name_plural = "Journal Lines"
+
+    def clean(self):
+        # Ensure debit and credit are not both set
+        if self.debit > 0 and self.credit > 0:
+            raise ValueError('JournalLine cannot have both debit and credit greater than 0')
+
+    def __str__(self):
+        return f"{self.account.code} D:{self.debit} C:{self.credit}"
+
+
+class LedgerBalance(models.Model):
+    """Materialized per-account balance for quick queries and trial balance reports."""
+    account = models.OneToOneField(LedgerAccount, on_delete=models.CASCADE, related_name='balance')
+    balance = models.DecimalField("Balance", max_digits=18, decimal_places=2, default=Decimal('0.00'))
+    updated_at = models.DateTimeField("Updated At", auto_now=True)
+
+    class Meta:
+        verbose_name = "Ledger Balance"
+        verbose_name_plural = "Ledger Balances"
+
+    def __str__(self):
+        return f"{self.account.code} - {self.balance}"
