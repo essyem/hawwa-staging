@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vendor Dashboard - Hawwa{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="text-center">
+                <div class="mb-4">
+                    <i class="fas fa-user-tie fa-5x text-muted"></i>
+                </div>
+                
+                <h2 class="h3 mb-3">Vendor Dashboard Access</h2>
+                
+                <p class="text-muted mb-4">
+                    To access the vendor performance dashboard, you need to have a vendor profile. 
+                    This dashboard provides insights into your quality scores, rankings, and performance metrics.
+                </p>
+                
+                <div class="alert alert-info" role="alert">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-info-circle me-2"></i>What you'll get with a vendor profile:
+                    </h6>
+                    <ul class="list-unstyled mb-0 text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Real-time quality scoring</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Performance analytics</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Customer feedback insights</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Ranking position tracking</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Certification opportunities</li>
+                    </ul>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{% url 'vendors:vendor_register' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Become a Vendor
+                    </a>
+                    <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

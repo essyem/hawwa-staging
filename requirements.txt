@@ -23,6 +23,7 @@ djangorestframework==3.16.0
 drf-yasg==1.21.10
 faker==37.8.0
 fonttools==4.59.1
+geopy==2.4.1
 gunicorn==23.0.0
 html5lib==1.1
 humanize==4.12.3

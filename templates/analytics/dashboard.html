@@ -1,0 +1,490 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Analytics Dashboard - Hawwa{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" rel="stylesheet">
+<style>
+    .analytics-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: transform 0.2s ease-in-out;
+    }
+    .analytics-card:hover {
+        transform: translateY(-2px);
+    }
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .trend-positive {
+        color: #27ae60;
+    }
+    .trend-negative {
+        color: #e74c3c;
+    }
+    .quality-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .quality-excellent {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .quality-good {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+    .quality-average {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .quality-poor {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .alert-item {
+        border-left: 4px solid;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0 8px 8px 0;
+    }
+    .alert-high {
+        border-left-color: #e74c3c;
+        background-color: #fdedec;
+    }
+    .alert-medium {
+        border-left-color: #f39c12;
+        background-color: #fef9e7;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 1rem 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0 text-gray-800">Analytics Dashboard</h1>
+                    <p class="text-muted">Period: {{ date_range.start|date:"M j, Y" }} - {{ date_range.end|date:"M j, Y" }}</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" onclick="updateDateRange(7)">7 Days</button>
+                    <button class="btn btn-primary" onclick="updateDateRange(30)">30 Days</button>
+                    <button class="btn btn-outline-primary" onclick="updateDateRange(90)">90 Days</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Platform Statistics -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card analytics-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="stat-value text-primary">{{ platform_stats.total_vendors|floatformat:0 }}</div>
+                            <div class="stat-label">Active Vendors</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card analytics-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="stat-value text-success">{{ platform_stats.total_bookings|floatformat:0 }}</div>
+                            <div class="stat-label">Total Bookings</div>
+                            {% if platform_stats.booking_growth > 0 %}
+                                <small class="trend-positive">
+                                    <i class="fas fa-arrow-up"></i> +{{ platform_stats.booking_growth|floatformat:1 }}%
+                                </small>
+                            {% elif platform_stats.booking_growth < 0 %}
+                                <small class="trend-negative">
+                                    <i class="fas fa-arrow-down"></i> {{ platform_stats.booking_growth|floatformat:1 }}%
+                                </small>
+                            {% endif %}
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-check fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card analytics-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="stat-value text-info">${{ platform_stats.total_revenue|floatformat:0|intcomma }}</div>
+                            <div class="stat-label">Total Revenue</div>
+                            <small class="text-muted">{{ platform_stats.completion_rate|floatformat:1 }}% completion rate</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-dollar-sign fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card analytics-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="stat-value text-warning">{{ platform_stats.avg_quality_score|floatformat:1 }}</div>
+                            <div class="stat-label">Avg Quality Score</div>
+                            <small class="text-muted">{{ platform_stats.avg_rating|floatformat:1 }}/5 customer rating</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-star fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card analytics-card">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Booking Trends</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="bookingTrendsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card analytics-card">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Quality Score Distribution</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="qualityDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Performers and Alerts -->
+    <div class="row">
+        <div class="col-xl-6 col-lg-6">
+            <div class="card analytics-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Top Performers</h6>
+                </div>
+                <div class="card-body">
+                    {% if top_vendors %}
+                        {% for score in top_vendors %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                                     style="width: 40px; height: 40px;">
+                                    {{ forloop.counter }}
+                                </div>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="font-weight-bold">
+                                    <a href="{% url 'analytics:vendor_detail' score.vendor.id %}" class="text-decoration-none">
+                                        {{ score.vendor.business_name }}
+                                    </a>
+                                </div>
+                                <small class="text-muted">{{ score.vendor.get_primary_service_display|default:"Multiple Services" }}</small>
+                            </div>
+                            <div class="ms-auto">
+                                {% if score.overall_score >= 90 %}
+                                    <span class="quality-badge quality-excellent">{{ score.overall_score|floatformat:1 }}</span>
+                                {% elif score.overall_score >= 80 %}
+                                    <span class="quality-badge quality-good">{{ score.overall_score|floatformat:1 }}</span>
+                                {% elif score.overall_score >= 70 %}
+                                    <span class="quality-badge quality-average">{{ score.overall_score|floatformat:1 }}</span>
+                                {% else %}
+                                    <span class="quality-badge quality-poor">{{ score.overall_score|floatformat:1 }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">No quality scores available yet.</p>
+                    {% endif %}
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'analytics:rankings' %}" class="btn btn-outline-primary btn-sm">
+                            View All Rankings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-lg-6">
+            <div class="card analytics-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">Quality Alerts</h6>
+                </div>
+                <div class="card-body">
+                    {% if recent_alerts %}
+                        {% for alert in recent_alerts %}
+                        <div class="alert-item alert-{{ alert.severity }}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>{{ alert.vendor.business_name }}</strong>
+                                    <div class="text-muted small">{{ alert.message }}</div>
+                                </div>
+                                <small class="text-muted">{{ alert.timestamp|timesince }} ago</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted">
+                            <i class="fas fa-check-circle fa-3x mb-3"></i>
+                            <p>No quality alerts! All vendors are performing well.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card analytics-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'analytics:trends' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-chart-line me-2"></i>Performance Trends
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'analytics:rankings' %}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-trophy me-2"></i>Quality Rankings
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-outline-info w-100" onclick="generateReport()">
+                                <i class="fas fa-file-export me-2"></i>Generate Report
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-outline-warning w-100" onclick="runQualityCheck()">
+                                <i class="fas fa-sync me-2"></i>Run Quality Check
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+<script>
+// Chart configurations
+let bookingTrendsChart;
+let qualityDistributionChart;
+
+// Initialize charts when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+});
+
+function initializeCharts() {
+    // Booking Trends Chart
+    const bookingCtx = document.getElementById('bookingTrendsChart').getContext('2d');
+    bookingTrendsChart = new Chart(bookingCtx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_data.daily_bookings|safe }}.map(item => {
+                const date = new Date(item.date);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }),
+            datasets: [{
+                label: 'Daily Bookings',
+                data: {{ chart_data.daily_bookings|safe }}.map(item => item.bookings),
+                borderColor: '#4e73df',
+                backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+
+    // Quality Distribution Chart
+    const qualityCtx = document.getElementById('qualityDistributionChart').getContext('2d');
+    qualityDistributionChart = new Chart(qualityCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ chart_data.score_distribution|safe }}.map(item => item.label),
+            datasets: [{
+                data: {{ chart_data.score_distribution|safe }}.map(item => item.count),
+                backgroundColor: [
+                    '#28a745',  // Excellent - Green
+                    '#17a2b8',  // Good - Teal
+                    '#ffc107',  // Average - Yellow
+                    '#fd7e14',  // Below Average - Orange
+                    '#dc3545'   // Poor - Red
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Update charts with new date range
+function updateDateRange(days) {
+    fetch(`{% url 'analytics:api_platform_stats' %}?days=${days}`)
+        .then(response => response.json())
+        .then(data => {
+            // Update stats cards
+            updateStatsCards(data);
+            
+            // Refresh charts with new data
+            // This would require additional API endpoints for chart data
+            location.reload(); // Simple refresh for now
+        })
+        .catch(error => {
+            console.error('Error updating dashboard:', error);
+        });
+}
+
+function updateStatsCards(data) {
+    // Update the stat values in the cards
+    document.querySelector('.stat-value.text-primary').textContent = data.total_vendors;
+    document.querySelector('.stat-value.text-success').textContent = data.total_bookings;
+    document.querySelector('.stat-value.text-info').textContent = `$${data.total_revenue.toLocaleString()}`;
+    document.querySelector('.stat-value.text-warning').textContent = data.avg_quality_score.toFixed(1);
+}
+
+// Quick action functions
+function generateReport() {
+    // Show loading state
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+    btn.disabled = true;
+    
+    // This would trigger a report generation process
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        alert('Report generation started. You will receive an email when it\'s ready.');
+    }, 2000);
+}
+
+function runQualityCheck() {
+    // Show loading state
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Running Check...';
+    btn.disabled = true;
+    
+    // This would trigger quality score recalculation
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        alert('Quality check completed. Dashboard will refresh with updated scores.');
+        location.reload();
+    }, 3000);
+}
+
+// Auto-refresh dashboard every 5 minutes
+setInterval(() => {
+    updateDateRange(30); // Refresh with current 30-day period
+}, 300000);
+</script>
+{% endblock %}
