@@ -7,29 +7,98 @@ from django.contrib import messages
 from django.db.models import Count, Sum, Q
 from datetime import datetime, timedelta
 
+import csv
+from django.http import HttpResponse
+
 from .models import Booking, BookingItem
+from .models import BookingStatusHistory
 
 # Custom admin actions
 @admin.action(description='Mark selected bookings as confirmed')
 def mark_as_confirmed(modeladmin, request, queryset):
-    """Mark selected bookings as confirmed."""
-    updated = queryset.filter(status='pending').update(status='confirmed')
-    messages.success(request, f"Successfully confirmed {updated} bookings.")
+    """Mark selected bookings as confirmed.
+
+    Create status history entries and send confirmation emails when appropriate.
+    """
+    count = 0
+    for booking in queryset:
+        if booking.status == 'pending':
+            old_status = booking.status
+            booking.status = 'confirmed'
+            booking.confirmed_at = timezone.now()
+            booking.save()
+
+            BookingStatusHistory.objects.create(
+                booking=booking,
+                old_status=old_status,
+                new_status='confirmed',
+                changed_by=request.user,
+                notes='Status updated via admin action: confirmed'
+            )
+
+            # Send confirmation email if available
+            try:
+                booking.send_confirmation_email()
+            except Exception:
+                # Don't break the admin action on email errors
+                pass
+
+            count += 1
+
+    messages.success(request, f"Successfully confirmed {count} bookings.")
 
 @admin.action(description='Mark selected bookings as cancelled')
 def mark_as_cancelled(modeladmin, request, queryset):
-    """Mark selected bookings as cancelled."""
-    updated = queryset.exclude(status__in=['completed', 'cancelled']).update(status='cancelled')
-    messages.success(request, f"Successfully cancelled {updated} bookings.")
+    """Mark selected bookings as cancelled and record history."""
+    count = 0
+    for booking in queryset.exclude(status__in=['completed', 'cancelled']):
+        old_status = booking.status
+        booking.status = 'cancelled'
+        booking.save()
+
+        BookingStatusHistory.objects.create(
+            booking=booking,
+            old_status=old_status,
+            new_status='cancelled',
+            changed_by=request.user,
+            notes='Cancelled via admin action'
+        )
+
+        try:
+            booking.send_status_update_email()
+        except Exception:
+            pass
+
+        count += 1
+
+    messages.success(request, f"Successfully cancelled {count} bookings.")
 
 @admin.action(description='Mark selected bookings as completed')
 def mark_as_completed(modeladmin, request, queryset):
-    """Mark selected bookings as completed."""
-    updated = queryset.filter(status='confirmed').update(
-        status='completed',
-        completed_at=timezone.now()
-    )
-    messages.success(request, f"Successfully completed {updated} bookings.")
+    """Mark selected bookings as completed and record history."""
+    count = 0
+    for booking in queryset.filter(status='confirmed'):
+        old_status = booking.status
+        booking.status = 'completed'
+        booking.completed_at = timezone.now()
+        booking.save()
+
+        BookingStatusHistory.objects.create(
+            booking=booking,
+            old_status=old_status,
+            new_status='completed',
+            changed_by=request.user,
+            notes='Completed via admin action'
+        )
+
+        try:
+            booking.send_status_update_email()
+        except Exception:
+            pass
+
+        count += 1
+
+    messages.success(request, f"Successfully completed {count} bookings.")
 
 @admin.action(description='Send reminder emails (Staff only)')
 def send_reminder_emails(modeladmin, request, queryset):
@@ -47,6 +116,30 @@ def send_reminder_emails(modeladmin, request, queryset):
     count = upcoming_bookings.count()
     # Here you would implement the actual email sending logic
     messages.success(request, f"Reminder emails queued for {count} upcoming bookings.")
+
+
+@admin.action(description='Export selected bookings as CSV')
+def export_bookings_csv(modeladmin, request, queryset):
+    """Export selected bookings to a CSV file for reporting."""
+    # Create the HttpResponse object with CSV headers
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="bookings_export.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Booking Number', 'User', 'Service', 'Start Date', 'End Date', 'Status', 'Total Price'])
+
+    for b in queryset.select_related('user', 'service'):
+        writer.writerow([
+            b.booking_number,
+            b.user.get_full_name() or b.user.email,
+            b.service.name if b.service else '',
+            b.start_date,
+            b.end_date,
+            b.status,
+            f'{b.total_price:.2f}'
+        ])
+
+    return response
 
 # Register your models here.
 class BookingItemInline(admin.TabularInline):
