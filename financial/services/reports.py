@@ -3,12 +3,12 @@ from django.db.models import Sum
 from django.utils import timezone
 
 from ..models import Invoice, InvoiceItem, Payment, Expense
-
 from ..models import LedgerBalance, LedgerAccount
 from ..models import InvoiceItem, AccountingCategory
+from .currency import convert_amount
 
 
-def profit_and_loss(start_date, end_date):
+def profit_and_loss(start_date, end_date, base_currency='QAR'):
     """Return a simple Profit & Loss summary for the period.
 
     Returns dict: { 'revenue': Decimal, 'costs': Decimal, 'expenses': Decimal, 'gross_profit': Decimal, 'net_profit': Decimal }
@@ -20,12 +20,19 @@ def profit_and_loss(start_date, end_date):
     ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
 
     # Costs: sum cost_amount from invoice items whose category is marked as COGS
-    cogs_items = InvoiceItem.objects.filter(
+    cogs_qs = InvoiceItem.objects.filter(
         invoice__invoice_date__gte=start_date,
         invoice__invoice_date__lte=end_date,
         category__is_cogs=True
-    ).aggregate(total=Sum('cost_amount'))['total'] or Decimal('0.00')
-    costs = Decimal(cogs_items)
+    ).values('cost_amount', 'cost_currency', 'invoice__invoice_date')
+
+    costs = Decimal('0.00')
+    for item in cogs_qs:
+        amt = Decimal(item['cost_amount'] or '0')
+        from_ccy = item.get('cost_currency') or 'QAR'
+        inv_date = item.get('invoice__invoice_date')
+        converted = convert_amount(amt, from_ccy, base_currency, date=inv_date)
+        costs += Decimal(converted)
 
     # Expenses: sum of Expense.amount in period
     expense_sum = Expense.objects.filter(

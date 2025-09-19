@@ -7,6 +7,7 @@ from django.utils import timezone
 from decimal import Decimal
 import uuid
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 class AccountingCategory(models.Model):
     """Categories for financial transactions and accounting."""
@@ -415,6 +416,27 @@ class Expense(models.Model):
         self.is_approved = True
         self.approved_by = user
         self.save()
+
+
+class CurrencyRate(models.Model):
+    """Simple historical currency rate table for converting amounts between currencies.
+
+    rate is the multiplier to convert 1 unit of `from_currency` into `to_currency`.
+    Example: from_currency='USD', to_currency='QAR', rate=3.64 means 1 USD = 3.64 QAR.
+    """
+    from_currency = models.CharField("From Currency", max_length=10)
+    to_currency = models.CharField("To Currency", max_length=10)
+    rate = models.DecimalField("Rate", max_digits=20, decimal_places=8)
+    valid_from = models.DateField("Valid From", default=timezone.now)
+    valid_to = models.DateField("Valid To", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Currency Rate"
+        verbose_name_plural = "Currency Rates"
+        indexes = [models.Index(fields=['from_currency', 'to_currency', 'valid_from'])]
+
+    def __str__(self):
+        return f"1 {self.from_currency} → {self.rate} {self.to_currency} (from {self.valid_from})"
     
     def mark_as_paid(self):
         """Mark expense as paid."""
