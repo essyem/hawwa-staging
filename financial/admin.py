@@ -401,7 +401,9 @@ class BudgetLineAdmin(admin.ModelAdmin):
 
 @admin.register(LedgerAccount)
 class LedgerAccountAdmin(admin.ModelAdmin):
-    list_display = ('code', 'name', 'is_active', 'created_at')
+    list_display = ('code', 'name', 'account_type', 'is_active', 'created_at')
+    list_filter = ('account_type', 'is_active')
+    list_editable = ('account_type', 'is_active')
     search_fields = ('code', 'name')
 
 
