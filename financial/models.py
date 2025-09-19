@@ -488,6 +488,14 @@ class LedgerAccount(models.Model):
     code = models.CharField("Account Code", max_length=32, unique=True)
     name = models.CharField("Account Name", max_length=200)
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
+    ACCOUNT_TYPE_CHOICES = (
+        ('asset', 'Asset'),
+        ('liability', 'Liability'),
+        ('equity', 'Equity'),
+        ('revenue', 'Revenue'),
+        ('expense', 'Expense'),
+    )
+    account_type = models.CharField("Account Type", max_length=20, choices=ACCOUNT_TYPE_CHOICES, default='asset')
     is_active = models.BooleanField("Active", default=True)
     created_at = models.DateTimeField("Created At", auto_now_add=True)
 

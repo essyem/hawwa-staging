@@ -14,7 +14,17 @@ DEFAULT_ACCOUNTS = {
 
 
 def _get_or_create_account(code, name):
-    acct, created = LedgerAccount.objects.get_or_create(code=code, defaults={'name': name})
+    # Determine sensible default account_type for common codes
+    ACCOUNT_TYPE_BY_CODE = {
+        DEFAULT_ACCOUNTS['cash']: 'asset',
+        DEFAULT_ACCOUNTS['revenue']: 'revenue',
+        DEFAULT_ACCOUNTS['expense']: 'expense',
+    }
+    defaults = {'name': name}
+    acct_type = ACCOUNT_TYPE_BY_CODE.get(code)
+    if acct_type:
+        defaults['account_type'] = acct_type
+    acct, created = LedgerAccount.objects.get_or_create(code=code, defaults=defaults)
     return acct
 
 
@@ -81,9 +91,19 @@ def create_expense_journal(expense):
 def _apply_line_to_balance(journal_line):
     """Apply a JournalLine to the materialized LedgerBalance."""
     acct = journal_line.account
-    amount = Decimal(journal_line.debit) - Decimal(journal_line.credit)
+    debit = Decimal(journal_line.debit)
+    credit = Decimal(journal_line.credit)
+    raw_amount = debit - credit
+
     lb, created = LedgerBalance.objects.select_for_update().get_or_create(account=acct, defaults={'balance': Decimal('0.00')})
-    # For asset/expense accounts, debit increases balance; for liability/equity/revenue, debit decreases balance.
-    # Simple approach: treat positive amount as increase, negative as decrease (sign stored in amount)
-    lb.balance = Decimal(lb.balance) + amount
+
+    # Natural sign: Assets and Expenses have debit-normal balances (debit increases),
+    # Liabilities, Equity, Revenue have credit-normal balances (credit increases).
+    if acct.account_type in ('asset', 'expense'):
+        # Increase balance by (debit - credit)
+        lb.balance = Decimal(lb.balance) + raw_amount
+    else:
+        # For credit-normal accounts, balance := balance + (credit - debit)
+        lb.balance = Decimal(lb.balance) + (credit - debit)
+
     lb.save()

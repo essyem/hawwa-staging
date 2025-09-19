@@ -174,9 +174,9 @@ class MaterializedBalanceTests(TestCase):
 		from .models import LedgerBalance
 		lb_cash = LedgerBalance.objects.get(account__code='1000')
 		lb_rev = LedgerBalance.objects.get(account__code='4000')
-		# Cash should have increased by 500, revenue decreased by -500 (credit)
+		# Cash should have increased by 500, revenue credited -> positive 500 under natural sign convention
 		self.assertEqual(lb_cash.balance, Decimal('500.00'))
-		self.assertEqual(lb_rev.balance, Decimal('-500.00'))
+		self.assertEqual(lb_rev.balance, Decimal('500.00'))
 
 	def test_trial_balance_report(self):
 		from .services.reports import trial_balance
