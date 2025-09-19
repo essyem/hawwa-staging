@@ -1,0 +1,418 @@
+{% extends 'services/service_list.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Nutrition Services - Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<!-- Service Header -->
+<section class="py-5 bg-warning text-dark">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">{% trans "Postpartum Nutrition" %}</h1>
+                <p class="lead">{% trans "Customized nutrition plans and meal services for optimal postpartum recovery" %}</p>
+                <p class="mb-4">{% trans "Nourish your body with expertly crafted meals and nutrition guidance designed specifically for the postpartum period, promoting healing, lactation, and overall wellness." %}</p>
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'img/nutrition-hero.jpg' %}" alt="{% trans 'Hawwa Nutrition Services' %}" class="img-fluid rounded-3 shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Postpartum Nutrition Matters -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-3">{% trans "Why Postpartum Nutrition Matters" %}</h2>
+                <p class="lead text-muted">{% trans "Proper nutrition during the postpartum period is essential for your recovery and well-being." %}</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-sync fa-2x text-warning"></i>
+                        </div>
+                        <h5>{% trans "Faster Recovery" %}</h5>
+                        <p class="text-muted">{% trans "Nutrient-rich foods accelerate the healing process after childbirth." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-baby fa-2x text-warning"></i>
+                        </div>
+                        <h5>{% trans "Breastfeeding Support" %}</h5>
+                        <p class="text-muted">{% trans "Specific nutrients that help establish and maintain milk supply." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-brain fa-2x text-warning"></i>
+                        </div>
+                        <h5>{% trans "Mood Stability" %}</h5>
+                        <p class="text-muted">{% trans "Foods that help balance hormones and support mental wellness." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-bolt fa-2x text-warning"></i>
+                        </div>
+                        <h5>{% trans "Energy Boost" %}</h5>
+                        <p class="text-muted">{% trans "Combat fatigue with properly timed meals and energy-supporting nutrients." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Nutrition Services -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">{% trans "Our Nutrition Services" %}</h2>
+        
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="row g-0">
+                        <div class="col-md-5">
+                            <img src="{% static 'img/meal-delivery.jpg' %}" class="img-fluid rounded-start h-100 object-fit-cover" alt="{% trans 'Postpartum Meal Delivery' %}">
+                        </div>
+                        <div class="col-md-7">
+                            <div class="card-body p-4">
+                                <h4 class="card-title">{% trans "Postpartum Meal Delivery" %}</h4>
+                                <p class="card-text">{% trans "Fresh, nutritious meals delivered to your doorstep, specifically designed for postpartum recovery and lactation support." %}</p>
+                                <ul class="list-unstyled mb-3">
+                                    <li class="mb-2"><i class="fas fa-check-circle text-warning me-2"></i>{% trans "Weekly or daily delivery options" %}</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-warning me-2"></i>{% trans "Customizable for dietary restrictions" %}</li>
+                                    <li><i class="fas fa-check-circle text-warning me-2"></i>{% trans "Ready-to-eat or minimal preparation" %}</li>
+                                </ul>
+                                <a href="#" class="btn btn-outline-warning">{% trans "Browse Meal Plans" %}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="row g-0">
+                        <div class="col-md-5">
+                            <img src="{% static 'img/consultation.jpg' %}" class="img-fluid rounded-start h-100 object-fit-cover" alt="{% trans 'Nutritionist Consultation' %}">
+                        </div>
+                        <div class="col-md-7">
+                            <div class="card-body p-4">
+                                <h4 class="card-title">{% trans "Nutritionist Consultation" %}</h4>
+                                <p class="card-text">{% trans "One-on-one sessions with specialized postpartum nutritionists to create personalized eating plans." %}</p>
+                                <ul class="list-unstyled mb-3">
+                                    <li class="mb-2"><i class="fas fa-check-circle text-warning me-2"></i>{% trans "Initial assessment and follow-ups" %}</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-warning me-2"></i>{% trans "Customized meal planning" %}</li>
+                                    <li><i class="fas fa-check-circle text-warning me-2"></i>{% trans "Virtual or in-home options" %}</li>
+                                </ul>
+                                <a href="#" class="btn btn-outline-warning">{% trans "Book Consultation" %}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="row g-0">
+                        <div class="col-md-5">
+                            <img src="{% static 'img/cooking-class.jpg' %}" class="img-fluid rounded-start h-100 object-fit-cover" alt="{% trans 'Postpartum Cooking Classes' %}">
+                        </div>
+                        <div class="col-md-7">
+                            <div class="card-body p-4">
+                                <h4 class="card-title">{% trans "Postpartum Cooking Classes" %}</h4>
+                                <p class="card-text">{% trans "Learn to prepare nutritious, easy meals specifically designed for postpartum recovery and lactation." %}</p>
+                                <ul class="list-unstyled mb-3">
+                                    <li class="mb-2"><i class="fas fa-check-circle text-warning me-2"></i>{% trans "Group or private sessions" %}</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-warning me-2"></i>{% trans "Ingredient shopping guides" %}</li>
+                                    <li><i class="fas fa-check-circle text-warning me-2"></i>{% trans "Virtual or in-home options" %}</li>
+                                </ul>
+                                <a href="#" class="btn btn-outline-warning">{% trans "View Classes" %}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="row g-0">
+                        <div class="col-md-5">
+                            <img src="{% static 'img/snack-box.jpg' %}" class="img-fluid rounded-start h-100 object-fit-cover" alt="{% trans 'Lactation Snack Boxes' %}">
+                        </div>
+                        <div class="col-md-7">
+                            <div class="card-body p-4">
+                                <h4 class="card-title">{% trans "Lactation Snack Boxes" %}</h4>
+                                <p class="card-text">{% trans "Convenient, nutritious snacks designed to support breastfeeding and keep energy levels stable." %}</p>
+                                <ul class="list-unstyled mb-3">
+                                    <li class="mb-2"><i class="fas fa-check-circle text-warning me-2"></i>{% trans "Weekly subscription available" %}</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-warning me-2"></i>{% trans "Variety of flavors and options" %}</li>
+                                    <li><i class="fas fa-check-circle text-warning me-2"></i>{% trans "Ready-to-eat convenience" %}</li>
+                                </ul>
+                                <a href="#" class="btn btn-outline-warning">{% trans "Order Snack Boxes" %}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call the parent template content which includes the service listing -->
+{{ block.super }}
+
+<!-- Nutrition Tips -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-3">{% trans "Postpartum Nutrition Tips" %}</h2>
+                <p class="lead text-muted">{% trans "Simple tips to enhance your nutritional intake during the postpartum period" %}</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-flex me-3">
+                                <i class="fas fa-clock fa-2x text-warning"></i>
+                            </div>
+                            <h5 class="mb-0">{% trans "Eat Regularly" %}</h5>
+                        </div>
+                        <p>{% trans "Aim to eat small, frequent meals every 2-3 hours to maintain energy levels and support milk production. Keep healthy snacks within reach, especially during feeding sessions." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-flex me-3">
+                                <i class="fas fa-tint fa-2x text-warning"></i>
+                            </div>
+                            <h5 class="mb-0">{% trans "Stay Hydrated" %}</h5>
+                        </div>
+                        <p>{% trans "Drink at least 2-3 liters of water daily. Keep a water bottle nearby during breastfeeding sessions. Herbal teas like fenugreek and fennel can support lactation." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-flex me-3">
+                                <i class="fas fa-balance-scale fa-2x text-warning"></i>
+                            </div>
+                            <h5 class="mb-0">{% trans "Balance Nutrients" %}</h5>
+                        </div>
+                        <p>{% trans "Include protein, healthy fats, and complex carbohydrates in each meal. Focus on iron-rich foods to replenish blood loss, and calcium-rich foods for bone health and milk production." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-flex me-3">
+                                <i class="fas fa-fish fa-2x text-warning"></i>
+                            </div>
+                            <h5 class="mb-0">{% trans "Omega-3 Fatty Acids" %}</h5>
+                        </div>
+                        <p>{% trans "Include sources of omega-3s like fatty fish, chia seeds, and walnuts to support brain development for your baby and reduce inflammation in your body." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-flex me-3">
+                                <i class="fas fa-carrot fa-2x text-warning"></i>
+                            </div>
+                            <h5 class="mb-0">{% trans "Fiber-Rich Foods" %}</h5>
+                        </div>
+                        <p>{% trans "Gradually increase fiber intake with fruits, vegetables, and whole grains to prevent constipation and support digestive health during recovery." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-flex me-3">
+                                <i class="fas fa-seedling fa-2x text-warning"></i>
+                            </div>
+                            <h5 class="mb-0">{% trans "Lactation-Supporting Foods" %}</h5>
+                        </div>
+                        <p>{% trans "Incorporate galactagogues like oats, fenugreek, fennel, and chickpeas that may help increase milk production for breastfeeding mothers." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">{% trans "Client Feedback" %}</h2>
+        
+        <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body p-5 text-center">
+                                    <div class="mb-4">
+                                        <i class="fas fa-quote-left fa-3x text-warning opacity-25"></i>
+                                    </div>
+                                    <p class="lead mb-4">{% trans "The meal delivery service was a lifesaver during my first weeks postpartum. Not only was the food delicious, but I could feel how it was helping my recovery and milk supply. My husband and I both loved the meals!" %}</p>
+                                    <div>
+                                        <h5 class="mb-1">{% trans "Rania H." %}</h5>
+                                        <div class="text-warning mb-2">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                        <p class="text-muted">{% trans "New mother of twins" %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body p-5 text-center">
+                                    <div class="mb-4">
+                                        <i class="fas fa-quote-left fa-3x text-warning opacity-25"></i>
+                                    </div>
+                                    <p class="lead mb-4">{% trans "My consultation with the nutritionist was incredibly helpful. She developed a personalized eating plan that addressed my specific needs as a breastfeeding mother with dietary restrictions. I'm still using many of her recommendations six months later!" %}</p>
+                                    <div>
+                                        <h5 class="mb-1">{% trans "Maya K." %}</h5>
+                                        <div class="text-warning mb-2">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star-half-alt"></i>
+                                        </div>
+                                        <p class="text-muted">{% trans "Mother with dietary restrictions" %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon bg-warning rounded-circle" aria-hidden="true"></span>
+                <span class="visually-hidden">{% trans "Previous" %}</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon bg-warning rounded-circle" aria-hidden="true"></span>
+                <span class="visually-hidden">{% trans "Next" %}</span>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">{% trans "Frequently Asked Questions" %}</h2>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="nutritionFaqs">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                {% trans "How soon after delivery can I start the meal service?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="faqOne" data-bs-parent="#nutritionFaqs">
+                            <div class="accordion-body">
+                                {% trans "You can start our meal service immediately after returning home from the hospital. We recommend pre-booking during your pregnancy with a flexible start date. We can even deliver your first meal on the day you return home if arranged in advance." %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                {% trans "Can meals be customized for dietary restrictions or preferences?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="faqTwo" data-bs-parent="#nutritionFaqs">
+                            <div class="accordion-body">
+                                {% trans "Yes, absolutely! Our meals can be customized to accommodate various dietary needs including vegetarian, vegan, halal, gluten-free, dairy-free, and specific allergies. Our nutritionists work with you to ensure your meals are both suitable for your dietary requirements and optimal for postpartum recovery." %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                {% trans "How long should I continue with postpartum nutrition services?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="faqThree" data-bs-parent="#nutritionFaqs">
+                            <div class="accordion-body">
+                                {% trans "Most mothers benefit from our nutrition services for the first 6-8 weeks postpartum, which is considered the critical recovery period. However, many clients choose to continue with our meal services or consultations for 3-6 months, especially while breastfeeding. Our nutritionists can help you determine the optimal duration based on your specific recovery needs, breastfeeding goals, and overall health objectives." %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                {% trans "Are there foods I should avoid while breastfeeding?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="faqFour" data-bs-parent="#nutritionFaqs">
+                            <div class="accordion-body">
+                                {% trans "While most mothers can eat a wide variety of foods while breastfeeding, some babies may be sensitive to certain foods in their mother's diet. Common potential sensitivities include dairy, caffeine, spicy foods, and certain gas-producing vegetables. Our nutritionists can help you identify if your baby has sensitivities and guide you through an elimination diet if needed. We recommend keeping a food journal to track any patterns between your diet and your baby's behavior." %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

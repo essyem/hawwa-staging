@@ -1,0 +1,175 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Privacy Policy - Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <h1 class="display-4 fw-bold mb-4">{% trans "Privacy Policy" %}</h1>
+                <p class="lead mb-5">{% trans "Last updated: June 15, 2023" %}</p>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "1. Introduction" %}</h2>
+                        <p>{% trans "At Hawwa Postpartum Care ("we", "our", or "us"), we respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and services." %}</p>
+                        <p>{% trans "Please read this Privacy Policy carefully. By accessing or using our services, you acknowledge that you have read and understood this Privacy Policy." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "2. Information We Collect" %}</h2>
+                        <p>{% trans "We collect several types of information from and about users of our services:" %}</p>
+                        
+                        <h3 class="h5 mt-4">{% trans "2.1 Personal Information" %}</h3>
+                        <ul>
+                            <li>{% trans "Contact information (name, email address, phone number, mailing address)" %}</li>
+                            <li>{% trans "Account credentials (username, password)" %}</li>
+                            <li>{% trans "Profile information (date of birth, gender, profile picture)" %}</li>
+                            <li>{% trans "For mothers: pregnancy and postpartum information, health information" %}</li>
+                            <li>{% trans "For providers: professional credentials, service details, availability" %}</li>
+                            <li>{% trans "Payment information (credit card details, billing address)" %}</li>
+                        </ul>
+                        
+                        <h3 class="h5 mt-4">{% trans "2.2 Non-Personal Information" %}</h3>
+                        <ul>
+                            <li>{% trans "Usage data (pages visited, time spent, clicks)" %}</li>
+                            <li>{% trans "Device information (IP address, browser type, operating system)" %}</li>
+                            <li>{% trans "Location data (if location services are enabled)" %}</li>
+                            <li>{% trans "Cookies and similar tracking technologies" %}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "3. How We Collect Information" %}</h2>
+                        <ul>
+                            <li>{% trans "Direct collection: Information you provide when registering, updating your profile, booking services, or contacting us." %}</li>
+                            <li>{% trans "Automated collection: Through cookies, web beacons, and other tracking technologies." %}</li>
+                            <li>{% trans "Third-party sources: We may receive information from business partners, service providers, and publicly available sources." %}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "4. How We Use Your Information" %}</h2>
+                        <p>{% trans "We use the information we collect for various purposes, including:" %}</p>
+                        <ul>
+                            <li>{% trans "Providing, maintaining, and improving our services" %}</li>
+                            <li>{% trans "Processing and facilitating service bookings" %}</li>
+                            <li>{% trans "Matching mothers with appropriate service providers" %}</li>
+                            <li>{% trans "Processing payments and transactions" %}</li>
+                            <li>{% trans "Communicating with you about services, updates, and promotional offers" %}</li>
+                            <li>{% trans "Personalizing your experience and delivering content relevant to your interests" %}</li>
+                            <li>{% trans "Analyzing usage patterns to improve our website and services" %}</li>
+                            <li>{% trans "Detecting, preventing, and addressing technical issues and fraudulent activities" %}</li>
+                            <li>{% trans "Complying with legal obligations" %}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "5. Information Sharing and Disclosure" %}</h2>
+                        <p>{% trans "We may share your information in the following circumstances:" %}</p>
+                        <ul>
+                            <li>{% trans "With service providers: We share necessary information with providers to facilitate service bookings." %}</li>
+                            <li>{% trans "With service partners: We work with third-party vendors who help us provide and improve our services." %}</li>
+                            <li>{% trans "For legal purposes: We may disclose information if required by law or in response to valid legal requests." %}</li>
+                            <li>{% trans "Business transfers: If we are involved in a merger, acquisition, or sale of assets, your information may be transferred." %}</li>
+                            <li>{% trans "With your consent: We may share information for purposes disclosed to you with your consent." %}</li>
+                        </ul>
+                        <p>{% trans "We do not sell your personal information to third parties." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "6. Data Security" %}</h2>
+                        <p>{% trans "We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. These measures include:" %}</p>
+                        <ul>
+                            <li>{% trans "Encryption of sensitive data" %}</li>
+                            <li>{% trans "Regular security assessments" %}</li>
+                            <li>{% trans "Access controls for employees and contractors" %}</li>
+                            <li>{% trans "Secure data storage practices" %}</li>
+                        </ul>
+                        <p>{% trans "However, no method of transmission over the internet or electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your personal information, we cannot guarantee absolute security." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "7. Data Retention" %}</h2>
+                        <p>{% trans "We retain your personal information for as long as necessary to fulfill the purposes outlined in this Privacy Policy, unless a longer retention period is required or permitted by law." %}</p>
+                        <p>{% trans "We will securely delete or anonymize your information when it is no longer needed for the purposes for which it was collected." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "8. Your Privacy Rights" %}</h2>
+                        <p>{% trans "Depending on your location, you may have certain rights regarding your personal information, including:" %}</p>
+                        <ul>
+                            <li>{% trans "Right to access: You can request a copy of the personal information we hold about you." %}</li>
+                            <li>{% trans "Right to rectification: You can request that we correct inaccurate or incomplete information." %}</li>
+                            <li>{% trans "Right to erasure: In certain circumstances, you can request the deletion of your personal information." %}</li>
+                            <li>{% trans "Right to restrict processing: You can request that we limit the processing of your information." %}</li>
+                            <li>{% trans "Right to data portability: You can request a copy of your information in a structured, machine-readable format." %}</li>
+                            <li>{% trans "Right to object: You can object to our processing of your information in certain circumstances." %}</li>
+                        </ul>
+                        <p>{% trans "To exercise these rights, please contact us using the information provided in the "Contact Us" section." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "9. Cookies Policy" %}</h2>
+                        <p>{% trans "We use cookies and similar tracking technologies to enhance your experience on our website. Cookies are small data files that are placed on your device when you visit a website." %}</p>
+                        <p>{% trans "We use the following types of cookies:" %}</p>
+                        <ul>
+                            <li>{% trans "Essential cookies: Required for the operation of our website." %}</li>
+                            <li>{% trans "Analytical cookies: Help us understand how visitors interact with our website." %}</li>
+                            <li>{% trans "Functional cookies: Enable enhanced functionality and personalization." %}</li>
+                            <li>{% trans "Targeting cookies: Used to deliver relevant advertisements." %}</li>
+                        </ul>
+                        <p>{% trans "You can control cookies through your browser settings. However, disabling certain cookies may limit your ability to use some features of our website." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "10. Children's Privacy" %}</h2>
+                        <p>{% trans "Our services are not intended for children under the age of 16. We do not knowingly collect personal information from children under 16. If we become aware that we have collected personal information from a child under 16, we will take steps to delete that information." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "11. Changes to This Privacy Policy" %}</h2>
+                        <p>{% trans "We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date." %}</p>
+                        <p>{% trans "We encourage you to review this Privacy Policy periodically for any changes. Your continued use of our services after any modifications indicates your acceptance of the updated Privacy Policy." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "12. Contact Us" %}</h2>
+                        <p>{% trans "If you have any questions about this Privacy Policy or our data practices, please contact us at:" %}</p>
+                        <p>
+                            <strong>{% trans "Email" %}</strong>: privacy@hawwa.com<br>
+                            <strong>{% trans "Phone" %}</strong>: +1 234 567 890<br>
+                            <strong>{% trans "Address" %}</strong>: 123 Main Street, City, Country
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,662 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Vendor Management - HAWWA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .management-header {
+        background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .vendor-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        border-left: 4px solid #9b59b6;
+    }
+    
+    .vendor-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .vendor-card.pending {
+        border-left-color: #f39c12;
+    }
+    
+    .vendor-card.approved {
+        border-left-color: #2ecc71;
+    }
+    
+    .vendor-card.rejected {
+        border-left-color: #e74c3c;
+    }
+    
+    .vendor-card.suspended {
+        border-left-color: #e67e22;
+    }
+    
+    .vendor-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-approved {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-rejected {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-suspended {
+        background: #ffeaa7;
+        color: #d63031;
+    }
+    
+    .vendor-stats {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+    }
+    
+    .action-btn {
+        padding: 0.25rem 0.75rem;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        border: none;
+        cursor: pointer;
+        margin: 0.2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-approve {
+        background: #2ecc71;
+        color: white;
+    }
+    
+    .btn-reject {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .btn-suspend {
+        background: #e67e22;
+        color: white;
+    }
+    
+    .btn-activate {
+        background: #3498db;
+        color: white;
+    }
+    
+    .btn-view {
+        background: #95a5a6;
+        color: white;
+    }
+    
+    .filters-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .overview-stats {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .overview-stat-item {
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .overview-stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .overview-stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+    
+    .rating-stars {
+        color: #f39c12;
+    }
+    
+    .service-tag {
+        background: #e9ecef;
+        color: #495057;
+        padding: 0.2rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        margin: 0.1rem;
+        display: inline-block;
+    }
+    
+    .vendor-contact {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .pending-approval {
+        background: linear-gradient(45deg, #f39c12, #e67e22);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 1rem;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+    
+    .revenue-highlight {
+        background: linear-gradient(45deg, #2ecc71, #27ae60);
+        color: white;
+        padding: 0.5rem;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Management Header -->
+<div class="management-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="mb-2">
+                    <i class="fas fa-store me-3"></i>
+                    Vendor Management
+                </h1>
+                <p class="mb-0">Comprehensive vendor oversight and approval system</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="{% url 'admin_dashboard:dashboard' %}" class="btn btn-outline-light me-2">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Back to Dashboard
+                </a>
+                <a href="/admin/accounts/customuser/?user_type__exact=vendor" class="btn btn-light">
+                    <i class="fas fa-cogs me-2"></i>
+                    Django Admin
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <!-- Vendor Overview Statistics -->
+    <div class="overview-stats">
+        <div class="row">
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="overview-stat-item">
+                    <div class="overview-stat-number text-purple">{{ vendor_stats.total_vendors }}</div>
+                    <div class="overview-stat-label">Total Vendors</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="overview-stat-item">
+                    <div class="overview-stat-number text-warning">{{ vendor_stats.pending_vendors }}</div>
+                    <div class="overview-stat-label">Pending Approval</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="overview-stat-item">
+                    <div class="overview-stat-number text-success">{{ vendor_stats.approved_vendors }}</div>
+                    <div class="overview-stat-label">Approved</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="overview-stat-item">
+                    <div class="overview-stat-number text-info">{{ vendor_stats.total_services }}</div>
+                    <div class="overview-stat-label">Total Services</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="overview-stat-item">
+                    <div class="overview-stat-number text-primary">{{ vendor_stats.total_bookings }}</div>
+                    <div class="overview-stat-label">Total Bookings</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="overview-stat-item">
+                    <div class="overview-stat-number text-success">{{ vendor_stats.total_revenue|floatformat:0 }}</div>
+                    <div class="overview-stat-label">Revenue (QAR)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-card">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search Vendors</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ request.GET.search }}" placeholder="Name, email, business, specialization...">
+            </div>
+            <div class="col-md-2">
+                <label for="approval_status" class="form-label">Approval Status</label>
+                <select class="form-select" id="approval_status" name="approval_status">
+                    <option value="">All Status</option>
+                    <option value="pending" {% if request.GET.approval_status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="approved" {% if request.GET.approval_status == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="rejected" {% if request.GET.approval_status == 'rejected' %}selected{% endif %}>Rejected</option>
+                    <option value="suspended" {% if request.GET.approval_status == 'suspended' %}selected{% endif %}>Suspended</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="verification_status" class="form-label">Verification</label>
+                <select class="form-select" id="verification_status" name="verification_status">
+                    <option value="">All Status</option>
+                    <option value="verified" {% if request.GET.verification_status == 'verified' %}selected{% endif %}>Verified</option>
+                    <option value="unverified" {% if request.GET.verification_status == 'unverified' %}selected{% endif %}>Unverified</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="service_count" class="form-label">Service Count</label>
+                <select class="form-select" id="service_count" name="service_count">
+                    <option value="">All Counts</option>
+                    <option value="none" {% if request.GET.service_count == 'none' %}selected{% endif %}>No Services</option>
+                    <option value="low" {% if request.GET.service_count == 'low' %}selected{% endif %}>1-3 Services</option>
+                    <option value="medium" {% if request.GET.service_count == 'medium' %}selected{% endif %}>4-10 Services</option>
+                    <option value="high" {% if request.GET.service_count == 'high' %}selected{% endif %}>10+ Services</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label for="rating" class="form-label">Min Rating</label>
+                <select class="form-select" id="rating" name="rating">
+                    <option value="">All</option>
+                    <option value="4" {% if request.GET.rating == '4' %}selected{% endif %}>4+</option>
+                    <option value="3" {% if request.GET.rating == '3' %}selected{% endif %}>3+</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">&nbsp;</label>
+                <div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Vendors List -->
+    <div class="row">
+        {% for vendor in vendors %}
+        <div class="col-lg-6 col-xl-4">
+            <div class="vendor-card {{ vendor.approval_status }}">
+                <!-- Vendor Header -->
+                <div class="text-center">
+                    <div class="vendor-avatar">
+                        {{ vendor.first_name|first|default:"V" }}
+                    </div>
+                    <h5 class="mb-1">{{ vendor.get_full_name }}</h5>
+                    <p class="text-muted mb-2">{{ vendor.business_name|default:"No Business Name" }}</p>
+                    
+                    <!-- Status Badges -->
+                    <div class="mb-2">
+                        <span class="status-badge status-{{ vendor.approval_status }}">
+                            {% if vendor.approval_status == 'pending' %}
+                                <i class="fas fa-clock me-1"></i>
+                                Pending Approval
+                            {% elif vendor.approval_status == 'approved' %}
+                                <i class="fas fa-check-circle me-1"></i>
+                                Approved
+                            {% elif vendor.approval_status == 'rejected' %}
+                                <i class="fas fa-times-circle me-1"></i>
+                                Rejected
+                            {% elif vendor.approval_status == 'suspended' %}
+                                <i class="fas fa-ban me-1"></i>
+                                Suspended
+                            {% endif %}
+                        </span>
+                        
+                        {% if vendor.is_verified %}
+                            <span class="status-badge status-approved">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                Verified
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if vendor.approval_status == 'pending' %}
+                    <div class="pending-approval">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Needs Review
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Vendor Details -->
+                <div class="vendor-contact mb-3">
+                    <div class="mb-1">
+                        <i class="fas fa-envelope me-2"></i>
+                        {{ vendor.email }}
+                    </div>
+                    {% if vendor.phone_number %}
+                    <div class="mb-1">
+                        <i class="fas fa-phone me-2"></i>
+                        {{ vendor.phone_number }}
+                    </div>
+                    {% endif %}
+                    {% if vendor.specialization %}
+                    <div class="mb-1">
+                        <i class="fas fa-star me-2"></i>
+                        <strong>Specialization:</strong> {{ vendor.specialization }}
+                    </div>
+                    {% endif %}
+                    <div class="mb-1">
+                        <i class="fas fa-calendar me-2"></i>
+                        <strong>Joined:</strong> {{ vendor.date_joined|date:"M d, Y" }}
+                    </div>
+                    {% if vendor.last_login %}
+                    <div class="mb-1">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        <strong>Last login:</strong> {{ vendor.last_login|naturaltime }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Services Preview -->
+                {% if vendor.vendor_services.exists %}
+                <div class="mb-3">
+                    <h6 class="mb-2">
+                        <i class="fas fa-concierge-bell me-1"></i>
+                        Services ({{ vendor.vendor_services.count }})
+                    </h6>
+                    <div>
+                        {% for service in vendor.vendor_services.all|slice:":3" %}
+                        <span class="service-tag">{{ service.name }}</span>
+                        {% endfor %}
+                        {% if vendor.vendor_services.count > 3 %}
+                        <span class="service-tag">+{{ vendor.vendor_services.count|add:"-3" }} more</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Vendor Statistics -->
+                <div class="vendor-stats">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <div class="stat-number text-info">{{ vendor.vendor_services.count }}</div>
+                                <div class="stat-label">Services</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <div class="stat-number text-primary">{{ vendor.vendor_bookings.count }}</div>
+                                <div class="stat-label">Bookings</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <div class="stat-number">
+                                    {% if vendor.average_rating %}
+                                        <span class="rating-stars">
+                                            {{ vendor.average_rating|floatformat:1 }}
+                                            <i class="fas fa-star"></i>
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </div>
+                                <div class="stat-label">Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if vendor.total_revenue > 0 %}
+                    <div class="revenue-highlight mt-2">
+                        <i class="fas fa-chart-line me-1"></i>
+                        Total Revenue: {{ vendor.total_revenue|floatformat:0 }} QAR
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="mt-3 text-center">
+                    <a href="/admin/accounts/customuser/{{ vendor.id }}/change/" class="action-btn btn-view">
+                        <i class="fas fa-eye me-1"></i>
+                        View Details
+                    </a>
+                    
+                    {% if vendor.approval_status == 'pending' %}
+                    <button class="action-btn btn-approve" onclick="updateVendorStatus({{ vendor.id }}, 'approved')">
+                        <i class="fas fa-check me-1"></i>
+                        Approve
+                    </button>
+                    <button class="action-btn btn-reject" onclick="updateVendorStatus({{ vendor.id }}, 'rejected')">
+                        <i class="fas fa-times me-1"></i>
+                        Reject
+                    </button>
+                    {% elif vendor.approval_status == 'approved' %}
+                    <button class="action-btn btn-suspend" onclick="updateVendorStatus({{ vendor.id }}, 'suspended')">
+                        <i class="fas fa-ban me-1"></i>
+                        Suspend
+                    </button>
+                    {% elif vendor.approval_status == 'rejected' or vendor.approval_status == 'suspended' %}
+                    <button class="action-btn btn-activate" onclick="updateVendorStatus({{ vendor.id }}, 'approved')">
+                        <i class="fas fa-check me-1"></i>
+                        Approve
+                    </button>
+                    {% endif %}
+                    
+                    {% if not vendor.is_verified %}
+                    <button class="action-btn btn-approve" onclick="verifyVendor({{ vendor.id }})">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        Verify
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-store-slash fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No vendors found</h4>
+                <p class="text-muted">Try adjusting your search criteria or filters.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination-wrapper mt-4">
+        <nav aria-label="Vendor pagination">
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        
+        <div class="text-center mt-2">
+            <small class="text-muted">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} vendors
+            </small>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateVendorStatus(vendorId, newStatus) {
+    const statusMessages = {
+        'approved': 'approve',
+        'rejected': 'reject',
+        'suspended': 'suspend'
+    };
+    
+    const confirmMessage = `Are you sure you want to ${statusMessages[newStatus]} this vendor?`;
+    
+    if (confirm(confirmMessage)) {
+        fetch('{% url "admin_dashboard:vendor_action" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                action: 'update_status',
+                vendor_id: vendorId,
+                approval_status: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating the vendor status.');
+        });
+    }
+}
+
+function verifyVendor(vendorId) {
+    if (confirm('Are you sure you want to verify this vendor?')) {
+        fetch('{% url "admin_dashboard:vendor_action" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                action: 'verify',
+                vendor_id: vendorId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while verifying the vendor.');
+        });
+    }
+}
+
+// Auto-submit form on filter change
+document.querySelectorAll('select[name]').forEach(select => {
+    select.addEventListener('change', function() {
+        this.closest('form').submit();
+    });
+});
+</script>
+{% endblock %}

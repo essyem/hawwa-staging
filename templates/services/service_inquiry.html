@@ -1,0 +1,87 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "Service Inquiry" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-10 col-lg-8 mx-auto">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'services:service_list' %}">{% trans "Services" %}</a></li>
+                    {% if service %}
+                    <li class="breadcrumb-item"><a href="{% url 'services:service_detail' service.slug %}">{{ service.name }}</a></li>
+                    {% endif %}
+                    <li class="breadcrumb-item active" aria-current="page">{% trans "Inquiry" %}</li>
+                </ol>
+            </nav>
+            
+            <div class="card border-0 shadow">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0">{% trans "Service Inquiry" %}</h4>
+                </div>
+                <div class="card-body p-4">
+                    {% if service %}
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center">
+                            {% if service.image %}
+                            <img src="{{ service.image.url }}" alt="{{ service.name }}" class="rounded me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h5>{{ service.name }}</h5>
+                                <p class="text-muted mb-0">{{ service.price }} {% trans "SAR" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.email|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.phone|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.preferred_date|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.service|as_crispy_field }}
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form.message|as_crispy_field }}
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% if service %}{% url 'services:service_detail' service.slug %}{% else %}{% url 'services:service_list' %}{% endif %}" class="btn btn-outline-secondary">
+                                {% trans "Cancel" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                {% trans "Submit Inquiry" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

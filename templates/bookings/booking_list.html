@@ -1,0 +1,468 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "My Bookings" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">{% trans "My Bookings" %}</h1>
+                    <p class="text-muted mb-0">{% trans "Manage your service bookings and appointments" %}</p>
+                </div>
+                <div>
+                    <a href="{% url 'bookings:booking_dashboard' %}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-chart-line"></i> {% trans "Dashboard" %}
+                    </a>
+                    <a href="{% url 'bookings:booking_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> {% trans "New Booking" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ stats.total_count }}</h4>
+                            <p class="mb-0">{% trans "Total Bookings" %}</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-alt fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ stats.pending_count }}</h4>
+                            <p class="mb-0">{% trans "Pending" %}</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ stats.confirmed_count }}</h4>
+                            <p class="mb-0">{% trans "Confirmed" %}</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ stats.completed_count }}</h4>
+                            <p class="mb-0">{% trans "Completed" %}</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-star fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">{% trans "Search" %}</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ search_form.search.value|default:'' }}"
+                                   placeholder="{% trans 'Search by booking number, service, or name' %}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="status" class="form-label">{% trans "Status" %}</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">{% trans "All Statuses" %}</option>
+                                <option value="draft" {% if search_form.status.value == 'draft' %}selected{% endif %}>{% trans "Draft" %}</option>
+                                <option value="pending" {% if search_form.status.value == 'pending' %}selected{% endif %}>{% trans "Pending" %}</option>
+                                <option value="confirmed" {% if search_form.status.value == 'confirmed' %}selected{% endif %}>{% trans "Confirmed" %}</option>
+                                <option value="in_progress" {% if search_form.status.value == 'in_progress' %}selected{% endif %}>{% trans "In Progress" %}</option>
+                                <option value="completed" {% if search_form.status.value == 'completed' %}selected{% endif %}>{% trans "Completed" %}</option>
+                                <option value="cancelled" {% if search_form.status.value == 'cancelled' %}selected{% endif %}>{% trans "Cancelled" %}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="priority" class="form-label">{% trans "Priority" %}</label>
+                            <select class="form-select" id="priority" name="priority">
+                                <option value="">{% trans "All Priorities" %}</option>
+                                <option value="low" {% if search_form.priority.value == 'low' %}selected{% endif %}>{% trans "Low" %}</option>
+                                <option value="normal" {% if search_form.priority.value == 'normal' %}selected{% endif %}>{% trans "Normal" %}</option>
+                                <option value="high" {% if search_form.priority.value == 'high' %}selected{% endif %}>{% trans "High" %}</option>
+                                <option value="urgent" {% if search_form.priority.value == 'urgent' %}selected{% endif %}>{% trans "Urgent" %}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="start_date" class="form-label">{% trans "From Date" %}</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" 
+                                   value="{{ search_form.start_date.value|default:'' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="end_date" class="form-label">{% trans "To Date" %}</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" 
+                                   value="{{ search_form.end_date.value|default:'' }}">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> {% trans "Search" %}
+                            </button>
+                            <a href="{% url 'bookings:booking_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> {% trans "Clear" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bookings List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Bookings" %}</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if bookings %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{% trans "Booking #" %}</th>
+                                        <th>{% trans "Service" %}</th>
+                                        <th>{% trans "Date & Time" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                        <th>{% trans "Priority" %}</th>
+                                        <th>{% trans "Total" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for booking in bookings %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold">{{ booking.booking_number }}</div>
+                                            <small class="text-muted">{{ booking.created_at|date:"M d, Y H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            <div>{{ booking.service.name }}</div>
+                                            {% if booking.notes %}
+                                                <small class="text-muted">{{ booking.notes|truncatechars:50 }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div>{{ booking.start_date|date:"M d, Y" }}</div>
+                                            {% if booking.start_time %}
+                                                <small class="text-muted">{{ booking.start_time|time:"H:i" }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if booking.status == 'draft' %}
+                                                <span class="badge bg-secondary">{% trans "Draft" %}</span>
+                                            {% elif booking.status == 'pending' %}
+                                                <span class="badge bg-warning">{% trans "Pending" %}</span>
+                                            {% elif booking.status == 'confirmed' %}
+                                                <span class="badge bg-success">{% trans "Confirmed" %}</span>
+                                            {% elif booking.status == 'in_progress' %}
+                                                <span class="badge bg-info">{% trans "In Progress" %}</span>
+                                            {% elif booking.status == 'completed' %}
+                                                <span class="badge bg-primary">{% trans "Completed" %}</span>
+                                            {% elif booking.status == 'cancelled' %}
+                                                <span class="badge bg-danger">{% trans "Cancelled" %}</span>
+                                            {% elif booking.status == 'no_show' %}
+                                                <span class="badge bg-dark">{% trans "No Show" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if booking.priority == 'low' %}
+                                                <span class="badge bg-light text-dark">{% trans "Low" %}</span>
+                                            {% elif booking.priority == 'normal' %}
+                                                <span class="badge bg-secondary">{% trans "Normal" %}</span>
+                                            {% elif booking.priority == 'high' %}
+                                                <span class="badge bg-warning">{% trans "High" %}</span>
+                                            {% elif booking.priority == 'urgent' %}
+                                                <span class="badge bg-danger">{% trans "Urgent" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold">${{ booking.total_price|floatformat:2 }}</div>
+                                            {% if booking.base_price != booking.total_price %}
+                                                <small class="text-muted">Base: ${{ booking.base_price|floatformat:2 }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'bookings:booking_detail' booking.pk %}" 
+                                                   class="btn btn-outline-primary" title="{% trans 'View Details' %}">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% if booking.can_be_modified %}
+                                                    <a href="{% url 'bookings:booking_update' booking.pk %}" 
+                                                       class="btn btn-outline-secondary" title="{% trans 'Edit' %}">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                {% endif %}
+                                                {% if booking.status == 'draft' %}
+                                                    <a href="{% url 'bookings:submit_booking' booking.pk %}" 
+                                                       class="btn btn-outline-success" title="{% trans 'Submit' %}">
+                                                        <i class="fas fa-paper-plane"></i>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if is_paginated %}
+                        <div class="card-footer">
+                            <nav aria-label="{% trans 'Bookings pagination' %}">
+                                <ul class="pagination justify-content-center mb-0">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                                {% trans "First" %}
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                                {% trans "Previous" %}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item active">
+                                        <span class="page-link">
+                                            {% trans "Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                                {% trans "Next" %}
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                                {% trans "Last" %}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">{% trans "No bookings found" %}</h5>
+                            <p class="text-muted">{% trans "You haven't created any bookings yet or no results match your search criteria." %}</p>
+                            <a href="{% url 'bookings:booking_create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> {% trans "Create Your First Booking" %}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Auto-submit form on filter change
+    $('#status, #priority').change(function() {
+        $(this).closest('form').submit();
+    });
+    
+    // Clear date filters
+    $('.btn-outline-secondary').click(function(e) {
+        if ($(this).text().trim().includes('Clear')) {
+            e.preventDefault();
+            window.location.href = '{% url "bookings:booking_list" %}';
+        }
+    });
+});
+</script>
+{% endblock %}
+                        <div class="col">
+                            <h5 class="mb-0">{% trans "Filter by Status" %}</h5>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{% url 'bookings:booking_create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>{% trans "New Booking" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body pb-0">
+                    <div class="d-flex gap-2 mb-3">
+                        <a href="{% url 'bookings:booking_list' %}" class="btn btn-outline-secondary {% if not filtered_status %}active{% endif %}">
+                            {% trans "All" %}
+                        </a>
+                        <a href="{% url 'bookings:booking_list' %}?status=pending" class="btn btn-outline-warning {% if filtered_status == 'pending' %}active{% endif %}">
+                            {% trans "Pending" %}
+                        </a>
+                        <a href="{% url 'bookings:booking_list' %}?status=confirmed" class="btn btn-outline-success {% if filtered_status == 'confirmed' %}active{% endif %}">
+                            {% trans "Confirmed" %}
+                        </a>
+                        <a href="{% url 'bookings:booking_list' %}?status=completed" class="btn btn-outline-info {% if filtered_status == 'completed' %}active{% endif %}">
+                            {% trans "Completed" %}
+                        </a>
+                        <a href="{% url 'bookings:booking_list' %}?status=cancelled" class="btn btn-outline-danger {% if filtered_status == 'cancelled' %}active{% endif %}">
+                            {% trans "Cancelled" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            {% if bookings %}
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{% trans "Booking ID" %}</th>
+                                        <th>{% trans "Service" %}</th>
+                                        <th>{% trans "Date" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                        <th>{% trans "Total Price" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for booking in bookings %}
+                                        <tr>
+                                            <td>{{ booking.id }}</td>
+                                            <td>{{ booking.service.name }}</td>
+                                            <td>{{ booking.start_date }}</td>
+                                            <td>
+                                                {% if booking.status == 'pending' %}
+                                                    <span class="badge bg-warning">{% trans "Pending" %}</span>
+                                                {% elif booking.status == 'confirmed' %}
+                                                    <span class="badge bg-success">{% trans "Confirmed" %}</span>
+                                                {% elif booking.status == 'completed' %}
+                                                    <span class="badge bg-info">{% trans "Completed" %}</span>
+                                                {% elif booking.status == 'cancelled' %}
+                                                    <span class="badge bg-danger">{% trans "Cancelled" %}</span>
+                                                {% elif booking.status == 'refunded' %}
+                                                    <span class="badge bg-secondary">{% trans "Refunded" %}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ booking.total_price|floatformat:2|intcomma }}</td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{% url 'bookings:booking_detail' booking.pk %}" class="btn btn-outline-primary">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    {% if booking.status == 'pending' %}
+                                                        <a href="{% url 'bookings:booking_update' booking.pk %}" class="btn btn-outline-secondary">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                        <a href="{% url 'bookings:booking_cancel' booking.pk %}" class="btn btn-outline-danger">
+                                                            <i class="bi bi-x-circle"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if is_paginated %}
+                    <div class="mt-4">
+                        <nav>
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1{% if filtered_status %}&status={{ filtered_status }}{% endif %}">
+                                            <i class="bi bi-chevron-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filtered_status %}&status={{ filtered_status }}{% endif %}">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                
+                                <li class="page-item disabled">
+                                    <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                                </li>
+                                
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filtered_status %}&status={{ filtered_status }}{% endif %}">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if filtered_status %}&status={{ filtered_status }}{% endif %}">
+                                            <i class="bi bi-chevron-double-right"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <img src="/static/images/illustrations/empty.svg" alt="No bookings" class="img-fluid mb-4" style="max-height: 200px;">
+                        <h3 class="mb-3">{% trans "No bookings found" %}</h3>
+                        <p class="text-muted mb-4">{% trans "You haven't made any bookings yet." %}</p>
+                        <a href="{% url 'services:service_list' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-search me-2"></i>{% trans "Browse Services" %}
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

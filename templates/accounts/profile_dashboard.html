@@ -1,0 +1,611 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Profile Dashboard - HAWWA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid white;
+        object-fit: cover;
+    }
+    
+    .profile-avatar-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid white;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .progress-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: conic-gradient(#667eea 0% var(--progress), #e0e0e0 var(--progress) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        position: relative;
+    }
+    
+    .progress-circle::before {
+        content: '';
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: white;
+        position: absolute;
+    }
+    
+    .progress-text {
+        position: relative;
+        z-index: 1;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .activity-item {
+        border-left: 3px solid #667eea;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: #f8f9fa;
+        border-radius: 5px;
+    }
+    
+    .activity-date {
+        font-size: 0.8rem;
+        color: #666;
+        float: right;
+    }
+    
+    .wellness-chart {
+        height: 200px;
+        margin: 1rem 0;
+    }
+    
+    .quick-action-btn {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        margin: 0.5rem;
+    }
+    
+    .quick-action-btn:hover {
+        background: linear-gradient(45deg, #764ba2, #667eea);
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .verification-badge {
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .unverified-badge {
+        background: #ffc107;
+        color: #212529;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .booking-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .booking-card:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-confirmed {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-completed {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name }}" class="profile-avatar">
+                {% else %}
+                    <div class="profile-avatar-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h1 class="mb-2">{{ user.get_full_name }}</h1>
+                <p class="mb-1">
+                    <i class="fas fa-user-tag me-2"></i>
+                    {{ user.get_user_type_display }}
+                </p>
+                <p class="mb-1">
+                    <i class="fas fa-envelope me-2"></i>
+                    {{ user.email }}
+                </p>
+                {% if user.phone %}
+                <p class="mb-1">
+                    <i class="fas fa-phone me-2"></i>
+                    {{ user.phone }}
+                </p>
+                {% endif %}
+                <p class="mb-0">
+                    {% if user.is_verified %}
+                        <span class="verification-badge">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Verified
+                        </span>
+                    {% else %}
+                        <span class="unverified-badge">
+                            <i class="fas fa-exclamation-circle me-1"></i>
+                            Unverified
+                        </span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="progress-circle" style="--progress: {{ account_metrics.profile_completion }}%;">
+                    <div class="progress-text">{{ account_metrics.profile_completion }}%</div>
+                </div>
+                <small>Profile Complete</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h4 class="mb-3">Quick Actions</h4>
+            <a href="{% url 'accounts:profile_edit' %}" class="quick-action-btn">
+                <i class="fas fa-edit me-2"></i>
+                Edit Profile
+            </a>
+            <a href="{% url 'accounts:booking_history' %}" class="quick-action-btn">
+                <i class="fas fa-history me-2"></i>
+                Booking History
+            </a>
+            <a href="{% url 'ai_buddy:home' %}" class="quick-action-btn">
+                <i class="fas fa-robot me-2"></i>
+                AI Buddy
+            </a>
+            <a href="{% url 'accounts:preferences' %}" class="quick-action-btn">
+                <i class="fas fa-cog me-2"></i>
+                Preferences
+            </a>
+            <a href="{% url 'accounts:security_settings' %}" class="quick-action-btn">
+                <i class="fas fa-shield-alt me-2"></i>
+                Security
+            </a>
+        </div>
+    </div>
+
+    <!-- Dashboard Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ dashboard_stats.total_bookings }}</div>
+                <div class="stat-label">Total Bookings</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ dashboard_stats.recent_bookings }}</div>
+                <div class="stat-label">Recent Bookings</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ dashboard_stats.service_reviews }}</div>
+                <div class="stat-label">Reviews Given</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ dashboard_stats.account_age_days }}</div>
+                <div class="stat-label">Days Member</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendor Statistics (if applicable) -->
+    {% if dashboard_stats.vendor_stats.has_vendor_profile %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-store text-primary me-2"></i>
+                        Vendor Statistics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="stat-card">
+                                <div class="stat-number">{{ dashboard_stats.vendor_stats.vendor_bookings }}</div>
+                                <div class="stat-label">Service Bookings</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-card">
+                                <div class="stat-number">{{ dashboard_stats.vendor_stats.vendor_revenue|floatformat:0 }}</div>
+                                <div class="stat-label">Total Revenue (QAR)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'vendors:dashboard' %}" class="btn btn-primary">
+                            <i class="fas fa-chart-line me-2"></i>
+                            View Vendor Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Recent Activity -->
+        <div class="col-lg-8">
+            <!-- Recent Bookings -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar text-primary me-2"></i>
+                        Recent Bookings
+                    </h5>
+                    <a href="{% url 'accounts:booking_history' %}" class="btn btn-sm btn-outline-primary">
+                        View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_bookings %}
+                        {% for booking in recent_bookings %}
+                        <div class="booking-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ booking.service.name }}</h6>
+                                    <p class="text-muted mb-1">
+                                        <i class="fas fa-user me-1"></i>
+                                        {{ booking.service.vendor_profile.user.get_full_name }}
+                                    </p>
+                                    <p class="text-muted mb-0">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ booking.booking_date|date:"M d, Y" }} at {{ booking.booking_time|time:"H:i" }}
+                                    </p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="status-badge status-{{ booking.status }}">
+                                        {{ booking.get_status_display }}
+                                    </span>
+                                    <div class="mt-1">
+                                        <strong>{{ booking.service.price }} QAR</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No bookings yet</h6>
+                            <p class="text-muted">Explore our services and make your first booking!</p>
+                            <a href="{% url 'services:service_list' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>
+                                Browse Services
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Upcoming Bookings -->
+            {% if upcoming_bookings %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock text-warning me-2"></i>
+                        Upcoming Appointments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for booking in upcoming_bookings %}
+                    <div class="booking-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">{{ booking.service.name }}</h6>
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-user me-1"></i>
+                                    {{ booking.service.vendor_profile.user.get_full_name }}
+                                </p>
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ booking.booking_date|date:"M d, Y" }} at {{ booking.booking_time|time:"H:i" }}
+                                </p>
+                            </div>
+                            <div class="text-end">
+                                <span class="status-badge status-{{ booking.status }}">
+                                    {{ booking.get_status_display }}
+                                </span>
+                                <div class="mt-1">
+                                    <strong>{{ booking.service.price }} QAR</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- AI Buddy Integration -->
+            {% if ai_buddy_stats.has_ai_profile %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-robot text-info me-2"></i>
+                        AI Buddy: {{ ai_buddy_stats.buddy_name }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="stat-number">{{ ai_buddy_stats.conversation_count }}</div>
+                        <div class="stat-label">Conversations</div>
+                    </div>
+                    {% if ai_buddy_stats.last_conversation %}
+                    <p class="small text-muted mb-3">
+                        Last chat: {{ ai_buddy_stats.last_conversation.updated_at|naturaltime }}
+                    </p>
+                    {% endif %}
+                    <div class="text-center">
+                        <a href="{% url 'ai_buddy:home' %}" class="btn btn-info btn-sm">
+                            <i class="fas fa-comments me-1"></i>
+                            Chat with {{ ai_buddy_stats.buddy_name }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Wellness Summary -->
+            {% if wellness_summary.entry_count > 0 %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-heart text-danger me-2"></i>
+                        Wellness Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="mb-2">
+                                <strong>{{ wellness_summary.avg_mood|floatformat:1 }}</strong>
+                            </div>
+                            <small class="text-muted">Avg Mood</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-2">
+                                <strong>{{ wellness_summary.avg_energy|floatformat:1 }}</strong>
+                            </div>
+                            <small class="text-muted">Avg Energy</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-2">
+                                <strong>{{ wellness_summary.avg_sleep|floatformat:1 }}h</strong>
+                            </div>
+                            <small class="text-muted">Avg Sleep</small>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <small class="text-muted">{{ wellness_summary.entry_count }} entries in last 30 days</small>
+                    </div>
+                    <div class="text-center mt-2">
+                        <a href="{% url 'ai_buddy:wellness_tracking' %}" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-chart-line me-1"></i>
+                            View Wellness
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Account Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle text-secondary me-2"></i>
+                        Account Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Member Since:</strong><br>
+                        <small class="text-muted">{{ user.date_joined|date:"F Y" }}</small>
+                    </div>
+                    
+                    {% if account_metrics.last_login %}
+                    <div class="mb-3">
+                        <strong>Last Login:</strong><br>
+                        <small class="text-muted">{{ account_metrics.last_login|naturaltime }}</small>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <strong>Notifications:</strong><br>
+                        <small class="text-muted">
+                            Email: {% if account_metrics.notification_preferences.email %}
+                                <span class="text-success">On</span>
+                            {% else %}
+                                <span class="text-danger">Off</span>
+                            {% endif %}
+                            | SMS: {% if account_metrics.notification_preferences.sms %}
+                                <span class="text-success">On</span>
+                            {% else %}
+                                <span class="text-danger">Off</span>
+                            {% endif %}
+                        </small>
+                    </div>
+                    
+                    <div class="text-center">
+                        <a href="{% url 'accounts:preferences' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-cog me-1"></i>
+                            Update Preferences
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Profile dashboard JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Load analytics data
+    loadProfileAnalytics();
+});
+
+function loadProfileAnalytics() {
+    fetch('{% url "accounts:profile_analytics_api" %}')
+    .then(response => response.json())
+    .then(data => {
+        // You could add charts here using Chart.js or similar
+        console.log('Analytics data loaded:', data);
+    })
+    .catch(error => {
+        console.error('Error loading analytics:', error);
+    });
+}
+
+// Profile picture upload
+function updateProfilePicture(input) {
+    if (input.files && input.files[0]) {
+        const formData = new FormData();
+        formData.append('profile_picture', input.files[0]);
+        
+        fetch('{% url "accounts:update_profile_picture" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the profile picture display
+                const img = document.querySelector('.profile-avatar');
+                if (img) {
+                    img.src = data.image_url;
+                }
+                alert('Profile picture updated successfully!');
+            } else {
+                alert('Error updating profile picture: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating profile picture');
+        });
+    }
+}
+</script>
+{% endblock %}

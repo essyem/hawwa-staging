@@ -1,0 +1,269 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "Add New Service" %} - {% trans "Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-3">{% trans "Add New Service" %}</h1>
+                <p class="lead">{% trans "Create a new service offering for Hawwa Postpartum Care" %}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Form Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <form method="post" enctype="multipart/form-data" class="service-form">
+                            {% csrf_token %}
+                            
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h4>{% trans "Service Type" %}</h4>
+                                    <p class="text-muted small">{% trans "Select the type of service you want to create" %}</p>
+                                </div>
+                                <div class="col-md-12">
+                                    {{ form.service_type|as_crispy_field }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h4>{% trans "Basic Information" %}</h4>
+                                    <p class="text-muted small">{% trans "General information about the service" %}</p>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    {{ form.name|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    {{ form.category|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-12">
+                                    {{ form.short_description|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-12">
+                                    {{ form.description|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-12">
+                                    {{ form.long_description|as_crispy_field }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h4>{% trans "Pricing" %}</h4>
+                                    <p class="text-muted small">{% trans "Set the price and availability" %}</p>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    {{ form.price|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    {{ form.discounted_price|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    {{ form.is_available|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    {{ form.availability_note|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    {{ form.duration|as_crispy_field }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h4>{% trans "Media" %}</h4>
+                                    <p class="text-muted small">{% trans "Upload images for the service" %}</p>
+                                </div>
+                                
+                                <div class="col-md-12">
+                                    {{ form.image|as_crispy_field }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h4>{% trans "Additional Information" %}</h4>
+                                    <p class="text-muted small">{% trans "More details about the service" %}</p>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    {{ form.location_type|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    {{ form.is_featured|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-12">
+                                    {{ form.cancellation_policy|as_crispy_field }}
+                                </div>
+                            </div>
+                            
+                            <!-- Service-specific fields will be shown/hidden based on service type -->
+                            <div id="accommodation-fields" class="service-specific-fields" style="display: none;">
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h4>{% trans "Accommodation Details" %}</h4>
+                                        <p class="text-muted small">{% trans "Specific information for accommodation services" %}</p>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        {{ accommodation_form.rooms|as_crispy_field }}
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        {{ accommodation_form.beds|as_crispy_field }}
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        {{ accommodation_form.max_occupancy|as_crispy_field }}
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        {{ accommodation_form.meals_provided|as_crispy_field }}
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        {{ accommodation_form.amenities|as_crispy_field }}
+                                    </div>
+                                    
+                                    <div class="col-md-12">
+                                        {{ accommodation_form.location|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="homecare-fields" class="service-specific-fields" style="display: none;">
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h4>{% trans "Home Care Details" %}</h4>
+                                        <p class="text-muted small">{% trans "Specific information for home care services" %}</p>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        {{ homecare_form.care_type|as_crispy_field }}
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        {{ homecare_form.service_hours|as_crispy_field }}
+                                    </div>
+                                    
+                                    <div class="col-md-12">
+                                        {{ homecare_form.services_included|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="wellness-fields" class="service-specific-fields" style="display: none;">
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h4>{% trans "Wellness Details" %}</h4>
+                                        <p class="text-muted small">{% trans "Specific information for wellness services" %}</p>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        {{ wellness_form.specialist_type|as_crispy_field }}
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        {{ wellness_form.session_format|as_crispy_field }}
+                                    </div>
+                                    
+                                    <div class="col-md-12">
+                                        {{ wellness_form.benefits|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="nutrition-fields" class="service-specific-fields" style="display: none;">
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h4>{% trans "Nutrition Details" %}</h4>
+                                        <p class="text-muted small">{% trans "Specific information for nutrition services" %}</p>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        {{ nutrition_form.diet_type|as_crispy_field }}
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        {{ nutrition_form.meal_type|as_crispy_field }}
+                                    </div>
+                                    
+                                    <div class="col-md-12">
+                                        {{ nutrition_form.ingredients|as_crispy_field }}
+                                    </div>
+                                    
+                                    <div class="col-md-12">
+                                        {{ nutrition_form.nutritional_benefits|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <a href="{% url 'services:service_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                                <button type="submit" class="btn btn-primary">{% trans "Save Service" %}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Service type selection handling
+        const serviceTypeSelect = document.querySelector('#id_service_type');
+        const specificFields = document.querySelectorAll('.service-specific-fields');
+        
+        function updateFields() {
+            // Hide all specific fields first
+            specificFields.forEach(field => {
+                field.style.display = 'none';
+            });
+            
+            // Show the selected service type fields
+            const selectedType = serviceTypeSelect.value;
+            if (selectedType) {
+                const selectedFields = document.getElementById(selectedType + '-fields');
+                if (selectedFields) {
+                    selectedFields.style.display = 'block';
+                }
+            }
+        }
+        
+        // Initial update
+        updateFields();
+        
+        // Update on change
+        serviceTypeSelect.addEventListener('change', updateFields);
+    });
+</script>
+{% endblock %}

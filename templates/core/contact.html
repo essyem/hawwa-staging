@@ -1,0 +1,175 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "Contact Us - Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<!-- Contact Header -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-3">{% trans "Contact Us" %}</h1>
+                <p class="lead">{% trans "We're here to answer your questions and provide the support you need." %}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Info & Form -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Contact Information -->
+            <div class="col-md-5">
+                <h2 class="mb-4">{% trans "Get in Touch" %}</h2>
+                
+                <div class="mb-4">
+                    <h5>{% trans "Main Office" %}</h5>
+                    <p class="mb-2"><i class="fas fa-map-marker-alt me-2 text-primary"></i> {% trans "123 Main Street, City, Country" %}</p>
+                    <p class="mb-2"><i class="fas fa-phone me-2 text-primary"></i> {% trans "+1 234 567 890" %}</p>
+                    <p><i class="fas fa-envelope me-2 text-primary"></i> <a href="mailto:info@hawwa.com">info@hawwa.com</a></p>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>{% trans "Operating Hours" %}</h5>
+                    <p class="mb-1">{% trans "Monday - Friday: 9:00 AM - 6:00 PM" %}</p>
+                    <p class="mb-1">{% trans "Saturday: 10:00 AM - 4:00 PM" %}</p>
+                    <p>{% trans "Sunday: Closed" %}</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>{% trans "Follow Us" %}</h5>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-outline-primary rounded-circle"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="btn btn-outline-primary rounded-circle"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="btn btn-outline-primary rounded-circle"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="btn btn-outline-primary rounded-circle"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Form -->
+            <div class="col-md-7">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="mb-4">{% trans "Send Us a Message" %}</h2>
+                        
+                        <form method="post" action="">
+                            {% csrf_token %}
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_name">{% trans "Full Name" %}</label>
+                                        <input type="text" name="name" class="form-control" id="id_name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_email">{% trans "Email Address" %}</label>
+                                        <input type="email" name="email" class="form-control" id="id_email" required>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="id_subject">{% trans "Subject" %}</label>
+                                        <input type="text" name="subject" class="form-control" id="id_subject" required>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="id_message">{% trans "Message" %}</label>
+                                        <textarea name="message" rows="5" class="form-control" id="id_message" required></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary">{% trans "Send Message" %}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3456.789012345678!2d-73.98765432109876!3d40.12345678901234!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDA3JzI0LjQiTiA3M8KwNTknMTUuNiJX!5e0!3m2!1sen!2sus!4v1234567890123!5m2!1sen!2sus" 
+                        width="100%" 
+                        height="450" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="text-center mb-4">{% trans "Frequently Asked Questions" %}</h2>
+                
+                <div class="accordion" id="contactFAQ">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                {% trans "How quickly can I expect a response?" %}
+                            </button>
+                        </h3>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#contactFAQ">
+                            <div class="accordion-body">
+                                {% trans "We strive to respond to all inquiries within 24 hours during business days. For urgent matters, we recommend calling our office directly." %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h3 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                {% trans "Can I schedule a tour of your retreat facility?" %}
+                            </button>
+                        </h3>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#contactFAQ">
+                            <div class="accordion-body">
+                                {% trans "Yes, we offer tours of our retreat facilities by appointment. Please contact us to schedule a convenient time." %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h3 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                {% trans "Do you offer services outside your listed locations?" %}
+                            </button>
+                        </h3>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#contactFAQ">
+                            <div class="accordion-body">
+                                {% trans "We are continuously expanding our service areas. Please contact us with your specific location, and we'll let you know if we can accommodate your needs." %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{% url 'core:faq' %}" class="btn btn-outline-primary">{% trans "View All FAQs" %}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

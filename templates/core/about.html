@@ -1,0 +1,173 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "About Us - Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-4 fw-bold mb-3">{% trans "About Hawwa" %}</h1>
+                <p class="lead">{% trans "Dedicated to supporting women through their postpartum journey with compassion and expertise." %}</p>
+            </div>
+            <div class="col-md-6">
+                <img src="{% static 'img/about-header.jpg' %}" alt="Hawwa Team" class="img-fluid rounded-3 shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Story -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="text-center mb-4">{% trans "Our Story" %}</h2>
+                <p>{% trans "Hawwa Postpartum Care was founded with a simple yet powerful mission: to provide comprehensive, compassionate care to mothers during their postpartum recovery period." %}</p>
+                <p>{% trans "Our founder, after experiencing the challenges of postpartum recovery herself, recognized the gap in support services available to new mothers. Inspired by traditional practices that honor the postpartum period as a sacred time of healing and bonding, she created Hawwa to bring these nurturing traditions into the modern era." %}</p>
+                <p>{% trans "What began as a small service offering home care has grown into a comprehensive ecosystem of support for new mothers, including retreat accommodations, in-home care, wellness therapies, and nutritional support – all designed to help women recover physically, emotionally, and spiritually after childbirth." %}</p>
+                <p>{% trans "Today, Hawwa continues to grow with the vision that every mother deserves dedicated support and care during the transformative postpartum period." %}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Mission & Values -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5">{% trans "Our Mission & Values" %}</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                            <i class="fas fa-heart text-white fa-2x"></i>
+                        </div>
+                        <h3 class="card-title h4">{% trans "Compassionate Care" %}</h3>
+                        <p class="card-text">{% trans "We approach each mother with empathy, understanding, and unwavering support during her unique postpartum journey." %}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                            <i class="fas fa-hands text-white fa-2x"></i>
+                        </div>
+                        <h3 class="card-title h4">{% trans "Holistic Approach" %}</h3>
+                        <p class="card-text">{% trans "We believe in caring for the whole person – physical, emotional, and mental wellbeing are equally important in postpartum recovery." %}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                            <i class="fas fa-star text-white fa-2x"></i>
+                        </div>
+                        <h3 class="card-title h4">{% trans "Excellence" %}</h3>
+                        <p class="card-text">{% trans "We are committed to providing the highest quality care through qualified professionals and evidence-based practices." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Team -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5">{% trans "Our Team" %}</h2>
+            <p class="lead">{% trans "Meet the dedicated professionals behind Hawwa" %}</p>
+        </div>
+        <div class="row g-4">
+            <!-- Team Member 1 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="{% static 'img/team-1.jpg' %}" class="card-img-top" alt="Team Member">
+                    <div class="card-body text-center p-4">
+                        <h3 class="card-title h4">{% trans "Nora Al-Rashid" %}</h3>
+                        <p class="text-muted mb-3">{% trans "Founder & CEO" %}</p>
+                        <p class="card-text">{% trans "With over 15 years of experience in maternal health, Nora brings passion and expertise to her leadership of Hawwa." %}</p>
+                        <div class="social-links mt-3">
+                            <a href="#" class="text-primary me-2"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="text-primary me-2"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Team Member 2 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="{% static 'img/team-2.jpg' %}" class="card-img-top" alt="Team Member">
+                    <div class="card-body text-center p-4">
+                        <h3 class="card-title h4">{% trans "Dr. Layla Hassan" %}</h3>
+                        <p class="text-muted mb-3">{% trans "Medical Director" %}</p>
+                        <p class="card-text">{% trans "A board-certified OB/GYN specializing in postpartum care with a focus on holistic recovery approaches." %}</p>
+                        <div class="social-links mt-3">
+                            <a href="#" class="text-primary me-2"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="text-primary me-2"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Team Member 3 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="{% static 'img/team-3.jpg' %}" class="card-img-top" alt="Team Member">
+                    <div class="card-body text-center p-4">
+                        <h3 class="card-title h4">{% trans "Sara Al-Khalil" %}</h3>
+                        <p class="text-muted mb-3">{% trans "Wellness Program Director" %}</p>
+                        <p class="card-text">{% trans "A certified midwife and wellness coach with specialized training in postpartum massage and nutritional therapy." %}</p>
+                        <div class="social-links mt-3">
+                            <a href="#" class="text-primary me-2"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="text-primary me-2"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Approach -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 mb-4 mb-md-0">
+                <img src="{% static 'img/our-approach.jpg' %}" alt="Our Approach" class="img-fluid rounded-3 shadow">
+            </div>
+            <div class="col-md-6">
+                <h2 class="mb-4">{% trans "Our Approach to Postpartum Care" %}</h2>
+                <p>{% trans "At Hawwa, we understand that the postpartum period is a critical time of healing and adjustment for new mothers. Our approach combines modern medical knowledge with traditional wisdom to provide comprehensive care that addresses the physical, emotional, and spiritual needs of mothers." %}</p>
+                <p>{% trans "We believe that proper postpartum care is not a luxury but a necessity, and that with the right support, mothers can emerge from this transformative period feeling strong, confident, and connected to their babies." %}</p>
+                <p>{% trans "Our services are designed to be flexible and personalized, allowing each mother to create a recovery plan that works for her unique situation and preferences." %}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Join Us CTA -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h2 class="display-5 mb-4">{% trans "Join the Hawwa Family" %}</h2>
+                <p class="lead mb-4">{% trans "Whether you're seeking postpartum support or interested in joining our network of care providers, we'd love to connect with you." %}</p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{% url 'accounts:register_mother' %}" class="btn btn-primary btn-lg">{% trans "Register as a Mother" %}</a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-outline-primary btn-lg">{% trans "Become a Provider" %}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,287 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Booking Dashboard" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">{% trans "Booking Dashboard" %}</h1>
+                    <p class="text-muted mb-0">{% trans "Overview of your booking activity and statistics" %}</p>
+                </div>
+                <div>
+                    <a href="{% url 'bookings:booking_list' %}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-list"></i> {% trans "All Bookings" %}
+                    </a>
+                    <a href="{% url 'bookings:booking_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> {% trans "New Booking" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overview Statistics -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-gradient-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-0 fw-bold">{{ overview.total_bookings }}</h2>
+                            <p class="mb-0">{% trans "Total Bookings" %}</p>
+                            <small class="opacity-75">{% trans "All time" %}</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-alt fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-gradient-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-0 fw-bold">{{ overview.active_bookings }}</h2>
+                            <p class="mb-0">{% trans "Active Bookings" %}</p>
+                            <small class="opacity-75">{% trans "Pending, confirmed, in progress" %}</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-gradient-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-0 fw-bold">{{ overview.completed_bookings }}</h2>
+                            <p class="mb-0">{% trans "Completed" %}</p>
+                            <small class="opacity-75">{% trans "Successfully finished" %}</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-gradient-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-0 fw-bold">{{ overview.upcoming_bookings }}</h2>
+                            <p class="mb-0">{% trans "Upcoming" %}</p>
+                            <small class="opacity-75">{% trans "Future appointments" %}</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-day fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Quick Actions" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{% url 'bookings:booking_create' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-center">
+                                <i class="fas fa-plus fa-2x mb-2"></i>
+                                <span>{% trans "Create New Booking" %}</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'bookings:booking_list' %}?status=draft" class="btn btn-outline-secondary w-100 h-100 d-flex flex-column justify-content-center">
+                                <i class="fas fa-edit fa-2x mb-2"></i>
+                                <span>{% trans "Continue Draft" %}</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'bookings:booking_list' %}?status=pending" class="btn btn-outline-warning w-100 h-100 d-flex flex-column justify-content-center">
+                                <i class="fas fa-clock fa-2x mb-2"></i>
+                                <span>{% trans "View Pending" %}</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'services:service_list' %}" class="btn btn-outline-info w-100 h-100 d-flex flex-column justify-content-center">
+                                <i class="fas fa-search fa-2x mb-2"></i>
+                                <span>{% trans "Browse Services" %}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="row">
+        <!-- Recent Bookings -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{% trans "Recent Bookings" %}</h5>
+                    <a href="{% url 'bookings:booking_list' %}" class="btn btn-sm btn-outline-primary">
+                        {% trans "View All" %}
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_bookings %}
+                        <div class="list-group list-group-flush">
+                            {% for booking in recent_bookings %}
+                            <div class="list-group-item px-0">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="me-3">
+                                        <h6 class="mb-1">
+                                            <a href="{% url 'bookings:booking_detail' booking.pk %}" class="text-decoration-none">
+                                                {{ booking.service.name }}
+                                            </a>
+                                        </h6>
+                                        <p class="mb-1 text-muted">{{ booking.booking_number }}</p>
+                                        <small class="text-muted">{{ booking.start_date|date:"M d, Y" }}
+                                            {% if booking.start_time %} at {{ booking.start_time|time:"H:i" }}{% endif %}
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        {% if booking.status == 'draft' %}
+                                            <span class="badge bg-secondary mb-1">{% trans "Draft" %}</span>
+                                        {% elif booking.status == 'pending' %}
+                                            <span class="badge bg-warning mb-1">{% trans "Pending" %}</span>
+                                        {% elif booking.status == 'confirmed' %}
+                                            <span class="badge bg-success mb-1">{% trans "Confirmed" %}</span>
+                                        {% elif booking.status == 'in_progress' %}
+                                            <span class="badge bg-info mb-1">{% trans "In Progress" %}</span>
+                                        {% elif booking.status == 'completed' %}
+                                            <span class="badge bg-primary mb-1">{% trans "Completed" %}</span>
+                                        {% elif booking.status == 'cancelled' %}
+                                            <span class="badge bg-danger mb-1">{% trans "Cancelled" %}</span>
+                                        {% endif %}
+                                        <br>
+                                        <small class="text-muted">${{ booking.total_price|floatformat:2 }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">{% trans "No recent bookings" %}</h6>
+                            <p class="text-muted mb-0">{% trans "Your recent booking activity will appear here" %}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Bookings & Monthly Stats -->
+        <div class="col-lg-4">
+            <!-- Upcoming Bookings -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Upcoming Appointments" %}</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_bookings %}
+                        {% for booking in upcoming_bookings %}
+                        <div class="d-flex align-items-center mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                            <div class="me-3">
+                                <div class="bg-primary text-white rounded text-center p-2" style="min-width: 50px;">
+                                    <div class="fw-bold">{{ booking.start_date|date:"d" }}</div>
+                                    <small>{{ booking.start_date|date:"M" }}</small>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <a href="{% url 'bookings:booking_detail' booking.pk %}" class="text-decoration-none">
+                                        {{ booking.service.name }}
+                                    </a>
+                                </h6>
+                                {% if booking.start_time %}
+                                    <small class="text-muted">{{ booking.start_time|time:"H:i" }}</small>
+                                {% endif %}
+                                <br>
+                                {% if booking.status == 'pending' %}
+                                    <span class="badge bg-warning">{% trans "Pending" %}</span>
+                                {% elif booking.status == 'confirmed' %}
+                                    <span class="badge bg-success">{% trans "Confirmed" %}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-calendar-day fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">{% trans "No upcoming appointments" %}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Monthly Statistics -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "This Month" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary mb-0">{{ monthly_stats.this_month }}</h4>
+                            <small class="text-muted">{% trans "New Bookings" %}</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success mb-0">{{ monthly_stats.completed_this_month }}</h4>
+                            <small class="text-muted">{% trans "Completed" %}</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-grid">
+                        <a href="{% url 'bookings:booking_list' %}" class="btn btn-outline-primary btn-sm">
+                            {% trans "View All Bookings" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+.bg-gradient-success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+.bg-gradient-info {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+</style>
+{% endblock %}

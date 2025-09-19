@@ -1,0 +1,404 @@
+from django.db import models
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.urls import reverse
+from django.utils import timezone
+from decimal import Decimal
+import uuid
+from datetime import datetime, timedelta
+
+class AccountingCategory(models.Model):
+    """Categories for financial transactions and accounting."""
+    name = models.CharField(_("Category Name"), max_length=100)
+    code = models.CharField(_("Category Code"), max_length=20, unique=True)
+    description = models.TextField(_("Description"), blank=True)
+    is_active = models.BooleanField(_("Active"), default=True)
+    created_at = models.DateTimeField(_("Created At"), auto_now_add=True)
+    
+    class Meta:
+        verbose_name = _("Accounting Category")
+        verbose_name_plural = _("Accounting Categories")
+        ordering = ['name']
+    
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+class TaxRate(models.Model):
+    """Tax rates for different services and regions."""
+    name = models.CharField(_("Tax Name"), max_length=100)
+    rate = models.DecimalField(_("Tax Rate (%)"), max_digits=5, decimal_places=2, 
+                              validators=[MinValueValidator(0), MaxValueValidator(100)])
+    is_active = models.BooleanField(_("Active"), default=True)
+    effective_from = models.DateField(_("Effective From"))
+    effective_to = models.DateField(_("Effective To"), null=True, blank=True)
+    description = models.TextField(_("Description"), blank=True)
+    created_at = models.DateTimeField(_("Created At"), auto_now_add=True)
+    
+    class Meta:
+        verbose_name = _("Tax Rate")
+        verbose_name_plural = _("Tax Rates")
+        ordering = ['-effective_from']
+    
+    def __str__(self):
+        return f"{self.name} ({self.rate}%)"
+    
+    def is_current(self):
+        """Check if tax rate is currently effective."""
+        today = timezone.now().date()
+        if self.effective_to:
+            return self.effective_from <= today <= self.effective_to
+        return self.effective_from <= today
+
+class Invoice(models.Model):
+    """Comprehensive invoice management for the Hawwa platform."""
+    STATUS_CHOICES = (
+        ('draft', _('Draft')),
+        ('pending', _('Pending')),
+        ('sent', _('Sent')),
+        ('paid', _('Paid')),
+        ('partially_paid', _('Partially Paid')),
+        ('overdue', _('Overdue')),
+        ('cancelled', _('Cancelled')),
+        ('refunded', _('Refunded')),
+    )
+    
+    INVOICE_TYPE_CHOICES = (
+        ('booking', _('Booking Invoice')),
+        ('service', _('Service Invoice')),
+        ('subscription', _('Subscription Invoice')),
+        ('addon', _('Add-on Invoice')),
+        ('custom', _('Custom Invoice')),
+    )
+    
+    # Basic Information
+    invoice_number = models.CharField(_("Invoice Number"), max_length=50, unique=True, editable=False)
+    booking = models.ForeignKey('bookings.Booking', on_delete=models.CASCADE, 
+                               related_name='invoices', verbose_name=_("Booking"), null=True, blank=True)
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                                related_name='invoices', verbose_name=_("Customer"))
+    
+    # Invoice Details
+    invoice_type = models.CharField(_("Invoice Type"), max_length=20, choices=INVOICE_TYPE_CHOICES, default='booking')
+    status = models.CharField(_("Status"), max_length=20, choices=STATUS_CHOICES, default='draft')
+    
+    # Dates
+    invoice_date = models.DateField(_("Invoice Date"), default=timezone.now)
+    due_date = models.DateField(_("Due Date"))
+    sent_date = models.DateTimeField(_("Sent Date"), null=True, blank=True)
+    paid_date = models.DateTimeField(_("Paid Date"), null=True, blank=True)
+    
+    # Financial Details
+    subtotal = models.DecimalField(_("Subtotal"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    tax_amount = models.DecimalField(_("Tax Amount"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    discount_amount = models.DecimalField(_("Discount Amount"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    total_amount = models.DecimalField(_("Total Amount"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    paid_amount = models.DecimalField(_("Paid Amount"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    balance_due = models.DecimalField(_("Balance Due"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    
+    # Additional Information
+    notes = models.TextField(_("Notes"), blank=True)
+    internal_notes = models.TextField(_("Internal Notes"), blank=True)
+    terms_and_conditions = models.TextField(_("Terms and Conditions"), blank=True)
+    
+    # Billing Address
+    billing_name = models.CharField(_("Billing Name"), max_length=255)
+    billing_email = models.EmailField(_("Billing Email"))
+    billing_phone = models.CharField(_("Billing Phone"), max_length=20, blank=True)
+    billing_address = models.TextField(_("Billing Address"))
+    billing_city = models.CharField(_("Billing City"), max_length=100)
+    billing_state = models.CharField(_("Billing State"), max_length=100, blank=True)
+    billing_postal_code = models.CharField(_("Billing Postal Code"), max_length=20)
+    billing_country = models.CharField(_("Billing Country"), max_length=100, default="Qatar")
+    
+    # Metadata
+    created_at = models.DateTimeField(_("Created At"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Updated At"), auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                  null=True, related_name='created_invoices', verbose_name=_("Created By"))
+    
+    class Meta:
+        verbose_name = _("Invoice")
+        verbose_name_plural = _("Invoices")
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['invoice_number']),
+            models.Index(fields=['status']),
+            models.Index(fields=['due_date']),
+            models.Index(fields=['customer']),
+        ]
+    
+    def save(self, *args, **kwargs):
+        if not self.invoice_number:
+            self.invoice_number = self.generate_invoice_number()
+        
+        if not self.due_date:
+            self.due_date = self.invoice_date + timedelta(days=30)
+        
+        # Auto-populate billing info from customer if not provided
+        if not self.billing_name and self.customer:
+            self.billing_name = self.customer.get_full_name() or self.customer.email
+            self.billing_email = self.customer.email
+            self.billing_phone = self.customer.phone or ''
+            self.billing_address = self.customer.address or ''
+            self.billing_city = self.customer.city or ''
+            self.billing_state = self.customer.state or ''
+            self.billing_postal_code = self.customer.postal_code or ''
+            self.billing_country = self.customer.country or 'Qatar'
+        
+        # Calculate totals
+        self.calculate_totals()
+        
+        super().save(*args, **kwargs)
+    
+    def generate_invoice_number(self):
+        """Generate a unique invoice number."""
+        today = timezone.now()
+        prefix = f"INV-{today.strftime('%Y%m')}"
+        
+        # Get the last invoice number for this month
+        last_invoice = Invoice.objects.filter(
+            invoice_number__startswith=prefix
+        ).order_by('-invoice_number').first()
+        
+        if last_invoice:
+            try:
+                last_number = int(last_invoice.invoice_number.split('-')[-1])
+                new_number = last_number + 1
+            except (ValueError, IndexError):
+                new_number = 1
+        else:
+            new_number = 1
+        
+        return f"{prefix}-{new_number:04d}"
+    
+    def calculate_totals(self):
+        """Calculate invoice totals based on line items."""
+        # Check if invoice has a primary key (is saved to database)
+        if not self.pk:
+            # If not saved yet, skip calculation
+            return
+            
+        line_items = self.items.all()
+        
+        self.subtotal = sum(item.total_amount for item in line_items)
+        
+        # Calculate tax (if tax rate is applied)
+        if hasattr(self, '_tax_rate'):
+            self.tax_amount = (self.subtotal * self._tax_rate) / 100
+        
+        self.total_amount = self.subtotal + self.tax_amount - self.discount_amount
+        self.balance_due = self.total_amount - self.paid_amount
+    
+    def __str__(self):
+        return f"{self.invoice_number} - {self.customer.get_full_name()} - QAR {self.total_amount}"
+    
+    def get_absolute_url(self):
+        return reverse('financial:invoice_detail', kwargs={'pk': self.pk})
+    
+    def is_overdue(self):
+        """Check if invoice is overdue."""
+        return self.due_date < timezone.now().date() and self.status not in ['paid', 'cancelled', 'refunded']
+    
+    def mark_as_sent(self, user=None):
+        """Mark invoice as sent."""
+        self.status = 'sent'
+        self.sent_date = timezone.now()
+        if user:
+            # Log the action (could be implemented with Django's admin logging)
+            pass
+        self.save()
+    
+    def mark_as_paid(self, amount=None, user=None):
+        """Mark invoice as paid."""
+        if amount is None:
+            amount = self.balance_due
+        
+        self.paid_amount += amount
+        self.balance_due = self.total_amount - self.paid_amount
+        
+        if self.balance_due <= 0:
+            self.status = 'paid'
+            self.paid_date = timezone.now()
+        elif self.paid_amount > 0:
+            self.status = 'partially_paid'
+        
+        self.save()
+
+class InvoiceItem(models.Model):
+    """Individual line items for invoices."""
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, 
+                               related_name='items', verbose_name=_("Invoice"))
+    service = models.ForeignKey('services.Service', on_delete=models.SET_NULL,
+                               null=True, blank=True, verbose_name=_("Service"))
+    
+    # Item Details
+    description = models.CharField(_("Description"), max_length=255)
+    quantity = models.DecimalField(_("Quantity"), max_digits=10, decimal_places=2, default=1)
+    unit_price = models.DecimalField(_("Unit Price"), max_digits=12, decimal_places=2)
+    discount_percentage = models.DecimalField(_("Discount %"), max_digits=5, decimal_places=2, 
+                                            default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    total_amount = models.DecimalField(_("Total Amount"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    
+    # Accounting
+    category = models.ForeignKey(AccountingCategory, on_delete=models.SET_NULL,
+                                null=True, blank=True, verbose_name=_("Category"))
+    
+    # Metadata
+    created_at = models.DateTimeField(_("Created At"), auto_now_add=True)
+    line_order = models.PositiveIntegerField(_("Line Order"), default=0)
+    
+    class Meta:
+        verbose_name = _("Invoice Item")
+        verbose_name_plural = _("Invoice Items")
+        ordering = ['line_order', 'created_at']
+    
+    def save(self, *args, **kwargs):
+        # Calculate total amount using Decimal arithmetic
+        discount_decimal = Decimal(str(self.discount_percentage)) / Decimal('100')
+        discounted_price = self.unit_price * (Decimal('1') - discount_decimal)
+        self.total_amount = self.quantity * discounted_price
+        super().save(*args, **kwargs)
+        
+        # Update invoice totals
+        if self.invoice_id:
+            self.invoice.calculate_totals()
+            self.invoice.save()
+    
+    def __str__(self):
+        return f"{self.description} - QAR {self.total_amount}"
+
+class Payment(models.Model):
+    """Track payments received for invoices."""
+    PAYMENT_METHOD_CHOICES = (
+        ('cash', _('Cash')),
+        ('bank_transfer', _('Bank Transfer')),
+        ('credit_card', _('Credit Card')),
+        ('debit_card', _('Debit Card')),
+        ('online_payment', _('Online Payment')),
+        ('cheque', _('Cheque')),
+        ('other', _('Other')),
+    )
+    
+    PAYMENT_STATUS_CHOICES = (
+        ('pending', _('Pending')),
+        ('processing', _('Processing')),
+        ('completed', _('Completed')),
+        ('failed', _('Failed')),
+        ('cancelled', _('Cancelled')),
+        ('refunded', _('Refunded')),
+    )
+    
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE,
+                               related_name='payments', verbose_name=_("Invoice"))
+    
+    # Payment Details
+    amount = models.DecimalField(_("Amount"), max_digits=12, decimal_places=2)
+    payment_method = models.CharField(_("Payment Method"), max_length=20, choices=PAYMENT_METHOD_CHOICES)
+    payment_status = models.CharField(_("Payment Status"), max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    
+    # Payment Information
+    transaction_reference = models.CharField(_("Transaction Reference"), max_length=100, blank=True)
+    payment_gateway = models.CharField(_("Payment Gateway"), max_length=50, blank=True)
+    gateway_transaction_id = models.CharField(_("Gateway Transaction ID"), max_length=100, blank=True)
+    
+    # Dates
+    payment_date = models.DateTimeField(_("Payment Date"), default=timezone.now)
+    processed_date = models.DateTimeField(_("Processed Date"), null=True, blank=True)
+    
+    # Additional Information
+    notes = models.TextField(_("Notes"), blank=True)
+    receipt_sent = models.BooleanField(_("Receipt Sent"), default=False)
+    
+    # Metadata
+    created_at = models.DateTimeField(_("Created At"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Updated At"), auto_now=True)
+    processed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                    null=True, blank=True, verbose_name=_("Processed By"))
+    
+    class Meta:
+        verbose_name = _("Payment")
+        verbose_name_plural = _("Payments")
+        ordering = ['-payment_date']
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        
+        # Update invoice payment status
+        if self.payment_status == 'completed':
+            self.invoice.mark_as_paid(self.amount)
+    
+    def __str__(self):
+        return f"Payment {self.amount} for {self.invoice.invoice_number}"
+    
+    def mark_as_completed(self, user=None):
+        """Mark payment as completed."""
+        self.payment_status = 'completed'
+        self.processed_date = timezone.now()
+        if user:
+            self.processed_by = user
+        self.save()
+
+class Expense(models.Model):
+    """Track business expenses."""
+    EXPENSE_TYPE_CHOICES = (
+        ('operational', _('Operational')),
+        ('marketing', _('Marketing')),
+        ('equipment', _('Equipment')),
+        ('supplies', _('Supplies')),
+        ('utilities', _('Utilities')),
+        ('travel', _('Travel')),
+        ('professional_services', _('Professional Services')),
+        ('other', _('Other')),
+    )
+    
+    # Basic Information
+    description = models.CharField(_("Description"), max_length=255)
+    amount = models.DecimalField(_("Amount"), max_digits=12, decimal_places=2)
+    expense_type = models.CharField(_("Expense Type"), max_length=30, choices=EXPENSE_TYPE_CHOICES)
+    category = models.ForeignKey(AccountingCategory, on_delete=models.SET_NULL,
+                                null=True, blank=True, verbose_name=_("Category"))
+    
+    # Vendor/Supplier Information
+    vendor_name = models.CharField(_("Vendor Name"), max_length=255, blank=True)
+    vendor_email = models.EmailField(_("Vendor Email"), blank=True)
+    vendor_phone = models.CharField(_("Vendor Phone"), max_length=20, blank=True)
+    
+    # Dates and Status
+    expense_date = models.DateField(_("Expense Date"), default=timezone.now)
+    is_approved = models.BooleanField(_("Approved"), default=False)
+    is_paid = models.BooleanField(_("Paid"), default=False)
+    payment_date = models.DateField(_("Payment Date"), null=True, blank=True)
+    
+    # Documentation
+    receipt_image = models.ImageField(_("Receipt Image"), upload_to='expenses/receipts/', blank=True, null=True)
+    invoice_file = models.FileField(_("Invoice File"), upload_to='expenses/invoices/', blank=True, null=True)
+    notes = models.TextField(_("Notes"), blank=True)
+    
+    # Metadata
+    created_at = models.DateTimeField(_("Created At"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Updated At"), auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                  null=True, verbose_name=_("Created By"))
+    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                   null=True, blank=True, related_name='approved_expenses', verbose_name=_("Approved By"))
+    
+    class Meta:
+        verbose_name = _("Expense")
+        verbose_name_plural = _("Expenses")
+        ordering = ['-expense_date']
+    
+    def __str__(self):
+        return f"{self.description} - QAR {self.amount}"
+    
+    def approve(self, user):
+        """Approve the expense."""
+        self.is_approved = True
+        self.approved_by = user
+        self.save()
+    
+    def mark_as_paid(self):
+        """Mark expense as paid."""
+        self.is_paid = True
+        self.payment_date = timezone.now().date()
+        self.save()

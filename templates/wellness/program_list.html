@@ -1,0 +1,142 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Wellness Programs - Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">{% trans "Home" %}</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'wellness:wellness_home' %}">{% trans "Wellness" %}</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{% trans "Programs" %}</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Program List Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="display-5 fw-bold">{% trans "Wellness Programs" %}</h1>
+                <p class="lead">{% trans "Find the perfect wellness program for your postpartum journey" %}</p>
+            </div>
+        </div>
+        
+        <!-- Search & Filter -->
+        <div class="row mb-4">
+            <div class="col-md-8 mb-3 mb-md-0">
+                <form method="get" action="{% url 'wellness:program_list' %}" class="d-flex">
+                    <input type="text" name="q" class="form-control me-2" placeholder="{% trans 'Search programs...' %}" value="{{ search_query }}">
+                    <button type="submit" class="btn btn-primary">{% trans "Search" %}</button>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" id="categoryFilter" onchange="location = this.value;">
+                    <option value="{% url 'wellness:program_list' %}">{% trans "All Categories" %}</option>
+                    {% for category in categories %}
+                    <option value="{% url 'wellness:program_list' %}?category={{ category.slug }}" {% if category.slug == selected_category %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <!-- Programs -->
+        <div class="row g-4">
+            {% for program in programs %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="{{ program.image.url }}" class="card-img-top" alt="{{ program.name }}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">{{ program.name }}</h5>
+                            {% if program.featured %}
+                            <span class="badge bg-primary">{% trans "Featured" %}</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-tag me-1"></i> {{ program.category.name }}
+                        </p>
+                        <p class="card-text">{{ program.short_description }}</p>
+                    </div>
+                    <div class="card-footer bg-white d-flex justify-content-between align-items-center border-top">
+                        <span class="text-muted">
+                            <i class="far fa-clock me-1"></i> {{ program.duration }} {% trans "mins" %}
+                        </span>
+                        <a href="{% url 'wellness:program_detail' program.slug %}" class="btn btn-sm btn-primary">{% trans "View Details" %}</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    {% if search_query or selected_category %}
+                    {% trans "No programs found matching your search criteria." %}
+                    {% else %}
+                    {% trans "No wellness programs available at the moment." %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

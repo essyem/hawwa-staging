@@ -1,0 +1,139 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Terms and Conditions - Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <h1 class="display-4 fw-bold mb-4">{% trans "Terms and Conditions" %}</h1>
+                <p class="lead mb-5">{% trans "Last updated: June 15, 2023" %}</p>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "1. Introduction" %}</h2>
+                        <p>{% trans "Welcome to Hawwa Postpartum Care ("Company", "we", "our", "us"). These Terms and Conditions govern your use of our website and services. By accessing or using our website or services, you agree to be bound by these Terms." %}</p>
+                        <p>{% trans "Please read these Terms carefully before using our platform. If you do not agree with any part of these terms, you may not access the website or use our services." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "2. Definitions" %}</h2>
+                        <ul>
+                            <li><strong>{% trans "Service" %}</strong>: {% trans "Refers to the Hawwa platform, website, and all postpartum care services offered." %}</li>
+                            <li><strong>{% trans "User" %}</strong>: {% trans "Refers to individuals who register on our platform, including mothers seeking care and service providers." %}</li>
+                            <li><strong>{% trans "Provider" %}</strong>: {% trans "Refers to accommodation providers, caretakers, wellness service providers, and other professionals offering services through our platform." %}</li>
+                            <li><strong>{% trans "Content" %}</strong>: {% trans "Refers to text, images, photos, audio, video, and all other forms of data or communication uploaded to our platform." %}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "3. Registration and Account" %}</h2>
+                        <p>{% trans "To use certain features of the Service, you must register for an account. When you register, you agree to provide accurate, current, and complete information about yourself." %}</p>
+                        <p>{% trans "You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to notify us immediately of any unauthorized use of your account." %}</p>
+                        <p>{% trans "We reserve the right to suspend or terminate your account if any information provided during registration or afterward proves to be inaccurate, false, or outdated." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "4. Service Usage and Booking" %}</h2>
+                        <p>{% trans "Our platform connects mothers with various postpartum care service providers. When booking services through our platform:" %}</p>
+                        <ul>
+                            <li>{% trans "Users agree to provide accurate information when booking services." %}</li>
+                            <li>{% trans "Users acknowledge that service availability is subject to provider schedules." %}</li>
+                            <li>{% trans "Cancellation policies vary by service type and provider, as specified at the time of booking." %}</li>
+                            <li>{% trans "While we vet our providers, we do not guarantee the quality or satisfaction with any particular service provider." %}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "5. Payments and Refunds" %}</h2>
+                        <p>{% trans "All payments are processed securely through our payment processors. By making a payment, you agree:" %}</p>
+                        <ul>
+                            <li>{% trans "To pay the specified amount for the selected service." %}</li>
+                            <li>{% trans "That you are authorized to use the payment method provided." %}</li>
+                            <li>{% trans "That refunds are subject to the specific cancellation policy associated with each service." %}</li>
+                            <li>{% trans "That we may charge applicable taxes in addition to the stated service price." %}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "6. Provider Terms" %}</h2>
+                        <p>{% trans "Service providers using our platform agree:" %}</p>
+                        <ul>
+                            <li>{% trans "To maintain all necessary licenses, certifications, and qualifications for their services." %}</li>
+                            <li>{% trans "To provide services in a professional manner consistent with industry standards." %}</li>
+                            <li>{% trans "To maintain appropriate insurance coverage for their services." %}</li>
+                            <li>{% trans "To adhere to appointment schedules and provide timely notification of any changes." %}</li>
+                            <li>{% trans "That Hawwa takes a service fee from each booking processed through the platform." %}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "7. User Content and Conduct" %}</h2>
+                        <p>{% trans "Users may post reviews, comments, and other content on our platform. You are solely responsible for the content you post and agree that it will comply with our community guidelines." %}</p>
+                        <p>{% trans "You agree not to post content that is illegal, fraudulent, deceptive, inaccurate, or misleading. We reserve the right to remove any content that violates these terms or that we find objectionable." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "8. Intellectual Property" %}</h2>
+                        <p>{% trans "The Service and its original content, features, and functionality are owned by Hawwa Postpartum Care and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws." %}</p>
+                        <p>{% trans "You retain ownership of any content you post on our platform, but grant us a non-exclusive, royalty-free license to use, reproduce, adapt, publish, and distribute such content." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "9. Limitation of Liability" %}</h2>
+                        <p>{% trans "To the maximum extent permitted by law, Hawwa Postpartum Care shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the Service." %}</p>
+                        <p>{% trans "We do not guarantee that our services will meet your requirements or that the service will be uninterrupted, timely, secure, or error-free." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "10. Changes to Terms" %}</h2>
+                        <p>{% trans "We reserve the right to modify these Terms at any time. We will provide notice of significant changes by posting the new Terms on our website and updating the "Last Updated" date." %}</p>
+                        <p>{% trans "Your continued use of the Service after any changes constitutes your acceptance of the new Terms." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "11. Governing Law" %}</h2>
+                        <p>{% trans "These Terms shall be governed by the laws of [Your Jurisdiction], without regard to its conflict of law provisions." %}</p>
+                        <p>{% trans "Any disputes arising under or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts located in [Your Jurisdiction]." %}</p>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">{% trans "12. Contact Us" %}</h2>
+                        <p>{% trans "If you have any questions about these Terms, please contact us at:" %}</p>
+                        <p>
+                            <strong>{% trans "Email" %}</strong>: legal@hawwa.com<br>
+                            <strong>{% trans "Phone" %}</strong>: +1 234 567 890<br>
+                            <strong>{% trans "Address" %}</strong>: 123 Main Street, City, Country
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

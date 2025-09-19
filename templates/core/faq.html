@@ -1,0 +1,541 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Frequently Asked Questions - Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-3">{% trans "Frequently Asked Questions" %}</h1>
+                <p class="lead">{% trans "Find answers to common questions about our postpartum care services" %}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <!-- FAQ Categories -->
+                <ul class="nav nav-pills mb-4 justify-content-center" id="faqTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="general-tab" data-bs-toggle="pill" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">{% trans "General" %}</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="services-tab" data-bs-toggle="pill" data-bs-target="#services" type="button" role="tab" aria-controls="services" aria-selected="false">{% trans "Services" %}</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="booking-tab" data-bs-toggle="pill" data-bs-target="#booking" type="button" role="tab" aria-controls="booking" aria-selected="false">{% trans "Booking" %}</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="providers-tab" data-bs-toggle="pill" data-bs-target="#providers" type="button" role="tab" aria-controls="providers" aria-selected="false">{% trans "For Providers" %}</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ai-buddy-tab" data-bs-toggle="pill" data-bs-target="#ai-buddy" type="button" role="tab" aria-controls="ai-buddy" aria-selected="false">{% trans "AI Buddy" %}</button>
+                    </li>
+                </ul>
+                
+                <!-- FAQ Content -->
+                <div class="tab-content" id="faqTabContent">
+                    <!-- General FAQs -->
+                    <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+                        <div class="accordion" id="accordionGeneral">
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingG1">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseG1" aria-expanded="true" aria-controls="collapseG1">
+                                        {% trans "What is Hawwa Postpartum Care?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseG1" class="accordion-collapse collapse show" aria-labelledby="headingG1" data-bs-parent="#accordionGeneral">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Hawwa Postpartum Care is a comprehensive platform that connects new mothers with a variety of postpartum care services. We offer retreat accommodations, home care services, wellness therapies, and nutritional support, all designed to help mothers recover and thrive during the postpartum period." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingG2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseG2" aria-expanded="false" aria-controls="collapseG2">
+                                        {% trans "How does Hawwa work?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseG2" class="accordion-collapse collapse" aria-labelledby="headingG2" data-bs-parent="#accordionGeneral">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Hawwa works by connecting mothers with qualified service providers based on their specific postpartum needs. Mothers can register on our platform, browse available services, book appointments with providers, and manage their postpartum care plan all in one place. Our platform ensures quality care by vetting all providers and facilitating secure payment and communication." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingG3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseG3" aria-expanded="false" aria-controls="collapseG3">
+                                        {% trans "Is Hawwa available in my area?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseG3" class="accordion-collapse collapse" aria-labelledby="headingG3" data-bs-parent="#accordionGeneral">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Hawwa currently operates in select cities and regions. To check if our services are available in your area, please enter your location on our website or contact our customer support team. We are continuously expanding our coverage to new locations based on demand and provider availability." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingG4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseG4" aria-expanded="false" aria-controls="collapseG4">
+                                        {% trans "How do I create an account?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseG4" class="accordion-collapse collapse" aria-labelledby="headingG4" data-bs-parent="#accordionGeneral">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Creating an account is simple. Click on the 'Register' button in the top right corner of our website. You'll need to provide basic information such as your name, email address, and create a password. After registering, you'll be prompted to complete your profile with additional details relevant to your postpartum needs or provider services." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingG5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseG5" aria-expanded="false" aria-controls="collapseG5">
+                                        {% trans "What if I have a question that's not answered here?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseG5" class="accordion-collapse collapse" aria-labelledby="headingG5" data-bs-parent="#accordionGeneral">
+                                    <div class="accordion-body">
+                                        <p>{% trans "If you have a question that's not addressed in our FAQ section, please don't hesitate to contact our customer support team. You can reach us through the Contact page on our website, by email at support@hawwa.com, or by phone at +1 234 567 890. Our team is available Monday through Friday from 9:00 AM to 6:00 PM." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Services FAQs -->
+                    <div class="tab-pane fade" id="services" role="tabpanel" aria-labelledby="services-tab">
+                        <div class="accordion" id="accordionServices">
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingS1">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS1" aria-expanded="true" aria-controls="collapseS1">
+                                        {% trans "What types of services does Hawwa offer?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseS1" class="accordion-collapse collapse show" aria-labelledby="headingS1" data-bs-parent="#accordionServices">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Hawwa offers a comprehensive range of postpartum care services including:" %}</p>
+                                        <ul>
+                                            <li>{% trans "Retreat Stays: Peaceful accommodations designed specifically for postpartum recovery" %}</li>
+                                            <li>{% trans "Home Care: In-home support from professional caretakers" %}</li>
+                                            <li>{% trans "Wellness Services: Massage therapy, meditation sessions, mental health counseling" %}</li>
+                                            <li>{% trans "Nutritional Support: Customized meal plans and prepared foods for postpartum recovery" %}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingS2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS2" aria-expanded="false" aria-controls="collapseS2">
+                                        {% trans "What are retreat stays?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseS2" class="accordion-collapse collapse" aria-labelledby="headingS2" data-bs-parent="#accordionServices">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Retreat stays are specialized accommodations designed for postpartum recovery. These retreats provide a peaceful, supportive environment where new mothers and their babies can rest and recover with 24/7 professional support. Facilities typically include comfortable private rooms, on-call caretakers, nutritious meals, and access to wellness services. Stays can range from a few days to several weeks, depending on the mother's needs and preferences." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingS3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS3" aria-expanded="false" aria-controls="collapseS3">
+                                        {% trans "What kind of home care services are available?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseS3" class="accordion-collapse collapse" aria-labelledby="headingS3" data-bs-parent="#accordionServices">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Our home care services include:" %}</p>
+                                        <ul>
+                                            <li>{% trans "Postpartum doula support" %}</li>
+                                            <li>{% trans "Newborn care assistance" %}</li>
+                                            <li>{% trans "Light housekeeping" %}</li>
+                                            <li>{% trans "Meal preparation" %}</li>
+                                            <li>{% trans "Overnight support" %}</li>
+                                            <li>{% trans "Breastfeeding guidance" %}</li>
+                                        </ul>
+                                        <p>{% trans "All home care providers are thoroughly vetted, trained, and experienced in postpartum care." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingS4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS4" aria-expanded="false" aria-controls="collapseS4">
+                                        {% trans "What wellness services do you offer?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseS4" class="accordion-collapse collapse" aria-labelledby="headingS4" data-bs-parent="#accordionServices">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Our wellness services include a variety of therapeutic treatments designed to support physical and emotional recovery after childbirth:" %}</p>
+                                        <ul>
+                                            <li>{% trans "Postnatal massage" %}</li>
+                                            <li>{% trans "Meditation and mindfulness sessions" %}</li>
+                                            <li>{% trans "Mental health counseling" %}</li>
+                                            <li>{% trans "Yoga for postpartum recovery" %}</li>
+                                            <li>{% trans "Physical therapy specialized for postpartum bodies" %}</li>
+                                            <li>{% trans "Acupuncture and traditional healing practices" %}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingS5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS5" aria-expanded="false" aria-controls="collapseS5">
+                                        {% trans "Tell me more about the nutritional support services." %}
+                                    </button>
+                                </h2>
+                                <div id="collapseS5" class="accordion-collapse collapse" aria-labelledby="headingS5" data-bs-parent="#accordionServices">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Our nutritional support services are designed to provide nourishing, healing foods for postpartum recovery and to support breastfeeding. These services include:" %}</p>
+                                        <ul>
+                                            <li>{% trans "Personalized meal planning with nutritionists specialized in postpartum nutrition" %}</li>
+                                            <li>{% trans "Prepared meal delivery services with options tailored to postpartum recovery" %}</li>
+                                            <li>{% trans "Lactation-supporting food and beverage options" %}</li>
+                                            <li>{% trans "Dietary consultation for specific postpartum needs or restrictions" %}</li>
+                                            <li>{% trans "Traditional postpartum recipes from various cultural traditions" %}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Booking FAQs -->
+                    <div class="tab-pane fade" id="booking" role="tabpanel" aria-labelledby="booking-tab">
+                        <div class="accordion" id="accordionBooking">
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingB1">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseB1" aria-expanded="true" aria-controls="collapseB1">
+                                        {% trans "How do I book a service?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseB1" class="accordion-collapse collapse show" aria-labelledby="headingB1" data-bs-parent="#accordionBooking">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Booking a service is easy:" %}</p>
+                                        <ol>
+                                            <li>{% trans "Create an account or log in to your existing account" %}</li>
+                                            <li>{% trans "Browse available services in your area" %}</li>
+                                            <li>{% trans "Select the service you're interested in" %}</li>
+                                            <li>{% trans "Choose your preferred dates, times, and provider (if applicable)" %}</li>
+                                            <li>{% trans "Review the details and complete the booking by making a payment" %}</li>
+                                            <li>{% trans "You'll receive a confirmation email with all the details of your booking" %}</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingB2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseB2" aria-expanded="false" aria-controls="collapseB2">
+                                        {% trans "How far in advance should I book services?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseB2" class="accordion-collapse collapse" aria-labelledby="headingB2" data-bs-parent="#accordionBooking">
+                                    <div class="accordion-body">
+                                        <p>{% trans "We recommend booking services as early as possible, especially for retreat stays and specialized services, which can fill up quickly. Ideally:" %}</p>
+                                        <ul>
+                                            <li>{% trans "Retreat stays: 2-3 months in advance" %}</li>
+                                            <li>{% trans "Home care services: 1-2 months in advance" %}</li>
+                                            <li>{% trans "Wellness services: 1-2 weeks in advance" %}</li>
+                                            <li>{% trans "Nutritional services: 1 week in advance" %}</li>
+                                        </ul>
+                                        <p>{% trans "However, we understand that postpartum needs can be unpredictable, so we do our best to accommodate last-minute bookings when possible." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingB3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseB3" aria-expanded="false" aria-controls="collapseB3">
+                                        {% trans "What is your cancellation policy?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseB3" class="accordion-collapse collapse" aria-labelledby="headingB3" data-bs-parent="#accordionBooking">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Our cancellation policy varies depending on the service:" %}</p>
+                                        <ul>
+                                            <li>{% trans "Retreat stays: Full refund if cancelled 7+ days in advance; 50% refund if cancelled 3-7 days in advance; no refund for cancellations less than 3 days in advance" %}</li>
+                                            <li>{% trans "Home care services: Full refund if cancelled 48+ hours in advance; 50% refund if cancelled 24-48 hours in advance; no refund for cancellations less than 24 hours in advance" %}</li>
+                                            <li>{% trans "Wellness services: Full refund if cancelled 24+ hours in advance; no refund for cancellations less than 24 hours in advance" %}</li>
+                                            <li>{% trans "Nutritional services: Full refund if cancelled before preparation begins (typically 48 hours); no refund once food preparation has started" %}</li>
+                                        </ul>
+                                        <p>{% trans "We understand that postpartum circumstances can be unpredictable. In cases of medical necessity, please contact our customer service team for special consideration." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingB4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseB4" aria-expanded="false" aria-controls="collapseB4">
+                                        {% trans "How do I pay for services?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseB4" class="accordion-collapse collapse" aria-labelledby="headingB4" data-bs-parent="#accordionBooking">
+                                    <div class="accordion-body">
+                                        <p>{% trans "We accept several payment methods:" %}</p>
+                                        <ul>
+                                            <li>{% trans "Credit/debit cards (Visa, MasterCard, American Express)" %}</li>
+                                            <li>{% trans "PayPal" %}</li>
+                                            <li>{% trans "Bank transfers" %}</li>
+                                            <li>{% trans "Health savings accounts (HSA) for eligible services" %}</li>
+                                        </ul>
+                                        <p>{% trans "Payment is processed securely at the time of booking. For ongoing services, you may choose to save your payment method for automatic billing." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingB5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseB5" aria-expanded="false" aria-controls="collapseB5">
+                                        {% trans "Can I reschedule a service I've already booked?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseB5" class="accordion-collapse collapse" aria-labelledby="headingB5" data-bs-parent="#accordionBooking">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Yes, you can reschedule most services. To reschedule:" %}</p>
+                                        <ol>
+                                            <li>{% trans "Log in to your account" %}</li>
+                                            <li>{% trans "Go to 'My Bookings'" %}</li>
+                                            <li>{% trans "Select the booking you wish to change" %}</li>
+                                            <li>{% trans "Click on 'Reschedule' and select new dates/times" %}</li>
+                                        </ol>
+                                        <p>{% trans "Please note that rescheduling is subject to provider availability and must be done within the timeframe specified by our rescheduling policy (typically 48 hours before the original appointment for most services)." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Provider FAQs -->
+                    <div class="tab-pane fade" id="providers" role="tabpanel" aria-labelledby="providers-tab">
+                        <div class="accordion" id="accordionProviders">
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingP1">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseP1" aria-expanded="true" aria-controls="collapseP1">
+                                        {% trans "How do I become a service provider on Hawwa?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseP1" class="accordion-collapse collapse show" aria-labelledby="headingP1" data-bs-parent="#accordionProviders">
+                                    <div class="accordion-body">
+                                        <p>{% trans "To become a service provider on our platform:" %}</p>
+                                        <ol>
+                                            <li>{% trans "Register for a provider account on our website" %}</li>
+                                            <li>{% trans "Complete your profile with your professional credentials, experience, and services offered" %}</li>
+                                            <li>{% trans "Submit required documentation (certifications, licenses, insurance, etc.)" %}</li>
+                                            <li>{% trans "Pass our verification process, which may include background checks and interviews" %}</li>
+                                            <li>{% trans "Once approved, set up your availability calendar and service offerings" %}</li>
+                                            <li>{% trans "Start receiving booking requests from clients" %}</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingP2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseP2" aria-expanded="false" aria-controls="collapseP2">
+                                        {% trans "What types of providers do you accept?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseP2" class="accordion-collapse collapse" aria-labelledby="headingP2" data-bs-parent="#accordionProviders">
+                                    <div class="accordion-body">
+                                        <p>{% trans "We accept a variety of postpartum care professionals, including:" %}</p>
+                                        <ul>
+                                            <li>{% trans "Accommodation providers with suitable postpartum facilities" %}</li>
+                                            <li>{% trans "Postpartum doulas and caretakers" %}</li>
+                                            <li>{% trans "Massage therapists with postpartum specialization" %}</li>
+                                            <li>{% trans "Meditation and mindfulness instructors" %}</li>
+                                            <li>{% trans "Mental health professionals (psychologists, counselors, therapists)" %}</li>
+                                            <li>{% trans "Nutritionists and meal service providers" %}</li>
+                                            <li>{% trans "Lactation consultants" %}</li>
+                                            <li>{% trans "Physical therapists specializing in postpartum recovery" %}</li>
+                                        </ul>
+                                        <p>{% trans "All providers must have appropriate qualifications, experience, and insurance for their field." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingP3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseP3" aria-expanded="false" aria-controls="collapseP3">
+                                        {% trans "How does payment work for providers?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseP3" class="accordion-collapse collapse" aria-labelledby="headingP3" data-bs-parent="#accordionProviders">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Our payment process for providers is straightforward:" %}</p>
+                                        <ol>
+                                            <li>{% trans "Clients pay for services through our platform at the time of booking" %}</li>
+                                            <li>{% trans "After the service is completed, the payment is released to you (minus our service fee)" %}</li>
+                                            <li>{% trans "Payments are transferred to your preferred payment method (bank account, PayPal, etc.)" %}</li>
+                                            <li>{% trans "Payment transfers typically process within 1-3 business days after service completion" %}</li>
+                                        </ol>
+                                        <p>{% trans "Our service fee is transparent and is disclosed during the provider registration process." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingP4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseP4" aria-expanded="false" aria-controls="collapseP4">
+                                        {% trans "Can I set my own schedule and prices?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseP4" class="accordion-collapse collapse" aria-labelledby="headingP4" data-bs-parent="#accordionProviders">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Yes, as a provider on our platform, you have control over:" %}</p>
+                                        <ul>
+                                            <li>{% trans "Your availability (days, hours, and specific times)" %}</li>
+                                            <li>{% trans "Your service rates (within reasonable market ranges)" %}</li>
+                                            <li>{% trans "The specific services you offer" %}</li>
+                                            <li>{% trans "Your service area or location" %}</li>
+                                        </ul>
+                                        <p>{% trans "You can update this information at any time through your provider dashboard. However, please note that price changes will not affect already booked appointments." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingP5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseP5" aria-expanded="false" aria-controls="collapseP5">
+                                        {% trans "What support does Hawwa offer to providers?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseP5" class="accordion-collapse collapse" aria-labelledby="headingP5" data-bs-parent="#accordionProviders">
+                                    <div class="accordion-body">
+                                        <p>{% trans "We offer comprehensive support to our providers:" %}</p>
+                                        <ul>
+                                            <li>{% trans "Marketing and client acquisition through our platform" %}</li>
+                                            <li>{% trans "Streamlined booking and payment processing" %}</li>
+                                            <li>{% trans "Dedicated provider support team" %}</li>
+                                            <li>{% trans "Professional development opportunities and resources" %}</li>
+                                            <li>{% trans "Community forum to connect with other postpartum care professionals" %}</li>
+                                            <li>{% trans "Liability protection through our terms of service" %}</li>
+                                            <li>{% trans "Regular feedback and quality improvement systems" %}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Buddy FAQs -->
+                    <div class="tab-pane fade" id="ai-buddy" role="tabpanel" aria-labelledby="ai-buddy-tab">
+                        <div class="accordion" id="accordionAIBuddy">
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingA1">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseA1" aria-expanded="true" aria-controls="collapseA1">
+                                        {% trans "What is the AI Buddy feature?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseA1" class="accordion-collapse collapse show" aria-labelledby="headingA1" data-bs-parent="#accordionAIBuddy">
+                                    <div class="accordion-body">
+                                        <p>{% trans "AI Buddy is a personal assistant powered by artificial intelligence that provides support and information throughout your pregnancy and postpartum journey. It offers:" %}</p>
+                                        <ul>
+                                            <li>{% trans "24/7 answers to common questions about pregnancy and postpartum recovery" %}</li>
+                                            <li>{% trans "Personalized recommendations based on your stage of pregnancy or postpartum recovery" %}</li>
+                                            <li>{% trans "Symptom tracking and analysis" %}</li>
+                                            <li>{% trans "Reminders for important milestones and appointments" %}</li>
+                                            <li>{% trans "Connection to appropriate care providers when needed" %}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingA2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseA2" aria-expanded="false" aria-controls="collapseA2">
+                                        {% trans "Is the AI Buddy medically accurate?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseA2" class="accordion-collapse collapse" aria-labelledby="headingA2" data-bs-parent="#accordionAIBuddy">
+                                    <div class="accordion-body">
+                                        <p>{% trans "AI Buddy is designed to provide generally reliable information based on current medical knowledge and best practices in maternal and postpartum care. The information is reviewed by our team of healthcare professionals." %}</p>
+                                        <p>{% trans "However, AI Buddy is not a substitute for professional medical advice, diagnosis, or treatment. It should be used as a supplementary resource only. For any medical concerns, please consult with a qualified healthcare provider." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingA3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseA3" aria-expanded="false" aria-controls="collapseA3">
+                                        {% trans "How do I access the AI Buddy?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseA3" class="accordion-collapse collapse" aria-labelledby="headingA3" data-bs-parent="#accordionAIBuddy">
+                                    <div class="accordion-body">
+                                        <p>{% trans "You can access AI Buddy through:" %}</p>
+                                        <ul>
+                                            <li>{% trans "Our website: Log in to your account and click on the 'AI Buddy' tab" %}</li>
+                                            <li>{% trans "Our mobile app: Download the Hawwa app and access AI Buddy from the main menu" %}</li>
+                                            <li>{% trans "Text message: Enable SMS integration in your profile settings" %}</li>
+                                        </ul>
+                                        <p>{% trans "AI Buddy is available to all registered users. Some advanced features may require a premium subscription." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingA4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseA4" aria-expanded="false" aria-controls="collapseA4">
+                                        {% trans "Is my data secure when using AI Buddy?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseA4" class="accordion-collapse collapse" aria-labelledby="headingA4" data-bs-parent="#accordionAIBuddy">
+                                    <div class="accordion-body">
+                                        <p>{% trans "Yes, we take data security and privacy seriously:" %}</p>
+                                        <ul>
+                                            <li>{% trans "All conversations with AI Buddy are encrypted" %}</li>
+                                            <li>{% trans "Your personal health information is protected according to relevant data protection laws" %}</li>
+                                            <li>{% trans "We do not share your individual data with third parties without your consent" %}</li>
+                                            <li>{% trans "We use anonymized data to improve the AI Buddy service" %}</li>
+                                        </ul>
+                                        <p>{% trans "You can review our full Privacy Policy for more details on how we handle your data." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 rounded shadow-sm">
+                                <h2 class="accordion-header" id="headingA5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseA5" aria-expanded="false" aria-controls="collapseA5">
+                                        {% trans "What should I do if AI Buddy can't answer my question?" %}
+                                    </button>
+                                </h2>
+                                <div id="collapseA5" class="accordion-collapse collapse" aria-labelledby="headingA5" data-bs-parent="#accordionAIBuddy">
+                                    <div class="accordion-body">
+                                        <p>{% trans "If AI Buddy can't provide a satisfactory answer to your question:" %}</p>
+                                        <ol>
+                                            <li>{% trans "Try rephrasing your question for clarity" %}</li>
+                                            <li>{% trans "Use the 'Connect with Human' option to be directed to our customer support team" %}</li>
+                                            <li>{% trans "For medical questions, use the 'Find Provider' feature to connect with an appropriate healthcare professional" %}</li>
+                                            <li>{% trans "For urgent concerns, always contact your healthcare provider directly or emergency services if needed" %}</li>
+                                        </ol>
+                                        <p>{% trans "We continuously improve AI Buddy based on user interactions, so your feedback helps make it better for everyone." %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Still Have Questions -->
+                <div class="text-center mt-5">
+                    <h3>{% trans "Still Have Questions?" %}</h3>
+                    <p>{% trans "Contact our support team for personalized assistance." %}</p>
+                    <a href="{% url 'core:contact' %}" class="btn btn-primary">{% trans "Contact Us" %}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

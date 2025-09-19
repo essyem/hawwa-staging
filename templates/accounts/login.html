@@ -1,0 +1,111 @@
+{% extends "base/base.html" %}
+{% load i18n %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "Login" %} | Hawwa Postpartum Care{% endblock %}
+
+{% block content %}
+<!-- Hero Login Section -->
+<section class="hero-section py-5 text-center bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 text-md-start">
+                <h1 class="display-4 fw-bold mb-4">{% trans "Welcome Back" %}</h1>
+                <p class="lead mb-4">{% trans "Continue your postpartum wellness journey with Hawwa. Access your personalized care plan and connect with our support community." %}</p>
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span>{% trans "Access your AI Buddy" %}</span>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span>{% trans "View your bookings" %}</span>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span>{% trans "Track your wellness progress" %}</span>
+                </div>
+            </div>
+            <div class="col-md-6 mt-4 mt-md-0">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-primary text-white text-center py-3">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-sign-in-alt me-2"></i>{% trans "Sign In to Your Account" %}
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="remember_me" id="remember_me">
+                                <label class="form-check-label" for="remember_me">
+                                    {% trans "Remember me" %}
+                                </label>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-sign-in-alt me-2"></i>{% trans "Sign In" %}
+                                </button>
+                            </div>
+                            
+                            <div class="text-center mt-3">
+                                <a href="#" class="text-decoration-none">{% trans "Forgot your password?" %}</a>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer bg-light text-center">
+                        <p class="mb-0">{% trans "Don't have an account?" %} 
+                            <a href="{% url 'accounts:register' %}" class="text-decoration-none fw-bold">{% trans "Join Hawwa" %}</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Access Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">{% trans "What You Can Do After Signing In" %}</h2>
+            <p class="lead">{% trans "Your personalized postpartum wellness dashboard awaits" %}</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="fas fa-robot text-white fa-2x"></i>
+                    </div>
+                    <h3>{% trans "Chat with AI Buddy" %}</h3>
+                    <p>{% trans "Get instant answers to your postpartum questions and receive personalized wellness tips." %}</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="fas fa-calendar-check text-white fa-2x"></i>
+                    </div>
+                    <h3>{% trans "Manage Bookings" %}</h3>
+                    <p>{% trans "View, modify, or book new services that support your postpartum recovery journey." %}</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="fas fa-chart-line text-white fa-2x"></i>
+                    </div>
+                    <h3>{% trans "Track Progress" %}</h3>
+                    <p>{% trans "Monitor your wellness goals and see how your recovery is progressing over time." %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

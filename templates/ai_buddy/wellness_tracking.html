@@ -1,0 +1,531 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Wellness Tracking - AI Buddy{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wellness-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .wellness-card {
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+    }
+    
+    .wellness-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .metric-card {
+        background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .metric-value {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .metric-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    
+    .mood-scale {
+        display: flex;
+        justify-content: space-between;
+        margin: 1rem 0;
+    }
+    
+    .mood-item {
+        text-align: center;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        flex: 1;
+        margin: 0 0.25rem;
+    }
+    
+    .mood-item:hover {
+        background: #e9ecef;
+    }
+    
+    .mood-item.selected {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+    }
+    
+    .mood-emoji {
+        font-size: 2rem;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+    
+    .wellness-log-form {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 2rem;
+    }
+    
+    .wellness-history {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .history-item {
+        border-left: 4px solid #667eea;
+        background: white;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 0 10px 10px 0;
+    }
+    
+    .recommendations-card {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .recommendation-item {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #ff7875;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wellness-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-3">
+                    <i class="fas fa-heart me-3"></i>
+                    Wellness Tracking
+                </h1>
+                <p class="lead mb-0">
+                    Monitor your daily wellness, track your progress, and receive personalized recommendations 
+                    for your postpartum journey.
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'ai_buddy:home' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Back to AI Buddy
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Wellness Metrics Overview -->
+        <div class="col-md-3 mb-4">
+            <div class="metric-card">
+                <div class="metric-value">{{ wellness_stats.mood_avg|floatformat:1 }}</div>
+                <div class="metric-label">Average Mood</div>
+                <small class="opacity-75">out of 10</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="metric-card" style="background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="metric-value">{{ wellness_stats.energy_avg|floatformat:1 }}</div>
+                <div class="metric-label">Average Energy</div>
+                <small class="opacity-75">out of 10</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="metric-card" style="background: linear-gradient(45deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="metric-value">{{ wellness_stats.sleep_hours|floatformat:1 }}</div>
+                <div class="metric-label">Avg Sleep Hours</div>
+                <small class="opacity-75">per night</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="metric-card" style="background: linear-gradient(45deg, #fa709a 0%, #fee140 100%);">
+                <div class="metric-value">{{ wellness_stats.total_entries }}</div>
+                <div class="metric-label">Total Entries</div>
+                <small class="opacity-75">logged</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Wellness Logging Form -->
+        <div class="col-md-6 mb-4">
+            <div class="wellness-card card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus-circle text-primary me-2"></i>
+                        Log Today's Wellness
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="wellnessForm" class="wellness-log-form">
+                        {% csrf_token %}
+                        
+                        <!-- Mood Scale -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">How is your mood today?</label>
+                            <div class="mood-scale" id="moodScale">
+                                <div class="mood-item" data-value="1">
+                                    <span class="mood-emoji">😢</span>
+                                    <small>Very Low</small>
+                                </div>
+                                <div class="mood-item" data-value="3">
+                                    <span class="mood-emoji">😕</span>
+                                    <small>Low</small>
+                                </div>
+                                <div class="mood-item" data-value="5">
+                                    <span class="mood-emoji">😐</span>
+                                    <small>Okay</small>
+                                </div>
+                                <div class="mood-item" data-value="7">
+                                    <span class="mood-emoji">😊</span>
+                                    <small>Good</small>
+                                </div>
+                                <div class="mood-item" data-value="10">
+                                    <span class="mood-emoji">😄</span>
+                                    <small>Excellent</small>
+                                </div>
+                            </div>
+                            <input type="hidden" id="moodValue" name="mood_scale">
+                        </div>
+                        
+                        <!-- Energy Level -->
+                        <div class="mb-4">
+                            <label for="energyLevel" class="form-label fw-bold">Energy Level (1-10)</label>
+                            <input type="range" class="form-range" id="energyLevel" name="energy_level" 
+                                   min="1" max="10" value="5">
+                            <div class="d-flex justify-content-between text-muted small">
+                                <span>Very Tired</span>
+                                <span id="energyValue">5</span>
+                                <span>Very Energetic</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Sleep Hours -->
+                        <div class="mb-4">
+                            <label for="sleepHours" class="form-label fw-bold">Hours of Sleep Last Night</label>
+                            <input type="number" class="form-control" id="sleepHours" name="sleep_hours" 
+                                   min="0" max="12" step="0.5" placeholder="e.g., 7.5">
+                        </div>
+                        
+                        <!-- Physical Symptoms -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Physical Symptoms (check all that apply)</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="fatigue" id="symptom1">
+                                        <label class="form-check-label" for="symptom1">Fatigue</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="headache" id="symptom2">
+                                        <label class="form-check-label" for="symptom2">Headache</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="body_aches" id="symptom3">
+                                        <label class="form-check-label" for="symptom3">Body Aches</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="nausea" id="symptom4">
+                                        <label class="form-check-label" for="symptom4">Nausea</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="breast_pain" id="symptom5">
+                                        <label class="form-check-label" for="symptom5">Breast Pain</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="none" id="symptom6">
+                                        <label class="form-check-label" for="symptom6">None</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label for="notes" class="form-label fw-bold">Notes (optional)</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                      placeholder="How are you feeling? Any concerns or highlights from today?"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-save me-2"></i>
+                            Save Wellness Entry
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Wellness History -->
+        <div class="col-md-6 mb-4">
+            <div class="wellness-card card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history text-success me-2"></i>
+                        Recent Wellness History
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="wellness-history">
+                        {% if wellness_entries %}
+                            {% for entry in wellness_entries %}
+                            <div class="history-item">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">
+                                            {% if entry.mood_scale >= 8 %}😄
+                                            {% elif entry.mood_scale >= 6 %}😊
+                                            {% elif entry.mood_scale >= 4 %}😐
+                                            {% elif entry.mood_scale >= 2 %}😕
+                                            {% else %}😢
+                                            {% endif %}
+                                        </span>
+                                        <div>
+                                            <strong>{{ entry.date|date:"M d, Y" }}</strong>
+                                            <small class="text-muted d-block">
+                                                {{ entry.date|timesince }} ago
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted">Mood: {{ entry.mood_scale }}/10</small>
+                                    </div>
+                                </div>
+                                <div class="row text-center mb-2">
+                                    <div class="col-4">
+                                        <small class="text-muted">Energy</small>
+                                        <div class="fw-bold">{{ entry.energy_level }}/10</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted">Sleep</small>
+                                        <div class="fw-bold">{{ entry.sleep_hours }}h</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted">Symptoms</small>
+                                        <div class="fw-bold">
+                                            {% if entry.physical_symptoms %}
+                                                {{ entry.physical_symptoms|length }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if entry.notes %}
+                                <p class="mb-0 small text-muted">
+                                    <i class="fas fa-quote-left me-1"></i>
+                                    {{ entry.notes|truncatechars:100 }}
+                                </p>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">No wellness entries yet</h6>
+                                <p class="text-muted">Start tracking your wellness to see your progress!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Personalized Recommendations -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card recommendations-card">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        Personalized Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="recommendationsContainer">
+                        {% if recommendations %}
+                            {% for recommendation in recommendations %}
+                            <div class="recommendation-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ recommendation.title }}</h6>
+                                        <p class="mb-2">{{ recommendation.description }}</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-tag me-1"></i>
+                                            {{ recommendation.category|title }} • 
+                                            Priority: {{ recommendation.priority|title }}
+                                        </small>
+                                    </div>
+                                    <small class="text-muted">{{ recommendation.created_at|timesince }} ago</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-3">
+                                <i class="fas fa-lightbulb fa-2x text-muted mb-2"></i>
+                                <p class="text-muted mb-0">Log your wellness to get personalized recommendations!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <button class="btn btn-outline-primary" id="getRecommendationsBtn">
+                            <i class="fas fa-refresh me-2"></i>
+                            Get New Recommendations
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const moodScale = document.getElementById('moodScale');
+    const moodValue = document.getElementById('moodValue');
+    const energyLevel = document.getElementById('energyLevel');
+    const energyValueDisplay = document.getElementById('energyValue');
+    const wellnessForm = document.getElementById('wellnessForm');
+    const getRecommendationsBtn = document.getElementById('getRecommendationsBtn');
+    
+    // Mood scale selection
+    moodScale.addEventListener('click', function(e) {
+        const moodItem = e.target.closest('.mood-item');
+        if (moodItem) {
+            // Remove previous selection
+            moodScale.querySelectorAll('.mood-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Add selection to clicked item
+            moodItem.classList.add('selected');
+            moodValue.value = moodItem.dataset.value;
+        }
+    });
+    
+    // Energy level slider
+    energyLevel.addEventListener('input', function() {
+        energyValueDisplay.textContent = this.value;
+    });
+    
+    // Form submission
+    wellnessForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Validate mood selection
+        if (!moodValue.value) {
+            alert('Please select your mood level.');
+            return;
+        }
+        
+        // Collect physical symptoms
+        const symptoms = [];
+        document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+            symptoms.push(checkbox.value);
+        });
+        
+        // Prepare data
+        const formData = {
+            mood_scale: parseInt(moodValue.value),
+            energy_level: parseInt(energyLevel.value),
+            sleep_hours: parseFloat(document.getElementById('sleepHours').value) || 8,
+            physical_symptoms: symptoms,
+            notes: document.getElementById('notes').value.trim()
+        };
+        
+        // Submit to server
+        fetch('{% url "ai_buddy:log_wellness" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Wellness entry saved successfully!');
+                
+                // Reset form
+                wellnessForm.reset();
+                moodScale.querySelectorAll('.mood-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                moodValue.value = '';
+                energyLevel.value = 5;
+                energyValueDisplay.textContent = '5';
+                
+                // Refresh page to show new entry
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                alert('Error saving wellness entry: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error saving wellness entry. Please try again.');
+        });
+    });
+    
+    // Get new recommendations
+    getRecommendationsBtn.addEventListener('click', function() {
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+        
+        fetch('{% url "ai_buddy:get_recommendations" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Refresh page to show new recommendations
+                window.location.reload();
+            } else {
+                alert('Error generating recommendations: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error generating recommendations. Please try again.');
+        })
+        .finally(() => {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-refresh me-2"></i>Get New Recommendations';
+        });
+    });
+});
+</script>
+{% endblock %}

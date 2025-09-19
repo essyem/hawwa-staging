@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Manage Services - HAWWA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .service-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .service-card:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    .service-status {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+    .add-service-card {
+        border: 2px dashed #8D1538;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 250px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .add-service-card:hover {
+        background: #e7f3ff;
+        border-color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-0">
+                <i class="fas fa-concierge-bell text-primary"></i>
+                Manage Services
+            </h1>
+            <p class="text-muted mb-0">Manage your service offerings</p>
+        </div>
+        <div>
+            <a href="{% url 'vendors:dashboard' %}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                <i class="fas fa-plus"></i> Add New Service
+            </button>
+        </div>
+    </div>
+
+    <!-- Services Grid -->
+    <div class="row">
+        <!-- Add New Service Card -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="add-service-card" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                <div class="text-center">
+                    <i class="fas fa-plus fa-3x text-primary mb-3"></i>
+                    <h5 class="text-primary">Add New Service</h5>
+                    <p class="text-muted">Create a new service offering</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Existing Services -->
+        {% for service in vendor_services %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card service-card">
+                <span class="service-status">
+                    <span class="badge bg-{% if service.status == 'active' %}success{% elif service.status == 'draft' %}warning{% else %}danger{% endif %}">
+                        {{ service.get_status_display|default:"Active" }}
+                    </span>
+                </span>
+                
+                {% if service.image %}
+                <img src="{{ service.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ service.name }}">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="fas fa-spa fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <h5 class="card-title">{{ service.name }}</h5>
+                    <p class="card-text text-muted">{{ service.short_description|truncatechars:100 }}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <span class="text-success h5 mb-0">{{ service.price|floatformat:0 }} QAR</span>
+                            <small class="text-muted d-block">{{ service.duration }} minutes</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">Category</small>
+                            <div>{{ service.category.name|default:"Wellness" }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <div class="btn-group">
+                            <button class="btn btn-outline-primary btn-sm" 
+                                    onclick="editService({{ service.id }})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-outline-info btn-sm"
+                                    onclick="viewBookings({{ service.id }})">
+                                <i class="fas fa-calendar"></i> Bookings
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm"
+                                    onclick="toggleService({{ service.id }})">
+                                <i class="fas fa-{% if service.status == 'active' %}pause{% else %}play{% endif %}"></i>
+                                {% if service.status == 'active' %}Pause{% else %}Activate{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-concierge-bell fa-4x text-muted mb-4"></i>
+                <h4 class="text-muted">No services yet</h4>
+                <p class="text-muted mb-4">Create your first service to start receiving bookings</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                    <i class="fas fa-plus"></i> Add Your First Service
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add Service Modal -->
+<div class="modal fade" id="addServiceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="serviceName" class="form-label">Service Name *</label>
+                                <input type="text" class="form-control" id="serviceName" name="name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="serviceCategory" class="form-label">Category *</label>
+                                <select class="form-select" id="serviceCategory" name="category" required>
+                                    <option value="">Select Category</option>
+                                    <option value="accommodation">Accommodation</option>
+                                    <option value="caretaker">Caretaker Services</option>
+                                    <option value="wellness">Wellness & Spa</option>
+                                    <option value="nutrition">Nutrition & Diet</option>
+                                    <option value="medical">Medical Support</option>
+                                    <option value="education">Education & Classes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="servicePrice" class="form-label">Price (QAR) *</label>
+                                <input type="number" class="form-control" id="servicePrice" name="price" min="0" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="serviceDuration" class="form-label">Duration (minutes) *</label>
+                                <input type="number" class="form-control" id="serviceDuration" name="duration" min="15" step="15" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="serviceDescription" class="form-label">Short Description *</label>
+                        <textarea class="form-control" id="serviceDescription" name="short_description" rows="3" maxlength="200" required></textarea>
+                        <div class="form-text">Maximum 200 characters</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="serviceFullDescription" class="form-label">Full Description</label>
+                        <textarea class="form-control" id="serviceFullDescription" name="description" rows="5"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="serviceImage" class="form-label">Service Image</label>
+                        <input type="file" class="form-control" id="serviceImage" name="image" accept="image/*">
+                        <div class="form-text">Upload a representative image for your service</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="serviceStatus" class="form-label">Status</label>
+                                <select class="form-select" id="serviceStatus" name="status">
+                                    <option value="draft">Draft (Not visible to clients)</option>
+                                    <option value="active" selected>Active (Visible to clients)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="serviceLocation" class="form-label">Service Location</label>
+                                <select class="form-select" id="serviceLocation" name="location_type">
+                                    <option value="vendor_location">At our location</option>
+                                    <option value="client_location">At client's location</option>
+                                    <option value="both">Both locations available</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Create Service
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function editService(serviceId) {
+    // Navigate to edit service page
+    window.location.href = `/vendors/services/${serviceId}/edit/`;
+}
+
+function viewBookings(serviceId) {
+    // Navigate to service bookings
+    window.location.href = `/vendors/bookings/?service=${serviceId}`;
+}
+
+function toggleService(serviceId) {
+    if (confirm('Are you sure you want to change the status of this service?')) {
+        // AJAX call to toggle service status
+        fetch(`/vendors/services/${serviceId}/toggle/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating service status');
+            }
+        });
+    }
+}
+
+// Character counter for description
+document.getElementById('serviceDescription').addEventListener('input', function() {
+    const maxLength = 200;
+    const currentLength = this.value.length;
+    const remaining = maxLength - currentLength;
+    
+    // Update form text
+    const formText = this.nextElementSibling;
+    formText.textContent = `${remaining} characters remaining`;
+    
+    if (remaining < 20) {
+        formText.classList.add('text-warning');
+    } else {
+        formText.classList.remove('text-warning');
+    }
+});
+</script>
+{% endblock %}

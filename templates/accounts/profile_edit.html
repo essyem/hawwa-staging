@@ -1,0 +1,374 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Edit Profile - HAWWA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .section-header {
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-picture-upload {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .current-picture {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #667eea;
+        margin-bottom: 1rem;
+    }
+    
+    .picture-placeholder {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: #f8f9fa;
+        border: 4px solid #667eea;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 3rem;
+        color: #667eea;
+    }
+    
+    .upload-btn {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .upload-btn:hover {
+        background: #764ba2;
+        transform: translateY(-2px);
+    }
+    
+    .save-btn {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        padding: 1rem 3rem;
+        border-radius: 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .save-btn:hover {
+        background: linear-gradient(45deg, #764ba2, #667eea);
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .notification-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .toggle-switch {
+        position: relative;
+        width: 60px;
+        height: 30px;
+        background: #ccc;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .toggle-switch.active {
+        background: #667eea;
+    }
+    
+    .toggle-slider {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 0.3s;
+    }
+    
+    .toggle-switch.active .toggle-slider {
+        transform: translateX(30px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h1 class="mb-3">
+                    <i class="fas fa-user-edit text-primary me-3"></i>
+                    Edit Profile
+                </h1>
+                <p class="text-muted">Update your personal information and preferences</p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Profile Picture Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h4>
+                            <i class="fas fa-camera me-2"></i>
+                            Profile Picture
+                        </h4>
+                    </div>
+                    
+                    <div class="profile-picture-upload">
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" alt="Current Profile Picture" class="current-picture" id="currentPicture">
+                        {% else %}
+                            <div class="picture-placeholder" id="picturePlaceholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div>
+                            <input type="file" id="profilePictureInput" name="profile_picture" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                            <button type="button" class="upload-btn" onclick="document.getElementById('profilePictureInput').click()">
+                                <i class="fas fa-upload me-2"></i>
+                                Choose New Picture
+                            </button>
+                        </div>
+                        <small class="text-muted d-block mt-2">Supported formats: JPG, PNG, GIF (Max: 5MB)</small>
+                    </div>
+                </div>
+
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h4>
+                            <i class="fas fa-user me-2"></i>
+                            Personal Information
+                        </h4>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.first_name|add_class:"form-control" }}
+                                <label for="{{ form.first_name.id_for_label }}">First Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.last_name|add_class:"form-control" }}
+                                <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form.phone|add_class:"form-control" }}
+                        <label for="{{ form.phone.id_for_label }}">Phone Number</label>
+                    </div>
+                </div>
+
+                <!-- Address Information Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h4>
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            Address Information
+                        </h4>
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form.address|add_class:"form-control" }}
+                        <label for="{{ form.address.id_for_label }}">Street Address</label>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.city|add_class:"form-control" }}
+                                <label for="{{ form.city.id_for_label }}">City</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.state|add_class:"form-control" }}
+                                <label for="{{ form.state.id_for_label }}">State/Province</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.country|add_class:"form-control" }}
+                                <label for="{{ form.country.id_for_label }}">Country</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.postal_code|add_class:"form-control" }}
+                                <label for="{{ form.postal_code.id_for_label }}">Postal Code</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Preferences Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h4>
+                            <i class="fas fa-bell me-2"></i>
+                            Notification Preferences
+                        </h4>
+                    </div>
+                    
+                    <div class="notification-toggle">
+                        <div>
+                            <strong>Email Notifications</strong>
+                            <p class="text-muted mb-0">Receive booking confirmations and updates via email</p>
+                        </div>
+                        <div class="toggle-switch" data-field="receive_emails" onclick="toggleNotification(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                        <input type="hidden" name="receive_emails" value="{{ form.receive_emails.value|yesno:'on,off' }}">
+                    </div>
+                    
+                    <div class="notification-toggle">
+                        <div>
+                            <strong>SMS Notifications</strong>
+                            <p class="text-muted mb-0">Receive important alerts and reminders via SMS</p>
+                        </div>
+                        <div class="toggle-switch" data-field="receive_sms" onclick="toggleNotification(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                        <input type="hidden" name="receive_sms" value="{{ form.receive_sms.value|yesno:'on,off' }}">
+                    </div>
+                </div>
+
+                <!-- Profile-Specific Section (if exists) -->
+                {% if profile_form %}
+                <div class="form-section">
+                    <div class="section-header">
+                        <h4>
+                            <i class="fas fa-id-card me-2"></i>
+                            {{ user.get_user_type_display }} Information
+                        </h4>
+                    </div>
+                    
+                    {{ profile_form|crispy }}
+                </div>
+                {% endif %}
+
+                <!-- Submit Section -->
+                <div class="text-center">
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary me-3">
+                        <i class="fas fa-times me-2"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="save-btn">
+                        <i class="fas fa-save me-2"></i>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Image preview function
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const currentPicture = document.getElementById('currentPicture');
+            const placeholder = document.getElementById('picturePlaceholder');
+            
+            if (currentPicture) {
+                currentPicture.src = e.target.result;
+            } else if (placeholder) {
+                placeholder.innerHTML = '<img src="' + e.target.result + '" class="current-picture" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover;">';
+            }
+        };
+        
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Toggle notification function
+function toggleNotification(element) {
+    const field = element.getAttribute('data-field');
+    const input = document.querySelector(`input[name="${field}"]`);
+    const isActive = element.classList.contains('active');
+    
+    if (isActive) {
+        element.classList.remove('active');
+        input.value = 'off';
+    } else {
+        element.classList.add('active');
+        input.value = 'on';
+    }
+}
+
+// Initialize toggle switches based on current values
+document.addEventListener('DOMContentLoaded', function() {
+    const emailToggle = document.querySelector('[data-field="receive_emails"]');
+    const smsToggle = document.querySelector('[data-field="receive_sms"]');
+    
+    // Set initial state based on current values
+    if ({{ form.receive_emails.value|yesno:'true,false' }}) {
+        emailToggle.classList.add('active');
+    }
+    
+    if ({{ form.receive_sms.value|yesno:'true,false' }}) {
+        smsToggle.classList.add('active');
+    }
+});
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const firstName = document.querySelector('[name="first_name"]').value.trim();
+    const lastName = document.querySelector('[name="last_name"]').value.trim();
+    
+    if (!firstName || !lastName) {
+        e.preventDefault();
+        alert('Please fill in your first and last name.');
+        return false;
+    }
+});
+</script>
+{% endblock %}

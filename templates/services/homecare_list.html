@@ -1,0 +1,283 @@
+{% extends 'services/service_list.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Home Care Services - Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<!-- Service Header -->
+<section class="py-5 bg-info text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">{% trans "Home Care Services" %}</h1>
+                <p class="lead">{% trans "Professional postpartum care in the comfort of your own home" %}</p>
+                <p class="mb-4">{% trans "Our trained caregivers provide personalized support for new mothers and babies, allowing you to recover peacefully in familiar surroundings while receiving expert care." %}</p>
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'img/homecare-hero.jpg' %}" alt="{% trans 'Hawwa Home Care Services' %}" class="img-fluid rounded-3 shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Benefits -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">{% trans "Benefits of Our Home Care Services" %}</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-home fa-2x text-info"></i>
+                        </div>
+                        <h5>{% trans "Comfort of Home" %}</h5>
+                        <p class="text-muted">{% trans "Recover in your familiar environment with your family while still receiving professional care." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-user-nurse fa-2x text-info"></i>
+                        </div>
+                        <h5>{% trans "Professional Caregivers" %}</h5>
+                        <p class="text-muted">{% trans "Our caregivers are trained specifically in postpartum care and newborn support." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-calendar-alt fa-2x text-info"></i>
+                        </div>
+                        <h5>{% trans "Flexible Scheduling" %}</h5>
+                        <p class="text-muted">{% trans "Choose from hourly visits, daily support, overnight care, or 24/7 assistance." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Overview -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">{% trans "Our Home Care Services" %}</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-info bg-opacity-10 p-3 d-inline-flex me-3">
+                                <i class="fas fa-baby fa-2x text-info"></i>
+                            </div>
+                            <h5 class="mb-0">{% trans "Newborn Care" %}</h5>
+                        </div>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Feeding support and assistance" %}</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Diapering and bathing" %}</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Sleep assistance and schedule establishment" %}</li>
+                            <li><i class="fas fa-check text-success me-2"></i>{% trans "Basic health monitoring" %}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-info bg-opacity-10 p-3 d-inline-flex me-3">
+                                <i class="fas fa-user-md fa-2x text-info"></i>
+                            </div>
+                            <h5 class="mb-0">{% trans "Maternal Recovery Support" %}</h5>
+                        </div>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Physical recovery assistance" %}</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Breastfeeding guidance" %}</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Postpartum health monitoring" %}</li>
+                            <li><i class="fas fa-check text-success me-2"></i>{% trans "Emotional support" %}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-info bg-opacity-10 p-3 d-inline-flex me-3">
+                                <i class="fas fa-utensils fa-2x text-info"></i>
+                            </div>
+                            <h5 class="mb-0">{% trans "Household Assistance" %}</h5>
+                        </div>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Meal preparation for mother" %}</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Light housekeeping" %}</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Baby laundry and room organization" %}</li>
+                            <li><i class="fas fa-check text-success me-2"></i>{% trans "Grocery shopping assistance" %}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-info bg-opacity-10 p-3 d-inline-flex me-3">
+                                <i class="fas fa-moon fa-2x text-info"></i>
+                            </div>
+                            <h5 class="mb-0">{% trans "Overnight Care" %}</h5>
+                        </div>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Nighttime feedings and changes" %}</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Allowing parents to rest" %}</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Monitoring baby throughout the night" %}</li>
+                            <li><i class="fas fa-check text-success me-2"></i>{% trans "Morning assistance and handover" %}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{% url 'services:homecare_list' %}" class="btn btn-info text-white btn-lg">{% trans "View All Home Care Services" %}</a>
+        </div>
+    </div>
+</section>
+
+<!-- Call the parent template content which includes the service listing -->
+{{ block.super }}
+
+<!-- Testimonials -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">{% trans "What Our Clients Say" %}</h2>
+        
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body p-5 text-center">
+                                    <div class="mb-4">
+                                        <i class="fas fa-quote-left fa-3x text-info opacity-25"></i>
+                                    </div>
+                                    <p class="lead mb-4">{% trans "The home care service from Hawwa was a lifesaver after the birth of my twins. Our care provider Aisha was knowledgeable, gentle, and so helpful with everything from breastfeeding to giving me time to rest. I don't know how I would have managed those first weeks without her support." %}</p>
+                                    <div class="d-flex justify-content-center">
+                                        <img src="{% static 'img/testimonial-1.jpg' %}" alt="Testimonial" class="rounded-circle" width="60" height="60">
+                                        <div class="ms-3 text-start">
+                                            <h5 class="mb-0">{% trans "Fatima A." %}</h5>
+                                            <p class="text-muted mb-0">{% trans "Riyadh" %}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body p-5 text-center">
+                                    <div class="mb-4">
+                                        <i class="fas fa-quote-left fa-3x text-info opacity-25"></i>
+                                    </div>
+                                    <p class="lead mb-4">{% trans "As a first-time mother, I had so many questions and uncertainties. The overnight care from Hawwa gave me peace of mind and helped me establish a routine with my baby. The caregivers were professional, warm, and shared so many helpful tips that I still use today." %}</p>
+                                    <div class="d-flex justify-content-center">
+                                        <img src="{% static 'img/testimonial-2.jpg' %}" alt="Testimonial" class="rounded-circle" width="60" height="60">
+                                        <div class="ms-3 text-start">
+                                            <h5 class="mb-0">{% trans "Layla M." %}</h5>
+                                            <p class="text-muted mb-0">{% trans "Jeddah" %}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon bg-info rounded-circle" aria-hidden="true"></span>
+                        <span class="visually-hidden">{% trans "Previous" %}</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon bg-info rounded-circle" aria-hidden="true"></span>
+                        <span class="visually-hidden">{% trans "Next" %}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">{% trans "Frequently Asked Questions" %}</h2>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="homecareFaqs">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                {% trans "How soon can home care services begin after birth?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="faqOne" data-bs-parent="#homecareFaqs">
+                            <div class="accordion-body">
+                                {% trans "Our home care services can begin as soon as you return home from the hospital. We recommend booking these services in advance during your pregnancy to ensure availability. In some cases, we may be able to accommodate last-minute requests based on caregiver availability." %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                {% trans "What qualifications do your caregivers have?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="faqTwo" data-bs-parent="#homecareFaqs">
+                            <div class="accordion-body">
+                                {% trans "All our caregivers are thoroughly vetted and have extensive experience in postpartum and newborn care. Many are certified nurses, midwives, or have specialized training in maternal and infant care. Each caregiver undergoes background checks and receives ongoing training in the latest postpartum care practices." %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                {% trans "Can I choose the same caregiver for all my sessions?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="faqThree" data-bs-parent="#homecareFaqs">
+                            <div class="accordion-body">
+                                {% trans "Yes, we strive to provide consistency in care by assigning the same caregiver throughout your service period. We understand the importance of building trust and familiarity, especially during this sensitive time. In cases where your regular caregiver is unavailable, we will notify you in advance and ensure a smooth handover to a substitute caregiver." %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                {% trans "What is the difference between day and overnight care?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="faqFour" data-bs-parent="#homecareFaqs">
+                            <div class="accordion-body">
+                                {% trans "Day care typically focuses on supporting the mother with baby care, breastfeeding assistance, light household tasks, and allowing mothers to rest or shower. Overnight care focuses on managing night feedings and diaper changes, allowing parents to get more restful sleep. Overnight caregivers will tend to the baby's needs throughout the night, bringing the baby to the mother only for feedings if breastfeeding, or handling bottle feedings themselves if formula feeding." %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

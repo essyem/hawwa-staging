@@ -1,0 +1,372 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}
+{% if booking %}
+    {% trans "Edit Booking" %} - {{ booking.booking_number }}
+{% else %}
+    {% trans "Create New Booking" %}
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'bookings:booking_list' %}">{% trans "Bookings" %}</a></li>
+            {% if booking %}
+                <li class="breadcrumb-item"><a href="{% url 'bookings:booking_detail' booking.pk %}">{{ booking.booking_number }}</a></li>
+                <li class="breadcrumb-item active">{% trans "Edit" %}</li>
+            {% else %}
+                <li class="breadcrumb-item active">{% trans "New Booking" %}</li>
+            {% endif %}
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1">
+                        {% if booking %}
+                            {% trans "Edit Booking" %}
+                        {% else %}
+                            {% trans "Create New Booking" %}
+                        {% endif %}
+                    </h1>
+                    <p class="text-muted mb-0">
+                        {% if booking %}
+                            {% trans "Update your booking details" %} - {{ booking.booking_number }}
+                        {% else %}
+                            {% trans "Fill in the details for your new service booking" %}
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    {% if booking %}
+                        <a href="{% url 'bookings:booking_detail' booking.pk %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> {% trans "Cancel" %}
+                        </a>
+                    {% else %}
+                        <a href="{% url 'bookings:booking_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> {% trans "Cancel" %}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="row">
+            <!-- Main Form -->
+            <div class="col-lg-8">
+                <!-- Service Selection -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">{% trans "Service Details" %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.service|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.priority|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                {{ form.notes|as_crispy_field }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date & Time -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">{% trans "Schedule" %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ form.start_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.start_time|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.end_time|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.end_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.duration_hours|as_crispy_field }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">{% trans "Contact Information" %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.client_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.client_email|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.client_phone|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.emergency_contact|as_crispy_field }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location Information -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">{% trans "Location" %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12">
+                                {{ form.location_address|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.location_city|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.location_postal_code|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                {{ form.location_notes|as_crispy_field }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing (for admin users) -->
+                {% if user.is_staff %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">{% trans "Pricing" %} <small class="text-muted">({% trans "Admin Only" %})</small></h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ form.base_price|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.discount_amount|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.tax_amount|as_crispy_field }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Booking Summary -->
+                <div class="card mb-4 position-sticky" style="top: 20px;">
+                    <div class="card-header">
+                        <h5 class="mb-0">{% trans "Booking Summary" %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="booking-summary">
+                            <div class="mb-3">
+                                <strong>{% trans "Service:" %}</strong>
+                                <div id="summary-service" class="text-muted">
+                                    {% if form.service.value %}
+                                        {{ form.service.value }}
+                                    {% else %}
+                                        {% trans "Please select a service" %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>{% trans "Date & Time:" %}</strong>
+                                <div id="summary-datetime" class="text-muted">
+                                    {% if form.start_date.value and form.start_time.value %}
+                                        {{ form.start_date.value|date:"M d, Y" }} at {{ form.start_time.value|time:"g:i A" }}
+                                    {% else %}
+                                        {% trans "Please select date and time" %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>{% trans "Priority:" %}</strong>
+                                <div id="summary-priority" class="text-muted">
+                                    {% if form.priority.value %}
+                                        {{ form.priority.value|title }}
+                                    {% else %}
+                                        {% trans "Normal" %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if form.base_price.value %}
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <strong>{% trans "Estimated Total:" %}</strong>
+                                <strong id="summary-total">${{ form.base_price.value|floatformat:2 }}</strong>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-grid gap-2">
+                            {% if booking and booking.status == 'draft' %}
+                                <button type="submit" name="action" value="save_draft" class="btn btn-outline-primary">
+                                    <i class="fas fa-save"></i> {% trans "Save Draft" %}
+                                </button>
+                                <button type="submit" name="action" value="submit" class="btn btn-success">
+                                    <i class="fas fa-paper-plane"></i> {% trans "Save & Submit" %}
+                                </button>
+                            {% elif booking %}
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> {% trans "Update Booking" %}
+                                </button>
+                            {% else %}
+                                <button type="submit" name="action" value="save_draft" class="btn btn-outline-primary">
+                                    <i class="fas fa-save"></i> {% trans "Save as Draft" %}
+                                </button>
+                                <button type="submit" name="action" value="submit" class="btn btn-success">
+                                    <i class="fas fa-paper-plane"></i> {% trans "Create & Submit" %}
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help & Tips -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">{% trans "Booking Tips" %}</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-lightbulb text-warning me-2"></i>
+                                <small>{% trans "Save as draft to continue later" %}</small>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-calendar text-info me-2"></i>
+                                <small>{% trans "Book at least 24 hours in advance" %}</small>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-phone text-success me-2"></i>
+                                <small>{% trans "Provide accurate contact information" %}</small>
+                            </li>
+                            <li class="mb-0">
+                                <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                <small>{% trans "Include detailed location notes" %}</small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Update summary when form fields change
+    function updateSummary() {
+        // Update service
+        const serviceText = $('#id_service option:selected').text();
+        $('#summary-service').text(serviceText || '{% trans "Please select a service" %}');
+        
+        // Update date and time
+        const date = $('#id_start_date').val();
+        const time = $('#id_start_time').val();
+        if (date && time) {
+            const formattedDate = new Date(date).toLocaleDateString();
+            $('#summary-datetime').text(formattedDate + ' at ' + time);
+        } else {
+            $('#summary-datetime').text('{% trans "Please select date and time" %}');
+        }
+        
+        // Update priority
+        const priority = $('#id_priority').val();
+        $('#summary-priority').text(priority ? priority.charAt(0).toUpperCase() + priority.slice(1) : 'Normal');
+        
+        // Update pricing if available
+        const basePrice = $('#id_base_price').val();
+        if (basePrice) {
+            $('#summary-total').text('$' + parseFloat(basePrice).toFixed(2));
+        }
+    }
+    
+    // Bind events
+    $('#id_service, #id_start_date, #id_start_time, #id_priority, #id_base_price').on('change', updateSummary);
+    
+    // Auto-fill client info from user profile if empty
+    if (!$('#id_client_email').val() && '{{ user.email }}') {
+        $('#id_client_email').val('{{ user.email }}');
+    }
+    
+    if (!$('#id_client_name').val() && '{{ user.get_full_name }}') {
+        $('#id_client_name').val('{{ user.get_full_name }}');
+    }
+    
+    // Form validation
+    $('form').on('submit', function(e) {
+        const form = this;
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        $(form).addClass('was-validated');
+    });
+    
+    // Date picker minimum date (tomorrow)
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minDate = tomorrow.toISOString().split('T')[0];
+    $('#id_start_date, #id_end_date').attr('min', minDate);
+    
+    // Auto-set end date when start date changes
+    $('#id_start_date').on('change', function() {
+        const startDate = $(this).val();
+        if (startDate && !$('#id_end_date').val()) {
+            $('#id_end_date').val(startDate);
+        }
+    });
+    
+    // Initial summary update
+    updateSummary();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Submit Booking" %} - {{ booking.booking_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'bookings:booking_list' %}">{% trans "Bookings" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'bookings:booking_detail' booking.pk %}">{{ booking.booking_number }}</a></li>
+            <li class="breadcrumb-item active">{% trans "Submit" %}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        {% trans "Submit Booking for Processing" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {% trans "Please review your booking details before submitting. Once submitted, you will receive a confirmation email and our team will review your booking request." %}
+                    </div>
+
+                    <!-- Booking Summary -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">{% trans "Booking Details" %}</h6>
+                            <p class="mb-1"><strong>{% trans "Booking Number:" %}</strong> {{ booking.booking_number }}</p>
+                            <p class="mb-1"><strong>{% trans "Service:" %}</strong> {{ booking.service.name }}</p>
+                            <p class="mb-1"><strong>{% trans "Date:" %}</strong> {{ booking.start_date|date:"F d, Y" }}</p>
+                            {% if booking.start_time %}
+                                <p class="mb-1"><strong>{% trans "Time:" %}</strong> {{ booking.start_time|time:"g:i A" }}</p>
+                            {% endif %}
+                            <p class="mb-1"><strong>{% trans "Priority:" %}</strong> 
+                                <span class="badge bg-secondary">{{ booking.get_priority_display }}</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">{% trans "Contact Information" %}</h6>
+                            <p class="mb-1"><strong>{% trans "Name:" %}</strong> {{ booking.client_name|default:booking.user.get_full_name }}</p>
+                            <p class="mb-1"><strong>{% trans "Email:" %}</strong> {{ booking.client_email|default:booking.user.email }}</p>
+                            {% if booking.client_phone %}
+                                <p class="mb-1"><strong>{% trans "Phone:" %}</strong> {{ booking.client_phone }}</p>
+                            {% endif %}
+                            {% if booking.location_address %}
+                                <p class="mb-1"><strong>{% trans "Location:" %}</strong> {{ booking.location_address }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Pricing Summary -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-muted mb-2">{% trans "Pricing Summary" %}</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td>{% trans "Base Service Price:" %}</td>
+                                            <td class="text-end">${{ booking.base_price|floatformat:2 }}</td>
+                                        </tr>
+                                        {% if booking.discount_amount %}
+                                        <tr class="text-success">
+                                            <td>{% trans "Discount:" %}</td>
+                                            <td class="text-end">-${{ booking.discount_amount|floatformat:2 }}</td>
+                                        </tr>
+                                        {% endif %}
+                                        {% if booking.tax_amount %}
+                                        <tr>
+                                            <td>{% trans "Tax:" %}</td>
+                                            <td class="text-end">${{ booking.tax_amount|floatformat:2 }}</td>
+                                        </tr>
+                                        {% endif %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-primary">
+                                            <th>{% trans "Total Amount:" %}</th>
+                                            <th class="text-end">${{ booking.total_price|floatformat:2 }}</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    {% if booking.notes %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-muted mb-2">{% trans "Additional Notes" %}</h6>
+                            <div class="border rounded p-3 bg-light">
+                                {{ booking.notes|linebreaks }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Confirmation -->
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>{% trans "Important Information" %}</h6>
+                        <ul class="mb-0">
+                            <li>{% trans "Once submitted, your booking will be reviewed by our team within 24 hours." %}</li>
+                            <li>{% trans "You will receive a confirmation email at" %} <strong>{{ booking.client_email|default:booking.user.email }}</strong></li>
+                            <li>{% trans "Payment will be processed only after booking confirmation." %}</li>
+                            <li>{% trans "You can still cancel or modify your booking before confirmation." %}</li>
+                        </ul>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a href="{% url 'bookings:booking_detail' booking.pk %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>{% trans "Back to Details" %}
+                                </a>
+                                <a href="{% url 'bookings:booking_update' booking.pk %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-edit me-2"></i>{% trans "Edit Booking" %}
+                                </a>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-paper-plane me-2"></i>{% trans "Submit Booking" %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Confirm before submitting
+    $('form').on('submit', function(e) {
+        if (!confirm('{% trans "Are you sure you want to submit this booking? You will receive a confirmation email shortly." %}')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

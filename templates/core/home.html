@@ -1,0 +1,244 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Home - Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section py-5 text-center bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 text-md-start">
+                <h1 class="display-4 fw-bold mb-4">{% trans "Nurturing Mothers Through Their Postpartum Journey" %}</h1>
+                <p class="lead mb-4">{% trans "Comprehensive support for new mothers with personalized care plans, wellness services, and expert guidance." %}</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg">{% trans "Get Started" %}</a>
+                    <a href="#services" class="btn btn-outline-primary btn-lg">{% trans "Explore Services" %}</a>
+                </div>
+            </div>
+            <div class="col-md-6 mt-4 mt-md-0">
+                <img src="{% static 'img/hero-image.jpg' %}" alt="Mother and baby" class="img-fluid rounded-3 shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section id="services" class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">{% trans "Our Services" %}</h2>
+            <p class="lead">{% trans "Comprehensive postpartum care tailored to your needs" %}</p>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Retreat Stays -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="{% static 'img/retreat.jpg' %}" class="card-img-top" alt="{% trans 'Retreat Stays' %}">
+                    <div class="card-body">
+                        <h5 class="card-title">{% trans "Retreat Stays" %}</h5>
+                        <p class="card-text">{% trans "Peaceful accommodations designed for mother and baby, with 24/7 support staff." %}</p>
+                        <a href="#" class="btn btn-sm btn-outline-primary">{% trans "Learn More" %}</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Home Care -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="{% static 'img/homecare.jpg' %}" class="card-img-top" alt="{% trans 'Home Care' %}">
+                    <div class="card-body">
+                        <h5 class="card-title">{% trans "Home Care" %}</h5>
+                        <p class="card-text">{% trans "Professional caretakers providing in-home support for mothers and newborns." %}</p>
+                        <a href="#" class="btn btn-sm btn-outline-primary">{% trans "Learn More" %}</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wellness Services -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="{% static 'img/wellness.jpg' %}" class="card-img-top" alt="{% trans 'Wellness Services' %}">
+                    <div class="card-body">
+                        <h5 class="card-title">{% trans "Wellness Services" %}</h5>
+                        <p class="card-text">{% trans "Therapeutic treatments including massage, meditation, and mental health support." %}</p>
+                        <a href="#" class="btn btn-sm btn-outline-primary">{% trans "Learn More" %}</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Nutritional Support -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="{% static 'img/nutrition.jpg' %}" class="card-img-top" alt="{% trans 'Nutritional Support' %}">
+                    <div class="card-body">
+                        <h5 class="card-title">{% trans "Nutritional Support" %}</h5>
+                        <p class="card-text">{% trans "Customized meal plans and prepared foods designed for postpartum recovery." %}</p>
+                        <a href="#" class="btn btn-sm btn-outline-primary">{% trans "Learn More" %}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">{% trans "How It Works" %}</h2>
+            <p class="lead">{% trans "Simple steps to start your postpartum care journey" %}</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="fas fa-user-plus text-white fa-2x"></i>
+                    </div>
+                    <h3>{% trans "1. Register" %}</h3>
+                    <p>{% trans "Create your account and fill out your profile with your preferences and needs." %}</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="fas fa-calendar-check text-white fa-2x"></i>
+                    </div>
+                    <h3>{% trans "2. Book Services" %}</h3>
+                    <p>{% trans "Browse and book the services that best fit your postpartum care needs." %}</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="fas fa-spa text-white fa-2x"></i>
+                    </div>
+                    <h3>{% trans "3. Receive Care" %}</h3>
+                    <p>{% trans "Enjoy personalized postpartum care from our network of qualified providers." %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">{% trans "What Mothers Say" %}</h2>
+            <p class="lead">{% trans "Hear from mothers who have experienced our care" %}</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3 text-warning">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="card-text">{% trans "The retreat stay was exactly what I needed after giving birth. The staff was attentive, and I felt completely supported during my recovery." %}</p>
+                        <div class="d-flex align-items-center mt-4">
+                            <img src="{% static 'img/testimonial1.jpg' %}" alt="Client" class="rounded-circle" width="50" height="50">
+                            <div class="ms-3">
+                                <h6 class="mb-0">{% trans "Sarah M." %}</h6>
+                                <small class="text-muted">{% trans "First-time Mother" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3 text-warning">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="card-text">{% trans "The home care services were exceptional. Having professional help with the baby while I recovered made all the difference in my postpartum experience." %}</p>
+                        <div class="d-flex align-items-center mt-4">
+                            <img src="{% static 'img/testimonial2.jpg' %}" alt="Client" class="rounded-circle" width="50" height="50">
+                            <div class="ms-3">
+                                <h6 class="mb-0">{% trans "Layla K." %}</h6>
+                                <small class="text-muted">{% trans "Mother of Two" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3 text-warning">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="card-text">{% trans "The nutritional support was amazing! Delicious meals that helped with my recovery and milk production. I'm so grateful for this service." %}</p>
+                        <div class="d-flex align-items-center mt-4">
+                            <img src="{% static 'img/testimonial3.jpg' %}" alt="Client" class="rounded-circle" width="50" height="50">
+                            <div class="ms-3">
+                                <h6 class="mb-0">{% trans "Fatima A." %}</h6>
+                                <small class="text-muted">{% trans "New Mother" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- AI Buddy Promo -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <h2 class="display-5 fw-bold">{% trans "Meet Your AI Buddy" %}</h2>
+                <p class="lead">{% trans "Your personal assistant through pregnancy and postpartum recovery" %}</p>
+                <ul class="list-unstyled mt-4">
+                    <li class="mb-2"><i class="fas fa-check-circle me-2"></i> {% trans "24/7 answers to your pregnancy and postpartum questions" %}</li>
+                    <li class="mb-2"><i class="fas fa-check-circle me-2"></i> {% trans "Personalized tips based on your stage of pregnancy or recovery" %}</li>
+                    <li class="mb-2"><i class="fas fa-check-circle me-2"></i> {% trans "Track your symptoms and receive customized recommendations" %}</li>
+                    <li class="mb-2"><i class="fas fa-check-circle me-2"></i> {% trans "Connect with care providers when needed" %}</li>
+                </ul>
+                <a href="#" class="btn btn-light btn-lg mt-3">{% trans "Try AI Buddy Now" %}</a>
+            </div>
+            <div class="col-md-5 mt-4 mt-md-0">
+                <img src="{% static 'img/ai-buddy.png' %}" alt="AI Buddy" class="img-fluid rounded-3">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8 text-center">
+                <h2 class="display-5 fw-bold">{% trans "Ready to Start Your Postpartum Journey?" %}</h2>
+                <p class="lead mb-4">{% trans "Join Hawwa today and discover the comprehensive support you deserve during this important time." %}</p>
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg px-4">{% trans "Register Now" %}</a>
+                    <a href="{% url 'core:contact' %}" class="btn btn-outline-primary btn-lg px-4">{% trans "Contact Us" %}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

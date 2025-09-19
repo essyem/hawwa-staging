@@ -1,0 +1,134 @@
+{% extends "base/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Register - Choose User Type" %} | Hawwa Postpartum Care{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="mb-3">{% trans "Join Hawwa Postpartum Care" %}</h1>
+                <p class="lead text-muted">{% trans "Please select the user type that best describes you" %}</p>
+            </div>
+        </div>
+        
+        <div class="row g-4 justify-content-center">
+            <!-- Mother Registration Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-4">
+                            <i class="bi bi-person-heart fs-1 text-primary"></i>
+                        </div>
+                        <h3 class="card-title">{% trans "Mother" %}</h3>
+                        <p class="card-text text-muted mb-4">{% trans "Register as a mother looking for postpartum care services" %}</p>
+                        <a href="{% url 'accounts:register_mother' %}" class="btn btn-primary btn-lg">{% trans "Register" %}</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Accommodation Provider Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-4">
+                            <i class="bi bi-house-heart fs-1 text-success"></i>
+                        </div>
+                        <h3 class="card-title">{% trans "Accommodation Provider" %}</h3>
+                        <p class="card-text text-muted mb-4">{% trans "Register to offer accommodation services for mothers" %}</p>
+                        <a href="{% url 'accounts:register_accommodation' %}" class="btn btn-success btn-lg">{% trans "Register" %}</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Caretaker Provider Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-4">
+                            <i class="bi bi-person-arms-up fs-1 text-info"></i>
+                        </div>
+                        <h3 class="card-title">{% trans "Caretaker Provider" %}</h3>
+                        <p class="card-text text-muted mb-4">{% trans "Register to offer caretaking services for mothers and babies" %}</p>
+                        <a href="{% url 'accounts:register_caretaker' %}" class="btn btn-info btn-lg">{% trans "Register" %}</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wellness Service Provider Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-4">
+                            <i class="bi bi-heart-pulse fs-1 text-danger"></i>
+                        </div>
+                        <h3 class="card-title">{% trans "Wellness Provider" %}</h3>
+                        <p class="card-text text-muted mb-4">{% trans "Register to offer wellness services for postpartum mothers" %}</p>
+                        <a href="{% url 'accounts:register_wellness' %}" class="btn btn-danger btn-lg">{% trans "Register" %}</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Meditation Consultant Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-4">
+                            <i class="bi bi-peace fs-1 text-warning"></i>
+                        </div>
+                        <h3 class="card-title">{% trans "Meditation Consultant" %}</h3>
+                        <p class="card-text text-muted mb-4">{% trans "Register to offer meditation consultation services" %}</p>
+                        <a href="{% url 'accounts:register_meditation' %}" class="btn btn-warning btn-lg">{% trans "Register" %}</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mental Health Consultant Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-4">
+                            <i class="bi bi-brain fs-1 text-secondary"></i>
+                        </div>
+                        <h3 class="card-title">{% trans "Mental Health Consultant" %}</h3>
+                        <p class="card-text text-muted mb-4">{% trans "Register to provide mental health services for mothers" %}</p>
+                        <a href="{% url 'accounts:register_mental_health' %}" class="btn btn-secondary btn-lg">{% trans "Register" %}</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Food Provider Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-4">
+                            <i class="bi bi-cup-hot fs-1 text-dark"></i>
+                        </div>
+                        <h3 class="card-title">{% trans "Food Provider" %}</h3>
+                        <p class="card-text text-muted mb-4">{% trans "Register to offer nutritious meals for postpartum mothers" %}</p>
+                        <a href="{% url 'accounts:register_food' %}" class="btn btn-dark btn-lg">{% trans "Register" %}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <p>{% trans "Already have an account?" %} <a href="{% url 'login' %}">{% trans "Login here" %}</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .hover-card {
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Wellness - Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-start">
+                <h1 class="display-4 fw-bold mb-3">{% trans "Wellness Programs" %}</h1>
+                <p class="lead mb-4">{% trans "Discover our holistic wellness programs designed specifically for your postpartum journey. From meditation and yoga to mental health support, we've got you covered." %}</p>
+                <a href="{% url 'wellness:program_list' %}" class="btn btn-primary btn-lg">{% trans "Explore Programs" %}</a>
+            </div>
+            <div class="col-md-6 mt-4 mt-md-0 text-center">
+                <img src="{% static 'img/wellness-hero.jpg' %}" alt="Wellness" class="img-fluid rounded-3 shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Programs -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="h1 mb-1">{% trans "Featured Programs" %}</h2>
+                <p class="lead text-muted">{% trans "Our most popular wellness offerings" %}</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            {% for program in featured_programs %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="position-relative">
+                        <img src="{{ program.image.url }}" class="card-img-top" alt="{{ program.name }}">
+                        <span class="badge bg-primary position-absolute top-0 end-0 m-2">{% trans "Featured" %}</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ program.name }}</h5>
+                        <p class="card-text">{{ program.short_description }}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <a href="{% url 'wellness:program_detail' program.slug %}" class="btn btn-sm btn-outline-primary">{% trans "View Details" %}</a>
+                            <small class="text-muted">{{ program.duration }} {% trans "mins" %}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">{% trans "No featured programs available at the moment." %}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Wellness Categories -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="h1 mb-1">{% trans "Wellness Categories" %}</h2>
+                <p class="lead text-muted">{% trans "Explore our diverse range of wellness services" %}</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            {% for category in categories %}
+            <div class="col-md-6 col-lg-4">
+                <a href="{% url 'wellness:category_detail' category.slug %}" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="row g-0">
+                            <div class="col-4 d-flex align-items-center justify-content-center bg-primary text-white p-3">
+                                <i class="{{ category.icon|default:'fas fa-spa' }} fa-3x"></i>
+                            </div>
+                            <div class="col-8">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ category.name }}</h5>
+                                    <p class="card-text">{{ category.description|truncatechars:80 }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">{% trans "No categories available at the moment." %}</div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'wellness:category_list' %}" class="btn btn-outline-primary">{% trans "View All Categories" %}</a>
+        </div>
+    </div>
+</section>
+
+<!-- Upcoming Sessions -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="h1 mb-1">{% trans "Upcoming Sessions" %}</h2>
+                <p class="lead text-muted">{% trans "Join our next wellness sessions" %}</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Program" %}</th>
+                                <th>{% trans "Date" %}</th>
+                                <th>{% trans "Time" %}</th>
+                                <th>{% trans "Location" %}</th>
+                                <th>{% trans "Spots" %}</th>
+                                <th>{% trans "Action" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for session in upcoming_sessions %}
+                            <tr>
+                                <td>{{ session.program.name }}</td>
+                                <td>{{ session.date }}</td>
+                                <td>{{ session.start_time }} - {{ session.end_time }}</td>
+                                <td>
+                                    {% if session.is_online %}
+                                    <span class="badge bg-info">{% trans "Online" %}</span>
+                                    {% else %}
+                                    {{ session.location }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% with enrolled=session.participants.filter.count max=session.max_participants %}
+                                    {% if enrolled >= max %}
+                                    <span class="badge bg-danger">{% trans "Full" %}</span>
+                                    {% else %}
+                                    {{ max|add:"-"|add:enrolled }} {% trans "left" %}
+                                    {% endif %}
+                                    {% endwith %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'wellness:session_detail' session.pk %}" class="btn btn-sm btn-outline-primary">{% trans "Details" %}</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">{% trans "No upcoming sessions at the moment." %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'wellness:session_list' %}" class="btn btn-outline-primary">{% trans "View All Sessions" %}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h2 class="h1 mb-3">{% trans "Ready to Focus on Your Wellness?" %}</h2>
+                <p class="lead mb-4">{% trans "Join our wellness programs and take a meaningful step towards better physical and mental health during your postpartum journey." %}</p>
+                {% if user.is_authenticated %}
+                <a href="{% url 'wellness:program_list' %}" class="btn btn-light btn-lg">{% trans "Browse Programs" %}</a>
+                {% else %}
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg">{% trans "Sign Up" %}</a>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg">{% trans "Log In" %}</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,591 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ service.name }} - {% trans "Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<!-- Service Detail Header -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-5 fw-bold mb-3">{{ service.name }}</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">{% trans "Home" %}</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'services:service_list' %}">{% trans "Services" %}</a></li>
+                        <li class="breadcrumb-item"><a href="{{ service.get_category_url }}">{{ service.category.name }}</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ service.name }}</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Service Details -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Service Images -->
+            <div class="col-lg-6">
+                <div class="service-images">
+                    {% if service.image %}
+                        <img src="{{ service.image.url }}" class="img-fluid rounded mb-3" alt="{{ service.name }}">
+                    {% else %}
+                        <img src="{% static 'img/service-placeholder.jpg' %}" class="img-fluid rounded mb-3" alt="{{ service.name }}">
+                    {% endif %}
+                    
+                    {% if service.gallery.all %}
+                    <div class="row g-2">
+                        {% for image in service.gallery.all %}
+                        <div class="col-3">
+                            <img src="{{ image.image.url }}" class="img-fluid rounded gallery-thumbnail" alt="{{ service.name }}" onclick="showFullImage('{{ image.image.url }}')">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Provider Info (if applicable) -->
+                {% if service.provider %}
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">{% trans "Service Provider" %}</h5>
+                        <div class="d-flex align-items-center">
+                            {% if service.provider.profile_picture %}
+                                <img src="{{ service.provider.profile_picture.url }}" class="rounded-circle me-3" width="60" height="60" alt="{{ service.provider.get_full_name }}">
+                            {% else %}
+                                <img src="{% static 'img/default-avatar.png' %}" class="rounded-circle me-3" width="60" height="60" alt="{{ service.provider.get_full_name }}">
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0">{{ service.provider.get_full_name }}</h6>
+                                <p class="text-muted mb-0 small">{{ service.provider.specialization|default:"" }}</p>
+                                <div class="mt-2">
+                                    {% if service.provider.reviews.exists %}
+                                    <div class="text-warning d-inline-block">
+                                        {% with ''|center:5 as range %}
+                                            {% for _ in range %}
+                                                {% if forloop.counter <= service.provider.average_rating %}
+                                                    <i class="fas fa-star"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endwith %}
+                                    </div>
+                                    <span class="ms-1 text-muted small">({{ service.provider.reviews.count }})</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Service Details -->
+            <div class="col-lg-6">
+                <div class="service-details">
+                    <!-- Price and Booking -->
+                    <div class="card border-primary mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="mb-0">{{ service.price }} {% trans "SAR" %}</h3>
+                                {% if service.discounted_price %}
+                                    <span class="badge bg-danger">{% trans "Save" %} {{ service.discount_percentage }}%</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if service.discounted_price %}
+                            <p class="text-decoration-line-through text-muted">{{ service.original_price }} {% trans "SAR" %}</p>
+                            {% endif %}
+                            
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'bookings:book_service' service.id %}" class="btn btn-primary">
+                                    <i class="fas fa-calendar-check me-1"></i> {% trans "Book Now" %}
+                                </a>
+                                
+                                <button class="btn btn-outline-primary" onclick="addToWishlist({{ service.id }})">
+                                    <i class="far fa-heart me-1"></i> {% trans "Add to Wishlist" %}
+                                </button>
+                            </div>
+                            
+                            <!-- Availability -->
+                            <div class="mt-3">
+                                <p class="text-muted mb-1">{% trans "Availability" %}:</p>
+                                {% if service.is_available %}
+                                    <span class="badge bg-success">{% trans "Available" %}</span>
+                                {% else %}
+                                    <span class="badge bg-danger">{% trans "Currently Unavailable" %}</span>
+                                {% endif %}
+                                
+                                {% if service.availability_note %}
+                                <p class="text-muted small mt-2">{{ service.availability_note }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Service Information -->
+                    <div class="service-info mb-4">
+                        <h4>{% trans "About This Service" %}</h4>
+                        <p>{{ service.description }}</p>
+                        
+                        <!-- Service Details List -->
+                        <div class="row g-2 mt-4">
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-clock text-primary me-2"></i>
+                                    <div>
+                                        <p class="mb-0 fw-medium">{% trans "Duration" %}</p>
+                                        <p class="mb-0 text-muted small">{{ service.duration }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                    <div>
+                                        <p class="mb-0 fw-medium">{% trans "Location" %}</p>
+                                        <p class="mb-0 text-muted small">{{ service.get_location_type_display }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-tag text-primary me-2"></i>
+                                    <div>
+                                        <p class="mb-0 fw-medium">{% trans "Category" %}</p>
+                                        <p class="mb-0 text-muted small">{{ service.category.name }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-calendar-check text-primary me-2"></i>
+                                    <div>
+                                        <p class="mb-0 fw-medium">{% trans "Bookings" %}</p>
+                                        <p class="mb-0 text-muted small">{{ service.booking_count|default:'0' }} {% trans "completed" %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if service.service_type == 'accommodation' %}
+                            <!-- Accommodation-specific details -->
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-bed text-primary me-2"></i>
+                                    <div>
+                                        <p class="mb-0 fw-medium">{% trans "Rooms" %}</p>
+                                        <p class="mb-0 text-muted small">{{ service.accommodation.rooms }} {% trans "rooms" %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-utensils text-primary me-2"></i>
+                                    <div>
+                                        <p class="mb-0 fw-medium">{% trans "Meals Included" %}</p>
+                                        <p class="mb-0 text-muted small">{{ service.accommodation.meals_provided|yesno:_("Yes,No") }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if service.service_type == 'wellness' %}
+                            <!-- Wellness-specific details -->
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-user-md text-primary me-2"></i>
+                                    <div>
+                                        <p class="mb-0 fw-medium">{% trans "Specialist" %}</p>
+                                        <p class="mb-0 text-muted small">{{ service.wellness.specialist_type }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if service.service_type == 'nutrition' %}
+                            <!-- Nutrition-specific details -->
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-utensils text-primary me-2"></i>
+                                    <div>
+                                        <p class="mb-0 fw-medium">{% trans "Diet Type" %}</p>
+                                        <p class="mb-0 text-muted small">{{ service.nutrition.diet_type }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if service.service_type == 'homecare' %}
+                            <!-- Home Care-specific details -->
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-user-nurse text-primary me-2"></i>
+                                    <div>
+                                        <p class="mb-0 fw-medium">{% trans "Care Type" %}</p>
+                                        <p class="mb-0 text-muted small">{{ service.homecare.care_type }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Features/Highlights -->
+                        {% if service.features.all %}
+                        <div class="mt-4">
+                            <h5>{% trans "Features & Highlights" %}</h5>
+                            <ul class="list-group list-group-flush">
+                                {% for feature in service.features.all %}
+                                <li class="list-group-item d-flex align-items-center px-0">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    {{ feature.name }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Service Details Tabs -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <nav>
+                    <div class="nav nav-tabs nav-fill" id="service-tab" role="tablist">
+                        <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">
+                            {% trans "Description" %}
+                        </button>
+                        <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab" aria-controls="details" aria-selected="false">
+                            {% trans "Details" %}
+                        </button>
+                        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">
+                            {% trans "Reviews" %} ({{ service.reviews.count|default:'0' }})
+                        </button>
+                        <button class="nav-link" id="faq-tab" data-bs-toggle="tab" data-bs-target="#faq" type="button" role="tab" aria-controls="faq" aria-selected="false">
+                            {% trans "FAQ" %}
+                        </button>
+                    </div>
+                </nav>
+                <div class="tab-content p-4" id="service-tabContent">
+                    <!-- Description Tab -->
+                    <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+                        {{ service.long_description|safe }}
+                    </div>
+                    
+                    <!-- Details Tab -->
+                    <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>{% trans "What's Included" %}</h5>
+                                <ul class="list-unstyled">
+                                    {% for item in service.inclusions.all %}
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i> {{ item.description }}
+                                    </li>
+                                    {% empty %}
+                                    <li>{% trans "No inclusions specified" %}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5>{% trans "What's Not Included" %}</h5>
+                                <ul class="list-unstyled">
+                                    {% for item in service.exclusions.all %}
+                                    <li class="mb-2">
+                                        <i class="fas fa-times text-danger me-2"></i> {{ item.description }}
+                                    </li>
+                                    {% empty %}
+                                    <li>{% trans "No exclusions specified" %}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Cancellation Policy -->
+                        <div class="mt-4">
+                            <h5>{% trans "Cancellation Policy" %}</h5>
+                            <p>{{ service.cancellation_policy|default:_("Please contact us for cancellation policy details.") }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Reviews Tab -->
+                    <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                        <!-- Review Summary -->
+                        <div class="review-summary mb-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-3 text-center">
+                                    <h2 class="display-4 mb-0">{{ service.average_rating|default:"0" }}</h2>
+                                    <div class="text-warning mb-2">
+                                        {% with ''|center:5 as range %}
+                                            {% for _ in range %}
+                                                {% if forloop.counter <= service.average_rating %}
+                                                    <i class="fas fa-star"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endwith %}
+                                    </div>
+                                    <p class="text-muted">{{ service.reviews.count|default:"0" }} {% trans "reviews" %}</p>
+                                </div>
+                                
+                                <div class="col-md-9">
+                                    <!-- Rating Distribution -->
+                                    <div class="rating-bars">
+                                        {% for i in "54321"|make_list %}
+                                            {% with i|add:"0" as rating %}
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="text-muted me-2" style="width: 15px;">{{ rating }}</div>
+                                                <div class="progress flex-grow-1" style="height: 8px;">
+                                                    <div class="progress-bar bg-warning" role="progressbar" style="width: {% widthratio service.get_rating_count|get_item:rating service.reviews.count|default:1 100 %}%"></div>
+                                                </div>
+                                                <div class="text-muted ms-2" style="width: 25px;">{{ service.get_rating_count|get_item:rating }}</div>
+                                            </div>
+                                            {% endwith %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Review List -->
+                        <div class="reviews-list">
+                            {% for review in service.reviews.all %}
+                            <div class="card mb-3 border-0 bg-light">
+                                <div class="card-body">
+                                    <div class="d-flex mb-3">
+                                        {% if review.user.profile_picture %}
+                                            <img src="{{ review.user.profile_picture.url }}" class="rounded-circle me-3" width="50" height="50" alt="{{ review.user.get_full_name }}">
+                                        {% else %}
+                                            <img src="{% static 'img/default-avatar.png' %}" class="rounded-circle me-3" width="50" height="50" alt="{{ review.user.get_full_name }}">
+                                        {% endif %}
+                                        <div>
+                                            <h6 class="mb-0">{{ review.user.get_full_name }}</h6>
+                                            <p class="text-muted small mb-0">{{ review.created_at|date:"F j, Y" }}</p>
+                                            <div class="text-warning mt-1">
+                                                {% with ''|center:5 as range %}
+                                                    {% for _ in range %}
+                                                        {% if forloop.counter <= review.rating %}
+                                                            <i class="fas fa-star"></i>
+                                                        {% else %}
+                                                            <i class="far fa-star"></i>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endwith %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h6>{{ review.title }}</h6>
+                                    <p>{{ review.comment }}</p>
+                                    
+                                    {% if review.provider_response %}
+                                    <div class="provider-response border-top pt-3 mt-3">
+                                        <p class="text-muted mb-1 small"><i class="fas fa-reply me-1"></i> {% trans "Response from provider" %}:</p>
+                                        <p class="mb-0">{{ review.provider_response }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-5">
+                                <div class="mb-3">
+                                    <i class="far fa-comments fa-4x text-muted"></i>
+                                </div>
+                                <h5>{% trans "No reviews yet" %}</h5>
+                                <p class="text-muted">{% trans "Be the first to review this service" %}</p>
+                                {% if user.is_authenticated %}
+                                <button class="btn btn-outline-primary mt-2" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                                    {% trans "Write a Review" %}
+                                </button>
+                                {% else %}
+                                <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-outline-primary mt-2">
+                                    {% trans "Sign in to write a review" %}
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Add Review Button -->
+                        {% if user.is_authenticated %}
+                        <div class="text-center mt-4">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                                {% trans "Write a Review" %}
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- FAQ Tab -->
+                    <div class="tab-pane fade" id="faq" role="tabpanel" aria-labelledby="faq-tab">
+                        <div class="accordion" id="faqAccordion">
+                            {% for faq in service.faqs.all %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faqHeading{{ forloop.counter }}">
+                                    <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse{{ forloop.counter }}" aria-expanded="{{ forloop.first|yesno:'true,false' }}" aria-controls="faqCollapse{{ forloop.counter }}">
+                                        {{ faq.question }}
+                                    </button>
+                                </h2>
+                                <div id="faqCollapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="faqHeading{{ forloop.counter }}" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        {{ faq.answer }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-5">
+                                <p class="text-muted">{% trans "No frequently asked questions available for this service." %}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Similar Services -->
+{% if similar_services %}
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">{% trans "Similar Services" %}</h2>
+        
+        <div class="row g-4">
+            {% for service in similar_services %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 service-card">
+                    {% if service.image %}
+                        <img src="{{ service.image.url }}" class="card-img-top" alt="{{ service.name }}">
+                    {% else %}
+                        <img src="{% static 'img/service-placeholder.jpg' %}" class="card-img-top" alt="{{ service.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ service.name }}</h5>
+                        <p class="card-text">{{ service.short_description }}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="fw-bold text-primary">{{ service.price }} {% trans "SAR" %}</span>
+                            <a href="{% url 'services:service_detail' service.slug %}" class="btn btn-outline-primary btn-sm">{% trans "View Details" %}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Review Modal -->
+{% if user.is_authenticated %}
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reviewModalLabel">{% trans "Write a Review" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'services:add_review' service.id %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Rating" %}</label>
+                        <div class="rating-select mb-3">
+                            {% for i in "12345"|make_list %}
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="rating" id="rating{{ i }}" value="{{ i }}" {% if i == '5' %}checked{% endif %}>
+                                <label class="form-check-label" for="rating{{ i }}">{{ i }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="review-title" class="form-label">{% trans "Title" %}</label>
+                        <input type="text" class="form-control" id="review-title" name="title" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="review-comment" class="form-label">{% trans "Comment" %}</label>
+                        <textarea class="form-control" id="review-comment" name="comment" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">{% trans "Submit Review" %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <img src="" id="fullImage" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function showFullImage(imageSrc) {
+        document.getElementById('fullImage').src = imageSrc;
+        var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+        imageModal.show();
+    }
+    
+    function addToWishlist(serviceId) {
+        // AJAX request to add service to wishlist
+        fetch(`{% url 'accounts:add_to_wishlist' %}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({service_id: serviceId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("{% trans 'Service added to wishlist' %}");
+            } else {
+                if (data.error === 'login_required') {
+                    window.location.href = `{% url 'accounts:login' %}?next={{ request.path }}`;
+                } else {
+                    alert(data.message || "{% trans 'Error adding to wishlist' %}");
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("{% trans 'An error occurred. Please try again.' %}");
+        });
+    }
+</script>
+{% endblock %}

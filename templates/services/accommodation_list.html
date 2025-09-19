@@ -1,0 +1,136 @@
+{% extends 'services/service_list.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Retreat Stays - Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<!-- Service Header -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">{% trans "Retreat Stays" %}</h1>
+                <p class="lead">{% trans "Luxurious and comfortable accommodations designed specifically for postpartum recovery and relaxation" %}</p>
+                <p class="mb-4">{% trans "Our carefully selected retreat stays provide a peaceful environment with 24/7 support to help new mothers recover and bond with their newborns." %}</p>
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'img/accommodation-hero.jpg' %}" alt="{% trans 'Hawwa Accommodation Services' %}" class="img-fluid rounded-3 shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Benefits -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">{% trans "Benefits of Our Retreat Stays" %}</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-bed fa-2x text-primary"></i>
+                        </div>
+                        <h5>{% trans "Comfortable Recovery" %}</h5>
+                        <p class="text-muted">{% trans "Specially designed rooms with comfortable beds and furnishings to support your physical recovery needs." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-utensils fa-2x text-primary"></i>
+                        </div>
+                        <h5>{% trans "Nutritious Meals" %}</h5>
+                        <p class="text-muted">{% trans "Healthy, balanced meals tailored for postpartum recovery, prepared by nutrition experts." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-user-nurse fa-2x text-primary"></i>
+                        </div>
+                        <h5>{% trans "Professional Support" %}</h5>
+                        <p class="text-muted">{% trans "24/7 access to professional care providers including nurses and lactation consultants." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call the parent template content which includes the service listing -->
+{{ block.super }}
+
+<!-- FAQ Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">{% trans "Frequently Asked Questions" %}</h2>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="accommodationFaqs">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                {% trans "What is included in a retreat stay package?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="faqOne" data-bs-parent="#accommodationFaqs">
+                            <div class="accordion-body">
+                                {% trans "Our retreat stay packages typically include accommodation in a private room, three nutritious meals per day designed for postpartum recovery, 24/7 access to care providers, basic baby care supplies, and daily wellness checks. Some packages may include additional services such as massage therapy, lactation consultations, and transportation." %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                {% trans "Can my partner stay with me?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="faqTwo" data-bs-parent="#accommodationFaqs">
+                            <div class="accordion-body">
+                                {% trans "Yes, most of our retreat stays accommodate partners with additional sleeping arrangements. Some locations offer separate partner rooms for an additional fee. Please check the specific details of each accommodation listing for partner stay policies." %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                {% trans "How long can I stay at a retreat?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="faqThree" data-bs-parent="#accommodationFaqs">
+                            <div class="accordion-body">
+                                {% trans "Our retreat stays offer flexible durations, typically ranging from 3 days to 6 weeks. The most popular stay duration is 2 weeks, which provides adequate time for initial recovery and adjustment. Extended stays can be arranged based on availability and your specific needs." %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                {% trans "What medical support is available?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="faqFour" data-bs-parent="#accommodationFaqs">
+                            <div class="accordion-body">
+                                {% trans "All our retreat stays have trained nurses or midwives available 24/7. We conduct regular health checks for both mother and baby. For specific medical needs, we can arrange visits from specialists including lactation consultants, physiotherapists, and physicians. In case of emergency, we have protocols in place for immediate medical intervention and hospital transfer if needed." %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

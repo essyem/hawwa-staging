@@ -1,0 +1,313 @@
+{% extends 'services/service_list.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Wellness Services - Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<!-- Service Header -->
+<section class="py-5 bg-success text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">{% trans "Wellness Services" %}</h1>
+                <p class="lead">{% trans "Holistic postpartum wellness therapies for physical and mental rejuvenation" %}</p>
+                <p class="mb-4">{% trans "Our specialized wellness services are designed to support your postpartum recovery journey, helping you regain strength, balance, and emotional well-being." %}</p>
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'img/wellness-hero.jpg' %}" alt="{% trans 'Hawwa Wellness Services' %}" class="img-fluid rounded-3 shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Slider -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">{% trans "Our Wellness Categories" %}</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <a href="#" class="text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm wellness-category-card">
+                        <img src="{% static 'img/massage-therapy.jpg' %}" class="card-img-top" alt="{% trans 'Massage Therapy' %}">
+                        <div class="card-body text-center p-4">
+                            <h4>{% trans "Massage Therapy" %}</h4>
+                            <p class="text-muted">{% trans "Specialized massage techniques for postpartum recovery" %}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="col-md-4">
+                <a href="#" class="text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm wellness-category-card">
+                        <img src="{% static 'img/yoga.jpg' %}" class="card-img-top" alt="{% trans 'Postnatal Yoga & Exercise' %}">
+                        <div class="card-body text-center p-4">
+                            <h4>{% trans "Postnatal Yoga & Exercise" %}</h4>
+                            <p class="text-muted">{% trans "Gentle movement to restore strength and flexibility" %}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="col-md-4">
+                <a href="#" class="text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm wellness-category-card">
+                        <img src="{% static 'img/mental-health.jpg' %}" class="card-img-top" alt="{% trans 'Mental Health Support' %}">
+                        <div class="card-body text-center p-4">
+                            <h4>{% trans "Mental Health Support" %}</h4>
+                            <p class="text-muted">{% trans "Professional counseling and emotional wellness services" %}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Services -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">{% trans "Most Popular Wellness Services" %}</h2>
+        
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="row g-0">
+                        <div class="col-md-5">
+                            <img src="{% static 'img/postpartum-massage.jpg' %}" class="img-fluid rounded-start h-100 object-fit-cover" alt="{% trans 'Postpartum Massage' %}">
+                        </div>
+                        <div class="col-md-7">
+                            <div class="card-body p-4">
+                                <h4 class="card-title">{% trans "Postpartum Massage" %}</h4>
+                                <div class="text-warning mb-2">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                    <span class="ms-1 text-muted">(128)</span>
+                                </div>
+                                <p class="card-text">{% trans "A gentle therapeutic massage designed to address the physical challenges of childbirth and early motherhood." %}</p>
+                                <ul class="list-unstyled mb-3">
+                                    <li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i>{% trans "Reduces muscle tension" %}</li>
+                                    <li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i>{% trans "Improves circulation" %}</li>
+                                    <li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i>{% trans "Promotes relaxation" %}</li>
+                                </ul>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fs-5 fw-bold text-success">350 {% trans "SAR" %}</span>
+                                    <a href="#" class="btn btn-outline-success">{% trans "View Details" %}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="row g-0">
+                        <div class="col-md-5">
+                            <img src="{% static 'img/pelvic-floor.jpg' %}" class="img-fluid rounded-start h-100 object-fit-cover" alt="{% trans 'Pelvic Floor Therapy' %}">
+                        </div>
+                        <div class="col-md-7">
+                            <div class="card-body p-4">
+                                <h4 class="card-title">{% trans "Pelvic Floor Therapy" %}</h4>
+                                <div class="text-warning mb-2">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <span class="ms-1 text-muted">(96)</span>
+                                </div>
+                                <p class="card-text">{% trans "Professional physical therapy focused on restoring pelvic floor strength and function after childbirth." %}</p>
+                                <ul class="list-unstyled mb-3">
+                                    <li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i>{% trans "Addresses incontinence issues" %}</li>
+                                    <li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i>{% trans "Reduces pelvic pain" %}</li>
+                                    <li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i>{% trans "Improves core stability" %}</li>
+                                </ul>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fs-5 fw-bold text-success">450 {% trans "SAR" %}</span>
+                                    <a href="#" class="btn btn-outline-success">{% trans "View Details" %}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call the parent template content which includes the service listing -->
+{{ block.super }}
+
+<!-- Benefits -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-3">{% trans "Benefits of Postpartum Wellness Care" %}</h2>
+                <p class="lead text-muted">{% trans "Our specialized wellness services provide numerous benefits for new mothers during the critical postpartum recovery period." %}</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 bg-success bg-opacity-10">
+                    <div class="card-body p-4 text-center">
+                        <div class="rounded-circle bg-success bg-opacity-25 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-heart fa-2x text-success"></i>
+                        </div>
+                        <h5>{% trans "Physical Recovery" %}</h5>
+                        <p class="mb-0">{% trans "Specialized therapies to help your body heal and recover strength after childbirth." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 bg-success bg-opacity-10">
+                    <div class="card-body p-4 text-center">
+                        <div class="rounded-circle bg-success bg-opacity-25 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-brain fa-2x text-success"></i>
+                        </div>
+                        <h5>{% trans "Mental Wellbeing" %}</h5>
+                        <p class="mb-0">{% trans "Support for emotional balance and mental health during the postpartum transition." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 bg-success bg-opacity-10">
+                    <div class="card-body p-4 text-center">
+                        <div class="rounded-circle bg-success bg-opacity-25 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-bed fa-2x text-success"></i>
+                        </div>
+                        <h5>{% trans "Better Sleep" %}</h5>
+                        <p class="mb-0">{% trans "Techniques to improve sleep quality during the challenging early parenthood period." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 bg-success bg-opacity-10">
+                    <div class="card-body p-4 text-center">
+                        <div class="rounded-circle bg-success bg-opacity-25 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-user-friends fa-2x text-success"></i>
+                        </div>
+                        <h5>{% trans "Mother-Baby Bonding" %}</h5>
+                        <p class="mb-0">{% trans "Activities and techniques to enhance the connection between mother and baby." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 bg-success bg-opacity-10">
+                    <div class="card-body p-4 text-center">
+                        <div class="rounded-circle bg-success bg-opacity-25 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-tint fa-2x text-success"></i>
+                        </div>
+                        <h5>{% trans "Hormonal Balance" %}</h5>
+                        <p class="mb-0">{% trans "Therapies that help regulate hormones for better mood and physical wellness." %}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 bg-success bg-opacity-10">
+                    <div class="card-body p-4 text-center">
+                        <div class="rounded-circle bg-success bg-opacity-25 p-3 d-inline-flex mb-3">
+                            <i class="fas fa-battery-full fa-2x text-success"></i>
+                        </div>
+                        <h5>{% trans "Energy Recovery" %}</h5>
+                        <p class="mb-0">{% trans "Methods to restore energy levels and combat postpartum fatigue." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">{% trans "Client Experiences" %}</h2>
+        
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-quote-left fa-2x text-success opacity-25"></i>
+                        </div>
+                        <p class="mb-4">{% trans "The postpartum yoga sessions were gentle yet effective, helping me reconnect with my body after birth. My instructor was very attentive to my recovery needs." %}</p>
+                        <div class="d-flex">
+                            <img src="{% static 'img/testimonial-3.jpg' %}" alt="Testimonial" class="rounded-circle" width="50" height="50">
+                            <div class="ms-3">
+                                <h6 class="mb-0">{% trans "Nora S." %}</h6>
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-quote-left fa-2x text-success opacity-25"></i>
+                        </div>
+                        <p class="mb-4">{% trans "The counseling sessions helped me navigate the emotional challenges of early motherhood. Having this support made a tremendous difference in my postpartum experience." %}</p>
+                        <div class="d-flex">
+                            <img src="{% static 'img/testimonial-4.jpg' %}" alt="Testimonial" class="rounded-circle" width="50" height="50">
+                            <div class="ms-3">
+                                <h6 class="mb-0">{% trans "Hana M." %}</h6>
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-quote-left fa-2x text-success opacity-25"></i>
+                        </div>
+                        <p class="mb-4">{% trans "The specialized postpartum massage therapist understood exactly what my body needed. After just two sessions, I experienced significant relief from back pain and tension." %}</p>
+                        <div class="d-flex">
+                            <img src="{% static 'img/testimonial-5.jpg' %}" alt="Testimonial" class="rounded-circle" width="50" height="50">
+                            <div class="ms-3">
+                                <h6 class="mb-0">{% trans "Sara K." %}</h6>
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

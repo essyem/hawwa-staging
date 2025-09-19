@@ -1,0 +1,247 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ program.name }} - {% trans "Wellness Program" %} | {% trans "Hawwa Postpartum Care" %}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">{% trans "Home" %}</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'wellness:wellness_home' %}">{% trans "Wellness" %}</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'wellness:program_list' %}">{% trans "Programs" %}</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ program.name }}</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Program Detail -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Program Image -->
+            <div class="col-lg-5 mb-4 mb-lg-0">
+                <img src="{{ program.image.url }}" alt="{{ program.name }}" class="img-fluid rounded-3 shadow">
+                
+                {% if program.video_url %}
+                <div class="mt-4">
+                    <h4 class="mb-3">{% trans "Video Preview" %}</h4>
+                    <div class="ratio ratio-16x9">
+                        {% if 'youtube.com' in program.video_url or 'youtu.be' in program.video_url %}
+                            <iframe src="{{ program.video_url|safe }}" allowfullscreen></iframe>
+                        {% elif 'vimeo.com' in program.video_url %}
+                            <iframe src="{{ program.video_url|safe }}" allowfullscreen></iframe>
+                        {% else %}
+                            <video controls>
+                                <source src="{{ program.video_url }}" type="video/mp4">
+                                {% trans "Your browser does not support the video tag." %}
+                            </video>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Program Details -->
+            <div class="col-lg-7">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h1 class="mb-0">{{ program.name }}</h1>
+                    {% if program.featured %}
+                    <span class="badge bg-primary">{% trans "Featured" %}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="me-3">
+                            <span class="badge bg-light text-dark">{{ program.category.name }}</span>
+                        </div>
+                        <div class="text-warning me-3">
+                            {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= avg_rating %}
+                            <i class="fas fa-star"></i>
+                            {% else %}
+                            <i class="far fa-star"></i>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="text-muted small">{{ reviews.count }} {% trans "reviews" %}</span>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="lead">{{ program.short_description }}</p>
+                    <p>{{ program.description }}</p>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-3 me-3">
+                                <i class="far fa-clock text-primary"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">{% trans "Duration" %}</h6>
+                                <p class="mb-0 text-muted">{{ program.duration }} {% trans "minutes" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-3 me-3">
+                                <i class="fas fa-user-alt text-primary"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">{% trans "Provider" %}</h6>
+                                <p class="mb-0 text-muted">
+                                    {% if program.provider %}
+                                    {{ program.provider.get_full_name }}
+                                    {% else %}
+                                    {% trans "Hawwa Team" %}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if program.benefits %}
+                <div class="mb-4">
+                    <h4 class="mb-3">{% trans "Benefits" %}</h4>
+                    <div class="bg-light p-4 rounded">
+                        {{ program.benefits|linebreaks }}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <hr class="my-4">
+                
+                <!-- Upcoming Sessions -->
+                <div class="mb-4">
+                    <h4 class="mb-3">{% trans "Upcoming Sessions" %}</h4>
+                    
+                    {% if upcoming_sessions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Date" %}</th>
+                                    <th>{% trans "Time" %}</th>
+                                    <th>{% trans "Location" %}</th>
+                                    <th>{% trans "Action" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in upcoming_sessions %}
+                                <tr>
+                                    <td>{{ session.date }}</td>
+                                    <td>{{ session.start_time }} - {{ session.end_time }}</td>
+                                    <td>
+                                        {% if session.is_online %}
+                                        <span class="badge bg-info">{% trans "Online" %}</span>
+                                        {% else %}
+                                        {{ session.location }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'wellness:session_detail' session.pk %}" class="btn btn-sm btn-outline-primary">{% trans "Details" %}</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        {% trans "No upcoming sessions for this program at the moment. Check back later!" %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Reviews -->
+                <div class="mt-5">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">{% trans "Reviews" %}</h4>
+                        {% if user.is_authenticated %}
+                            {% if user_review %}
+                            <a href="{% url 'wellness:add_review' program.slug %}" class="btn btn-outline-primary btn-sm">{% trans "Edit Your Review" %}</a>
+                            {% else %}
+                            <a href="{% url 'wellness:add_review' program.slug %}" class="btn btn-outline-primary btn-sm">{% trans "Write a Review" %}</a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    
+                    {% if reviews %}
+                    <div class="mb-4">
+                        {% for review in reviews %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h6 class="mb-0">{{ review.user.get_full_name }}</h6>
+                                        <div class="text-warning">
+                                            {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= review.rating %}
+                                            <i class="fas fa-star"></i>
+                                            {% else %}
+                                            <i class="far fa-star"></i>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">{{ review.created_at|date }}</small>
+                                </div>
+                                <p class="card-text">{{ review.comment }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-light">
+                        {% trans "No reviews yet. Be the first to review this program!" %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Related Programs -->
+        {% if related_programs %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3 class="mb-4">{% trans "Similar Programs You Might Like" %}</h3>
+                
+                <div class="row g-4">
+                    {% for related in related_programs %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <img src="{{ related.image.url }}" class="card-img-top" alt="{{ related.name }}">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ related.name }}</h5>
+                                <p class="card-text">{{ related.short_description }}</p>
+                            </div>
+                            <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center">
+                                <span class="text-muted">
+                                    <i class="far fa-clock me-1"></i> {{ related.duration }} {% trans "mins" %}
+                                </span>
+                                <a href="{% url 'wellness:program_detail' related.slug %}" class="btn btn-sm btn-outline-primary">{% trans "View Details" %}</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,541 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}User Management - HAWWA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .management-header {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .filters-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .user-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .user-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .user-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #3498db;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-verified {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .action-btn {
+        padding: 0.25rem 0.75rem;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        border: none;
+        cursor: pointer;
+        margin: 0.2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-activate {
+        background: #2ecc71;
+        color: white;
+    }
+    
+    .btn-deactivate {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .btn-verify {
+        background: #3498db;
+        color: white;
+    }
+    
+    .btn-view {
+        background: #95a5a6;
+        color: white;
+    }
+    
+    .stats-row {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+    
+    .pagination-wrapper {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .search-highlight {
+        background: #fff3cd;
+        padding: 0.1rem 0.2rem;
+        border-radius: 3px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Management Header -->
+<div class="management-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="mb-2">
+                    <i class="fas fa-users me-3"></i>
+                    User Management
+                </h1>
+                <p class="mb-0">Comprehensive user administration and oversight</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="{% url 'admin_dashboard:dashboard' %}" class="btn btn-outline-light me-2">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Back to Dashboard
+                </a>
+                <a href="/admin/accounts/customuser/" class="btn btn-light">
+                    <i class="fas fa-cogs me-2"></i>
+                    Django Admin
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <!-- User Statistics -->
+    <div class="stats-row">
+        <div class="row">
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="stat-item">
+                    <div class="stat-number text-primary">{{ user_stats.total_users }}</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="stat-item">
+                    <div class="stat-number text-success">{{ user_stats.active_users }}</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="stat-item">
+                    <div class="stat-number text-warning">{{ user_stats.unverified_users }}</div>
+                    <div class="stat-label">Unverified</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="stat-item">
+                    <div class="stat-number text-info">{{ user_stats.mothers }}</div>
+                    <div class="stat-label">Mothers</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="stat-item">
+                    <div class="stat-number text-purple">{{ user_stats.vendors }}</div>
+                    <div class="stat-label">Vendors</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="stat-item">
+                    <div class="stat-number text-secondary">{{ user_stats.healthcare_providers }}</div>
+                    <div class="stat-label">Providers</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-card">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label for="search" class="form-label">Search Users</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ request.GET.search }}" placeholder="Name, email, phone...">
+            </div>
+            <div class="col-md-2">
+                <label for="user_type" class="form-label">User Type</label>
+                <select class="form-select" id="user_type" name="user_type">
+                    <option value="">All Types</option>
+                    <option value="mother" {% if request.GET.user_type == 'mother' %}selected{% endif %}>Mothers</option>
+                    <option value="vendor" {% if request.GET.user_type == 'vendor' %}selected{% endif %}>Vendors</option>
+                    <option value="healthcare_provider" {% if request.GET.user_type == 'healthcare_provider' %}selected{% endif %}>Healthcare Providers</option>
+                    <option value="admin" {% if request.GET.user_type == 'admin' %}selected{% endif %}>Admins</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="verification_status" class="form-label">Verification</label>
+                <select class="form-select" id="verification_status" name="verification_status">
+                    <option value="">All Status</option>
+                    <option value="verified" {% if request.GET.verification_status == 'verified' %}selected{% endif %}>Verified</option>
+                    <option value="unverified" {% if request.GET.verification_status == 'unverified' %}selected{% endif %}>Unverified</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="activity_status" class="form-label">Activity</label>
+                <select class="form-select" id="activity_status" name="activity_status">
+                    <option value="">All Status</option>
+                    <option value="active" {% if request.GET.activity_status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if request.GET.activity_status == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="date_joined" class="form-label">Joined Date</label>
+                <select class="form-select" id="date_joined" name="date_joined">
+                    <option value="">All Time</option>
+                    <option value="today" {% if request.GET.date_joined == 'today' %}selected{% endif %}>Today</option>
+                    <option value="week" {% if request.GET.date_joined == 'week' %}selected{% endif %}>This Week</option>
+                    <option value="month" {% if request.GET.date_joined == 'month' %}selected{% endif %}>This Month</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">&nbsp;</label>
+                <div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Users List -->
+    <div class="row">
+        {% for user in users %}
+        <div class="col-lg-6 col-xl-4">
+            <div class="user-card">
+                <div class="d-flex align-items-start">
+                    <div class="user-avatar">
+                        {{ user.first_name|first|default:"U" }}
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h5 class="mb-1">
+                            {% if request.GET.search %}
+                                {{ user.get_full_name|highlight_search:request.GET.search }}
+                            {% else %}
+                                {{ user.get_full_name }}
+                            {% endif %}
+                        </h5>
+                        <p class="text-muted mb-1">
+                            {% if request.GET.search %}
+                                {{ user.email|highlight_search:request.GET.search }}
+                            {% else %}
+                                {{ user.email }}
+                            {% endif %}
+                        </p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-user-tag me-1"></i>
+                            {{ user.get_user_type_display }}
+                        </p>
+                        
+                        <!-- User Status Badges -->
+                        <div class="mb-2">
+                            {% if user.is_verified %}
+                                <span class="status-badge status-verified">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    Verified
+                                </span>
+                            {% else %}
+                                <span class="status-badge status-pending">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Unverified
+                                </span>
+                            {% endif %}
+                            
+                            {% if user.is_active %}
+                                <span class="status-badge status-active">
+                                    <i class="fas fa-circle me-1"></i>
+                                    Active
+                                </span>
+                            {% else %}
+                                <span class="status-badge status-inactive">
+                                    <i class="fas fa-ban me-1"></i>
+                                    Inactive
+                                </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- User Details -->
+                        <div class="small text-muted">
+                            <div><i class="fas fa-calendar me-1"></i> Joined: {{ user.date_joined|date:"M d, Y" }}</div>
+                            {% if user.phone_number %}
+                            <div><i class="fas fa-phone me-1"></i> {{ user.phone_number }}</div>
+                            {% endif %}
+                            {% if user.last_login %}
+                            <div><i class="fas fa-sign-in-alt me-1"></i> Last login: {{ user.last_login|naturaltime }}</div>
+                            {% else %}
+                            <div><i class="fas fa-exclamation-triangle me-1"></i> Never logged in</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- User Statistics -->
+                        {% if user.user_type == 'mother' %}
+                        <div class="mt-2 small">
+                            <span class="badge bg-primary">{{ user.bookings.count }} bookings</span>
+                            <span class="badge bg-success">{{ user.reviews.count }} reviews</span>
+                        </div>
+                        {% elif user.user_type == 'vendor' %}
+                        <div class="mt-2 small">
+                            <span class="badge bg-info">{{ user.vendor_services.count }} services</span>
+                            <span class="badge bg-warning">{{ user.vendor_bookings.count }} bookings</span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Action Buttons -->
+                        <div class="mt-3">
+                            <a href="/admin/accounts/customuser/{{ user.id }}/change/" class="action-btn btn-view">
+                                <i class="fas fa-eye me-1"></i>
+                                View Details
+                            </a>
+                            
+                            {% if not user.is_verified %}
+                            <button class="action-btn btn-verify" onclick="verifyUser({{ user.id }})">
+                                <i class="fas fa-check me-1"></i>
+                                Verify
+                            </button>
+                            {% endif %}
+                            
+                            {% if user.is_active %}
+                            <button class="action-btn btn-deactivate" onclick="deactivateUser({{ user.id }})">
+                                <i class="fas fa-ban me-1"></i>
+                                Deactivate
+                            </button>
+                            {% else %}
+                            <button class="action-btn btn-activate" onclick="activateUser({{ user.id }})">
+                                <i class="fas fa-check me-1"></i>
+                                Activate
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No users found</h4>
+                <p class="text-muted">Try adjusting your search criteria or filters.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination-wrapper mt-4">
+        <nav aria-label="User pagination">
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        
+        <div class="text-center mt-2">
+            <small class="text-muted">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} users
+            </small>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function verifyUser(userId) {
+    if (confirm('Are you sure you want to verify this user?')) {
+        fetch('{% url "admin_dashboard:user_action" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                action: 'verify',
+                user_id: userId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while verifying the user.');
+        });
+    }
+}
+
+function activateUser(userId) {
+    if (confirm('Are you sure you want to activate this user?')) {
+        fetch('{% url "admin_dashboard:user_action" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                action: 'activate',
+                user_id: userId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while activating the user.');
+        });
+    }
+}
+
+function deactivateUser(userId) {
+    if (confirm('Are you sure you want to deactivate this user? This will prevent them from logging in.')) {
+        fetch('{% url "admin_dashboard:user_action" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                action: 'deactivate',
+                user_id: userId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deactivating the user.');
+        });
+    }
+}
+
+// Auto-submit form on filter change
+document.querySelectorAll('select[name]').forEach(select => {
+    select.addEventListener('change', function() {
+        this.closest('form').submit();
+    });
+});
+</script>
+{% endblock %}
