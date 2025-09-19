@@ -427,6 +427,15 @@ Immediate developer notes and blockers discovered during audit:
 - Missing/extra dependencies: `requirements-frozen.txt` includes `drf-yasg` and other frozen deps not mirrored in `requirements.txt`; ensure `requirements.txt` is synchronized. `django-filter` was required by DRF settings and must be present in the environment.
 - Staticfiles: `STATICFILES_DIRS` references `/workspaces/hawwa/static` which is currently missing; create or update this directory and ensure `collectstatic` works for deployments.
 
+Recent changes (2025-09-19):
+
+- Admin improvements: enhanced admin actions and UX for `bookings` and `vendors`.
+  - Bookings admin: status actions now create `BookingStatusHistory` entries and attempt to send emails; CSV export action added.
+  - Vendors admin: bulk verify/activate/suspend actions, CSV export, and notification stub action added.
+- Requirements sync: `drf-yasg` and `django-filter` added to `requirements.txt` and installed in dev environment to resolve import errors during `manage.py check`.
+
+These changes reduce friction for staff workflows and resolved immediate package import blockers during development checks.
+
 Recommended short-term next steps (developer-friendly):
 
 1. Address repository warnings and sync `requirements.txt` with `requirements-frozen.txt` (add `drf-yasg`, `django-filter`, keep versions pinned as appropriate).
