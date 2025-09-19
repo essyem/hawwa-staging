@@ -45,11 +45,15 @@ def profit_and_loss(start_date, end_date, base_currency='QAR'):
     gross_profit = revenue - costs
     net_profit = gross_profit - expenses
 
+    gross_margin_pct = (gross_profit / revenue * 100) if revenue and revenue != Decimal('0.00') else Decimal('0.00')
+
     return {
+        'base_currency': base_currency,
         'revenue': revenue,
         'costs': costs,
         'expenses': expenses,
         'gross_profit': gross_profit,
+        'gross_margin_pct': gross_margin_pct,
         'net_profit': net_profit
     }
 

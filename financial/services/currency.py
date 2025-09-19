@@ -3,6 +3,40 @@ from django.utils import timezone
 from ..models import CurrencyRate
 
 
+def convert_amount(amount, from_currency, to_currency, date=None):
+    """Convert `amount` from `from_currency` to `to_currency` using CurrencyRate.
+
+    Default behavior: if no rate exists, return the same amount (1:1), so reports stay consistent until seeded.
+    """
+    if not amount:
+        return Decimal('0.00')
+
+    if not date:
+        date = timezone.now().date()
+
+    # short-circuit if same currency
+    if (not from_currency) or (from_currency == to_currency):
+        return Decimal(amount)
+
+    # Look for a direct rate valid at the date
+    try:
+        rate_obj = CurrencyRate.objects.filter(
+            from_currency=from_currency,
+            to_currency=to_currency,
+            valid_from__lte=date
+        ).order_by('-valid_from').first()
+        if rate_obj:
+            return (Decimal(amount) * Decimal(rate_obj.rate))
+    except Exception:
+        pass
+
+    # No rate found: fall back to 1:1
+    return Decimal(amount)
+from decimal import Decimal
+from django.utils import timezone
+from ..models import CurrencyRate
+
+
 def get_rate(from_currency, to_currency, date=None):
     """Return the best matching rate to convert from_currency -> to_currency for the given date.
 
