@@ -405,3 +405,34 @@
 ---
 
 *This checklist will be updated regularly as we progress through the development phases.*
+
+---
+
+## 🧭 Repository Audit (2025-09-19)
+
+Summary of repository mapping to checklist items (quick developer-focused evidence):
+
+- Website & Core Infrastructure: Code present in `hawwa/` (Django settings and urls), templates and `staticfiles/` — matches "Website Foundation" items.
+- User Authentication & Management: `accounts/` contains `models.py`, `forms.py`, `views.py`, `profile_models.py` — registration and auth are implemented; profile models exist (`accounts/profile_models.py`) but profile UI and avatar upload require completion.
+- Service Management System: `services/` app includes `models.py`, admin + views — service listing, categories, pricing, and duration are implemented.
+- Booking & Scheduling System: `bookings/` app contains rich models, views, and forms (`bookings/models.py`, `bookings/views.py`, `bookings/forms.py`) — basic booking creation, listing, status history, and dashboard are implemented. Booking workflow end-to-end (confirmation, status transitions, payment integration) remains a high-priority item.
+- AI Buddy System: `ai_buddy/` has models, `ai_engine.py`, and views — foundational conversational engine exists; advanced NLP/OpenAI integration and conversation management features remain in progress.
+- Vendor Management System: `vendors/` contains models, views, templates and management commands (`vendors/models.py`, `vendors/views.py`, `templates/vendors/*`) — vendor portal skeleton and many features exist but need polish (availability, document verification workflows, payments).
+- Payments & Cloud: `payments/` contains services and forecasting but no production gateway wiring; cloud deployment configs are not present (skipped until staging per checklist).
+- Reporting & Analytics: `reporting/` app exists with services and models but dashboard/KPI work remains pending.
+
+Immediate developer notes and blockers discovered during audit:
+
+- Running `python3 manage.py check` (dev environment) produced security warnings to address before production (HSTS, SSL redirect, SECRET_KEY length/rotation, SESSION/CSRF cookie secure flags, DEBUG).
+- Missing/extra dependencies: `requirements-frozen.txt` includes `drf-yasg` and other frozen deps not mirrored in `requirements.txt`; ensure `requirements.txt` is synchronized. `django-filter` was required by DRF settings and must be present in the environment.
+- Staticfiles: `STATICFILES_DIRS` references `/workspaces/hawwa/static` which is currently missing; create or update this directory and ensure `collectstatic` works for deployments.
+
+Recommended short-term next steps (developer-friendly):
+
+1. Address repository warnings and sync `requirements.txt` with `requirements-frozen.txt` (add `drf-yasg`, `django-filter`, keep versions pinned as appropriate).
+2. Finish booking workflow: confirm/submit flow, confirmation emails templates, booking status transitions, and basic payment stubs in `bookings/` and `payments/`.
+3. Harden settings for production (use environment variables, generate secure `SECRET_KEY`, set `DEBUG=False` in production settings, and set secure cookie flags).
+4. Finish vendor portal polish: availability UI, document verification flow, and vendor payment records.
+5. Add CI (GitHub Actions) that runs `python -m pip install -r requirements.txt`, `python manage.py check`, and a subset of tests.
+
+If you'd like I can: (a) open PR(s) that sync `requirements.txt`, (b) add a small GitHub Actions workflow skeleton, and (c) implement the booking confirmation email template and tests as the next incremental change.
