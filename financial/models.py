@@ -13,6 +13,7 @@ class AccountingCategory(models.Model):
     name = models.CharField(_("Category Name"), max_length=100)
     code = models.CharField(_("Category Code"), max_length=20, unique=True)
     description = models.TextField(_("Description"), blank=True)
+    is_cogs = models.BooleanField("Is COGS", default=False)
     is_active = models.BooleanField(_("Active"), default=True)
     created_at = models.DateTimeField(_("Created At"), auto_now_add=True)
     
@@ -239,6 +240,9 @@ class InvoiceItem(models.Model):
     discount_percentage = models.DecimalField(_("Discount %"), max_digits=5, decimal_places=2, 
                                             default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
     total_amount = models.DecimalField(_("Total Amount"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    cost_amount = models.DecimalField("Cost Amount", max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    # Currency for the cost. If None, assume same as invoice/base currency (QAR)
+    cost_currency = models.CharField("Cost Currency", max_length=10, default='QAR')
     
     # Accounting
     category = models.ForeignKey(AccountingCategory, on_delete=models.SET_NULL,
@@ -258,6 +262,21 @@ class InvoiceItem(models.Model):
         discount_decimal = Decimal(str(self.discount_percentage)) / Decimal('100')
         discounted_price = self.unit_price * (Decimal('1') - discount_decimal)
         self.total_amount = self.quantity * discounted_price
+        # Auto-populate cost_amount from linked service if not explicitly set
+        try:
+            if (not self.cost_amount or Decimal(self.cost_amount) == Decimal('0.00')) and self.service:
+                # Prefer service.cost when available, otherwise fall back to service.price
+                svc = self.service
+                svc_cost = getattr(svc, 'cost', None)
+                if svc_cost is None or Decimal(svc_cost) == Decimal('0.00'):
+                    svc_cost = getattr(svc, 'price', Decimal('0.00'))
+                # Multiply by quantity to get total cost for the line
+                self.cost_amount = (Decimal(svc_cost) * self.quantity)
+                # Assume service currency is QAR for now; future: store Service.currency
+                self.cost_currency = getattr(svc, 'currency', 'QAR')
+        except Exception:
+            # Fail-safe: don't break save if service lookup fails
+            pass
         super().save(*args, **kwargs)
         
         # Update invoice totals

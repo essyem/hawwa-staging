@@ -5,6 +5,7 @@ from django.utils import timezone
 from ..models import Invoice, InvoiceItem, Payment, Expense
 
 from ..models import LedgerBalance, LedgerAccount
+from ..models import InvoiceItem, AccountingCategory
 
 
 def profit_and_loss(start_date, end_date):
@@ -18,9 +19,13 @@ def profit_and_loss(start_date, end_date):
         invoice__invoice_date__lte=end_date
     ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
 
-    # Costs: placeholder - invoices may have cost-of-goods lines marked by category or negative amounts
-    # For now assume costs = 0.00 (extend later to support cost categories)
-    costs = Decimal('0.00')
+    # Costs: sum cost_amount from invoice items whose category is marked as COGS
+    cogs_items = InvoiceItem.objects.filter(
+        invoice__invoice_date__gte=start_date,
+        invoice__invoice_date__lte=end_date,
+        category__is_cogs=True
+    ).aggregate(total=Sum('cost_amount'))['total'] or Decimal('0.00')
+    costs = Decimal(cogs_items)
 
     # Expenses: sum of Expense.amount in period
     expense_sum = Expense.objects.filter(

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from django.urls import reverse
+from django.urls import reverse, path
 from django.contrib import messages
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
@@ -12,8 +12,10 @@ from .models import (
     AccountingCategory, TaxRate, Invoice, InvoiceItem, 
     Payment, Expense
 )
+from . import admin_views
 from .models import Budget, BudgetLine
 from .models import LedgerAccount, JournalEntry, JournalLine
+from django.core.management import call_command
 
 # Custom admin actions
 @admin.action(description='Mark selected invoices as sent')
@@ -399,12 +401,58 @@ class BudgetLineAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
 
 
+@admin.register(InvoiceItem)
+class InvoiceItemAdmin(admin.ModelAdmin):
+    list_display = ('description', 'invoice', 'quantity', 'unit_price', 'total_amount', 'cost_amount', 'cost_currency')
+    list_filter = ('category',)
+    search_fields = ('description', 'invoice__invoice_number')
+    actions = ['set_costs_from_service']
+
+    def set_costs_from_service(self, request, queryset):
+        updated = 0
+        for item in queryset:
+            if item.service:
+                svc_cost = getattr(item.service, 'cost', None)
+                if svc_cost is None or Decimal(svc_cost) == Decimal('0.00'):
+                    svc_cost = getattr(item.service, 'price', Decimal('0.00'))
+                item.cost_amount = Decimal(svc_cost) * item.quantity
+                item.cost_currency = getattr(item.service, 'currency', 'QAR')
+                item.save()
+                updated += 1
+        self.message_user(request, f"Updated cost for {updated} items.")
+    set_costs_from_service.short_description = 'Set cost amounts from linked Service'
+
+
 @admin.register(LedgerAccount)
 class LedgerAccountAdmin(admin.ModelAdmin):
     list_display = ('code', 'name', 'account_type', 'is_active', 'created_at')
     list_filter = ('account_type', 'is_active')
     list_editable = ('account_type', 'is_active')
     search_fields = ('code', 'name')
+    actions = ['rebuild_selected_accounts']
+
+    @admin.action(description='Rebuild balances for selected accounts')
+    def rebuild_selected_accounts(self, request, queryset):
+        # For each selected account, compute balance from journal lines and update LedgerBalance
+        from .models import LedgerBalance
+        changed = 0
+        for acct in queryset:
+            # Aggregate via JournalLine DB grouping to compute balance
+            qs = JournalLine.objects.filter(account=acct).aggregate(
+                debits=Sum('debit') , credits=Sum('credit')
+            )
+            debits = qs['debits'] or 0
+            credits = qs['credits'] or 0
+            if acct.account_type in ('asset', 'expense'):
+                new_bal = debits - credits
+            else:
+                new_bal = credits - debits
+            lb, _ = LedgerBalance.objects.get_or_create(account=acct, defaults={'balance': new_bal})
+            if lb.balance != new_bal:
+                lb.balance = new_bal
+                lb.save()
+                changed += 1
+        messages.info(request, f"Rebuilt balances for {queryset.count()} accounts, changed: {changed}")
 
 
 class JournalLineInline(admin.TabularInline):
@@ -432,3 +480,15 @@ class JournalEntryAdmin(admin.ModelAdmin):
             except Exception as e:
                 failed += 1
         messages.info(request, f"Posted {success} entries, {failed} failed.")
+
+
+# Add admin view url for trial balance by wrapping admin.site.get_urls
+original_get_urls = admin.site.get_urls
+
+def get_urls():
+    my_urls = [
+        path('financial/trial-balance/', admin_views.trial_balance_view, name='financial_trial_balance'),
+    ]
+    return my_urls + original_get_urls()
+
+admin.site.get_urls = get_urls

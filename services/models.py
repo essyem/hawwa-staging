@@ -37,6 +37,8 @@ class Service(models.Model):
     description = models.TextField(_("Description"))
     short_description = models.CharField(_("Short Description"), max_length=200, blank=True)
     price = models.DecimalField(_("Price"), max_digits=10, decimal_places=2)
+    # Optional cost field to record the supplier/cost price for COGS calculations
+    cost = models.DecimalField(_("Cost"), max_digits=10, decimal_places=2, default=0)
     duration = models.DurationField(_("Duration"), help_text=_("Expected duration of the service"))
     category = models.ForeignKey(ServiceCategory, related_name="services", on_delete=models.CASCADE)
     image = models.ImageField(_("Service Image"), upload_to='services/', blank=True, null=True)
