@@ -31,6 +31,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install pytest pytest-django junitparser
 
     - name: Lint (flake8)
       run: |
@@ -40,17 +41,31 @@ jobs:
           echo "flake8 not installed; skipping lint step"
         fi
 
-    - name: Run Django tests (settings_dev)
+    - name: Run tests with pytest (junit xml)
       env:
         HAWWA_ALLOWED_HOSTS: localhost,127.0.0.1,testserver
         HAWWA_DB_PATH: ${{ github.workspace }}/db.sqlite3
         HAWWA_EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
       run: |
-        python manage.py test --settings=hawwa.settings_dev -v 1 | tee test-output.txt
+        # pytest-django will pick up Django settings via DJANGO_SETTINGS_MODULE if needed.
+        export DJANGO_SETTINGS_MODULE=hawwa.settings_dev
+        pytest -q --maxfail=1 --junitxml=junit.xml
 
-    - name: Upload test output
+    - name: Upload JUnit report
       uses: actions/upload-artifact@v4
       with:
-        name: test-output
-        path: test-output.txt
+        name: junit-report
+        path: junit.xml
+
+    - name: Post PR comment with test summary
+      if: github.event_name == 'pull_request'
+      uses: peter-evans/create-or-update-comment@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          ### CI Test Summary
+          Tests were executed with pytest. Download the `junit.xml` artifact for details.
+          If tests failed, see the artifact or workflow log for failure traces.
 
