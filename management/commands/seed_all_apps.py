@@ -37,16 +37,22 @@ class Command(BaseCommand):
         except Exception:
             pass
 
-        # Create predictable demo accounts
+        # Create predictable demo accounts (use create_user to ensure password hashing and required fields)
         try:
             if not User.objects.filter(email='mother@example.com').exists():
-                u = User.objects.create(email='mother@example.com', first_name='Aisha', last_name='Mother')
-                u.set_password('mother123')
-                u.save()
+                try:
+                    User.objects.create_user(email='mother@example.com', password='mother123', first_name='Aisha', last_name='Mother', user_type='MOTHER')
+                except Exception:
+                    u = User.objects.create(email='mother@example.com', first_name='Aisha', last_name='Mother', user_type='MOTHER')
+                    u.set_password('mother123')
+                    u.save()
             if not User.objects.filter(email='provider@example.com').exists():
-                p = User.objects.create(email='provider@example.com', first_name='Lina', last_name='Provider')
-                p.set_password('provider123')
-                p.save()
+                try:
+                    User.objects.create_user(email='provider@example.com', password='provider123', first_name='Lina', last_name='Provider', user_type='WELLNESS')
+                except Exception:
+                    p = User.objects.create(email='provider@example.com', first_name='Lina', last_name='Provider', user_type='WELLNESS')
+                    p.set_password('provider123')
+                    p.save()
         except Exception:
             pass
 
