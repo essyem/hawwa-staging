@@ -48,11 +48,11 @@
                     </p>
                     <p class="mb-2">
                         <i class="fas fa-phone me-2"></i>
-                        <a href="tel:+97472126440">+974 7212 6440</a>
+                        <a href="tel:{{ HAWWA_SETTINGS.PHONE_NUMBER|default:'+97472126440'|urlencode }}">{{ HAWWA_SETTINGS.PHONE_NUMBER|default:'+974 7212 6440' }}</a>
                     </p>
                     <p class="mb-2">
                         <i class="fas fa-envelope me-2"></i>
-                        <a href="mailto:hello@hawwawellness.com">hello@hawwawellness.com</a>
+                        <a href="mailto:{{ HAWWA_SETTINGS.SUPPORT_EMAIL|default:'hello@hawwawellness.com' }}">{{ HAWWA_SETTINGS.SUPPORT_EMAIL|default:'hello@hawwawellness.com' }}</a>
                     </p>
                     <p class="mb-0">
                         <i class="fas fa-clock me-2"></i>
