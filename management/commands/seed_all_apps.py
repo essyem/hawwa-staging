@@ -18,6 +18,34 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         User = get_user_model()
         users = []
+        # Create a predictable superuser for demos
+        try:
+            if not User.objects.filter(email='admin@hawwa.com').exists():
+                # create_superuser may not be available on all custom user models; fallback to create
+                try:
+                    User.objects.create_superuser(email='admin@hawwa.com', password='admin123', first_name='Admin', last_name='Hawwa')
+                except Exception:
+                    u = User.objects.create(email='admin@hawwa.com', first_name='Admin', last_name='Hawwa')
+                    u.set_password('admin123')
+                    u.is_staff = True
+                    u.is_superuser = True
+                    u.save()
+        except Exception:
+            pass
+
+        # Create predictable demo accounts
+        try:
+            if not User.objects.filter(email='mother@example.com').exists():
+                u = User.objects.create(email='mother@example.com', first_name='Aisha', last_name='Mother')
+                u.set_password('mother123')
+                u.save()
+            if not User.objects.filter(email='provider@example.com').exists():
+                p = User.objects.create(email='provider@example.com', first_name='Lina', last_name='Provider')
+                p.set_password('provider123')
+                p.save()
+        except Exception:
+            pass
+
         for i in range(5):
             email = f'integ_user{i}@example.com'
             u, _ = User.objects.get_or_create(email=email, defaults={
