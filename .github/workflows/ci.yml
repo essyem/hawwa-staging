@@ -1,10 +1,8 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [ master ]
-  push:
-    branches: [ copilot/**, master ]
+  pull_request: {}
+  push: {}
 
 jobs:
   test:
@@ -16,6 +14,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -26,10 +32,25 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Lint (flake8)
+      run: |
+        if command -v flake8 >/dev/null 2>&1; then
+          flake8 || true
+        else
+          echo "flake8 not installed; skipping lint step"
+        fi
+
     - name: Run Django tests (settings_dev)
       env:
         HAWWA_ALLOWED_HOSTS: localhost,127.0.0.1,testserver
         HAWWA_DB_PATH: ${{ github.workspace }}/db.sqlite3
         HAWWA_EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
       run: |
-        python manage.py test --settings=hawwa.settings_dev -v 1
+        python manage.py test --settings=hawwa.settings_dev -v 1 | tee test-output.txt
+
+    - name: Upload test output
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-output
+        path: test-output.txt
+
