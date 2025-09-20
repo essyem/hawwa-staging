@@ -17,6 +17,40 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         User = get_user_model()
         users = []
+        # Ensure demo superuser and demo accounts exist for predictable demos
+        try:
+            if not User.objects.filter(email='admin@hawwa.com').exists():
+                try:
+                    User.objects.create_superuser(email='admin@hawwa.com', password='admin123', first_name='Admin', last_name='Hawwa', user_type='ADMIN')
+                except Exception:
+                    u = User.objects.create(email='admin@hawwa.com', first_name='Admin', last_name='Hawwa', user_type='ADMIN')
+                    u.set_password('admin123')
+                    try:
+                        u.is_staff = True
+                        u.is_superuser = True
+                    except Exception:
+                        pass
+                    u.save()
+        except Exception:
+            pass
+
+        try:
+            if not User.objects.filter(email='mother@example.com').exists():
+                try:
+                    User.objects.create_user(email='mother@example.com', password='mother123', first_name='Aisha', last_name='Mother', user_type='MOTHER')
+                except Exception:
+                    u = User.objects.create(email='mother@example.com', first_name='Aisha', last_name='Mother', user_type='MOTHER')
+                    u.set_password('mother123')
+                    u.save()
+            if not User.objects.filter(email='provider@example.com').exists():
+                try:
+                    User.objects.create_user(email='provider@example.com', password='provider123', first_name='Lina', last_name='Provider', user_type='WELLNESS')
+                except Exception:
+                    p = User.objects.create(email='provider@example.com', first_name='Lina', last_name='Provider', user_type='WELLNESS')
+                    p.set_password('provider123')
+                    p.save()
+        except Exception:
+            pass
         for i in range(5):
             email = f'integ_user{i}@example.com'
             u, _ = User.objects.get_or_create(email=email, defaults={
