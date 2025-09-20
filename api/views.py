@@ -13,6 +13,7 @@ from .serializers import (
 from accounts.models import User
 from services.models import Service, ServiceCategory, ServiceReview
 from bookings.models import Booking, BookingItem
+from rest_framework.authentication import TokenAuthentication
 
 
 class IsOwnerOrAdmin(permissions.BasePermission):
@@ -54,6 +55,18 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['patch'], url_path='update-profile', url_name='update-profile')
+    def update_profile(self, request):
+        """
+        Allow the authenticated user to update their own profile via the API.
+        This provides the reverse name `user-update-profile` expected by tests.
+        """
+        user = request.user
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
 
 class ServiceCategoryViewSet(viewsets.ModelViewSet):
     """
@@ -71,7 +84,18 @@ class ServiceViewSet(viewsets.ModelViewSet):
     """
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
+    # Use TokenAuthentication for API clients; allow read-only access to unauthenticated users
+    authentication_classes = [
+        TokenAuthentication,
+    ]
+    # By default allow read-only to unauthenticated users; enforce admin-only for write operations
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_permissions(self):
+        # For unsafe methods require admin privileges
+        if self.request.method in ('POST', 'PUT', 'PATCH', 'DELETE'):
+            return [permissions.IsAdminUser()]
+        return [perm() for perm in self.permission_classes]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category', 'status', 'featured']
     search_fields = ['name', 'description', 'short_description']

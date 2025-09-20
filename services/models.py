@@ -70,8 +70,9 @@ class Service(models.Model):
         if not self.slug:
             self.slug = slugify(self.name)
         
-        # Allow tests and fixtures to set duration as a string like '01:00:00'.
-        # Django's DurationField expects a datetime.timedelta; coerce if necessary.
+        # Allow tests and fixtures to set duration as a string like '01:00:00',
+        # or as an integer/float number of seconds. Django's DurationField
+        # expects a datetime.timedelta; coerce if necessary.
         if isinstance(self.duration, str):
             try:
                 parts = self.duration.split(':')
@@ -83,6 +84,12 @@ class Service(models.Model):
                     self.duration = timedelta(minutes=minutes, seconds=seconds)
             except Exception:
                 # leave as-is and let Django validation raise if invalid
+                pass
+        elif isinstance(self.duration, (int, float)):
+            # Treat numeric durations as seconds
+            try:
+                self.duration = timedelta(seconds=int(self.duration))
+            except Exception:
                 pass
 
         if not self.short_description and self.description:

@@ -1,22 +1,47 @@
 from .settings import *
 from pathlib import Path
+import os
 
-# Development overrides for local testing (uses SQLite)
+# Development overrides for local testing (portable across VMs)
+# This file is safe to commit to the repo for development usage.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = True
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+# Allow toggling DEBUG via env var. Default to True in development images.
+DEBUG = os.environ.get('HAWWA_DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
-# Use a lightweight SQLite DB for local dev in Codespace
+# Allow configuration of hosts via env var; default includes common test/dev hosts
+# Example: HAWWA_ALLOWED_HOSTS=localhost,127.0.0.1,my-vm
+allowed = os.environ.get('HAWWA_ALLOWED_HOSTS', '127.0.0.1,localhost,testserver')
+ALLOWED_HOSTS = [h.strip() for h in allowed.split(',') if h.strip()]
+
+# SQLite by default for simple VM developer experience. Override with HAWWA_DB_PATH
+db_path = os.environ.get('HAWWA_DB_PATH')
+if db_path:
+    db_name = Path(db_path)
+else:
+    db_name = BASE_DIR / 'db.sqlite3'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': str(db_name),
     }
 }
 
-# Ensure STATIC directory exists so system checks don't warn
-STATICFILES_DIRS = [BASE_DIR / 'static']
+# Static directory: ensure a local static directory exists on the VM
+static_dir = BASE_DIR / 'static'
+try:
+    static_dir.mkdir(parents=True, exist_ok=True)
+except Exception:
+    # Best-effort: if we can't create the dir (permissions), just ensure the setting exists
+    pass
+STATICFILES_DIRS = [static_dir]
 
-# Use a simpler email backend in dev
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Development-friendly email backend
+EMAIL_BACKEND = os.environ.get('HAWWA_EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+
+# For local development, you may want to set a non-empty secret key via env var.
+# Never store production secrets here. Example: export DJANGO_SECRET_KEY='mydevkey'
+if os.environ.get('DJANGO_SECRET_KEY'):
+    SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+
