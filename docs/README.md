@@ -133,3 +133,13 @@ For information about data security, privacy policies, and compliance:
 ---
 
 *This documentation is designed to ensure all stakeholders can effectively use the Hawwa platform. If you notice any gaps or need additional information, please contact our documentation team at docs@hawwa.com.*
+
+---
+
+## 🟢 Recent Changes (Sept 20, 2025)
+
+- Frozen current Python dependencies into `requirements-frozen.txt` for a reproducible dev environment.
+- Exposed `HAWWA_SETTINGS` to templates via a new context processor (`hawwa/context_processors.py`) and updated header/footer to use the centralized `SUPPORT_EMAIL` and `PHONE_NUMBER` settings.
+- Added the `change_management` app (Change Requests, Incidents, Leads) with REST API endpoints, admin dashboard, signals, and tests. See the project checklist for details.
+
+If you rely on `requirements.txt` for deployments, ensure you sync or pin versions from `requirements-frozen.txt` as needed.
