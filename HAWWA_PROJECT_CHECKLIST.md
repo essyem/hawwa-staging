@@ -129,6 +129,22 @@
 
 ---
 
+## 🆕 New App: change_management (Sept 2025)
+
+- [x] `change_management` app added for Change Requests, Incidents, and Leads
+  - [x] Models: `ChangeRequest`, `Incident`, `Lead`, `Comment`, `Activity`, `Role`, `RoleAssignment`
+  - [x] REST API (DRF) endpoints: change requests, incidents, leads, comments, roles, role-assignments, activity
+  - [x] UI: CR detail page with comments, supports AJAX comment submission (progressive enhancement)
+  - [x] Signals: Activity creation and email notifications on saves
+  - [x] Admin: Dashboard view and assign-to-user admin action
+  - [x] Seeder/management commands for deterministic dev data and integration tests
+  - [x] Unit and integration tests added for RBAC, signals, admin flows, and UI comment behavior
+
+Notes: This is an enhancement/new app addition. Merge requires adding migrations and templates; expect new files but no breaking changes to core apps. Verify the admin and API routes are accessible after merge.
+
+
+---
+
 ## 📅 4. Booking & Scheduling System
 
 ### ✅ **COMPLETED**
