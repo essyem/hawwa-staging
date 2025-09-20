@@ -593,6 +593,14 @@ Notes: This is an enhancement/new app addition. Merge requires adding migrations
 
 ---
 
+### Repository Actions (Sept 20, 2025)
+
+- Frozen current Python dependencies to `requirements-frozen.txt` and committed to `master` for reproducible development.
+- Added `hawwa/context_processors.py` to expose `HAWWA_SETTINGS` in templates and updated header/footer to use centralized contact settings (`SUPPORT_EMAIL`, `PHONE_NUMBER`).
+- Pushed these changes to `origin/master`.
+
+---
+
 ## 🧭 Repository Audit (2025-09-19)
 
 Summary of repository mapping to checklist items (quick developer-focused evidence):
