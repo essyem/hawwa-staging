@@ -21,38 +21,63 @@ class Command(BaseCommand):
         # Create a predictable superuser for demos
         try:
             if not User.objects.filter(email='admin@hawwa.com').exists():
+                self.stdout.write('Creating demo superuser admin@hawwa.com')
                 # Create superuser with required fields for custom user model
                 try:
                     User.objects.create_superuser(email='admin@hawwa.com', password='admin123', first_name='Admin', last_name='Hawwa', user_type='ADMIN')
+                    self.stdout.write(self.style.SUCCESS('Created superuser via create_superuser'))
                 except Exception:
-                    u = User.objects.create(email='admin@hawwa.com', first_name='Admin', last_name='Hawwa', user_type='ADMIN')
-                    u.set_password('admin123')
-                    # set staff/superuser flags if available
                     try:
-                        u.is_staff = True
-                        u.is_superuser = True
-                    except Exception:
-                        pass
-                    u.save()
-        except Exception:
-            pass
+                        u = User.objects.create(email='admin@hawwa.com', first_name='Admin', last_name='Hawwa', user_type='ADMIN')
+                        u.set_password('admin123')
+                        # set staff/superuser flags if available
+                        try:
+                            u.is_staff = True
+                            u.is_superuser = True
+                        except Exception:
+                            pass
+                        u.save()
+                        self.stdout.write(self.style.SUCCESS('Created superuser via fallback create'))
+                    except Exception as e:
+                        self.stdout.write(self.style.ERROR(f'Failed to create superuser: {e}'))
+            else:
+                self.stdout.write('Superuser admin@hawwa.com already exists; skipping')
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f'Error while ensuring superuser: {e}'))
 
         # Create predictable demo accounts (use create_user to ensure password hashing and required fields)
         try:
             if not User.objects.filter(email='mother@example.com').exists():
+                self.stdout.write('Creating demo user mother@example.com')
                 try:
                     User.objects.create_user(email='mother@example.com', password='mother123', first_name='Aisha', last_name='Mother', user_type='MOTHER')
-                except Exception:
-                    u = User.objects.create(email='mother@example.com', first_name='Aisha', last_name='Mother', user_type='MOTHER')
-                    u.set_password('mother123')
-                    u.save()
+                    self.stdout.write(self.style.SUCCESS('Created mother@example.com'))
+                except Exception as e:
+                    try:
+                        u = User.objects.create(email='mother@example.com', first_name='Aisha', last_name='Mother', user_type='MOTHER')
+                        u.set_password('mother123')
+                        u.save()
+                        self.stdout.write(self.style.SUCCESS('Created mother@example.com via fallback'))
+                    except Exception as e2:
+                        self.stdout.write(self.style.ERROR(f'Failed to create mother user: {e2}'))
+            else:
+                self.stdout.write('Demo user mother@example.com already exists; skipping')
+
             if not User.objects.filter(email='provider@example.com').exists():
+                self.stdout.write('Creating demo user provider@example.com')
                 try:
                     User.objects.create_user(email='provider@example.com', password='provider123', first_name='Lina', last_name='Provider', user_type='WELLNESS')
-                except Exception:
-                    p = User.objects.create(email='provider@example.com', first_name='Lina', last_name='Provider', user_type='WELLNESS')
-                    p.set_password('provider123')
-                    p.save()
+                    self.stdout.write(self.style.SUCCESS('Created provider@example.com'))
+                except Exception as e:
+                    try:
+                        p = User.objects.create(email='provider@example.com', first_name='Lina', last_name='Provider', user_type='WELLNESS')
+                        p.set_password('provider123')
+                        p.save()
+                        self.stdout.write(self.style.SUCCESS('Created provider@example.com via fallback'))
+                    except Exception as e2:
+                        self.stdout.write(self.style.ERROR(f'Failed to create provider user: {e2}'))
+            else:
+                self.stdout.write('Demo user provider@example.com already exists; skipping')
         except Exception:
             pass
 
