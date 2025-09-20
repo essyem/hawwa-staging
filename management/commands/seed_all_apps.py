@@ -21,14 +21,18 @@ class Command(BaseCommand):
         # Create a predictable superuser for demos
         try:
             if not User.objects.filter(email='admin@hawwa.com').exists():
-                # create_superuser may not be available on all custom user models; fallback to create
+                # Create superuser with required fields for custom user model
                 try:
-                    User.objects.create_superuser(email='admin@hawwa.com', password='admin123', first_name='Admin', last_name='Hawwa')
+                    User.objects.create_superuser(email='admin@hawwa.com', password='admin123', first_name='Admin', last_name='Hawwa', user_type='ADMIN')
                 except Exception:
-                    u = User.objects.create(email='admin@hawwa.com', first_name='Admin', last_name='Hawwa')
+                    u = User.objects.create(email='admin@hawwa.com', first_name='Admin', last_name='Hawwa', user_type='ADMIN')
                     u.set_password('admin123')
-                    u.is_staff = True
-                    u.is_superuser = True
+                    # set staff/superuser flags if available
+                    try:
+                        u.is_staff = True
+                        u.is_superuser = True
+                    except Exception:
+                        pass
                     u.save()
         except Exception:
             pass
@@ -51,7 +55,8 @@ class Command(BaseCommand):
             u, _ = User.objects.get_or_create(email=email, defaults={
                 'first_name': (fake.first_name() if fake else f'User{i}'),
                 'last_name': (fake.last_name() if fake else 'Test'),
-                'user_type': 'USER'
+                # default to MOTHER for seeded users to satisfy USER_TYPE_CHOICES
+                'user_type': 'MOTHER'
             })
             users.append(u)
 
