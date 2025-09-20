@@ -33,29 +33,10 @@
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                {{ form.service|as_crispy_field }}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                {{ form.start_date|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                {{ form.end_date|as_crispy_field }}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                {{ form.start_time|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                {{ form.address|as_crispy_field }}
-                            </div>
-                        </div>
+
+                        {# Use crispy to render the booking form in one go for consistent spacing and validation display #}
                         <div class="mb-4">
-                            {{ form.notes|as_crispy_field }}
+                            {{ form|crispy }}
                         </div>
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             {% if booking %}
