@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
+from datetime import timedelta
 
 class ServiceCategory(models.Model):
     """Model for categorizing services."""
@@ -69,6 +70,21 @@ class Service(models.Model):
         if not self.slug:
             self.slug = slugify(self.name)
         
+        # Allow tests and fixtures to set duration as a string like '01:00:00'.
+        # Django's DurationField expects a datetime.timedelta; coerce if necessary.
+        if isinstance(self.duration, str):
+            try:
+                parts = self.duration.split(':')
+                if len(parts) == 3:
+                    hours, minutes, seconds = map(int, parts)
+                    self.duration = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+                elif len(parts) == 2:
+                    minutes, seconds = map(int, parts)
+                    self.duration = timedelta(minutes=minutes, seconds=seconds)
+            except Exception:
+                # leave as-is and let Django validation raise if invalid
+                pass
+
         if not self.short_description and self.description:
             # Create a short description from the full description if not provided
             self.short_description = self.description[:197] + "..." if len(self.description) > 200 else self.description

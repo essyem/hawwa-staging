@@ -16,6 +16,10 @@ from . import admin_views
 from .models import Budget, BudgetLine
 from .models import LedgerAccount, JournalEntry, JournalLine
 from django.core.management import call_command
+from django import forms
+import csv
+from io import TextIOWrapper
+from decimal import Decimal
 
 # Custom admin actions
 @admin.action(description='Mark selected invoices as sent')
@@ -401,12 +405,67 @@ class BudgetLineAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
 
 
+# Admin form for CSV upload
+class InvoiceItemCostCSVForm(forms.Form):
+    csv_file = forms.FileField(label='CSV file')
+
+
 @admin.register(InvoiceItem)
 class InvoiceItemAdmin(admin.ModelAdmin):
     list_display = ('description', 'invoice', 'quantity', 'unit_price', 'total_amount', 'cost_amount', 'cost_currency')
     list_filter = ('category',)
     search_fields = ('description', 'invoice__invoice_number')
+    change_list_template = 'admin/financial/invoiceitem_changelist.html'
     actions = ['set_costs_from_service']
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('import-costs/', self.admin_site.admin_view(self.import_costs_view), name='financial_invoiceitem_import_costs'),
+        ]
+        return custom_urls + urls
+
+    def import_costs_view(self, request):
+        """Simple CSV import for invoice item costs.
+
+        CSV columns expected: invoice_number, description (or leave blank), cost_amount, cost_currency
+        Matches by invoice_number and description best-effort.
+        """
+        if request.method == 'POST':
+            form = InvoiceItemCostCSVForm(request.POST, request.FILES)
+            if form.is_valid():
+                f = TextIOWrapper(request.FILES['csv_file'].file, encoding='utf-8')
+                reader = csv.DictReader(f)
+                updated = 0
+                not_found = []
+                for row in reader:
+                    inv_num = row.get('invoice_number') or row.get('invoice')
+                    desc = row.get('description')
+                    cost = row.get('cost_amount')
+                    ccy = row.get('cost_currency') or 'QAR'
+                    if not inv_num or not cost:
+                        continue
+                    items = InvoiceItem.objects.filter(invoice__invoice_number=inv_num)
+                    if desc:
+                        items = items.filter(description__iexact=desc)
+                    item = items.first()
+                    if item:
+                        try:
+                            item.cost_amount = Decimal(cost)
+                            item.cost_currency = ccy
+                            item.save()
+                            updated += 1
+                        except Exception:
+                            not_found.append(inv_num)
+                    else:
+                        not_found.append(inv_num)
+
+                self.message_user(request, f"Updated costs for {updated} items. Not found: {len(not_found)}")
+                return HttpResponse(render_to_string('admin/financial/import_result.html', {'updated': updated, 'not_found': not_found}))
+        else:
+            form = InvoiceItemCostCSVForm()
+        context = {'form': form, 'title': 'Import InvoiceItem Costs'}
+        return HttpResponse(render_to_string('admin/financial/import_costs.html', context, request=request))
 
     def set_costs_from_service(self, request, queryset):
         updated = 0
