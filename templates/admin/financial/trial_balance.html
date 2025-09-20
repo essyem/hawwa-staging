@@ -1,0 +1,43 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <h1>{{ title }}</h1>
+  <p>Trial Balance generated from materialized balances.</p>
+  <p>
+    <a class="button" href="?format=csv">Download CSV</a>
+    &nbsp;|&nbsp;
+    Sort: <a href="?order=code">Code</a> | <a href="?order=name">Name</a> | <a href="?order=-balance">Balance Desc</a>
+    &nbsp;|&nbsp;
+    Type filter: <a href="?">All</a> | <a href="?type=asset">Asset</a> | <a href="?type=liability">Liability</a> | <a href="?type=revenue">Revenue</a> | <a href="?type=expense">Expense</a>
+  </p>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Account Code</th>
+        <th>Account Name</th>
+        <th>Type</th>
+        <th>Balance</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in trial_balance.rows %}
+        <tr>
+          <td>{{ r.account.code }}</td>
+          <td>{{ r.account.name }}</td>
+          <td>{{ r.account.account_type }}</td>
+          <td>{{ r.balance|floatformat:2 }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="paginator">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+    {% endif %}
+    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}">Next</a>
+    {% endif %}
+  </div>
+  <p><strong>Total balance:</strong> {{ trial_balance.total }}</p>
+{% endblock %}

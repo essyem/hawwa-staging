@@ -1,8 +1,16 @@
+
 # HAWWA Postpartum Care - Project Implementation Checklist
 
 > **Last Updated**: September 19, 2025  
 > **Based on**: Business System Requirements - Operations and Tech  
 > **Project Status**: Production Ready - All Core Systems Complete  
+
+---
+
+> **Branch Freeze Notice**: The codebase is currently frozen for the `financial` import UX rollout.
+> - Freeze start: 2025-09-20
+> - Active branch: `copilot/vscode1758273895028`
+> - Changes pushed: feature enhancements for `financial` admin CSV import (preview, editable rows, suggestions, unmatched export, sanitization, session-backed payload)
 
 ---
 
@@ -118,6 +126,22 @@
   - [ ] Service availability calendar
   - [ ] Bulk service management
   - [ ] Service analytics and reporting
+
+---
+
+## 🆕 New App: change_management (Sept 2025)
+
+- [x] `change_management` app added for Change Requests, Incidents, and Leads
+  - [x] Models: `ChangeRequest`, `Incident`, `Lead`, `Comment`, `Activity`, `Role`, `RoleAssignment`
+  - [x] REST API (DRF) endpoints: change requests, incidents, leads, comments, roles, role-assignments, activity
+  - [x] UI: CR detail page with comments, supports AJAX comment submission (progressive enhancement)
+  - [x] Signals: Activity creation and email notifications on saves
+  - [x] Admin: Dashboard view and assign-to-user admin action
+  - [x] Seeder/management commands for deterministic dev data and integration tests
+  - [x] Unit and integration tests added for RBAC, signals, admin flows, and UI comment behavior
+
+Notes: This is an enhancement/new app addition. Merge requires adding migrations and templates; expect new files but no breaking changes to core apps. Verify the admin and API routes are accessible after merge.
+
 
 ---
 

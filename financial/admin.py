@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from django.urls import reverse
+from django.urls import reverse, path
 from django.contrib import messages
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
@@ -12,8 +12,18 @@ from .models import (
     AccountingCategory, TaxRate, Invoice, InvoiceItem, 
     Payment, Expense
 )
+from .models import CurrencyRate
+from . import admin_views
 from .models import Budget, BudgetLine
 from .models import LedgerAccount, JournalEntry, JournalLine
+from django.core.management import call_command
+from django import forms
+import csv
+from io import TextIOWrapper, BytesIO
+from decimal import Decimal
+import base64
+import json
+import difflib
 
 # Custom admin actions
 @admin.action(description='Mark selected invoices as sent')
@@ -399,12 +409,249 @@ class BudgetLineAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
 
 
+@admin.register(CurrencyRate)
+class CurrencyRateAdmin(admin.ModelAdmin):
+    list_display = ('from_currency', 'to_currency', 'rate', 'valid_from', 'valid_to')
+    list_filter = ('from_currency', 'to_currency', 'valid_from')
+    search_fields = ('from_currency', 'to_currency')
+    date_hierarchy = 'valid_from'
+
+
+# Admin form for CSV upload
+class InvoiceItemCostCSVForm(forms.Form):
+    csv_file = forms.FileField(label='CSV file')
+    invoice_field = forms.CharField(label='Invoice column name', required=False, initial='invoice_number')
+    description_field = forms.CharField(label='Description column name', required=False, initial='description')
+    cost_field = forms.CharField(label='Cost column name', required=False, initial='cost_amount')
+    currency_field = forms.CharField(label='Currency column name', required=False, initial='cost_currency')
+
+
+@admin.register(InvoiceItem)
+class InvoiceItemAdmin(admin.ModelAdmin):
+    list_display = ('description', 'invoice', 'quantity', 'unit_price', 'total_amount', 'cost_amount', 'cost_currency')
+    list_filter = ('category',)
+    search_fields = ('description', 'invoice__invoice_number')
+    change_list_template = 'admin/financial/invoiceitem_changelist.html'
+    actions = ['set_costs_from_service']
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('import-costs/', self.admin_site.admin_view(self.import_costs_view), name='financial_invoiceitem_import_costs'),
+        ]
+        return custom_urls + urls
+
+    def import_costs_view(self, request):
+        """Simple CSV import for invoice item costs.
+
+        CSV columns expected: invoice_number, description (or leave blank), cost_amount, cost_currency
+        Matches by invoice_number and description best-effort.
+        """
+        # Allow downloading unmatched rows via GET with payload
+        if request.method == 'GET' and request.GET.get('download_unmatched') == '1':
+            # Prefer explicit payload param, otherwise try session-stored unmatched rows
+            payload_param = request.GET.get('payload')
+            not_found = None
+            if payload_param:
+                try:
+                    payload_json = base64.b64decode(payload_param).decode('utf-8')
+                    not_found = json.loads(payload_json)
+                except Exception:
+                    return HttpResponse('Invalid payload', status=400)
+            else:
+                not_found = request.session.get('financial_import_unmatched') or []
+
+            out = BytesIO()
+            text_out = TextIOWrapper(out, encoding='utf-8', write_through=True)
+            writer = csv.writer(text_out)
+            writer.writerow(['invoice', 'reason'])
+            for nf in (not_found or []):
+                writer.writerow([nf.get('invoice'), nf.get('reason')])
+            text_out.flush()
+            out.seek(0)
+            resp = HttpResponse(out.read(), content_type='text/csv')
+            resp['Content-Disposition'] = 'attachment; filename="unmatched_invoice_rows.csv"'
+            # Clear stored unmatched rows from session after download
+            try:
+                if 'financial_import_unmatched' in request.session:
+                    del request.session['financial_import_unmatched']
+                    request.session.modified = True
+            except Exception:
+                pass
+            return resp
+
+        if request.method == 'POST':
+            # If commit flag is set, payload contains a base64 JSON of parsed rows.
+            # Also allow commits when the preview form posts per-row fields (rows_count) without commit_payload.
+            if 'commit_payload' in request.POST or request.POST.get('rows_count'):
+                # If the form posted per-row edited fields, build rows from those inputs.
+                rows = []
+                try:
+                    rows_count = int(request.POST.get('rows_count', '0'))
+                except Exception:
+                    rows_count = 0
+
+                if rows_count > 0:
+                    # Collect rows from per-row inputs
+                    for i in range(rows_count):
+                        inv = request.POST.get(f'row_invoice_{i}', '').strip() or None
+                        desc = request.POST.get(f'row_description_{i}', '').strip() or None
+                        cost = request.POST.get(f'row_cost_{i}', '').strip() or None
+                        ccy = request.POST.get(f'row_currency_{i}', '').strip() or None
+                        rows.append({'invoice': inv, 'description': desc, 'cost': cost, 'currency': ccy})
+                else:
+                    # Fallback to base64 payload if no per-row edits were sent
+                    payload_b64 = request.POST.get('commit_payload')
+                    try:
+                        payload_json = base64.b64decode(payload_b64).decode('utf-8')
+                        rows = json.loads(payload_json)
+                    except Exception:
+                        self.message_user(request, 'Invalid commit payload', level=messages.ERROR)
+                        return HttpResponse(render_to_string('admin/financial/import_costs.html', {'form': InvoiceItemCostCSVForm(), 'title': 'Import InvoiceItem Costs'}, request=request))
+
+                updated = 0
+                not_found = []
+                errors = []
+                for row in rows:
+                    inv_num = row.get('invoice')
+                    desc = row.get('description')
+                    cost = row.get('cost')
+                    ccy = row.get('currency') or 'QAR'
+                    if not inv_num or not cost:
+                        not_found.append({'invoice': inv_num, 'reason': 'missing invoice or cost'})
+                        continue
+                    items = InvoiceItem.objects.filter(invoice__invoice_number=inv_num)
+                    if desc:
+                        items = items.filter(description__iexact=desc)
+                    item = items.first()
+                    if item:
+                        try:
+                            item.cost_amount = Decimal(str(cost))
+                            item.cost_currency = ccy
+                            item.save()
+                            updated += 1
+                        except Exception as e:
+                            errors.append({'invoice': inv_num, 'error': str(e)})
+                    else:
+                        not_found.append({'invoice': inv_num, 'reason': 'no matching item'})
+
+                self.message_user(request, f"Updated costs for {updated} items. Not found: {len(not_found)}")
+                # Store unmatched rows in session so a follow-up GET can download them
+                try:
+                    request.session['financial_import_unmatched'] = not_found
+                    request.session.modified = True
+                except Exception:
+                    # ignore session storage errors
+                    pass
+
+                # Prepare payload for unmatched rows so users can download via GET
+                try:
+                    unmatched_payload = base64.b64encode(json.dumps(not_found).encode('utf-8')).decode('utf-8') if not_found else ''
+                except Exception:
+                    unmatched_payload = ''
+
+                # Render HTML result
+                context = {'updated': updated, 'not_found': not_found, 'errors': errors, 'unmatched_payload': unmatched_payload}
+                return HttpResponse(render_to_string('admin/financial/import_result.html', context, request=request))
+
+            # Otherwise it's an initial upload/preview request
+            form = InvoiceItemCostCSVForm(request.POST, request.FILES)
+            if form.is_valid():
+                f = TextIOWrapper(request.FILES['csv_file'].file, encoding='utf-8')
+                reader = csv.DictReader(f)
+                invoice_col = form.cleaned_data.get('invoice_field') or 'invoice_number'
+                desc_col = form.cleaned_data.get('description_field') or 'description'
+                cost_col = form.cleaned_data.get('cost_field') or 'cost_amount'
+                ccy_col = form.cleaned_data.get('currency_field') or 'cost_currency'
+
+                preview_rows = []
+                # Collect existing keys to match against
+                all_descriptions = list(InvoiceItem.objects.values_list('description', flat=True))
+                all_invoices = list(InvoiceItem.objects.values_list('invoice__invoice_number', flat=True))
+
+                def sanitize(val):
+                    if val is None:
+                        return None
+                    # Remove control characters except common whitespace
+                    return ''.join(ch for ch in str(val) if ch.isprintable())
+
+                for row in reader:
+                    inv_num = sanitize(row.get(invoice_col) or row.get('invoice_number') or row.get('invoice'))
+                    desc = sanitize(row.get(desc_col) or row.get('description'))
+                    cost = sanitize(row.get(cost_col) or row.get('cost_amount'))
+                    ccy = sanitize(row.get(ccy_col) or row.get('cost_currency') or 'QAR')
+                    match = None
+                    if inv_num and cost:
+                        items = InvoiceItem.objects.filter(invoice__invoice_number=inv_num)
+                        if desc:
+                            items = items.filter(description__iexact=desc)
+                        match = items.first()
+                    suggestions = []
+                    if not match:
+                        # Suggest similar descriptions and invoices
+                        if desc:
+                            desc_sugg = difflib.get_close_matches(desc, all_descriptions, n=3, cutoff=0.6)
+                        else:
+                            desc_sugg = []
+                        inv_sugg = difflib.get_close_matches(inv_num or '', all_invoices, n=3, cutoff=0.7) if inv_num else []
+                        suggestions = {'descriptions': desc_sugg, 'invoices': inv_sugg}
+
+                    preview_rows.append({'invoice': inv_num, 'description': desc, 'cost': cost, 'currency': ccy, 'matched': bool(match), 'suggestions': suggestions})
+
+                # Encode preview_rows into base64 payload for commit
+                payload = base64.b64encode(json.dumps(preview_rows).encode('utf-8')).decode('utf-8')
+                context = {'form': form, 'title': 'Import InvoiceItem Costs - Preview', 'preview_rows': preview_rows, 'commit_payload': payload}
+                return HttpResponse(render_to_string('admin/financial/import_preview.html', context, request=request))
+        else:
+            form = InvoiceItemCostCSVForm()
+        context = {'form': form, 'title': 'Import InvoiceItem Costs'}
+        return HttpResponse(render_to_string('admin/financial/import_costs.html', context, request=request))
+
+    def set_costs_from_service(self, request, queryset):
+        updated = 0
+        for item in queryset:
+            if item.service:
+                svc_cost = getattr(item.service, 'cost', None)
+                if svc_cost is None or Decimal(svc_cost) == Decimal('0.00'):
+                    svc_cost = getattr(item.service, 'price', Decimal('0.00'))
+                item.cost_amount = Decimal(svc_cost) * item.quantity
+                item.cost_currency = getattr(item.service, 'currency', 'QAR')
+                item.save()
+                updated += 1
+        self.message_user(request, f"Updated cost for {updated} items.")
+    set_costs_from_service.short_description = 'Set cost amounts from linked Service'
+
+
 @admin.register(LedgerAccount)
 class LedgerAccountAdmin(admin.ModelAdmin):
     list_display = ('code', 'name', 'account_type', 'is_active', 'created_at')
     list_filter = ('account_type', 'is_active')
     list_editable = ('account_type', 'is_active')
     search_fields = ('code', 'name')
+    actions = ['rebuild_selected_accounts']
+
+    @admin.action(description='Rebuild balances for selected accounts')
+    def rebuild_selected_accounts(self, request, queryset):
+        # For each selected account, compute balance from journal lines and update LedgerBalance
+        from .models import LedgerBalance
+        changed = 0
+        for acct in queryset:
+            # Aggregate via JournalLine DB grouping to compute balance
+            qs = JournalLine.objects.filter(account=acct).aggregate(
+                debits=Sum('debit') , credits=Sum('credit')
+            )
+            debits = qs['debits'] or 0
+            credits = qs['credits'] or 0
+            if acct.account_type in ('asset', 'expense'):
+                new_bal = debits - credits
+            else:
+                new_bal = credits - debits
+            lb, _ = LedgerBalance.objects.get_or_create(account=acct, defaults={'balance': new_bal})
+            if lb.balance != new_bal:
+                lb.balance = new_bal
+                lb.save()
+                changed += 1
+        messages.info(request, f"Rebuilt balances for {queryset.count()} accounts, changed: {changed}")
 
 
 class JournalLineInline(admin.TabularInline):
@@ -432,3 +679,15 @@ class JournalEntryAdmin(admin.ModelAdmin):
             except Exception as e:
                 failed += 1
         messages.info(request, f"Posted {success} entries, {failed} failed.")
+
+
+# Add admin view url for trial balance by wrapping admin.site.get_urls
+original_get_urls = admin.site.get_urls
+
+def get_urls():
+    my_urls = [
+        path('financial/trial-balance/', admin_views.trial_balance_view, name='financial_trial_balance'),
+    ]
+    return my_urls + original_get_urls()
+
+admin.site.get_urls = get_urls

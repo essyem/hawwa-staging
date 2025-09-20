@@ -7,6 +7,8 @@ from django.utils import timezone
 from .models import Budget, BudgetLine, AccountingCategory, Expense, Invoice, InvoiceItem, LedgerAccount, JournalEntry, JournalLine, Payment
 from .services.reports import profit_and_loss, cash_flow
 from .services.posting import create_payment_journal, create_expense_journal
+from django.core.management import call_command
+from django.urls import reverse
 
 
 class BudgetTests(TestCase):
@@ -183,3 +185,57 @@ class MaterializedBalanceTests(TestCase):
 		tb = trial_balance()
 		self.assertIn('rows', tb)
 		self.assertIn('total', tb)
+
+	def test_rebuild_balances_command(self):
+		# Create a manual journal entry
+		je = JournalEntry.objects.create(reference='RB-1', date=date.today(), narration='Rebuild Test')
+		JournalLine.objects.create(entry=je, account=self.cash, debit=Decimal('200.00'))
+		JournalLine.objects.create(entry=je, account=self.rev, credit=Decimal('200.00'))
+
+		# Zero existing balances
+		from .models import LedgerBalance
+		LedgerBalance.objects.all().delete()
+
+		# Run rebuild
+		call_command('rebuild_balances')
+
+		lb_cash = LedgerBalance.objects.get(account__code='1000')
+		lb_rev = LedgerBalance.objects.get(account__code='4000')
+		self.assertEqual(lb_cash.balance, Decimal('200.00'))
+		self.assertEqual(lb_rev.balance, Decimal('200.00'))
+
+	def test_trial_balance_csv_export(self):
+		# Create a superuser and log in via admin client
+		User = get_user_model()
+		admin_user = User.objects.create_superuser(email='admin@example.com', password='adminpass')
+		self.client.force_login(admin_user)
+
+		url = '/admin/financial/trial-balance/?format=csv'
+		resp = self.client.get(url)
+		self.assertEqual(resp.status_code, 200)
+		self.assertTrue(resp['Content-Type'].startswith('text/csv'))
+		content = resp.content.decode('utf-8-sig')  # strip BOM if present
+		# Expect metadata header lines
+		self.assertIn('Report: Trial Balance', content)
+		self.assertIn('Generated:', content)
+		self.assertIn('Filters:', content)
+		self.assertIn('account_code', content)
+
+	def test_profit_and_loss_with_cogs(self):
+		User = get_user_model()
+		acct = User.objects.create_user(email='pl@example.com', password='password')
+		# Create COGS category
+		cogs_cat = AccountingCategory.objects.create(name='COGS Cat', code='COGS', is_cogs=True)
+		# Create invoice and item with cost
+		today = date.today()
+		inv = Invoice.objects.create(invoice_number='COGS-1', customer=acct, invoice_date=today, due_date=today, billing_name='C', billing_email='c@x.com', billing_address='a', billing_city='c', billing_postal_code='000')
+		InvoiceItem.objects.create(invoice=inv, description='Product', quantity=1, unit_price=Decimal('1000.00'), cost_amount=Decimal('600.00'), category=cogs_cat)
+		inv.calculate_totals()
+		inv.save()
+		start = today.replace(day=1)
+		end = (start + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+		from .services.reports import profit_and_loss
+		pl = profit_and_loss(start, end)
+		self.assertEqual(pl['revenue'], Decimal('1000.00'))
+		self.assertEqual(pl['costs'], Decimal('600.00'))
+		self.assertEqual(pl['gross_profit'], Decimal('400.00'))

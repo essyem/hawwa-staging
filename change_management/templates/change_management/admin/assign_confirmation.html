@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block content %}
+  <h1>Assign selected Change Requests</h1>
+  <form method="post">{% csrf_token %}
+    <p>Enter user id to assign to:</p>
+    <input type="text" name="user_id" />
+    <button type="submit" name="apply">Apply</button>
+  </form>
+  <h2>Selected</h2>
+  <ul>
+    {% for obj in objects %}
+      <li>{{ obj }}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

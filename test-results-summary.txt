@@ -1,0 +1,20 @@
+Test run: python3 manage.py test --settings=hawwa.settings_dev -v 1
+Date: 2025-09-20
+
+Creating test database for alias 'default'...
+..................../home/codespace/.local/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1612: 
+RuntimeWarning: DateTimeField Payment.payment_date received a naive datetime (2025-09-01 00:00:00) while time zone support is active.                                                                                                 warnings.warn(
+/home/codespace/.local/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1612: RuntimeWarning: Date
+TimeField Payment.payment_date received a naive datetime (2025-09-30 00:00:00) while time zone support is active.   warnings.warn(
+..........
+----------------------------------------------------------------------
+Ran 30 tests in 15.096s
+
+OK
+Destroying test database for alias 'default'...
+Found 30 test(s).
+System check identified no issues (0 silenced).
+Rebuilt balances for 2 accounts, changed: 2
+Found 30 test(s).
+System check identified no issues (0 silenced).
+Rebuilt balances for 2 accounts, changed: 2

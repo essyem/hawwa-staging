@@ -1,0 +1,70 @@
+{% load static %}
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Change Request Detail</title>
+    <style>
+      body{font-family:Arial,Helvetica,sans-serif;max-width:900px;margin:16px}
+      .meta{color:#666;font-size:0.9em}
+      .comment-list{list-style:none;padding:0}
+      .comment-list li{padding:8px 0;border-bottom:1px solid #eee}
+      .comment-form{margin-top:12px}
+      .btn{background:#007bff;color:#fff;border:none;padding:8px 12px;border-radius:4px}
+    </style>
+  </head>
+  <body>
+    <h1>{{ cr.title }}</h1>
+    <p class="meta">Reported by: {{ cr.reporter }}{% if cr.assignee %} • Assigned to: {{ cr.assignee }}{% endif %} • Status: {{ cr.status }}</p>
+    <p>{{ cr.description }}</p>
+    <h2>Comments</h2>
+    <ul id="comments" class="comment-list">
+      {% for c in comments %}
+        <li><strong>{{ c.author }}</strong>: {{ c.text }} <span class="meta">({{ c.created_at }})</span></li>
+      {% empty %}
+        <li id="no-comments">No comments yet.</li>
+      {% endfor %}
+    </ul>
+    {% if user.is_authenticated %}
+    <div class="comment-form">
+      <h3>Add Comment</h3>
+      <form id="commentForm" method="post" action="">{% csrf_token %}
+        <textarea id="commentText" name="text" rows="4" cols="60"></textarea><br>
+        <button id="commentSubmit" class="btn" type="submit">Add comment</button>
+      </form>
+    </div>
+
+    <script>
+      // Progressive enhancement: try AJAX submit, fall back to normal POST
+      (function(){
+        const form = document.getElementById('commentForm');
+        const txt = document.getElementById('commentText');
+        const list = document.getElementById('comments');
+        form.addEventListener('submit', function(e){
+          e.preventDefault();
+          const value = txt.value.trim();
+          if(!value) return;
+          fetch('', {method:'POST', headers:{'X-Requested-With':'XMLHttpRequest','Content-Type':'application/x-www-form-urlencoded'}, body:'text='+encodeURIComponent(value)})
+          .then(r=>{
+            if(r.ok) return r.text();
+            throw new Error('Failed to post');
+          })
+          .then(()=>{
+            // add to list
+            const li = document.createElement('li');
+            li.innerHTML = '<strong>{{ user.get_full_name|escapejs }}</strong>: '+value+' <span class="meta">(just now)</span>';
+            const no = document.getElementById('no-comments'); if(no) no.remove();
+            list.insertBefore(li, list.firstChild);
+            txt.value='';
+          }).catch(function(){
+            // fallback to normal submit on failure
+            form.submit();
+          });
+        });
+      })();
+    </script>
+    {% else %}
+      <p><em>Log in to add comments.</em></p>
+    {% endif %}
+  </body>
+  </html>
