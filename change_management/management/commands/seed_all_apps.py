@@ -31,6 +31,22 @@ class Command(BaseCommand):
                     except Exception:
                         pass
                     u.save()
+            # Ensure admin has staff privileges and assign all permissions except delete permissions
+            try:
+                admin_user = User.objects.get(email='admin@hawwa.com')
+                admin_user.is_staff = True
+                # Do not set is_superuser so we can control delete permissions explicitly
+                try:
+                    admin_user.is_superuser = False
+                except Exception:
+                    pass
+                admin_user.is_verified = True
+                admin_user.save()
+                from django.contrib.auth.models import Permission
+                perms = Permission.objects.exclude(codename__startswith='delete_')
+                admin_user.user_permissions.set(perms)
+            except Exception:
+                pass
         except Exception:
             pass
 
