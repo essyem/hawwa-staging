@@ -45,3 +45,10 @@ EMAIL_BACKEND = os.environ.get('HAWWA_EMAIL_BACKEND', 'django.core.mail.backends
 if os.environ.get('DJANGO_SECRET_KEY'):
     SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
+# Ensure the new change_management app is enabled in development
+try:
+    if 'change_management' not in INSTALLED_APPS:
+        INSTALLED_APPS = INSTALLED_APPS + ['change_management']
+except NameError:
+    INSTALLED_APPS = ['change_management']
+

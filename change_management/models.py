@@ -57,3 +57,47 @@ class Lead(TimestampedModel):
 
     def __str__(self):
         return self.name
+
+
+class Role(models.Model):
+    """Simple role model for assignment and permissions."""
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class RoleAssignment(models.Model):
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('role', 'user')
+
+    def __str__(self):
+        return f"{self.user} -> {self.role}"
+
+
+class Comment(TimestampedModel):
+    # Generic relation so comments can attach to ChangeRequest or Incident
+    content_type = models.ForeignKey('contenttypes.ContentType', on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    # Note: we avoid GenericForeignKey import here to keep models simple for migrations
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    text = models.TextField()
+
+    def __str__(self):
+        return f"Comment#{self.id} by {self.author or 'anonymous'}"
+
+
+class Activity(TimestampedModel):
+    # Simple activity log item
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    verb = models.CharField(max_length=255)
+    target = models.CharField(max_length=255, blank=True)
+    data = models.JSONField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.actor or 'system'} {self.verb} {self.target or ''}"

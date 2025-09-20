@@ -1,0 +1,20 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+  <h1>Change Management Dashboard</h1>
+  <h2>Status Counts</h2>
+  <ul>
+  {% for s in status_counts %}
+    <li>{{ s.status }}: {{ s.count }}</li>
+  {% empty %}
+    <li>No change requests</li>
+  {% endfor %}
+  </ul>
+  <h2>Priority Counts</h2>
+  <ul>
+  {% for p in priority_counts %}
+    <li>{{ p.priority }}: {{ p.count }}</li>
+  {% empty %}
+    <li>No change requests</li>
+  {% endfor %}
+  </ul>
+{% endblock %}
