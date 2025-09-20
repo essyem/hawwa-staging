@@ -1,11 +1,39 @@
 {% extends 'admin/base_site.html' %}
 {% block content %}
   <h1>Import Result</h1>
-  <p>Updated: {{ updated }}</p>
-  <p>Not found count: {{ not_found|length }}</p>
-  <ul>
-    {% for nf in not_found %}
-      <li>{{ nf }}</li>
-    {% endfor %}
-  </ul>
+  <p>Updated: <strong>{{ updated }}</strong></p>
+  <p>Not found count: <strong>{{ not_found|length }}</strong></p>
+
+  {% if not_found %}
+    <h2>Not Found / Skipped Rows</h2>
+    <table border="1" cellpadding="4">
+      <thead><tr><th>Invoice</th><th>Reason</th></tr></thead>
+      <tbody>
+        {% for nf in not_found %}
+          <tr>
+            <td>{{ nf.invoice }}</td>
+            <td>{{ nf.reason }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <p>
+      {% if unmatched_payload %}
+        <a href="?download_unmatched=1&payload={{ unmatched_payload|urlencode }}">Download unmatched rows as CSV</a>
+      {% else %}
+        <a href="?download_unmatched=1">Download unmatched rows as CSV</a>
+      {% endif %}
+    </p>
+  {% endif %}
+
+  {% if errors %}
+    <h2>Errors</h2>
+    <ul>
+      {% for e in errors %}
+        <li>Invoice {{ e.invoice }}: {{ e.error }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
 {% endblock %}

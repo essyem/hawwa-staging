@@ -1,8 +1,15 @@
 {% extends 'admin/base_site.html' %}
 {% block content %}
   <h1>{{ title }}</h1>
+  <p>Upload a CSV and you will be shown a preview. The preview will show which rows match existing InvoiceItems. Committing the preview will apply changes.</p>
   <form method="post" enctype="multipart/form-data">{% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="default">Upload</button>
+    <button type="submit" class="default">Upload & Preview</button>
+  </form>
+  <p>
+    <a href="/static/admin/financial/sample_invoiceitem_costs.csv">Download sample CSV</a>
+  </p>
+  <p>
+    Note: uploaded CSV fields will be sanitized (control characters stripped) before processing.
   </form>
 {% endblock %}

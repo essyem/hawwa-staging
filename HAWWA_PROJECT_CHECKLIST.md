@@ -6,6 +6,14 @@
 
 ---
 
+> **Branch Freeze Notice**: The codebase is currently frozen for the `financial` import UX rollout.
+> - Freeze start: 2025-09-20
+> - Active branch: `copilot/vscode1758273895028`
+> - Changes pushed: feature enhancements for `financial` admin CSV import (preview, editable rows, suggestions, unmatched export, sanitization, session-backed payload)
+
+
+---
+
 ## 📊 Overall Progress Summary
 
 ### Completed Features: ✅ 95%

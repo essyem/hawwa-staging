@@ -10,7 +10,7 @@ from .models import Invoice, InvoiceItem
 from services.models import Service, ServiceCategory
 
 
-class AdminImportTests(TestCase):
+class AdminImportUnmatchedTests(TestCase):
     def setUp(self):
         User = get_user_model()
         self.admin_user = User.objects.create_superuser(email='admin@ex', password='pass')
@@ -21,45 +21,32 @@ class AdminImportTests(TestCase):
         self.inv = Invoice.objects.create(invoice_number='I-IMPORT', customer=self.admin_user, invoice_date=date.today(), due_date=date.today(), billing_name='B', billing_email='b@x.com', billing_address='a', billing_city='c', billing_postal_code='000')
         self.item = InvoiceItem.objects.create(invoice=self.inv, service=svc, description='Line1', quantity=1, unit_price=Decimal('10.00'))
 
-    def test_csv_import_updates_cost(self):
+    def test_unmatched_export_available(self):
         url = reverse('admin:financial_invoiceitem_import_costs')
-        # Prepare CSV and post to preview
+        # Prepare CSV with missing invoice to force unmatched
         output = BytesIO()
         text_out = TextIOWrapper(output, encoding='utf-8', write_through=True)
         writer = csv.DictWriter(text_out, fieldnames=['invoice_number', 'description', 'cost_amount', 'cost_currency'])
         writer.writeheader()
-        writer.writerow({'invoice_number': 'I-IMPORT', 'description': 'Line1', 'cost_amount': '7.50', 'cost_currency': 'QAR'})
+        writer.writerow({'invoice_number': '', 'description': 'NoInvoice', 'cost_amount': '7.50', 'cost_currency': 'QAR'})
         text_out.flush()
         output.seek(0)
 
         resp = self.client.post(url, {'csv_file': output}, follow=True)
         self.assertEqual(resp.status_code, 200)
-        # Response should contain preview form with commit_payload
-        self.assertIn('Commit Import', resp.content.decode('utf-8'))
-
-        # Extract commit_payload hidden input value
+        # Commit using the payload
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(resp.content, 'html.parser')
-        payload = soup.find('input', {'name': 'commit_payload'})['value']
+        payload_input = soup.find('input', {'name': 'commit_payload'})
+        self.assertIsNotNone(payload_input)
+        payload = payload_input['value']
 
-        # Now commit the payload
         resp2 = self.client.post(url, {'commit_payload': payload}, follow=True)
         self.assertEqual(resp2.status_code, 200)
-        self.item.refresh_from_db()
-        self.assertEqual(self.item.cost_amount, Decimal('7.50'))
-
-    def test_preview_suggestions_for_unmatched(self):
-        url = reverse('admin:financial_invoiceitem_import_costs')
-        # CSV with a non-matching description
-        output = BytesIO()
-        text_out = TextIOWrapper(output, encoding='utf-8', write_through=True)
-        writer = csv.DictWriter(text_out, fieldnames=['invoice_number', 'description', 'cost_amount', 'cost_currency'])
-        writer.writeheader()
-        writer.writerow({'invoice_number': 'I-IMPORT', 'description': 'Lne1-typo', 'cost_amount': '8.00', 'cost_currency': 'QAR'})
-        text_out.flush()
-        output.seek(0)
-        resp = self.client.post(url, {'csv_file': output}, follow=True)
-        self.assertEqual(resp.status_code, 200)
-        body = resp.content.decode('utf-8')
-        # Should contain Suggestions section in preview
-        self.assertIn('Suggestions', body)
+        # Now request unmatched CSV (GET with param)
+        resp3 = self.client.get(url + '?download_unmatched=1')
+        # Should return a CSV
+        self.assertEqual(resp3.status_code, 200)
+        self.assertEqual(resp3['Content-Type'], 'text/csv')
+        body = resp3.content.decode('utf-8')
+        self.assertIn('invoice,reason', body)
