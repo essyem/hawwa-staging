@@ -72,7 +72,7 @@ class Command(BaseCommand):
             address='Building 123, West Bay Area, Doha, Qatar',
             country='QA',
             phone='+974-4444-5555',
-            email='hello@trendzapps.com',
+            email='hello@hawwawellness.com',
             website='https://ifccqatar.com',
             established_date=fake.date_between(start_date='-10y', end_date='-2y')
         )

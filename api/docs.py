@@ -9,7 +9,7 @@ schema_view = get_schema_view(
         default_version='v1',
         description="API documentation for Hawwa Postpartum Care Platform",
         terms_of_service="https://www.hawwa.com/terms/",
-        contact=openapi.Contact(email="hello@trendzapps.com"),
+    contact=openapi.Contact(email="hello@hawwawellness.com"),
         license=openapi.License(name="Private License"),
     ),
     public=True,

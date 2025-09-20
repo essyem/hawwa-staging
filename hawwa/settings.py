@@ -236,7 +236,7 @@ ADMIN_INDEX_TITLE = "Welcome to Hawwa Administration"
 # Custom application settings
 HAWWA_SETTINGS = {
     'COMPANY_NAME': 'Hawwa LLC',
-    'SUPPORT_EMAIL': 'hello@trendzapps.com',
+    'SUPPORT_EMAIL': 'hello@hawwawellness.com',
     'PHONE_NUMBER': '+974 7212 6440',
 }
 
