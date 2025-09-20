@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+import sys
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +23,40 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-wuy_yg&5m5=b3%dvz@!(c(!_@+w@slo^b-svc67pt$o!okv+9f'
+# Use an environment variable for production. Keep the development fallback for
+# local development only. Never commit a production secret key to source.
+_env_secret = os.environ.get('HAWWA_SECRET_KEY') or os.environ.get('SECRET_KEY')
+if _env_secret:
+    SECRET_KEY = _env_secret
+else:
+    # Development fallback only
+    SECRET_KEY = 'django-insecure-wuy_yg&5m5=b3%dvz@!(c(!_@+w@slo^b-svc67pt$o!okv+9f'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Toggle production mode with an environment variable.
+# Set `HAWWA_ENV=production` or `DJANGO_PRODUCTION=1` in your production env.
+_is_prod = os.environ.get('HAWWA_ENV', '').lower() == 'production' or os.environ.get('DJANGO_PRODUCTION') in ('1', 'true', 'True')
+DEBUG = not _is_prod
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.100.2']
+# Hosts allowed. Use environment variable to override in production.
+ALLOWED_HOSTS = os.environ.get('HAWWA_ALLOWED_HOSTS', '127.0.0.1,localhost,192.168.100.2').split(',')
+
+# Production security defaults (applied when in production mode)
+if _is_prod:
+    # Detect test runner to avoid changing behavior during tests (which use HTTP by default)
+    _running_tests = any(('test' in a or 'pytest' in a) for a in sys.argv)
+    # HSTS: only enable after verifying HTTPS termination
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '31536000')) if not _running_tests else 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'True') in ('1', 'true', 'True')
+    SECURE_HSTS_PRELOAD = os.environ.get('SECURE_HSTS_PRELOAD', 'True') in ('1', 'true', 'True')
+    SECURE_SSL_REDIRECT = (os.environ.get('SECURE_SSL_REDIRECT', 'True') in ('1', 'true', 'True')) and not _running_tests
+    SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'True') in ('1', 'true', 'True')
+    CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'True') in ('1', 'true', 'True')
+    # X-Frame-Options is already set by default middleware, but explicit is good
+    X_FRAME_OPTIONS = os.environ.get('X_FRAME_OPTIONS', 'DENY')
+    # Basic sanity: require a non-default secret key
+    if not _running_tests:
+        if not _env_secret or _env_secret.startswith('django-insecure-'):
+            raise ImproperlyConfigured('A strong SECRET_KEY must be set in the environment when running in production.')
 
 
 # Application definition
@@ -93,10 +124,16 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'hawwa.context_processors.hawwa_settings',
+                    'django.template.context_processors.request',
+                    'django.template.context_processors.i18n',
+                    'django.template.context_processors.static',
+                    'django.template.context_processors.media',
+                    'django.contrib.auth.context_processors.auth',
+                    'django.contrib.messages.context_processors.messages',
+                    'hawwa.context_processors.hawwa_settings',
+                ],
+            'builtins': [
+                'crispy_forms.templatetags.crispy_forms_tags',
             ],
         },
     },

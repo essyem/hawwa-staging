@@ -599,6 +599,28 @@ Notes: This is an enhancement/new app addition. Merge requires adding migrations
 - Added `hawwa/context_processors.py` to expose `HAWWA_SETTINGS` in templates and updated header/footer to use centralized contact settings (`SUPPORT_EMAIL`, `PHONE_NUMBER`).
 - Pushed these changes to `origin/master`.
 
+## Production Environment Variables & Deployment Verification
+
+When deploying to production, set the following environment variables (do not commit them to source control):
+
+- `HAWWA_SECRET_KEY` or `SECRET_KEY` — strong secret key (required in production)
+- `HAWWA_ENV=production` or `DJANGO_PRODUCTION=1` — enable production mode
+- `HAWWA_ALLOWED_HOSTS` — comma-separated allowed hosts (e.g. `example.com,www.example.com`)
+- `SECURE_HSTS_SECONDS` — integer seconds for HSTS (default used: 31536000)
+- `SECURE_SSL_REDIRECT` — `True` to redirect HTTP -> HTTPS
+- `SESSION_COOKIE_SECURE` — `True` to restrict session cookie to HTTPS
+- `CSRF_COOKIE_SECURE` — `True` to restrict CSRF cookie to HTTPS
+
+Verification checklist to run after deployment configuration:
+
+1. Ensure the environment variables above are set and `HAWWA_ENV=production`.
+2. Run `python manage.py check --deploy` — aim for zero Warnings.
+3. Run a small smoke test suite: `python manage.py test change_management` and a few critical app tests.
+4. Confirm HTTPS is terminating correctly and that `SECURE_SSL_REDIRECT` doesn't cause redirect loops behind a proxy (configure `SECURE_PROXY_SSL_HEADER` if necessary).
+5. Use `collectstatic` and verify static assets served via CDN or web server.
+
+Add any provider-specific steps (load balancer, reverse proxy, SSL certs) to this checklist before a production release.
+
 ---
 
 ## 🧭 Repository Audit (2025-09-19)
