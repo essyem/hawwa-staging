@@ -32,4 +32,6 @@ urlpatterns = [
     
     # Legacy profile URL (for compatibility)
     path('profile/legacy/', views.ProfileView.as_view(), name='profile_legacy'),
+    # Wishlist endpoint (AJAX)
+    path('add-to-wishlist/', views.add_to_wishlist, name='add_to_wishlist'),
 ]

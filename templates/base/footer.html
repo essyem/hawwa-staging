@@ -48,7 +48,20 @@
                     </p>
                     <p class="mb-2">
                         <i class="fas fa-phone me-2"></i>
+                        {# Visible phone (tel) #}
                         <a href="tel:{{ HAWWA_SETTINGS.PHONE_NUMBER|default:'+97472126440'|urlencode }}">{{ HAWWA_SETTINGS.PHONE_NUMBER|default:'+974 7212 6440' }}</a>
+                        {# WhatsApp link: normalize number by removing spaces and plus sign for wa.me; keep both web and mobile-capable links #}
+                        {% with raw_number=HAWWA_SETTINGS.PHONE_NUMBER|default:'+974 7212 6440' %}
+                            {% comment %}Create compact number for wa.me: remove spaces and leading +{% endcomment %}
+                            {% with compact=raw_number|cut:' ' %}
+                                {% with compact=compact|cut:'+' %}
+                                    <a class="ms-3 text-success" href="https://wa.me/{{ compact }}" target="_blank" rel="noopener">
+                                        <i class="fab fa-whatsapp fa-lg"></i>
+                                        <span class="visually-hidden">WhatsApp</span>
+                                    </a>
+                                {% endwith %}
+                            {% endwith %}
+                        {% endwith %}
                     </p>
                     <p class="mb-2">
                         <i class="fas fa-envelope me-2"></i>
@@ -69,6 +82,7 @@
                 <p class="mb-0">
                     © {% now "Y" %} {% trans "Hawwa Postpartum Care. All rights reserved." %}
                 </p>
+                <p class="mb-0 small text-light">Powered by <a href="https://trendzapps.com" class="text-light" target="_blank" rel="noopener">TrendzApps</a></p>
             </div>
                 <div class="col-md-6 text-md-end">
                 <small class="text-light">

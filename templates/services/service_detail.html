@@ -560,33 +560,14 @@
         var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
         imageModal.show();
     }
-    
-    function addToWishlist(serviceId) {
-        // AJAX request to add service to wishlist
-        fetch(`{% url 'accounts:add_to_wishlist' %}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({service_id: serviceId})
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("{% trans 'Service added to wishlist' %}");
-            } else {
-                if (data.error === 'login_required') {
-                    window.location.href = `{% url 'accounts:login' %}?next={{ request.path }}`;
-                } else {
-                    alert(data.message || "{% trans 'Error adding to wishlist' %}");
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert("{% trans 'An error occurred. Please try again.' %}");
-        });
-    }
 </script>
+
+{# Resolve wishlist URL into a variable and expose global HAWWA config for static JS #}
+{% url 'accounts:add_to_wishlist' as wishlist_url %}
+<script>
+    window.HAWWA = window.HAWWA || {};
+    window.HAWWA.wishlistUrl = "{{ wishlist_url }}";
+    window.HAWWA.loginUrl = "{% url 'accounts:login' %}";
+</script>
+<script src="{% static 'js/services.js' %}"></script>
 {% endblock %}

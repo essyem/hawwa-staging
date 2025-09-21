@@ -27,10 +27,10 @@ class BookingForm(forms.ModelForm):
             'address': forms.TextInput(attrs={'class': 'form-control'}),
             'city': forms.TextInput(attrs={'class': 'form-control'}),
             'postal_code': forms.TextInput(attrs={'class': 'form-control'}),
-            'client_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+1 234 567 8900'}),
+            'client_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+974 7212 6440'}),
             'client_email': forms.EmailInput(attrs={'class': 'form-control'}),
             'emergency_contact': forms.TextInput(attrs={'class': 'form-control'}),
-            'emergency_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+1 234 567 8900'}),
+            'emergency_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+974 7212 6440'}),
             'priority': forms.Select(attrs={'class': 'form-select'}),
         }
         
@@ -89,7 +89,7 @@ class QuickBookingForm(forms.ModelForm):
             'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
-            'client_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+1 234 567 8900'}),
+            'client_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+974 7212 6440'}),
         }
         
     def __init__(self, *args, **kwargs):

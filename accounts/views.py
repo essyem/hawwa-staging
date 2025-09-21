@@ -22,6 +22,9 @@ from .profile_models import (
 from .forms import ProfileForm
 from django.views.generic.edit import UpdateView
 from django.urls import reverse
+from django.conf import settings
+from django.http import JsonResponse, HttpResponseBadRequest
+import json
 
 class RegisterView(TemplateView):
     """View to choose which type of user to register as."""
@@ -174,7 +177,41 @@ def logout_view(request):
     """View for user logout."""
     logout(request)
     messages.success(request, _('You have successfully logged out.'))
-    return redirect('home')
+    # Use configured logout redirect (can be a URL name like 'core:home')
+    return redirect(settings.LOGOUT_REDIRECT_URL)
+
+
+def add_to_wishlist(request):
+    """Simple session-backed wishlist endpoint.
+
+    Expects a POST with JSON body: {"service_id": <int>}.
+    Stores a list of service ids in `request.session['wishlist']`.
+    Returns JSON {"success": True, "message": "..."} on success.
+    For unauthenticated AJAX/JSON callers, returns 401 with {"error":"login_required"}.
+    """
+    # For AJAX/JSON calls, return a JSON error rather than redirecting to login
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'login_required'}, status=401)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'invalid_method'}, status=400)
+
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'invalid_json'}, status=400)
+
+    service_id = payload.get('service_id')
+    if not service_id:
+        return JsonResponse({'error': 'missing_service_id'}, status=400)
+
+    wishlist = request.session.get('wishlist', [])
+    # ensure uniqueness
+    if service_id not in wishlist:
+        wishlist.append(service_id)
+        request.session['wishlist'] = wishlist
+
+    return JsonResponse({'success': True, 'message': 'Service added to wishlist', 'wishlist': wishlist})
 
 @method_decorator(login_required, name='dispatch')
 class ProfileView(TemplateView):

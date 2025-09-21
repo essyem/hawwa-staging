@@ -1,46 +1,26 @@
 {% load static %}
 {% load i18n %}
+{% load crispy_forms_tags %}
 <!DOCTYPE html>
-<html lang="{% get_current_language as LANGUAGE_CODE %}{{ LANGUAGE_CODE }}">
+<html lang="{% get_current_language as LANGUAGE_CODE %}{{ LANGUAGE_CODE }}" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{% block title %}Hawwa Wellness{% endblock %}</title>
-    
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Qatar Theme CSS -->
     <link rel="stylesheet" href="{% static 'css/qatar-theme.css' %}">
-    
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
-    
-    <!-- Service CSS (only loaded on service pages) -->
-    {% if 'services' in request.path %}
-    <link rel="stylesheet" href="{% static 'css/services.css' %}">
-    {% endif %}
-    
-    <!-- Additional CSS -->
+    <link rel="stylesheet" href="{% static 'css/site.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Header (includes accessible skip link and navbar) -->
-    {% include 'base/_header.html' %}
-    
-    <!-- Messages/Alerts -->
+    {% block header %}{% endblock %}
+
+    {% block messages %}
     {% if messages %}
     <div class="container mt-3">
         {% for message in messages %}
@@ -51,31 +31,65 @@
         {% endfor %}
     </div>
     {% endif %}
-    
-    <!-- Main Content -->
-    <main id="main-content" class="container my-4" tabindex="-1">
-        {% block content %}
-        {% endblock content %}
+    {% endblock %}
+
+    <main id="main-content" tabindex="-1" style="min-height: calc(100vh - 200px);">
+        {% block content %}{% endblock %}
     </main>
-    
-    <!-- Footer -->
-    {% include 'base/footer.html' %}
-    
-    <!-- Bootstrap Bundle with Popper -->
+
+    {% block footer %}
+    <footer class="footer" style="background: var(--gradient-primary); color: var(--qatar-white); padding: 3rem 0 1rem;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="text-white mb-3">
+                        <i class="fas fa-spa me-2"></i>{% trans "Hawwa Postpartum Care" %}
+                    </h5>
+                    <p class="text-white-50 mb-3">{% trans "Supporting mothers through their postpartum journey with personalized care, luxury services, and expert guidance." %}</p>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="text-white mb-3">{% trans "Services" %}</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{% url 'services:accommodation_list' %}" class="text-white-50 text-decoration-none">{% trans "Retreat Stays" %}</a></li>
+                        <li class="mb-2"><a href="{% url 'services:homecare_list' %}" class="text-white-50 text-decoration-none">{% trans "Home Care" %}</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6 class="text-white mb-3">{% trans "Company" %}</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{% url 'core:home' %}" class="text-white-50 text-decoration-none">{% trans "Home" %}</a></li>
+                        <li class="mb-2"><a href="{% url 'core:about' %}" class="text-white-50 text-decoration-none">{% trans "About Us" %}</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="text-white mb-3">{% trans "Contact Information" %}</h6>
+                    <p class="mb-2 text-white-50">
+                        <i class="fas fa-phone me-2"></i>
+                        <a href="tel:{{ HAWWA_SETTINGS.PHONE_NUMBER|default:'+97472126440'|urlencode }}" class="text-white-50 text-decoration-none">{{ HAWWA_SETTINGS.PHONE_NUMBER|default:'+974 7212 6440' }}</a>
+                    </p>
+                    <p class="mb-2 text-white-50">
+                        <i class="fas fa-envelope me-2"></i>
+                        <a href="mailto:{{ HAWWA_SETTINGS.SUPPORT_EMAIL|default:'hello@hawwawellness.com' }}" class="text-white-50 text-decoration-none">{{ HAWWA_SETTINGS.SUPPORT_EMAIL|default:'hello@hawwawellness.com' }}</a>
+                    </p>
+                </div>
+            </div>
+            <hr style="border-color: rgba(255,255,255,0.3); margin: 2rem 0 1rem;">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0 text-white-50">© {% now "Y" %} {% trans "Hawwa Postpartum Care. All rights reserved." %}</p>
+                    <p class="mb-0 small text-white-50">Powered by <a href="https://trendzapps.com" class="text-white-50 text-decoration-none" target="_blank" rel="noopener">TrendzApps</a></p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <small class="text-white-50">{% trans "Providing luxury postpartum care since 2024" %}</small>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Qatar Theme JavaScript -->
     <script src="{% static 'js/qatar-theme.js' %}"></script>
-    
-    <!-- Custom JavaScript -->
     <script src="{% static 'js/main.js' %}"></script>
-    
-    <!-- Service JavaScript (only loaded on service pages) -->
-    {% if 'services' in request.path %}
-    <script src="{% static 'js/services.js' %}"></script>
-    {% endif %}
-    
-    <!-- Additional JavaScript -->
     {% block extra_js %}{% endblock %}
 </body>
 </html>

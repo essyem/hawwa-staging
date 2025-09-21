@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load widget_tweaks %}
+{% load crispy_forms_tags %}
 
 {% block title %}Apply for Leave - HRMS{% endblock %}
 
@@ -39,65 +40,25 @@
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="{{ form.leave_type.id_for_label }}" class="form-label">
-                                Leave Type <span class="text-danger">*</span>
-                            </label>
-                            {% render_field form.leave_type class="form-select" %}
-                            {% if form.leave_type.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.leave_type.errors.0 }}
-                                </div>
-                            {% endif %}
+                            {{ form.leave_type|as_crispy_field }}
                         </div>
                         
                         <div class="col-md-2 mb-3">
-                            <label for="{{ form.days_requested.id_for_label }}" class="form-label">
-                                Days Requested <span class="text-danger">*</span>
-                            </label>
-                            {% render_field form.days_requested class="form-control" step="0.5" min="0.5" %}
-                            {% if form.days_requested.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.days_requested.errors.0 }}
-                                </div>
-                            {% endif %}
+                            {{ form.days_requested|as_crispy_field }}
                         </div>
                         
                         <div class="col-md-2 mb-3">
-                            <label for="{{ form.start_date.id_for_label }}" class="form-label">
-                                Start Date <span class="text-danger">*</span>
-                            </label>
-                            {% render_field form.start_date class="form-control" type="date" %}
-                            {% if form.start_date.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.start_date.errors.0 }}
-                                </div>
-                            {% endif %}
+                            {{ form.start_date|as_crispy_field }}
                         </div>
                         
                         <div class="col-md-2 mb-3">
-                            <label for="{{ form.end_date.id_for_label }}" class="form-label">
-                                End Date <span class="text-danger">*</span>
-                            </label>
-                            {% render_field form.end_date class="form-control" type="date" %}
-                            {% if form.end_date.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.end_date.errors.0 }}
-                                </div>
-                            {% endif %}
+                            {{ form.end_date|as_crispy_field }}
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="col-12 mb-3">
-                            <label for="{{ form.reason.id_for_label }}" class="form-label">
-                                Reason for Leave <span class="text-danger">*</span>
-                            </label>
-                            {% render_field form.reason class="form-control" rows="3" placeholder="Please provide a detailed reason for your leave application..." %}
-                            {% if form.reason.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.reason.errors.0 }}
-                                </div>
-                            {% endif %}
+                            {{ form.reason|as_crispy_field }}
                         </div>
                     </div>
                     
@@ -112,28 +73,16 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-12 mb-3">
-                                    <label for="{{ form.substitute_employee.id_for_label }}" class="form-label">
-                                        Substitute Employee
-                                        <span class="text-danger" id="substitute-required" style="display: none;">*</span>
-                                    </label>
-                                    {% render_field form.substitute_employee class="form-select" %}
+                                    {{ form.substitute_employee|as_crispy_field }}
                                     {% if form.substitute_employee.help_text %}
                                         <small class="form-text text-muted">{{ form.substitute_employee.help_text }}</small>
-                                    {% endif %}
-                                    {% if form.substitute_employee.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.substitute_employee.errors.0 }}
-                                        </div>
                                     {% endif %}
                                 </div>
                             </div>
                             
                             <div class="row">
                                 <div class="col-12 mb-3">
-                                    <label for="{{ form.substitute_notes.id_for_label }}" class="form-label">
-                                        Work Handover Notes
-                                    </label>
-                                    {% render_field form.substitute_notes class="form-control" rows="3" %}
+                                    {{ form.substitute_notes|as_crispy_field }}
                                     {% if form.substitute_notes.help_text %}
                                         <small class="form-text text-muted">{{ form.substitute_notes.help_text }}</small>
                                     {% endif %}

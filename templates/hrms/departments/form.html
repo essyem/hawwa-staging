@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load crispy_forms_tags %}
 
 {% block title %}
     {% if object %}Edit Department{% else %}Add Department{% endif %} - HRMS
@@ -32,71 +33,31 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="id_name" class="form-label">Department Name *</label>
-                                <input type="text" class="form-control {% if form.name.errors %}is-invalid{% endif %}" 
-                                       id="id_name" name="name" value="{{ form.name.value|default:'' }}" required>
-                                {% if form.name.errors %}
-                                    <div class="invalid-feedback">{{ form.name.errors.0 }}</div>
-                                {% endif %}
+                                {{ form.name|as_crispy_field }}
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="id_code" class="form-label">Department Code *</label>
-                                <input type="text" class="form-control {% if form.code.errors %}is-invalid{% endif %}" 
-                                       id="id_code" name="code" value="{{ form.code.value|default:'' }}" required>
+                                {{ form.code|as_crispy_field }}
                                 <small class="form-text text-muted">Short code for the department (e.g., ENG, HR, SAL)</small>
-                                {% if form.code.errors %}
-                                    <div class="invalid-feedback">{{ form.code.errors.0 }}</div>
-                                {% endif %}
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="id_description" class="form-label">Description</label>
-                        <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}" 
-                                  id="id_description" name="description" rows="3">{{ form.description.value|default:'' }}</textarea>
+                        {{ form.description|as_crispy_field }}
                         <small class="form-text text-muted">Brief description of the department's role and responsibilities</small>
-                        {% if form.description.errors %}
-                            <div class="invalid-feedback">{{ form.description.errors.0 }}</div>
-                        {% endif %}
                     </div>
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="id_manager" class="form-label">Department Manager</label>
-                                <select class="form-select {% if form.manager.errors %}is-invalid{% endif %}" 
-                                        id="id_manager" name="manager">
-                                    <option value="">Select a manager</option>
-                                    {% for employee in employees %}
-                                    <option value="{{ employee.pk }}" 
-                                            {% if form.manager.value == employee.pk %}selected{% endif %}>
-                                        {{ employee.get_full_name }} - {{ employee.profile.position.title|default:"Employee" }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                                {% if form.manager.errors %}
-                                    <div class="invalid-feedback">{{ form.manager.errors.0 }}</div>
-                                {% endif %}
+                                {{ form.manager|as_crispy_field }}
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="id_company" class="form-label">Company</label>
-                                <select class="form-select {% if form.company.errors %}is-invalid{% endif %}" 
-                                        id="id_company" name="company">
-                                    {% for company in companies %}
-                                    <option value="{{ company.pk }}" 
-                                            {% if form.company.value == company.pk %}selected{% endif %}>
-                                        {{ company.name }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                                {% if form.company.errors %}
-                                    <div class="invalid-feedback">{{ form.company.errors.0 }}</div>
-                                {% endif %}
+                                {{ form.company|as_crispy_field }}
                             </div>
                         </div>
                     </div>
@@ -104,27 +65,17 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="id_location" class="form-label">Location</label>
-                                <input type="text" class="form-control {% if form.location.errors %}is-invalid{% endif %}" 
-                                       id="id_location" name="location" value="{{ form.location.value|default:'' }}">
+                                {{ form.location|as_crispy_field }}
                                 <small class="form-text text-muted">Physical location or office</small>
-                                {% if form.location.errors %}
-                                    <div class="invalid-feedback">{{ form.location.errors.0 }}</div>
-                                {% endif %}
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="id_budget" class="form-label">Annual Budget</label>
+                                <label class="form-label">Annual Budget</label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
-                                    <input type="number" class="form-control {% if form.budget.errors %}is-invalid{% endif %}" 
-                                           id="id_budget" name="budget" value="{{ form.budget.value|default:'' }}" 
-                                           step="0.01" min="0">
+                                    {{ form.budget|as_crispy_field }}
                                 </div>
-                                {% if form.budget.errors %}
-                                    <div class="invalid-feedback">{{ form.budget.errors.0 }}</div>
-                                {% endif %}
                             </div>
                         </div>
                     </div>
