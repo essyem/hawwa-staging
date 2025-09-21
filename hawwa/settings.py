@@ -134,6 +134,7 @@ TEMPLATES = [
                 ],
             'builtins': [
                 'crispy_forms.templatetags.crispy_forms_tags',
+                'services.templatetags.service_extras',
             ],
         },
     },
@@ -274,8 +275,8 @@ ADMIN_INDEX_TITLE = "Welcome to Hawwa Administration"
 # Custom application settings
 HAWWA_SETTINGS = {
     'COMPANY_NAME': 'Hawwa LLC',
-    'SUPPORT_EMAIL': 'hello@hawwawellness.com',
-    'PHONE_NUMBER': '+974 7212 6440',
+    'SUPPORT_EMAIL': os.environ.get('HAWWA_SUPPORT_EMAIL', 'hello@hawwawellness.com'),
+    'PHONE_NUMBER': os.environ.get('HAWWA_PHONE_NUMBER', '+974 7212 6440'),
 }
 
 # Authentication
