@@ -1,0 +1,165 @@
+/* Custom styling for Hawwa Postpartum Care */
+
+:root {
+    --primary: #5a4199;
+    --secondary: #f08a5d;
+    --light: #f8f9fa;
+    --dark: #343a40;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    background-color: #f9f7ff;
+}
+
+/* Navbar customization */
+.navbar {
+    padding: 0.5rem 1rem;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.navbar .nav-link {
+    font-weight: 500;
+    color: #555;
+    padding: 0.8rem 1rem;
+}
+
+.navbar .nav-link:hover {
+    color: var(--primary);
+}
+
+.navbar .active {
+    color: var(--primary);
+    position: relative;
+}
+
+.navbar .active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 1rem;
+    right: 1rem;
+    height: 3px;
+    background-color: var(--primary);
+}
+
+/* Card customization */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1rem 1.5rem;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #4a3580;
+    border-color: #4a3580;
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Service cards */
+.service-card {
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Badge customization */
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 500;
+}
+
+/* Footer styling */
+footer {
+    background-color: #f8f7fc;
+}
+
+footer a {
+    color: var(--primary);
+}
+
+footer a:hover {
+    color: #4a3580;
+}
+
+/* Social icons */
+.social-links a {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--light);
+    color: var(--primary);
+    transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+/* Booking status colors */
+.status-pending {
+    color: #ffc107;
+}
+
+.status-confirmed {
+    color: #198754;
+}
+
+.status-completed {
+    color: #0dcaf0;
+}
+
+.status-cancelled {
+    color: #dc3545;
+}
+
+/* Form improvements */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(90, 65, 153, 0.25);
+}
+
+/* Custom pagination */
+.pagination .page-link {
+    color: var(--primary);
+}
+
+.pagination .active .page-link {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}

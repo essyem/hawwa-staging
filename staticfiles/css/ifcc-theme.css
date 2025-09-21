@@ -1,0 +1,474 @@
+/* IFCC Theme for Hawwa - Inspired by IFCC HRMS Portal */
+
+:root {
+    /* Primary Colors - Purple/Burgundy Theme */
+    --primary-color: #8B1538;
+    --primary-dark: #6B0F2A;
+    --primary-light: #A91B42;
+    --secondary-color: #4A90A4;
+    --accent-color: #E74C3C;
+    
+    /* Neutral Colors */
+    --gray-100: #F8F9FA;
+    --gray-200: #E9ECEF;
+    --gray-300: #DEE2E6;
+    --gray-400: #CED4DA;
+    --gray-500: #ADB5BD;
+    --gray-600: #6C757D;
+    --gray-700: #495057;
+    --gray-800: #343A40;
+    --gray-900: #212529;
+    
+    /* Status Colors */
+    --success-color: #28A745;
+    --warning-color: #FFC107;
+    --danger-color: #DC3545;
+    --info-color: #17A2B8;
+    
+    /* Background Colors */
+    --bg-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    --bg-light: #F8F9FA;
+    --bg-white: #FFFFFF;
+}
+
+/* Global Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--gray-700);
+    line-height: 1.6;
+}
+
+/* Navigation Styles - IFCC Theme */
+.navbar {
+    background: var(--bg-primary) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 0.75rem 0;
+}
+
+.navbar-brand {
+    color: white !important;
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+
+.navbar-nav .nav-link {
+    color: rgba(255,255,255,0.9) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    border-radius: 6px;
+    margin: 0 0.25rem;
+    transition: all 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+    color: white !important;
+    background-color: rgba(255,255,255,0.1);
+    transform: translateY(-1px);
+}
+
+.navbar-toggler {
+    border-color: rgba(255,255,255,0.3);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Hero Section - IFCC Style */
+.hero-section {
+    background: var(--bg-primary);
+    color: white;
+    padding: 4rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.03)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.03)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.1;
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Card Styles - IFCC Theme */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    transition: all 0.3s ease;
+    background: var(--bg-white);
+}
+
+.card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background: var(--bg-primary);
+    color: white;
+    border-radius: 12px 12px 0 0 !important;
+    border: none;
+    padding: 1.25rem 1.5rem;
+    font-weight: 600;
+}
+
+.card-footer {
+    background-color: var(--gray-100);
+    border-top: 1px solid var(--gray-200);
+    border-radius: 0 0 12px 12px;
+}
+
+/* Button Styles - IFCC Theme */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.6rem 1.5rem;
+    transition: all 0.3s ease;
+    border: none;
+    text-transform: none;
+}
+
+.btn-primary {
+    background: var(--bg-primary);
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 21, 56, 0.3);
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border: none;
+}
+
+.btn-info {
+    background-color: var(--info-color);
+    border: none;
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    border: none;
+    color: var(--gray-800);
+}
+
+/* Table Styles - IFCC Employee Directory Style */
+.table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+}
+
+.table th {
+    background-color: var(--gray-100);
+    border: none;
+    font-weight: 600;
+    color: var(--gray-700);
+    padding: 1rem 1.25rem;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    border: none;
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(139, 21, 56, 0.02);
+}
+
+/* Avatar/Profile Image Styles */
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-right: 0.75rem;
+}
+
+.avatar-lg {
+    width: 60px;
+    height: 60px;
+    font-size: 1.2rem;
+}
+
+/* Status Badge Styles - IFCC Style */
+.badge {
+    border-radius: 20px;
+    padding: 0.4rem 0.8rem;
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-active {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.badge-inactive {
+    background-color: var(--gray-400);
+    color: white;
+}
+
+.badge-pending {
+    background-color: var(--warning-color);
+    color: var(--gray-800);
+}
+
+/* Form Styles */
+.form-control, .form-select {
+    border: 2px solid var(--gray-300);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(139, 21, 56, 0.1);
+    background-color: white;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+}
+
+/* Page Header */
+.page-header {
+    background: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.page-title {
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    color: var(--gray-600);
+    font-size: 1.1rem;
+}
+
+/* Search and Filter Section */
+.search-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Action Buttons */
+.action-buttons .btn {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Pagination */
+.pagination .page-link {
+    border: none;
+    color: var(--primary-color);
+    padding: 0.75rem 1rem;
+    margin: 0 0.25rem;
+    border-radius: 8px;
+}
+
+.pagination .page-link:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Alert Styles */
+.alert {
+    border: none;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    border-left: 4px solid;
+}
+
+.alert-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    border-left-color: var(--success-color);
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-left-color: var(--danger-color);
+    color: #721c24;
+}
+
+.alert-info {
+    background-color: rgba(23, 162, 184, 0.1);
+    border-left-color: var(--info-color);
+    color: #0c5460;
+}
+
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    border-left-color: var(--warning-color);
+    color: #856404;
+}
+
+/* Service Cards */
+.service-card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.service-card:hover {
+    box-shadow: 0 8px 25px rgba(139, 21, 56, 0.15);
+    transform: translateY(-3px);
+}
+
+.service-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.service-card .card-body {
+    padding: 1.5rem;
+}
+
+.service-card .price {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+/* Footer */
+.footer {
+    background: var(--bg-primary);
+    color: white;
+    padding: 3rem 0 1rem;
+    margin-top: 4rem;
+}
+
+.footer h5 {
+    color: white;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.footer a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 2rem 0;
+        text-align: center;
+    }
+    
+    .page-header {
+        text-align: center;
+        padding: 1.5rem 0;
+    }
+    
+    .table-responsive {
+        border-radius: 12px;
+        overflow-x: auto;
+    }
+    
+    .action-buttons {
+        text-align: center;
+        margin-top: 1rem;
+    }
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gray-200);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
