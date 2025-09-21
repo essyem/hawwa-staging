@@ -11,6 +11,9 @@ from .models import Comment, Activity
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib.contenttypes.models import ContentType
+from django.views.generic import ListView
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from .models import ChangeRequest
 
 
 
@@ -111,3 +114,19 @@ def cr_detail_view(request, pk):
             return redirect(request.path)
 
     return render(request, 'change_management/cr_detail.html', {'cr': cr, 'comments': comments})
+
+
+class ChangeRequestListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """Staff-only paginated list of Change Requests."""
+    model = ChangeRequest
+    template_name = 'change_management/change_list.html'
+    context_object_name = 'change_requests'
+    paginate_by = 20
+
+    def test_func(self):
+        # Allow staff or users with explicit permission
+        user = self.request.user
+        return bool(user and (user.is_staff or user.has_perm('change_management.view_changerequest')))
+
+    def get_queryset(self):
+        return ChangeRequest.objects.all().order_by('-created_at')

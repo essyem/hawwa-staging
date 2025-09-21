@@ -11,6 +11,7 @@ from .views import (
 	RoleViewSet,
 	RoleAssignmentViewSet,
 	cr_detail_view,
+    ChangeRequestListView,
 )
 
 router = DefaultRouter()
@@ -26,4 +27,5 @@ urlpatterns = router.urls
 
 urlpatterns += [
 	path('ui/change-request/<int:pk>/', cr_detail_view, name='cr_detail'),
+    path('ui/change-requests/', ChangeRequestListView.as_view(), name='change_list'),
 ]

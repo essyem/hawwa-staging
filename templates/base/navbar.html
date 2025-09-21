@@ -122,6 +122,10 @@
                         <li><a class="dropdown-item" href="{% url 'admin:index' %}">
                             <i class="fas fa-cog me-2"></i>{% trans "Admin Panel" %}</a></li>
                         {% endif %}
+                        {% if user.is_staff or user.has_perm('change_management.view_changerequest') %}
+                        <li><a class="dropdown-item" href="{% url 'change_management:change_list' %}">
+                            <i class="fas fa-exchange-alt me-2"></i>{% trans "Change Requests" %}</a></li>
+                        {% endif %}
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{% url 'logout' %}">
                             <i class="fas fa-sign-out-alt me-2"></i>{% trans "Logout" %}</a></li>

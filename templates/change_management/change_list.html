@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Change Requests" %}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-3">{% trans "Change Requests" %}</h1>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>{% trans "ID" %}</th>
+                <th>{% trans "Title" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Assignee" %}</th>
+                <th>{% trans "Created" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for cr in change_requests %}
+            <tr>
+                <td>{{ cr.id }}</td>
+                <td><a href="{% url 'change_management:cr_detail' cr.id %}">{{ cr.title }}</a></td>
+                <td>{{ cr.get_status_display }}</td>
+                <td>{{ cr.assignee.get_full_name|default:cr.assignee.email if cr.assignee else "-" }}</td>
+                <td>{{ cr.created_at }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5">{% trans "No change requests found." %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% if is_paginated %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">{% trans "Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+{% endblock %}
