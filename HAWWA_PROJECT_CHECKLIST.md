@@ -599,6 +599,26 @@ Notes: This is an enhancement/new app addition. Merge requires adding migrations
 - Added `hawwa/context_processors.py` to expose `HAWWA_SETTINGS` in templates and updated header/footer to use centralized contact settings (`SUPPORT_EMAIL`, `PHONE_NUMBER`).
 - Pushed these changes to `origin/master`.
 
+---
+
+## 🔒 Freeze: Reproducible dependencies (2025-09-21)
+
+To make development and deployment reproducible, a frozen requirements file has been generated and committed as `requirements-frozen.txt`.
+
+How to reproduce locally:
+
+```bash
+# activate your virtualenv
+source /home/essyem/hawwa/env-hawwa/bin/activate
+# install exact versions
+pip install -r requirements-frozen.txt
+```
+
+Notes:
+- Keep `requirements.txt` as the editable development manifest; update it as you add/remove top-level dependencies.
+- Periodically regenerate `requirements-frozen.txt` after intentional dependency changes and test the project before committing.
+
+
 ## Production Environment Variables & Deployment Verification
 
 When deploying to production, set the following environment variables (do not commit them to source control):
