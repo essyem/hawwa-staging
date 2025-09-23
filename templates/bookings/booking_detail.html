@@ -1,639 +1,261 @@
 {% extends 'base.html' %}
-{% load i18n %}
-{% load static %}
+{% load i18n static humanize %}
 
 {% block title %}{% trans "Booking Details" %} - {{ booking.booking_number }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'bookings:booking_list' %}">{% trans "Bookings" %}</a></li>
-            <li class="breadcrumb-item active">{{ booking.booking_number }}</li>
-        </ol>
-    </nav>
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'bookings:booking_list' %}">{% trans "Bookings" %}</a></li>
+      <li class="breadcrumb-item active">{{ booking.booking_number }}</li>
+    </ol>
+  </nav>
 
-    <!-- Page Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <h1 class="h3 mb-1">{% trans "Booking Details" %}</h1>
-                    <p class="text-muted mb-0">{{ booking.booking_number }} • {{ booking.created_at|date:"M d, Y H:i" }}</p>
-                </div>
-                <div class="btn-group">
-                    {% if booking.status == 'draft' %}
-                        <a href="{% url 'bookings:booking_update' booking.pk %}" class="btn btn-outline-primary">
-                            <i class="fas fa-edit"></i> {% trans "Edit" %}
-                        </a>
-                        <a href="{% url 'bookings:submit_booking' booking.pk %}" class="btn btn-success">
-                            <i class="fas fa-paper-plane"></i> {% trans "Submit" %}
-                        </a>
-                    {% elif booking.can_be_modified %}
-                        <a href="{% url 'bookings:booking_update' booking.pk %}" class="btn btn-outline-primary">
-                            <i class="fas fa-edit"></i> {% trans "Edit" %}
-                        </a>
-                    {% endif %}
-                    {% if booking.status in 'draft,pending,confirmed' and booking.start_date > today %}
-                        <a href="{% url 'bookings:booking_cancel' booking.pk %}" class="btn btn-outline-danger">
-                            <i class="fas fa-times"></i> {% trans "Cancel" %}
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h1 class="h3 mb-1">{% trans "Booking Details" %}</h1>
+          <p class="text-muted mb-0">{{ booking.booking_number }} • {{ booking.created_at|date:"M d, Y H:i" }}</p>
         </div>
+        <div class="btn-group">
+          {% if booking.status == 'draft' %}
+            <a href="{% url 'bookings:booking_update' booking.pk %}" class="btn btn-outline-primary"><i class="fas fa-edit"></i> {% trans "Edit" %}</a>
+            <a href="{% url 'bookings:submit_booking' booking.pk %}" class="btn btn-success"><i class="fas fa-paper-plane"></i> {% trans "Submit" %}</a>
+          {% elif booking.can_be_modified %}
+            <a href="{% url 'bookings:booking_update' booking.pk %}" class="btn btn-outline-primary"><i class="fas fa-edit"></i> {% trans "Edit" %}</a>
+          {% endif %}
+
+          {% if booking.start_date > today %}
+            {% if booking.status == 'draft' or booking.status == 'pending' or booking.status == 'confirmed' %}
+              <a href="{% url 'bookings:booking_cancel' booking.pk %}" class="btn btn-outline-danger"><i class="fas fa-times"></i> {% trans "Cancel" %}</a>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
     </div>
+  </div>
 
-    <div class="row">
-        <!-- Main Booking Information -->
-        <div class="col-lg-8 mb-4">
-            <!-- Status Card -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-3 text-center mb-3 mb-md-0">
-                            {% if booking.status == 'draft' %}
-                                <div class="status-icon bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                    <i class="fas fa-edit fa-2x"></i>
-                                </div>
-                                <h5 class="mt-2 mb-0">{% trans "Draft" %}</h5>
-                            {% elif booking.status == 'pending' %}
-                                <div class="status-icon bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                    <i class="fas fa-clock fa-2x"></i>
-                                </div>
-                                <h5 class="mt-2 mb-0">{% trans "Pending" %}</h5>
-                            {% elif booking.status == 'confirmed' %}
-                                <div class="status-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                    <i class="fas fa-check-circle fa-2x"></i>
-                                </div>
-                                <h5 class="mt-2 mb-0">{% trans "Confirmed" %}</h5>
-                            {% elif booking.status == 'in_progress' %}
-                                <div class="status-icon bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                    <i class="fas fa-spinner fa-2x"></i>
-                                </div>
-                                <h5 class="mt-2 mb-0">{% trans "In Progress" %}</h5>
-                            {% elif booking.status == 'completed' %}
-                                <div class="status-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                    <i class="fas fa-star fa-2x"></i>
-                                </div>
-                                <h5 class="mt-2 mb-0">{% trans "Completed" %}</h5>
-                            {% elif booking.status == 'cancelled' %}
-                                <div class="status-icon bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                    <i class="fas fa-times-circle fa-2x"></i>
-                                </div>
-                                <h5 class="mt-2 mb-0">{% trans "Cancelled" %}</h5>
-                            {% elif booking.status == 'no_show' %}
-                                <div class="status-icon bg-dark text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                    <i class="fas fa-user-times fa-2x"></i>
-                                </div>
-                                <h5 class="mt-2 mb-0">{% trans "No Show" %}</h5>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-9">
-                            <h4 class="mb-2">{{ booking.service.name }}</h4>
-                            <p class="text-muted mb-2">{{ booking.service.description|truncatechars:150 }}</p>
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <strong>{% trans "Date & Time:" %}</strong><br>
-                                    {{ booking.start_date|date:"l, F d, Y" }}<br>
-                                    {% if booking.start_time %}
-                                        {{ booking.start_time|time:"g:i A" }}
-                                        {% if booking.end_time %} - {{ booking.end_time|time:"g:i A" }}{% endif %}
-                                    {% endif %}
-                                </div>
-                                <div class="col-sm-6">
-                                    <strong>{% trans "Priority:" %}</strong><br>
-                                    {% if booking.priority == 'low' %}
-                                        <span class="badge bg-light text-dark">{% trans "Low" %}</span>
-                                    {% elif booking.priority == 'normal' %}
-                                        <span class="badge bg-secondary">{% trans "Normal" %}</span>
-                                    {% elif booking.priority == 'high' %}
-                                        <span class="badge bg-warning">{% trans "High" %}</span>
-                                    {% elif booking.priority == 'urgent' %}
-                                        <span class="badge bg-danger">{% trans "Urgent" %}</span>
-                                    {% endif %}
-                                </div>
+  <div class="row">
+    <div class="col-lg-8 mb-4">
+      <!-- Main booking details (simplified for template-safety) -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h4 class="mb-2">{{ booking.service.name }}</h4>
+          <p class="text-muted mb-2">{{ booking.service.description|truncatechars:150 }}</p>
+          <div class="row">
+            <div class="col-sm-6">
+              <strong>{% trans "Date & Time:" %}</strong><br>
+              {{ booking.start_date|date:"l, F d, Y" }}<br>
+              {% if booking.start_time %}{{ booking.start_time|time:"g:i A" }}{% if booking.end_time %} - {{ booking.end_time|time:"g:i A" }}{% endif %}{% endif %}
+            </div>
+            <div class="col-sm-6">
+              <strong>{% trans "Priority:" %}</strong><br>
+              {% if booking.priority == 'low' %}<span class="badge bg-light text-dark">{% trans "Low" %}</span>
+                              {% elif booking.priority == 'normal' %}<span class="badge bg-secondary">{% trans "Normal" %}</span>
+                              {% elif booking.priority == 'high' %}<span class="badge bg-warning">{% trans "High" %}</span>
+                              {% elif booking.priority == 'urgent' %}<span class="badge bg-danger">{% trans "Urgent" %}</span>{% endif %}
                             </div>
+                          </div>
                         </div>
-                    </div>
-                </div>
-            </div>
+                      </div>
 
-            <!-- Contact & Location Information -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">{% trans "Contact & Location Information" %}</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-2">{% trans "Contact Information" %}</h6>
-                            {% if booking.client_name %}
-                                <p class="mb-1"><strong>{% trans "Name:" %}</strong> {{ booking.client_name }}</p>
-                            {% endif %}
-                            {% if booking.client_email %}
-                                <p class="mb-1"><strong>{% trans "Email:" %}</strong> {{ booking.client_email }}</p>
-                            {% endif %}
-                            {% if booking.client_phone %}
-                                <p class="mb-1"><strong>{% trans "Phone:" %}</strong> {{ booking.client_phone }}</p>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-2">{% trans "Location" %}</h6>
-                            {% if booking.location_address %}
-                                <p class="mb-1"><strong>{% trans "Address:" %}</strong><br>{{ booking.location_address }}</p>
-                            {% endif %}
-                            {% if booking.location_city %}
-                                <p class="mb-1"><strong>{% trans "City:" %}</strong> {{ booking.location_city }}</p>
-                            {% endif %}
-                            {% if booking.location_notes %}
-                                <p class="mb-1"><strong>{% trans "Notes:" %}</strong> {{ booking.location_notes }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Additional Items -->
-            {% if booking_items %}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">{% trans "Additional Items" %}</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
+                      {% if booking_items %}
+                      <div class="card mb-4">
+                        <div class="card-header"><h5 class="mb-0">{% trans "Additional Items" %}</h5></div>
+                        <div class="card-body">
+                          <div class="table-responsive">
+                            <table class="table table-sm">
+                              <thead>
                                 <tr>
-                                    <th>{% trans "Item" %}</th>
-                                    <th>{% trans "Description" %}</th>
-                                    <th class="text-end">{% trans "Qty" %}</th>
-                                    <th class="text-end">{% trans "Price" %}</th>
-                                    <th class="text-end">{% trans "Total" %}</th>
+                                  <th>{% trans "Item" %}</th>
+                                  <th>{% trans "Description" %}</th>
+                                  <th class="text-end">{% trans "Qty" %}</th>
+                                  <th class="text-end">{% trans "Price" %}</th>
+                                  <th class="text-end">{% trans "Total" %}</th>
                                 </tr>
-                            </thead>
-                            <tbody>
+                              </thead>
+                              <tbody>
                                 {% for item in booking_items %}
                                 <tr>
-                                    <td>{{ item.name }}</td>
-                                    <td>{{ item.description|default:"-" }}</td>
-                                    <td class="text-end">{{ item.quantity }}</td>
-                                    <td class="text-end">${{ item.price|floatformat:2 }}</td>
-                                    <td class="text-end">${{ item.get_total|floatformat:2 }}</td>
+                                  <td>{{ item.name }}</td>
+                                  <td>{{ item.description|default:"-" }}</td>
+                                  <td class="text-end">{{ item.quantity }}</td>
+                                  <td class="text-end">${{ item.price|floatformat:2 }}</td>
+                                  <td class="text-end">${{ item.get_total|floatformat:2 }}</td>
                                 </tr>
                                 {% endfor %}
-                            </tbody>
-                            <tfoot>
+                              </tbody>
+                              <tfoot>
                                 <tr class="table-light">
-                                    <th colspan="4" class="text-end">{% trans "Items Total:" %}</th>
-                                    <th class="text-end">${{ items_total|floatformat:2 }}</th>
+                                  <th colspan="4" class="text-end">{% trans "Items Total:" %}</th>
+                                  <th class="text-end">${{ items_total|floatformat:2 }}</th>
                                 </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+                              </tfoot>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                      {% endif %}
 
-            <!-- Notes -->
-            {% if booking.notes or booking.admin_notes %}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">{% trans "Notes" %}</h5>
-                </div>
-                <div class="card-body">
-                    {% if booking.notes %}
-                        <h6 class="text-muted">{% trans "Client Notes:" %}</h6>
-                        <p>{{ booking.notes }}</p>
-                    {% endif %}
-                    {% if booking.admin_notes %}
-                        <h6 class="text-muted">{% trans "Admin Notes:" %}</h6>
-                        <p>{{ booking.admin_notes }}</p>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
+                      {% if booking.notes or booking.admin_notes %}
+                      <div class="card mb-4">
+                        <div class="card-header"><h5 class="mb-0">{% trans "Notes" %}</h5></div>
+                        <div class="card-body">
+                          {% if booking.notes %}<h6 class="text-muted">{% trans "Client Notes:" %}</h6><p>{{ booking.notes }}</p>{% endif %}
+                          {% if booking.admin_notes %}<h6 class="text-muted">{% trans "Admin Notes:" %}</h6><p>{{ booking.admin_notes }}</p>{% endif %}
+                        </div>
+                      </div>
+                      {% endif %}
 
-            <!-- Status History -->
-            {% if status_history %}
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">{% trans "Status History" %}</h5>
-                </div>
-                <div class="card-body">
-                    <div class="timeline">
-                        {% for history in status_history %}
-                        <div class="timeline-item">
-                            <div class="timeline-marker"></div>
-                            <div class="timeline-content">
+                      {% if status_history %}
+                      <div class="card">
+                        <div class="card-header"><h5 class="mb-0">{% trans "Status History" %}</h5></div>
+                        <div class="card-body">
+                          <div class="timeline">
+                            {% for history in status_history %}
+                            <div class="timeline-item">
+                              <div class="timeline-marker"></div>
+                              <div class="timeline-content">
                                 <h6 class="mb-1">
-                                    {% if history.old_status %}
-                                        {% trans "Changed from" %} <span class="badge bg-secondary">{{ history.get_old_status_display }}</span>
-                                        {% trans "to" %} <span class="badge bg-primary">{{ history.get_new_status_display }}</span>
-                                    {% else %}
-                                        {% trans "Status set to" %} <span class="badge bg-primary">{{ history.get_new_status_display }}</span>
-                                    {% endif %}
+                                  {% if history.old_status %}
+                                    {% trans "Changed from" %} <span class="badge bg-secondary">{{ history.get_old_status_display }}</span> {% trans "to" %} <span class="badge bg-primary">{{ history.get_new_status_display }}</span>
+                                  {% else %}
+                                    {% trans "Status set to" %} <span class="badge bg-primary">{{ history.get_new_status_display }}</span>
+                                  {% endif %}
                                 </h6>
                                 <p class="text-muted mb-1">{{ history.timestamp|date:"M d, Y H:i" }}</p>
-                                {% if history.notes %}
-                                    <p class="mb-0"><small>{{ history.notes }}</small></p>
-                                {% endif %}
+                                {% if history.notes %}<p class="mb-0"><small>{{ history.notes }}</small></p>{% endif %}
+                              </div>
                             </div>
+                            {% endfor %}
+                          </div>
                         </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
+                      </div>
+                      {% endif %}
 
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <!-- Pricing Summary -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">{% trans "Pricing Summary" %}</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-2">
-                        <div class="col">{% trans "Base Price:" %}</div>
-                        <div class="col-auto">${{ booking.base_price|floatformat:2 }}</div>
                     </div>
-                    {% if booking.discount_amount %}
-                    <div class="row mb-2 text-success">
-                        <div class="col">{% trans "Discount:" %}</div>
-                        <div class="col-auto">-${{ booking.discount_amount|floatformat:2 }}</div>
-                    </div>
-                    {% endif %}
-                    {% if booking.tax_amount %}
-                    <div class="row mb-2">
-                        <div class="col">{% trans "Tax:" %}</div>
-                        <div class="col-auto">${{ booking.tax_amount|floatformat:2 }}</div>
-                    </div>
-                    {% endif %}
-                    {% if items_total %}
-                    <div class="row mb-2">
-                        <div class="col">{% trans "Additional Items:" %}</div>
-                        <div class="col-auto">${{ items_total|floatformat:2 }}</div>
-                    </div>
-                    {% endif %}
-                    <hr>
-                    <div class="row">
-                        <div class="col"><strong>{% trans "Total:" %}</strong></div>
-                        <div class="col-auto"><strong>${{ booking.total_price|floatformat:2 }}</strong></div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Payment Information -->
-            {% if payments %}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">{% trans "Payment History" %}</h5>
-                </div>
-                <div class="card-body">
-                    {% for payment in payments %}
-                    <div class="d-flex justify-content-between align-items-center mb-2 {% if not forloop.last %}border-bottom pb-2{% endif %}">
-                        <div>
-                            <div class="fw-bold">${{ payment.amount|floatformat:2 }}</div>
-                            <small class="text-muted">{{ payment.payment_date|date:"M d, Y" }}</small>
+                    <div class="col-lg-4">
+                      <div class="card mb-4">
+                        <div class="card-header"><h5 class="mb-0">{% trans "Pricing Summary" %}</h5></div>
+                        <div class="card-body">
+                          <div class="row mb-2"><div class="col">{% trans "Base Price:" %}</div><div class="col-auto">${{ booking.base_price|floatformat:2 }}</div></div>
+                          {% if booking.discount_amount %}<div class="row mb-2 text-success"><div class="col">{% trans "Discount:" %}</div><div class="col-auto">-${{ booking.discount_amount|floatformat:2 }}</div></div>{% endif %}
+                          {% if booking.tax_amount %}<div class="row mb-2"><div class="col">{% trans "Tax:" %}</div><div class="col-auto">${{ booking.tax_amount|floatformat:2 }}</div></div>{% endif %}
+                          {% if items_total %}<div class="row mb-2"><div class="col">{% trans "Additional Items:" %}</div><div class="col-auto">${{ items_total|floatformat:2 }}</div></div>{% endif %}
+                          <hr>
+                          <div class="row"><div class="col"><strong>{% trans "Total:" %}</strong></div><div class="col-auto"><strong>${{ booking.total_price|floatformat:2 }}</strong></div></div>
                         </div>
-                        <div class="text-end">
-                            {% if payment.payment_status == 'completed' %}
-                                <span class="badge bg-success">{% trans "Completed" %}</span>
-                            {% elif payment.payment_status == 'pending' %}
-                                <span class="badge bg-warning">{% trans "Pending" %}</span>
-                            {% elif payment.payment_status == 'failed' %}
-                                <span class="badge bg-danger">{% trans "Failed" %}</span>
+                      </div>
+
+                      {% if payments %}
+                      <div class="card mb-4">
+                        <div class="card-header"><h5 class="mb-0">{% trans "Payment History" %}</h5></div>
+                        <div class="card-body">
+                          {% for payment in payments %}
+                          <div class="d-flex justify-content-between align-items-center mb-2 {% if not forloop.last %}border-bottom pb-2{% endif %}">
+                            <div><div class="fw-bold">${{ payment.amount|floatformat:2 }}</div><small class="text-muted">{{ payment.payment_date|date:"M d, Y" }}</small></div>
+                            <div class="text-end">
+                              {% if payment.payment_status == 'completed' %}<span class="badge bg-success">{% trans "Completed" %}</span>
+                              {% elif payment.payment_status == 'pending' %}<span class="badge bg-warning">{% trans "Pending" %}</span>
+                              {% elif payment.payment_status == 'failed' %}<span class="badge bg-danger">{% trans "Failed" %}</span>{% endif %}
+                              <br><small class="text-muted">{{ payment.get_payment_method_display }}</small>
+                            </div>
+                          </div>
+                          {% endfor %}
+                          <hr>
+                          <div class="d-flex justify-content-between"><strong>{% trans "Total Paid:" %}</strong><strong class="text-success">${{ total_paid|floatformat:2 }}</strong></div>
+                          {% if booking.total_price > total_paid %}<div class="d-flex justify-content-between text-warning"><strong>{% trans "Balance Due:" %}</strong><strong>${{ booking.total_price|add:total_paid|floatformat:2 }}</strong></div>{% endif %}
+                        </div>
+                      </div>
+                      {% endif %}
+
+                      <div class="card">
+                        <div class="card-header"><h5 class="mb-0">{% trans "Quick Actions" %}</h5></div>
+                        <div class="card-body">
+                          <div class="d-grid gap-2">
+                            {% if booking.status == 'draft' %}
+                            <a href="{% url 'bookings:submit_booking' booking.pk %}" class="btn btn-success"><i class="fas fa-paper-plane"></i> {% trans "Submit Booking" %}</a>
+                            <a href="{% url 'bookings:booking_update' booking.pk %}" class="btn btn-outline-primary"><i class="fas fa-edit"></i> {% trans "Edit Details" %}</a>
                             {% endif %}
-                            <br>
-                            <small class="text-muted">{{ payment.get_payment_method_display }}</small>
+                            <a href="{% url 'bookings:booking_list' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> {% trans "Back to Bookings" %}</a>
+                            <button class="btn btn-outline-info" onclick="window.print()"><i class="fas fa-print"></i> {% trans "Print Details" %}</button>
+                          </div>
                         </div>
+                      </div>
                     </div>
-                    {% endfor %}
-                    <hr>
-                    <div class="d-flex justify-content-between">
-                        <strong>{% trans "Total Paid:" %}</strong>
-                        <strong class="text-success">${{ total_paid|floatformat:2 }}</strong>
-                    </div>
-                    {% if booking.total_price > total_paid %}
-                    <div class="d-flex justify-content-between text-warning">
-                        <strong>{% trans "Balance Due:" %}</strong>
-                        <strong>${{ booking.total_price|add:total_paid|floatformat:2 }}</strong>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
+                  </div>
 
-            <!-- Quick Actions -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">{% trans "Quick Actions" %}</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        {% if booking.status == 'draft' %}
-                            <a href="{% url 'bookings:submit_booking' booking.pk %}" class="btn btn-success">
-                                <i class="fas fa-paper-plane"></i> {% trans "Submit Booking" %}
-                            </a>
-                            <a href="{% url 'bookings:booking_update' booking.pk %}" class="btn btn-outline-primary">
-                                <i class="fas fa-edit"></i> {% trans "Edit Details" %}
-                            </a>
-                        {% endif %}
-                        
-                        <a href="{% url 'bookings:booking_list' %}" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left"></i> {% trans "Back to Bookings" %}
-                        </a>
-                        
-                        <button class="btn btn-outline-info" onclick="window.print()">
-                            <i class="fas fa-print"></i> {% trans "Print Details" %}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-.timeline {
-    position: relative;
-    padding-left: 30px;
-}
-
-.timeline-item {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.timeline-marker {
-    position: absolute;
-    left: -35px;
-    top: 5px;
-    width: 12px;
-    height: 12px;
-    background: #007bff;
-    border-radius: 50%;
-    border: 3px solid #fff;
-    box-shadow: 0 0 0 3px #dee2e6;
-}
-
-.timeline-item:not(:last-child)::before {
-    content: '';
-    position: absolute;
-    left: -29px;
-    top: 17px;
-    width: 2px;
-    height: calc(100% + 3px);
-    background: #dee2e6;
-}
-
-@media print {
-    .btn, .breadcrumb {
-        display: none !important;
-    }
-}
-</style>
-{% endblock %}
-                                <span class="badge bg-secondary">{% trans "Refunded" %}</span>
-                            {% endif %}
+                  {% if booking.status == 'pending' %}
+                  <!-- Add Item Modal -->
+                  <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="addItemModalLabel">{% trans "Add Item" %}</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <h6 class="text-muted mb-2">{% trans "Created On" %}</h6>
-                            <p>{{ booking.created_at|date:"F j, Y H:i" }}</p>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <h6 class="text-muted mb-2">{% trans "Service" %}</h6>
-                            <p>{{ booking.service.name }}</p>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <h6 class="text-muted mb-2">{% trans "Total Price" %}</h6>
-                            <p class="h5 text-primary">{{ booking.total_price|floatformat:2|intcomma }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card mb-4">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">{% trans "Booking Details" %}</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <h6 class="text-muted mb-2">{% trans "Start Date" %}</h6>
-                            <p>{{ booking.start_date|date:"F j, Y" }}</p>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <h6 class="text-muted mb-2">{% trans "End Date" %}</h6>
-                            <p>{{ booking.end_date|date:"F j, Y" }}</p>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <h6 class="text-muted mb-2">{% trans "Start Time" %}</h6>
-                            <p>{{ booking.start_time|time:"H:i" }}</p>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <h6 class="text-muted mb-2">{% trans "Address" %}</h6>
-                            <p>{{ booking.address }}</p>
-                        </div>
-                        {% if booking.notes %}
-                            <div class="col-12 mb-3">
-                                <h6 class="text-muted mb-2">{% trans "Notes" %}</h6>
-                                <p>{{ booking.notes }}</p>
+                        <form id="addItemForm" method="post" action="{% url 'bookings:add_booking_item' booking.id %}">{% csrf_token %}
+                          <div class="modal-body">
+                            <div class="mb-3"><label for="id_name" class="form-label">{% trans "Item Name" %}</label><input type="text" class="form-control" id="id_name" name="name" required></div>
+                            <div class="mb-3"><label for="id_description" class="form-label">{% trans "Description" %}</label><textarea class="form-control" id="id_description" name="description" rows="2"></textarea></div>
+                            <div class="row">
+                              <div class="col-md-6 mb-3"><label for="id_quantity" class="form-label">{% trans "Quantity" %}</label><input type="number" class="form-control" id="id_quantity" name="quantity" value="1" min="1" required></div>
+                              <div class="col-md-6 mb-3"><label for="id_price" class="form-label">{% trans "Price" %}</label><input type="number" class="form-control" id="id_price" name="price" step="0.01" min="0" required></div>
                             </div>
-                        {% endif %}
+                          </div>
+                          <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button><button type="submit" class="btn btn-primary">{% trans "Add Item" %}</button></div>
+                        </form>
+                      </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="card mb-4">
-                <div class="card-header bg-light">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h5 class="mb-0">{% trans "Booking Items" %}</h5>
-                        </div>
-                        {% if booking.status == 'pending' %}
-                            <div class="col-auto">
-                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addItemModal">
-                                    <i class="bi bi-plus-circle me-1"></i>{% trans "Add Item" %}
-                                </button>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>{% trans "Item" %}</th>
-                                    <th>{% trans "Description" %}</th>
-                                    <th>{% trans "Quantity" %}</th>
-                                    <th>{% trans "Price" %}</th>
-                                    <th>{% trans "Total" %}</th>
-                                </tr>
-                            </thead>
-                            <tbody id="items-table-body">
-                                {% if booking.items.all %}
-                                    {% for item in booking.items.all %}
-                                        <tr>
-                                            <td>{{ item.name }}</td>
-                                            <td>{{ item.description|default:"-" }}</td>
-                                            <td>{{ item.quantity }}</td>
-                                            <td>{{ item.price|floatformat:2|intcomma }}</td>
-                                            <td>{{ item.get_total|floatformat:2|intcomma }}</td>
-                                        </tr>
-                                    {% endfor %}
-                                {% else %}
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">
-                                            <p class="text-muted mb-0">{% trans "No items added to this booking." %}</p>
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="text-center">
-                <a href="{% url 'bookings:booking_list' %}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>{% trans "Back to Bookings" %}
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+                  </div>
+                  {% endif %}
 
-{% if booking.status == 'pending' %}
-    <!-- Add Item Modal -->
-    <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addItemModalLabel">{% trans "Add Item" %}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="addItemForm" method="post" action="{% url 'bookings:add_booking_item' booking.id %}">
-                    {% csrf_token %}
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="id_name" class="form-label">{% trans "Item Name" %}</label>
-                            <input type="text" class="form-control" id="id_name" name="name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="id_description" class="form-label">{% trans "Description" %}</label>
-                            <textarea class="form-control" id="id_description" name="description" rows="2"></textarea>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="id_quantity" class="form-label">{% trans "Quantity" %}</label>
-                                <input type="number" class="form-control" id="id_quantity" name="quantity" value="1" min="1" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="id_price" class="form-label">{% trans "Price" %}</label>
-                                <input type="number" class="form-control" id="id_price" name="price" step="0.01" min="0" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
-                        <button type="submit" class="btn btn-primary">{% trans "Add Item" %}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-{% endif %}
+                {% endblock %}
 
-{% endblock %}
+                {% block extra_css %}
+                <style>
+                .timeline { position: relative; padding-left: 30px; }
+                .timeline-item { position: relative; margin-bottom: 20px; }
+                .timeline-marker { position: absolute; left: -35px; top: 5px; width: 12px; height: 12px; background: #007bff; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 3px #dee2e6; }
+                .timeline-item:not(:last-child)::before { content: ''; position: absolute; left: -29px; top: 17px; width: 2px; height: calc(100% + 3px); background: #dee2e6; }
+                @media print { .btn, .breadcrumb { display: none !important; } }
+                </style>
+                {% endblock %}
 
-{% block extra_js %}
-{% if booking.status == 'pending' %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const addItemForm = document.getElementById('addItemForm');
-        const itemsTableBody = document.getElementById('items-table-body');
-        
-        addItemForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Submit form using AJAX
-            const formData = new FormData(addItemForm);
-            
-            fetch(addItemForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Clear form
-                    addItemForm.reset();
-                    
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
-                    modal.hide();
-                    
-                    // Check if there's a "no items" row
-                    if (itemsTableBody.querySelector('td[colspan="5"]')) {
-                        itemsTableBody.innerHTML = '';
-                    }
-                    
-                    // Add new row to table
-                    const newRow = document.createElement('tr');
-                    newRow.innerHTML = `
-                        <td>${data.name}</td>
-                        <td>${data.description || '-'}</td>
-                        <td>${data.quantity}</td>
-                        <td>${Number(data.price).toFixed(2)}</td>
-                        <td>${(Number(data.price) * data.quantity).toFixed(2)}</td>
-                    `;
-                    itemsTableBody.appendChild(newRow);
-                    
-                    // Update total price
-                    document.querySelector('.text-primary').textContent = Number(data.total_price).toFixed(2);
-                    
-                    // Show success message
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-success alert-dismissible fade show';
-                    alertDiv.innerHTML = `
-                        {% trans "Item added successfully!" %}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    `;
-                    document.querySelector('.container').prepend(alertDiv);
-                    
-                    // Auto-dismiss alert after 3 seconds
-                    setTimeout(() => {
-                        alertDiv.classList.remove('show');
-                        setTimeout(() => alertDiv.remove(), 150);
-                    }, 3000);
-                } else {
-                    console.error('Error adding item:', data.errors);
-                    // Show error message
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
-                    alertDiv.innerHTML = `
-                        {% trans "Error adding item. Please check the form and try again." %}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    `;
-                    document.querySelector('.modal-body').prepend(alertDiv);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    });
-</script>
-{% endif %}
-{% endblock %}
+                {% block extra_js %}
+                {% if booking.status == 'pending' %}
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                  const addItemForm = document.getElementById('addItemForm');
+                  const itemsTableBody = document.getElementById('items-table-body');
+                  if (!addItemForm) return;
+                  addItemForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(addItemForm);
+                    fetch(addItemForm.action, { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': formData.get('csrfmiddlewaretoken') } })
+                      .then(response => response.json())
+                      .then(data => {
+                        if (data.success) {
+                          addItemForm.reset();
+                          const modalEl = document.getElementById('addItemModal');
+                          if (modalEl) { const modal = bootstrap.Modal.getInstance(modalEl); if (modal) modal.hide(); }
+                          if (itemsTableBody && itemsTableBody.querySelector('td[colspan="5"]')) itemsTableBody.innerHTML = '';
+                          if (itemsTableBody) {
+                            const newRow = document.createElement('tr');
+                            newRow.innerHTML = ` <td>${data.name}</td> <td>${data.description || '-'}</td> <td>${data.quantity}</td> <td>${Number(data.price).toFixed(2)}</td> <td>${(Number(data.price) * data.quantity).toFixed(2)}</td>`;
+                            itemsTableBody.appendChild(newRow);
+                          }
+                          const totalElem = document.querySelector('.text-primary'); if (totalElem) totalElem.textContent = Number(data.total_price).toFixed(2);
+                        }
+                      }).catch(error => console.error('Error:', error));
+                  });
+                });
+                </script>
+                {% endif %}
+                {% endblock %}

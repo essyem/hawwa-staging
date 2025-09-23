@@ -1,0 +1,36 @@
+{% load safe_urls i18n static %}
+<nav class="nav flex-column p-2">
+    {# Render sections from HAWWA_SIDEBAR_APPS setting; fallback to the existing static links #}
+    {% if HAWWA_SIDEBAR_APPS %}
+        {% for section in HAWWA_SIDEBAR_APPS %}
+            <div class="sidebar-section mb-2">
+                <button class="btn btn-sm btn-toggle w-100 text-start py-2" data-bs-toggle="collapse" data-bs-target="#section-{{ forloop.counter }}" aria-expanded="true" aria-controls="section-{{ forloop.counter }}">
+                    <strong>{{ section.title }}</strong>
+                </button>
+                <div class="collapse show" id="section-{{ forloop.counter }}">
+                    <ul class="nav flex-column small">
+                        {% for item in section.items %}
+                            {% if item.url_name %}
+                                {% safe_url item.url_name as url %}
+                                {% if url %}
+                                    <li class="nav-item"><a class="nav-link px-2 py-1" href="{{ url }}"><i class="{{ item.icon }} me-2"></i> {{ item.label }}</a></li>
+                                {% endif %}
+                            {% else %}
+                                <li class="nav-item"><span class="nav-link px-2 py-1"><i class="{{ item.icon }} me-2"></i> {{ item.label }}</span></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <a class="nav-link px-2 py-1" href="{% url 'services:service_list' %}"><i class="fas fa-spa me-2"></i> {% trans "Services" %}</a>
+        <a class="nav-link px-2 py-1" href="{% url 'bookings:booking_dashboard' %}"><i class="fas fa-calendar-check me-2"></i> {% trans "Bookings" %}</a>
+        <a class="nav-link px-2 py-1" href="{% url 'ai_buddy:home' %}"><i class="fas fa-robot me-2"></i> {% trans "AI Buddy" %}</a>
+    {% endif %}
+
+    <hr class="my-2">
+    <a class="nav-link px-2 py-1" href="{% url 'core:home' %}"><i class="fas fa-home me-2"></i> {% trans "Home" %}</a>
+    <a class="nav-link px-2 py-1" href="{% url 'core:about' %}"><i class="fas fa-info-circle me-2"></i> {% trans "About" %}</a>
+    <a class="nav-link px-2 py-1" href="{% url 'core:contact' %}"><i class="fas fa-envelope me-2"></i> {% trans "Contact" %}</a>
+</nav>

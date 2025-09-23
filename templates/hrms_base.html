@@ -126,7 +126,7 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark" style="min-height:56px;">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'dashboard:home' %}">
                 <img src="{% static 'img/logo.svg' %}" alt="{{ COMPANY_NAME }}" style="height:40px; margin-right:10px;" />
@@ -144,101 +144,51 @@
                             <i class="fas fa-home"></i> Home
                         </a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="employeeDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-users"></i> Employees
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'hrms:employee_list' %}"><i class="fas fa-list"></i> All Employees</a></li>
-                            {% if user.is_staff %}
-                            <li><a class="dropdown-item" href="{% url 'hrms:employee_add' %}"><i class="fas fa-plus"></i> Add Employee</a></li>
-                            {% endif %}
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:department_list' %}"><i class="fas fa-building"></i> Departments</a></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:position_list' %}"><i class="fas fa-briefcase"></i> Positions</a></li>
-                        </ul>
+                    {% if not user.is_authenticated %}
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link" href="{% url 'hrms:employee_list' %}"><i class="fas fa-users"></i> Employees</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="attendanceDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-clock"></i> Attendance
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'hrms:attendance_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Attendance Dashboard</a></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:clock_inout' %}"><i class="fas fa-sign-in-alt"></i> Check In/Out</a></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:user_attendance' %}"><i class="fas fa-history"></i> My Attendance</a></li>
-                            {% if user.is_staff %}
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:attendance_report' %}"><i class="fas fa-chart-bar"></i> Attendance Reports</a></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:attendance_list' %}"><i class="fas fa-list"></i> All Attendance</a></li>
-                            {% endif %}
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="leaveDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-calendar-alt"></i> Leave
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'hrms:leave_list' %}"><i class="fas fa-list"></i> Leave Applications</a></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:leave_apply' %}"><i class="fas fa-plus"></i> Apply for Leave</a></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:leave_balance' %}"><i class="fas fa-balance-scale"></i> Leave Balance</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="trainingDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-graduation-cap"></i> Training
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'hrms:training_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Training Dashboard</a></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:training_programs' %}"><i class="fas fa-book"></i> Programs</a></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:my_trainings' %}"><i class="fas fa-user-graduate"></i> My Trainings</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="performanceDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-chart-line"></i> Performance
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'hrms:performance_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Performance Dashboard</a></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:performance_reviews' %}"><i class="fas fa-clipboard-check"></i> Reviews</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="payrollDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-money-bill-wave"></i> Payroll
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'hrms:payroll_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Payroll Dashboard</a></li>
-                            {% if user.is_staff %}
-                            <li><a class="dropdown-item" href="{% url 'hrms:payroll_periods' %}"><i class="fas fa-calendar"></i> Payroll Periods</a></li>
-                            {% endif %}
-                            <li><a class="dropdown-item" href="{% url 'hrms:my_payslips' %}"><i class="fas fa-receipt"></i> My Payslips</a></li>
-                        </ul>
-                    </li>
-                    {% if user.is_staff %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-chart-bar"></i> Reports & Analytics
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'hrms:reports' %}"><i class="fas fa-chart-bar"></i> Reports Dashboard</a></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:analytics_dashboard' %}"><i class="fas fa-analytics"></i> Analytics Dashboard</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:employee_report' %}"><i class="fas fa-users"></i> Employee Report</a></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:payroll_report' %}"><i class="fas fa-money-bill"></i> Payroll Report</a></li>
-                            <li><a class="dropdown-item" href="{% url 'hrms:attendance_report' %}"><i class="fas fa-clock"></i> Attendance Report</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/">
-                            <i class="fas fa-cogs"></i> Admin
-                        </a>
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link" href="{% url 'hrms:attendance_dashboard' %}"><i class="fas fa-clock"></i> Attendance</a>
                     </li>
                     {% endif %}
+                    {# On large screens these links live in the left sidebar; keep mobile link in navbar #}
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link" href="{% url 'hrms:employee_list' %}"><i class="fas fa-users"></i> Employees</a>
+                    </li>
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link" href="{% url 'hrms:attendance_dashboard' %}"><i class="fas fa-clock"></i> Attendance</a>
+                    </li>
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link" href="{% url 'hrms:leave_list' %}"><i class="fas fa-calendar-alt"></i> Leave</a>
+                    </li>
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link" href="{% url 'hrms:training_dashboard' %}"><i class="fas fa-graduation-cap"></i> Training</a>
+                    </li>
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link" href="{% url 'hrms:performance_dashboard' %}"><i class="fas fa-chart-line"></i> Performance</a>
+                    </li>
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link" href="{% url 'hrms:payroll_dashboard' %}"><i class="fas fa-money-bill-wave"></i> Payroll</a>
+                    </li>
+                    {% if user.is_staff %}
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link" href="{% url 'hrms:reports' %}"><i class="fas fa-chart-bar"></i> Reports</a>
+                    </li>
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link" href="/admin/"><i class="fas fa-cogs"></i> Admin</a>
+                    </li>
+                    {% endif %}
+                    {# Reverse docpool safely to avoid errors when app/namespace not installed #}
+                    {% load safe_urls %}
+                    {% safe_url 'docpool:document_list' as docpool_url %}
+                    {% if docpool_url %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'docpool:document_list' %}">
+                        <a class="nav-link" href="{{ docpool_url }}">
                             <i class="fas fa-file-alt"></i> Switch to DocPool
                         </a>
                     </li>
+                    {% endif %}
                 </ul>
                 
                 <ul class="navbar-nav">
@@ -275,7 +225,8 @@
             </div>
         </div>
     </nav>
-
+    {# Include left sidebar for large screens #}
+    {% include 'includes/left_sidebar.html' %}
     <!-- Breadcrumb -->
     {% if breadcrumbs %}
     <nav aria-label="breadcrumb" class="bg-light">

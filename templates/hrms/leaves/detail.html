@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_filters %}
 
 {% block title %}Leave Application Details - HRMS{% endblock %}
 
@@ -136,7 +137,7 @@
                     <div class="list-group">
                         <a href="{{ object.supporting_documents.url }}" target="_blank" class="list-group-item list-group-item-action">
                             <i class="fas fa-file-alt me-2"></i>
-                            {{ object.supporting_documents.name|split:"/"}}
+                            {{ object.supporting_documents.name|split:"/" }}
                             <span class="float-end">
                                 <i class="fas fa-external-link-alt"></i>
                             </span>

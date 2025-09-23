@@ -1,0 +1,83 @@
+{% comment %}Left sidebar wrapper — includes shared left_sidebar_content and provides desktop fixed layout.{% endcomment %}
+{% load safe_urls i18n %}
+{% if user.is_authenticated %}
+<aside id="left-sidebar" class="left-sidebar d-none d-lg-block bg-light border-end" style="width:220px; position:fixed; top:56px; bottom:0; overflow:auto; padding-top:1rem; z-index:1000;">
+    <div class="sidebar-inner">
+        {% include 'includes/left_sidebar_content.html' %}
+    </div>
+
+    <!-- Mini icon strip shown when sidebar is hidden/unpinned. Rendered from HAWWA_SIDEBAR_APPS to keep in sync. -->
+    <div id="hawwa-mini-strip" class="hawwa-mini-strip" style="position:fixed; left:0; top:56px; z-index:1100; display:none;">
+        <ul class="list-unstyled mb-0">
+            {# Avatar/profile at the top #}
+            <li class="mb-2 text-center">
+                <a href="{% url 'accounts:profile' %}" class="d-inline-block p-2" title="Profile">
+                    <div class="avatar-small rounded-circle bg-primary text-white" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;">{{ user.first_name|first|default:user.email|first|upper }}</div>
+                </a>
+            </li>
+            {# Flatten first N items from HAWWA_SIDEBAR_APPS into mini-strip icons #}
+            {% if HAWWA_SIDEBAR_APPS %}
+                {# Take up to first 6 sections; for each section render its first item as an icon link #}
+                {% for section in HAWWA_SIDEBAR_APPS|slice:":6" %}
+                    {% for item in section.items|slice:":1" %}
+                        {% if item.url_name %}
+                            {% safe_url item.url_name as url %}
+                            {% if url %}
+                                <li class="mb-2 text-center">
+                                    <a href="{{ url }}" class="d-inline-block p-2" title="{{ item.label }}">
+                                        <i class="{{ item.icon }} fa-lg text-primary"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
+        </ul>
+    </div>
+
+    <!-- Pin/Unpin button fixed near top of sidebar -->
+    <button id="hawwa-sidebar-pin" class="btn btn-sm btn-outline-secondary" aria-pressed="false" title="Pin sidebar" style="position: absolute; right: 8px; top: 8px; z-index:1101;">
+        <i id="hawwa-sidebar-pin-icon" class="fas fa-thumbtack"></i>
+    </button>
+
+    </aside>
+{% endif %}
+
+<style>
+    /* Reduced navbar height to 56px to match left sidebar top offset */
+    .navbar { min-height: 56px; padding-top: 0.25rem; padding-bottom: 0.25rem; }
+    .navbar .navbar-brand img { height:32px; }
+    main.container-fluid { margin-left: 0; transition: margin-left .2s ease-in-out; }
+
+    /* Desktop layout: when viewport is >= 992px we push content instead of overlaying it */
+    @media (min-width: 992px) {
+        /* Default: when sidebar is NOT hidden, push main content to make room for sidebar */
+        :root:not(.hawwa-sidebar-hidden) main.container-fluid { margin-left: 220px; }
+
+        /* When sidebar is hidden/unpinned, keep content full width */
+        :root.hawwa-sidebar-hidden main.container-fluid { margin-left: 0; }
+
+        /* When sidebar is collapsed (icons-only), use a smaller left margin */
+        :root.sidebar-collapsed main.container-fluid { margin-left: 56px; }
+
+        /* Ensure the sidebar transforms / slides cleanly on desktop
+           but does not visually overlay the page because the content is pushed */
+        #left-sidebar { transform: none; transition: transform .2s ease-in-out, width .2s ease-in-out; }
+        :root.hawwa-sidebar-hidden #left-sidebar { transform: translateX(-220px); }
+        :root.sidebar-collapsed #left-sidebar { width: 56px; }
+    }
+
+    /* Hide optional handle by default; only shown by JS/CSS when needed */
+    #hawwa-sidebar-handle { display: none; }
+
+    /* Mini-strip visibility: only show the mini-strip on desktop when sidebar is hidden */
+    .hawwa-mini-strip { display: none; }
+    @media (min-width: 992px) {
+        :root.hawwa-sidebar-hidden .hawwa-mini-strip { display: block; }
+    }
+
+    /* Pinned state: ensure pinned sidebar is visible and content margin is applied */
+    :root.hawwa-sidebar-pinned #left-sidebar { transform: none; }
+    :root.hawwa-sidebar-pinned main.container-fluid { margin-left: 220px; }
+</style>

@@ -23,7 +23,13 @@
                 <td>{{ cr.id }}</td>
                 <td><a href="{% url 'change_management:cr_detail' cr.id %}">{{ cr.title }}</a></td>
                 <td>{{ cr.get_status_display }}</td>
-                <td>{{ cr.assignee.get_full_name|default:cr.assignee.email if cr.assignee else "-" }}</td>
+                <td>
+                    {% if cr.assignee %}
+                        {{ cr.assignee.get_full_name|default:cr.assignee.email }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
                 <td>{{ cr.created_at }}</td>
             </tr>
         {% empty %}

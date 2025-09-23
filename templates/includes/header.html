@@ -1,0 +1,105 @@
+{% load i18n static %}
+<a class="skip-link sr-only-focusable" href="#main-content">{% trans "Skip to main content" %}</a>
+
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: var(--nav-bg); min-height:56px;">
+        <div class="container">
+            <div class="d-flex align-items-center">
+                <!-- Sidebar toggle (desktop) -->
+                <button id="sidebar-toggle" class="btn btn-outline-light btn-sm me-2 d-none d-lg-inline" aria-expanded="true" aria-controls="left-sidebar" aria-label="Toggle sidebar">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
+
+                <!-- Mobile sidebar offcanvas toggle -->
+                <button class="btn btn-outline-light btn-sm me-2 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" aria-label="Open menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <a class="navbar-brand d-flex align-items-center" href="{% url 'core:home' %}">
+                    <i class="fas fa-spa me-2" aria-hidden="true"></i>
+                    <strong class="d-none d-sm-inline">Hawwa Postpartum Care</strong>
+                    <strong class="d-inline d-sm-none">Hawwa</strong>
+                </a>
+
+                <!-- App title (when logged in) -->
+                {% if user.is_authenticated and app_title %}
+                <div class="ms-3 d-none d-md-inline-block">
+                    <span class="navbar-text text-uppercase fw-semibold app-title">{{ app_title }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex align-items-center order-lg-3">
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" class="btn btn-outline-light btn-sm me-2" data-tooltip="Toggle Theme" aria-label="Toggle between light and dark themes" aria-pressed="false" role="button">
+                    <i id="theme-icon" class="fas fa-moon" aria-hidden="true"></i>
+                </button>
+
+                <!-- Standard navbar toggler for other links on small screens -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+
+            <div class="collapse navbar-collapse order-lg-2" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'core:home' %}">
+                            <i class="fas fa-home me-1"></i>{% trans "Home" %}
+                        </a>
+                    </li>
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link" href="{% url 'services:service_list' %}">
+                            <i class="fas fa-spa me-1"></i>{% trans "Services" %}
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.app_name == 'ai_buddy' %}active{% endif %}" href="{% url 'ai_buddy:home' %}">
+                            <i class="fas fa-robot me-1"></i>{% trans "AI Buddy" %}
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'core:about' %}">
+                            <i class="fas fa-info-circle me-1"></i>{% trans "About Us" %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'core:contact' %}">
+                            <i class="fas fa-envelope me-1"></i>{% trans "Contact" %}
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Authentication Links -->
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="avatar d-inline-flex me-2">{{ user.first_name|first|default:user.email|first|upper }}</div>
+                            <span class="d-none d-lg-inline">{{ user.get_full_name|default:user.email }}</span>
+                            <span class="d-inline d-lg-none">{% trans "Profile" %}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-tachometer-alt me-2"></i>{% trans "Dashboard" %}</a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile_edit' %}"><i class="fas fa-user-edit me-2"></i>{% trans "Edit Profile" %}</a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:booking_history' %}"><i class="fas fa-calendar me-2"></i>{% trans "My Bookings" %}</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>{% trans "Logout" %}</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}" href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-1"></i>{% trans "Login" %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light btn-sm ms-2" href="{% url 'accounts:register' %}"><i class="fas fa-user-plus me-1"></i><span class="d-none d-sm-inline">{% trans "Join Hawwa" %}</span></a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
