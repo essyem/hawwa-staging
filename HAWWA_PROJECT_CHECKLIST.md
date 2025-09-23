@@ -680,3 +680,5 @@ Recommended short-term next steps (developer-friendly):
 5. Add CI (GitHub Actions) that runs `python -m pip install -r requirements.txt`, `python manage.py check`, and a subset of tests.
 
 If you'd like I can: (a) open PR(s) that sync `requirements.txt`, (b) add a small GitHub Actions workflow skeleton, and (c) implement the booking confirmation email template and tests as the next incremental change.
+Tue Sep 23 11:15:02 UTC 2025
+\n- requirements frozen to requirements-frozen.txt
