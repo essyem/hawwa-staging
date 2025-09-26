@@ -1,0 +1,40 @@
+[Unit]
+Description=Hawwa Wellness Django Application
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=exec
+User=azureuser
+Group=azureuser
+WorkingDirectory=/home/azureuser/hawwa
+Environment=PATH=/home/azureuser/hawwa/env-hawwa/bin
+Environment=HAWWA_ENV=staging
+Environment=DJANGO_PRODUCTION=0
+Environment=DJANGO_DEBUG=1
+Environment=PYTHONUNBUFFERED=1
+Environment=HAWWA_ALLOWED_HOSTS=hawwawellness.com,www.hawwawellness.com,127.0.0.1,localhost
+Environment=HAWWA_SECRET_KEY=your-production-secret-key-here
+ExecStart=/home/azureuser/hawwa/env-hawwa/bin/gunicorn \
+    --workers 3 \
+    --bind unix:/home/azureuser/hawwa/hawwa.sock \
+    --timeout 60 \
+    --keep-alive 2 \
+    --max-requests 1000 \
+    --max-requests-jitter 50 \
+    --preload \
+    --access-logfile /var/log/hawwa/gunicorn_access.log \
+    --error-logfile /var/log/hawwa/gunicorn_error.log \
+    --log-level info \
+    hawwa.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+StandardOutput=journal
+StandardError=journal
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

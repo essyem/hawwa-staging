@@ -1,0 +1,1300 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+{% load humanize %}
+{% load financial_tags %}
+
+{% block title %}Payments - Hawwa Admin{% endblock %}
+
+{% block page_title %}Payments{% endblock %}
+{% block page_subtitle %}Track and manage all payment transactions{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'financial:dashboard' %}">Financial</a></li>
+<li class="breadcrumb-item active">Payments</li>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'financial:payment_create' %}" class="btn btn-admin-primary">
+    <i class="fas fa-plus me-2"></i>Record Payment
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Filters and Search -->
+<div class="admin-card mb-4">
+    <div class="admin-card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-lg-3 col-md-6 col-12">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ current_search }}" placeholder="Transaction reference, customer...">
+            </div>
+            <div class="col-lg-2 col-md-6 col-12">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Statuses</option>
+                    {% for value, label in payment_status_choices %}
+                    <option value="{{ value }}" {% if value == current_status %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6 col-12">
+                <label for="method" class="form-label">Payment Method</label>
+                <select class="form-select" id="method" name="method">
+                    <option value="">All Methods</option>
+                    {% for value, label in payment_method_choices %}
+                    <option value="{{ value }}" {% if value == current_method %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6 col-12">
+                <label for="date_from" class="form-label">From Date</label>
+                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from }}">
+            </div>
+            <div class="col-lg-2 col-md-6 col-12">
+                <label for="date_to" class="form-label">To Date</label>
+                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to }}">
+            </div>
+            <div class="col-lg-3 col-12">
+                <button type="submit" class="btn btn-admin-primary me-2">
+                    <i class="fas fa-search me-1"></i>Filter
+                </button>
+                <a href="{% url 'financial:payment_list' %}" class="btn btn-admin-secondary">
+                    <i class="fas fa-times me-1"></i>Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Payment Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-value">{{ all_payments.count }}</div>
+            <div class="stats-label">Total Payments</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-value">{{ completed_payments_count }}</div>
+            <div class="stats-label">Completed</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-value">{{ pending_payments_count }}</div>
+            <div class="stats-label">Pending</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-value">QAR {{ total_amount|floatformat:0|default:"0" }}</div>
+            <div class="stats-label">Total Amount</div>
+        </div>
+    </div>
+</div>
+                        <label class="form-label fw-medium">Status</label>
+                        <select name="status" class="form-select form-select-modern">
+                            <option value="">All Statuses</option>
+                            <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>🔄 Pending</option>
+                            <option value="processing" {% if current_status == 'processing' %}selected{% endif %}>⚙️ Processing</option>
+                            <option value="completed" {% if current_status == 'completed' %}selected{% endif %}>✅ Completed</option>
+                            <option value="failed" {% if current_status == 'failed' %}selected{% endif %}>❌ Failed</option>
+                            <option value="cancelled" {% if current_status == 'cancelled' %}selected{% endif %}>🚫 Cancelled</option>
+                            <option value="refunded" {% if current_status == 'refunded' %}selected{% endif %}>💰 Refunded</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <label class="form-label fw-medium">Payment Method</label>
+                        <select name="method" class="form-select form-select-modern">
+                            <option value="">All Methods</option>
+                            <option value="cash" {% if current_method == 'cash' %}selected{% endif %}>💵 Cash</option>
+                            <option value="bank_transfer" {% if current_method == 'bank_transfer' %}selected{% endif %}>🏦 Bank Transfer</option>
+                            <option value="credit_card" {% if current_method == 'credit_card' %}selected{% endif %}>💳 Credit Card</option>
+                            <option value="debit_card" {% if current_method == 'debit_card' %}selected{% endif %}>💳 Debit Card</option>
+                            <option value="online_payment" {% if current_method == 'online_payment' %}selected{% endif %}>🌐 Online Payment</option>
+                            <option value="cheque" {% if current_method == 'cheque' %}selected{% endif %}>📝 Cheque</option>
+                            <option value="other" {% if current_method == 'other' %}selected{% endif %}>📋 Other</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-md-6 col-12">
+                        <label class="form-label fw-medium">Date From</label>
+                        <input type="date" name="date_from" class="form-control form-control-modern" value="{{ date_from }}">
+                    </div>
+                    <div class="col-lg-2 col-md-6 col-12">
+                        <label class="form-label fw-medium">Date To</label>
+                        <input type="date" name="date_to" class="form-control form-control-modern" value="{{ date_to }}">
+                    </div>
+                    <div class="col-lg-2 col-12">
+                        <label class="form-label fw-medium d-block">&nbsp;</label>
+                        <div class="d-flex gap-2 flex-column flex-sm-row">
+                            <button type="submit" class="btn btn-primary btn-modern flex-fill">
+                                <i class="fas fa-search me-1"></i>Apply
+                            </button>
+                            <a href="{% url 'financial:payment_list' %}" class="btn btn-outline-secondary btn-modern flex-fill">
+                                <i class="fas fa-times me-1"></i>Clear
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<!-- Payment Stats -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-3 col-md-6 col-12">
+        <div class="stats-card stats-total">
+            <div class="stats-content">
+                <div class="stats-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="stats-info">
+                    <div class="stats-value">{{ all_payments.count }}</div>
+                    <div class="stats-label">Total Payments</div>
+                </div>
+            </div>
+            <div class="stats-trend">
+                <span class="trend-indicator trend-up">
+                    <i class="fas fa-arrow-up"></i> 12%
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-12">
+        <div class="stats-card stats-completed">
+            <div class="stats-content">
+                <div class="stats-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stats-info">
+                    <div class="stats-value">{% payment_count_by_status all_payments 'completed' %}</div>
+                    <div class="stats-label">Completed</div>
+                </div>
+            </div>
+            <div class="stats-trend">
+                <span class="trend-indicator trend-up">
+                    <i class="fas fa-arrow-up"></i> 8%
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-12">
+        <div class="stats-card stats-pending">
+            <div class="stats-content">
+                <div class="stats-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stats-info">
+                    <div class="stats-value">{% payment_count_by_status all_payments 'pending' %}</div>
+                    <div class="stats-label">Pending</div>
+                </div>
+            </div>
+            <div class="stats-trend">
+                <span class="trend-indicator trend-down">
+                    <i class="fas fa-arrow-down"></i> 3%
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-12">
+        <div class="stats-card stats-failed">
+            <div class="stats-content">
+                <div class="stats-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stats-info">
+                    <div class="stats-value">{% payment_count_by_status all_payments 'failed' %}</div>
+                    <div class="stats-label">Failed</div>
+                </div>
+            </div>
+            <div class="stats-trend">
+                <span class="trend-indicator trend-neutral">
+                    <i class="fas fa-minus"></i> 0%
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Advanced Search -->
+    <div class="admin-card mb-4 search-card">
+        <div class="admin-card-body">
+            <form method="get" class="search-form">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text search-icon">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" name="search" class="form-control search-input" 
+                           placeholder="🔍 Search by transaction reference, invoice number, customer name, or email..." 
+                           value="{{ current_search }}">
+                    {% if current_status %}<input type="hidden" name="status" value="{{ current_status }}">{% endif %}
+                    {% if current_method %}<input type="hidden" name="method" value="{{ current_method }}">{% endif %}
+                    {% if date_from %}<input type="hidden" name="date_from" value="{{ date_from }}">{% endif %}
+                    {% if date_to %}<input type="hidden" name="date_to" value="{{ date_to }}">{% endif %}
+                    <button type="submit" class="btn btn-primary search-btn">
+                        <i class="fas fa-search me-2"></i>Search Payments
+                    </button>
+                </div>
+                {% if current_search %}
+                <div class="search-results-info mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Showing results for "<strong>{{ current_search }}</strong>"
+                        <a href="{% url 'financial:payment_list' %}" class="ms-2 text-primary text-decoration-none">
+                            <i class="fas fa-times me-1"></i>Clear search
+                        </a>
+                    </small>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+<!-- Payments Table -->
+<div class="admin-card">
+    <div class="admin-card-header d-flex justify-content-between align-items-center">
+        <h5 class="admin-card-title mb-0">
+            Payments 
+            <span class="badge bg-secondary ms-2">{{ payments.count }}</span>
+        </h5>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-admin-secondary" onclick="exportPayments()">
+                <i class="fas fa-download me-1"></i>Export
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-admin-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-cog me-1"></i>Actions
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="bulkStatusUpdate()">
+                        <i class="fas fa-edit me-2"></i>Bulk Status Update
+                    </a></li>
+                    <li><a class="dropdown-item" href="#" onclick="markAsCompleted()">
+                        <i class="fas fa-check me-2"></i>Mark as Completed
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="bulkDelete()">
+                        <i class="fas fa-trash me-2"></i>Delete Selected
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="admin-table">
+        {% if payments %}
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                    </th>
+                    <th>Transaction #</th>
+                    <th>Invoice</th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr class="payment-row" data-payment-id="{{ payment.pk }}">
+                    <td>
+                        <input type="checkbox" class="payment-checkbox" value="{{ payment.pk }}">
+                    </td>
+                    <td>
+                        <a href="{% url 'financial:payment_detail' payment.pk %}" 
+                           class="fw-bold text-decoration-none">
+                            {% if payment.transaction_reference %}
+                                {{ payment.transaction_reference }}
+                            {% else %}
+                                TXN-{{ payment.pk|stringformat:"06d" }}
+                            {% endif %}
+                        </a>
+                    </td>
+                    <td>
+                        {% if payment.invoice %}
+                        <a href="{% url 'financial:invoice_detail' payment.invoice.pk %}" 
+                           class="text-decoration-none">
+                            <i class="fas fa-file-invoice me-1 text-primary"></i>
+                            #{{ payment.invoice.invoice_number }}
+                        </a>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if payment.invoice.customer %}
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-sm bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                {{ payment.invoice.customer.first_name|first|upper }}{{ payment.invoice.customer.last_name|first|upper }}
+                            </div>
+                            <div>
+                                <div class="fw-medium">{{ payment.invoice.customer.get_full_name }}</div>
+                                <small class="text-muted">{{ payment.invoice.customer.email }}</small>
+                            </div>
+                        </div>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <span class="fw-bold text-success">QAR {{ payment.amount|floatformat:2 }}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark">
+                            {% if payment.payment_method == 'credit_card' %}
+                            <i class="fas fa-credit-card me-1"></i>Credit Card
+                            {% elif payment.payment_method == 'bank_transfer' %}
+                            <i class="fas fa-university me-1"></i>Bank Transfer
+                            {% elif payment.payment_method == 'cash' %}
+                            <i class="fas fa-money-bill me-1"></i>Cash
+                            {% elif payment.payment_method == 'online' %}
+                            <i class="fas fa-globe me-1"></i>Online
+                            {% else %}
+                            {{ payment.get_payment_method_display }}
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if payment.payment_status == 'completed' %}bg-success
+                            {% elif payment.payment_status == 'pending' %}bg-warning text-dark
+                            {% elif payment.payment_status == 'processing' %}bg-info
+                            {% elif payment.payment_status == 'failed' %}bg-danger
+                            {% elif payment.payment_status == 'cancelled' %}bg-secondary
+                            {% elif payment.payment_status == 'refunded' %}bg-dark
+                            {% else %}bg-light text-dark
+                            {% endif %}">
+                            {% if payment.payment_status == 'completed' %}✓ Completed
+                            {% elif payment.payment_status == 'pending' %}⏳ Pending
+                            {% elif payment.payment_status == 'processing' %}⚙️ Processing
+                            {% elif payment.payment_status == 'failed' %}❌ Failed
+                            {% elif payment.payment_status == 'cancelled' %}🚫 Cancelled
+                            {% elif payment.payment_status == 'refunded' %}💰 Refunded
+                            {% else %}{{ payment.get_payment_status_display }}
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'financial:payment_detail' payment.pk %}">
+                                    <i class="fas fa-eye me-2"></i>View Details
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'financial:payment_update' payment.pk %}">
+                                    <i class="fas fa-edit me-2"></i>Edit
+                                </a></li>
+                                {% if payment.payment_status == 'pending' %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-success" href="#" onclick="markCompleted({{ payment.pk }})">
+                                    <i class="fas fa-check me-2"></i>Mark Completed
+                                </a></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="markFailed({{ payment.pk }})">
+                                    <i class="fas fa-times me-2"></i>Mark Failed
+                                </a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'financial:payment_delete' payment.pk %}">
+                                    <i class="fas fa-trash me-2"></i>Delete
+                                </a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+                            <td class="method-cell">
+                                <div class="method-badge-modern">
+                                    {% if payment.payment_method == 'cash' %}
+                                        <span class="badge bg-success-subtle text-success">
+                                            <i class="fas fa-money-bill-wave me-1"></i>{{ payment.get_payment_method_display }}
+                                        </span>
+                                    {% elif payment.payment_method == 'credit_card' or payment.payment_method == 'debit_card' %}
+                                        <span class="badge bg-primary-subtle text-primary">
+                                            <i class="fas fa-credit-card me-1"></i>{{ payment.get_payment_method_display }}
+                                        </span>
+                                    {% elif payment.payment_method == 'bank_transfer' %}
+                                        <span class="badge bg-info-subtle text-info">
+                                            <i class="fas fa-university me-1"></i>{{ payment.get_payment_method_display }}
+                                        </span>
+                                    {% elif payment.payment_method == 'online_payment' %}
+                                        <span class="badge bg-warning-subtle text-warning">
+                                            <i class="fas fa-globe me-1"></i>{{ payment.get_payment_method_display }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-secondary">
+                                            <i class="fas fa-question-circle me-1"></i>{{ payment.get_payment_method_display }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="status-cell">
+                                <div class="status-badge-modern status-{{ payment.payment_status }}">
+                                    {% if payment.payment_status == 'completed' %}
+                                        <i class="fas fa-check-circle me-1"></i>
+                                    {% elif payment.payment_status == 'pending' %}
+                                        <i class="fas fa-clock me-1"></i>
+                                    {% elif payment.payment_status == 'processing' %}
+                                        <i class="fas fa-spinner me-1"></i>
+                                    {% elif payment.payment_status == 'failed' %}
+                                        <i class="fas fa-times-circle me-1"></i>
+                                    {% elif payment.payment_status == 'cancelled' %}
+                                        <i class="fas fa-ban me-1"></i>
+                                    {% elif payment.payment_status == 'refunded' %}
+                                        <i class="fas fa-undo me-1"></i>
+                                    {% endif %}
+                                    {{ payment.get_payment_status_display }}
+                                </div>
+                            </td>
+                            <td class="date-cell">
+                                <div class="date-display">
+                                    <div class="date-primary">{{ payment.payment_date|date:"M d, Y" }}</div>
+                                    <small class="date-time text-muted">{{ payment.payment_date|date:"H:i" }}</small>
+                                </div>
+                            </td>
+                            <td class="actions-cell text-center">
+                                <div class="btn-group action-buttons">
+                                    <a href="{% url 'financial:payment_detail' payment.pk %}" 
+                                       class="btn btn-sm btn-outline-primary btn-action" 
+                                       title="View Payment Details"
+                                       data-bs-toggle="tooltip">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if payment.payment_status != 'completed' %}
+                                    <a href="{% url 'financial:payment_update' payment.pk %}" 
+                                       class="btn btn-sm btn-outline-secondary btn-action" 
+                                       title="Edit Payment"
+                                       data-bs-toggle="tooltip">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% endif %}
+                                    {% if not payment.receipt_sent and payment.payment_status == 'completed' %}
+                                    <button class="btn btn-sm btn-outline-success btn-action send-receipt" 
+                                            title="Send Receipt"
+                                            data-payment-id="{{ payment.pk }}"
+                                            data-bs-toggle="tooltip">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                    {% endif %}
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle btn-action" 
+                                                data-bs-toggle="dropdown" 
+                                                title="More Actions"
+                                                data-bs-toggle="tooltip">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-print me-2"></i>Print Receipt</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-download me-2"></i>Download PDF</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i>Delete Payment</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="empty-state">
+                <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No payments found</h5>
+                <p class="text-muted">No payments match your current filters. Try adjusting your search criteria.</p>
+                <a href="{% url 'financial:payment_create' %}" class="btn btn-admin-primary">
+                    <i class="fas fa-plus me-2"></i>Record Payment
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="d-flex justify-content-center mt-4">
+    <nav aria-label="Payment pagination">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?{% if current_status %}status={{ current_status }}&{% endif %}{% if current_method %}method={{ current_method }}&{% endif %}{% if current_search %}search={{ current_search }}&{% endif %}{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}page=1">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?{% if current_status %}status={{ current_status }}&{% endif %}{% if current_method %}method={{ current_method }}&{% endif %}{% if current_search %}search={{ current_search }}&{% endif %}{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?{% if current_status %}status={{ current_status }}&{% endif %}{% if current_method %}method={{ current_method }}&{% endif %}{% if current_search %}search={{ current_search }}&{% endif %}{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?{% if current_status %}status={{ current_status }}&{% endif %}{% if current_method %}method={{ current_method }}&{% endif %}{% if current_search %}search={{ current_search }}&{% endif %}{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}page={{ page_obj.paginator.num_pages }}">Last</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.payment-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+}
+
+function exportPayments() {
+    alert('Export functionality will be implemented soon!');
+}
+
+function bulkStatusUpdate() {
+    const selected = document.querySelectorAll('.payment-checkbox:checked');
+    if (selected.length === 0) {
+        alert('Please select at least one payment to update.');
+        return;
+    }
+    alert('Bulk status update functionality will be implemented soon!');
+}
+
+function markAsCompleted() {
+    const selected = document.querySelectorAll('.payment-checkbox:checked');
+    if (selected.length === 0) {
+        alert('Please select at least one payment to mark as completed.');
+        return;
+    }
+    alert('Mark as completed functionality will be implemented soon!');
+}
+
+function bulkDelete() {
+    const selected = document.querySelectorAll('.payment-checkbox:checked');
+    if (selected.length === 0) {
+        alert('Please select at least one payment to delete.');
+        return;
+    }
+    if (confirm('Are you sure you want to delete the selected payments?')) {
+        alert('Bulk delete functionality will be implemented soon!');
+    }
+}
+
+function markCompleted(paymentId) {
+    if (confirm('Mark this payment as completed?')) {
+        // Implementation for marking payment as completed
+        alert('Mark completed functionality will be implemented soon!');
+    }
+}
+
+function markFailed(paymentId) {
+    if (confirm('Mark this payment as failed?')) {
+        // Implementation for marking payment as failed
+        alert('Mark failed functionality will be implemented soon!');
+    }
+}
+</script>
+{% endblock %}
+    </div>
+</div>
+
+<!-- Enhanced Styles -->
+<style>
+/* Stats Cards */
+.stats-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.stats-total::before { background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); }
+.stats-completed::before { background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%); }
+.stats-pending::before { background: linear-gradient(90deg, #fa709a 0%, #fee140 100%); }
+.stats-failed::before { background: linear-gradient(90deg, #ff6b6b 0%, #ffa726 100%); }
+
+.stats-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.stats-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.stats-total .stats-icon { background: rgba(79, 172, 254, 0.1); color: #4facfe; }
+.stats-completed .stats-icon { background: rgba(67, 233, 123, 0.1); color: #43e97b; }
+.stats-pending .stats-icon { background: rgba(250, 112, 154, 0.1); color: #fa709a; }
+.stats-failed .stats-icon { background: rgba(255, 107, 107, 0.1); color: #ff6b6b; }
+
+.stats-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0;
+    line-height: 1;
+}
+
+.stats-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-trend {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.trend-indicator {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+}
+
+.trend-up { background: #d4edda; color: #155724; }
+.trend-down { background: #f8d7da; color: #721c24; }
+.trend-neutral { background: #e2e3e5; color: #495057; }
+
+/* Filters Card */
+.filters-card {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.filters-card .admin-card-header {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e6f2ff 100%);
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+    border-radius: 10px 10px 0 0;
+}
+
+.form-select-modern, .form-control-modern {
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.form-select-modern:focus, .form-control-modern:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-modern {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+}
+
+/* Search Card */
+.search-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.search-form .input-group {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.search-icon {
+    background: #fff;
+    border: none;
+    color: #667eea;
+    font-size: 1.1rem;
+}
+
+.search-input {
+    border: none;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+}
+
+.search-input::placeholder {
+    color: #9ca3af;
+}
+
+.search-btn {
+    border: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+}
+
+/* Table Styles */
+.table-modern {
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 800px; /* Ensure minimum width for horizontal scroll */
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table-responsive {
+    border-radius: 0;
+    border: none;
+}
+
+.table-header-modern th {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e6f2ff 100%);
+    border: none;
+    padding: 1rem 0.75rem;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.sortable:hover {
+    background: linear-gradient(135deg, #e6f2ff 0%, #dbeafe 100%);
+    color: #667eea;
+}
+
+.payment-row {
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+}
+
+.payment-row:hover {
+    background: linear-gradient(135deg, #fafbff 0%, #f0f4ff 100%);
+    transform: scale(1.005);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.payment-icon-modern {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.transaction-ref {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.95rem;
+}
+
+.gateway-id {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    font-family: 'Monaco', monospace;
+}
+
+.invoice-link a {
+    font-weight: 500;
+    color: #667eea;
+}
+
+.invoice-link a:hover {
+    color: #4f46e5;
+}
+
+.customer-name {
+    color: #374151;
+    font-size: 0.9rem;
+}
+
+.customer-email {
+    margin-top: 0.25rem;
+}
+
+.amount-display {
+    text-align: right;
+}
+
+.amount-value {
+    font-weight: 700;
+    color: #059669;
+    font-size: 1.1rem;
+}
+
+.amount-badge {
+    margin-top: 0.25rem;
+}
+
+.method-badge-modern .badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.status-badge-modern {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-completed {
+    background: rgba(16, 185, 129, 0.1);
+    color: #065f46;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #92400e;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.status-processing {
+    background: rgba(59, 130, 246, 0.1);
+    color: #1e40af;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.status-failed {
+    background: rgba(239, 68, 68, 0.1);
+    color: #991b1b;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.status-cancelled {
+    background: rgba(107, 114, 128, 0.1);
+    color: #374151;
+    border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.status-refunded {
+    background: rgba(139, 92, 246, 0.1);
+    color: #5b21b6;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.date-display {
+    text-align: left;
+}
+
+.date-primary {
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.9rem;
+}
+
+.date-time {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+}
+
+.btn-action {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.search-results-info {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+/* Empty State */
+.empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.empty-state i {
+    opacity: 0.5;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .stats-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .filters-card .row > div {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .payment-icon-modern {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .stats-value {
+        font-size: 2.2rem;
+    }
+    
+    .stats-card {
+        padding: 1.25rem;
+    }
+    
+    .customer-info {
+        max-width: 200px;
+    }
+    
+    .customer-email {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-card {
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+    
+    .stats-value {
+        font-size: 2rem;
+    }
+    
+    .stats-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .stats-icon {
+        margin: 0 auto;
+    }
+    
+    .stats-trend {
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.8rem;
+    }
+    
+    .payment-icon-modern {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+    
+    .transaction-ref {
+        font-size: 0.85rem;
+    }
+    
+    .gateway-id {
+        font-size: 0.7rem;
+    }
+    
+    .customer-name {
+        font-size: 0.85rem;
+    }
+    
+    .amount-value {
+        font-size: 1rem;
+    }
+    
+    .method-badge-modern .badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .status-badge-modern {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .date-primary {
+        font-size: 0.8rem;
+    }
+    
+    .date-time {
+        font-size: 0.7rem;
+    }
+    
+    .btn-action {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+    
+    /* Stack filter inputs vertically on mobile */
+    .filters-card .row > div {
+        margin-bottom: 0.75rem;
+    }
+    
+    .filters-card .d-flex {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    /* Improve mobile table readability */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Make search input stack better */
+    .search-form .input-group {
+        flex-direction: column;
+        border-radius: 12px;
+    }
+    
+    .search-input {
+        border-radius: 12px 12px 0 0;
+        margin-bottom: 0;
+    }
+    
+    .search-btn {
+        border-radius: 0 0 12px 12px;
+        margin-top: -1px;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-container {
+        padding: 0.5rem;
+    }
+    
+    .stats-card {
+        padding: 0.875rem;
+    }
+    
+    .stats-value {
+        font-size: 1.75rem;
+    }
+    
+    .stats-label {
+        font-size: 0.75rem;
+    }
+    
+    .filters-card .admin-card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .filters-card .admin-card-body {
+        padding: 1rem;
+    }
+    
+    .search-card .admin-card-body {
+        padding: 1rem;
+    }
+    
+    .table-responsive {
+        margin: 0 -0.5rem;
+        padding: 0 0.5rem;
+    }
+    
+    /* Ensure proper vertical stacking on very small screens */
+    .row.g-4 > * {
+        margin-bottom: 1rem;
+    }
+    
+    /* Stack action buttons vertically if needed */
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .action-buttons .btn-group {
+        flex-direction: row;
+    }
+}
+
+/* Animation for filter collapse */
+#filtersContent {
+    transition: all 0.3s ease;
+}
+
+#filtersContent.collapsed {
+    height: 0;
+    overflow: hidden;
+    padding: 0;
+}
+
+/* Tooltip styles */
+.tooltip-inner {
+    background-color: #374151;
+    border-radius: 6px;
+    font-size: 0.75rem;
+}
+
+/* Loading states */
+.payment-row.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Focus styles for accessibility */
+.btn-action:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+</style>
+
+<!-- JavaScript for Enhanced Interactions -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Filter toggle functionality
+    const toggleFilters = document.getElementById('toggleFilters');
+    const filtersContent = document.getElementById('filtersContent');
+    
+    if (toggleFilters && filtersContent) {
+        toggleFilters.addEventListener('click', function() {
+            if (filtersContent.classList.contains('collapsed')) {
+                filtersContent.classList.remove('collapsed');
+                toggleFilters.innerHTML = '<i class="fas fa-chevron-up"></i> Collapse';
+            } else {
+                filtersContent.classList.add('collapsed');
+                toggleFilters.innerHTML = '<i class="fas fa-chevron-down"></i> Expand';
+            }
+        });
+    }
+
+    // Send receipt functionality
+    document.querySelectorAll('.send-receipt').forEach(button => {
+        button.addEventListener('click', function() {
+            const paymentId = this.dataset.paymentId;
+            // Add your receipt sending logic here
+            console.log('Sending receipt for payment:', paymentId);
+            
+            // Show loading state
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            this.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-check"></i>';
+                this.classList.remove('btn-outline-success');
+                this.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    this.style.display = 'none';
+                }, 1000);
+            }, 1500);
+        });
+    });
+
+    // Table sorting functionality
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', function() {
+            const sortBy = this.dataset.sort;
+            console.log('Sorting by:', sortBy);
+            // Add your sorting logic here
+        });
+    });
+
+    // Enhanced search with debouncing
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                // Add live search functionality here if needed
+                console.log('Searching:', this.value);
+            }, 500);
+        });
+    }
+});
+</script>
+{% endblock %}

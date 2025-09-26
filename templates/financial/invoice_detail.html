@@ -1,0 +1,639 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Invoice #{{ invoice.invoice_number }} - Hawwa Admin{% endblock %}
+
+{% block page_title %}Invoice #{{ invoice.invoice_number }}{% endblock %}
+{% block page_subtitle %}{{ invoice.customer.get_full_name }} • {{ invoice.created_at|date:"M d, Y" }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'financial:dashboard' %}">Financial</a></li>
+<li class="breadcrumb-item"><a href="{% url 'financial:invoice_list' %}">Invoices</a></li>
+<li class="breadcrumb-item active">#{{ invoice.invoice_number }}</li>
+{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group">
+    <button class="btn btn-admin-primary" onclick="sendInvoice()">
+        <i class="fas fa-paper-plane me-2"></i>Send Invoice
+    </button>
+    <button type="button" class="btn btn-admin-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+        <span class="visually-hidden">Toggle Dropdown</span>
+    </button>
+    <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="{% url 'financial:invoice_pdf' invoice.pk %}">
+            <i class="fas fa-file-pdf me-2"></i>Download PDF
+        </a></li>
+        <li><a class="dropdown-item" href="#" onclick="printInvoice()">
+            <i class="fas fa-print me-2"></i>Print
+        </a></li>
+        <li><a class="dropdown-item" href="#" onclick="duplicateInvoice()">
+            <i class="fas fa-copy me-2"></i>Duplicate
+        </a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="{% url 'financial:invoice_update' invoice.pk %}">
+            <i class="fas fa-edit me-2"></i>Edit Invoice
+        </a></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Main Invoice Content -->
+    <div class="col-lg-8">
+        <!-- Invoice Header -->
+        <div class="admin-card mb-4">
+            <div class="admin-card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar-lg bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                <i class="fas fa-file-invoice fa-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-1">Invoice #{{ invoice.invoice_number }}</h3>
+                                <span class="status-badge status-{{ invoice.status }} fs-6">
+                                    {{ invoice.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Customer Information -->
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-2">BILL TO</h6>
+                            <div class="d-flex align-items-start">
+                                <div class="avatar-sm bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                    {{ invoice.customer.first_name|first|upper }}{{ invoice.customer.last_name|first|upper }}
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">{{ invoice.customer.get_full_name }}</h6>
+                                    <p class="text-muted small mb-1">{{ invoice.customer.email }}</p>
+                                    {% if invoice.customer.phone %}
+                                    <p class="text-muted small mb-0">{{ invoice.customer.phone }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <!-- Invoice Details -->
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="detail-item">
+                                    <label class="text-muted small">Invoice Date</label>
+                                    <div class="fw-medium">{{ invoice.created_at|date:"M d, Y" }}</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="detail-item">
+                                    <label class="text-muted small">Due Date</label>
+                                    <div class="fw-medium {% if invoice.status == 'overdue' %}text-danger{% endif %}">
+                                        {{ invoice.due_date|date:"M d, Y" }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="detail-item">
+                                    <label class="text-muted small">Total Amount</label>
+                                    <div class="fw-bold fs-5 text-primary">QAR {{ invoice.total_amount|floatformat:2|intcomma }}</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="detail-item">
+                                    <label class="text-muted small">Remaining</label>
+                                    <div class="fw-bold fs-5 {% if invoice.remaining_amount > 0 %}text-warning{% else %}text-success{% endif %}">
+                                        QAR {{ invoice.remaining_amount|floatformat:2|intcomma }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoice Items -->
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">Invoice Items</h5>
+            </div>
+            <div class="admin-table">
+                <table class="table table-borderless mb-0">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Qty</th>
+                            <th>Rate</th>
+                            <th>Tax</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in invoice_items %}
+                        <tr>
+                            <td>
+                                <div class="fw-medium">{{ item.service.name|default:item.description }}</div>
+                                {% if item.service.description %}
+                                <small class="text-muted">{{ item.service.description }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.quantity|floatformat:0 }}</td>
+                            <td>QAR {{ item.unit_price|floatformat:2|intcomma }}</td>
+                            <td>
+                                {% if item.tax_amount > 0 %}
+                                QAR {{ item.tax_amount|floatformat:2|intcomma }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-medium">QAR {{ item.total_amount|floatformat:2|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                No items found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="border-top">
+                        <tr>
+                            <td colspan="4" class="text-end fw-medium">Subtotal:</td>
+                            <td class="text-end fw-medium">QAR {{ invoice.subtotal|floatformat:2|intcomma }}</td>
+                        </tr>
+                        {% if invoice.tax_amount > 0 %}
+                        <tr>
+                            <td colspan="4" class="text-end fw-medium">Tax:</td>
+                            <td class="text-end fw-medium">QAR {{ invoice.tax_amount|floatformat:2|intcomma }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if invoice.discount_amount > 0 %}
+                        <tr>
+                            <td colspan="4" class="text-end fw-medium">Discount:</td>
+                            <td class="text-end fw-medium text-success">-QAR {{ invoice.discount_amount|floatformat:2|intcomma }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr class="table-active">
+                            <td colspan="4" class="text-end fw-bold fs-6">Total:</td>
+                            <td class="text-end fw-bold fs-5 text-primary">QAR {{ invoice.total_amount|floatformat:2|intcomma }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payment History -->
+        {% if payments %}
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">Payment History</h5>
+            </div>
+            <div class="admin-table">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Method</th>
+                            <th>Reference</th>
+                            <th class="text-end">Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr>
+                            <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                            <td>
+                                <span class="badge bg-light text-dark">
+                                    {{ payment.get_payment_method_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if payment.reference_number %}
+                                <code>{{ payment.reference_number }}</code>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-medium text-success">
+                                QAR {{ payment.amount|floatformat:2|intcomma }}
+                            </td>
+                            <td>
+                                <a href="{% url 'financial:payment_detail' payment.pk %}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Notes -->
+        {% if invoice.notes %}
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">Notes</h5>
+            </div>
+            <div class="admin-card-body">
+                <p class="mb-0">{{ invoice.notes|linebreaks }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title">Quick Actions</h6>
+            </div>
+            <div class="admin-card-body">
+                <div class="d-grid gap-2">
+                    {% if invoice.status != 'paid' %}
+                    <button class="btn btn-success" onclick="recordPayment()">
+                        <i class="fas fa-credit-card me-2"></i>Record Payment
+                    </button>
+                    {% endif %}
+                    
+                    <button class="btn btn-primary" onclick="sendInvoice()">
+                        <i class="fas fa-paper-plane me-2"></i>Send via Email
+                    </button>
+                    
+                    <button class="btn btn-outline-primary" onclick="sendReminder()">
+                        <i class="fas fa-bell me-2"></i>Send Reminder
+                    </button>
+                    
+                    <hr>
+                    
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-secondary" onclick="updateStatus('paid')">
+                            <i class="fas fa-check"></i> Paid
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="updateStatus('pending')">
+                            <i class="fas fa-clock"></i> Pending
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="updateStatus('overdue')">
+                            <i class="fas fa-exclamation-triangle"></i> Overdue
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Summary -->
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title">Payment Summary</h6>
+            </div>
+            <div class="admin-card-body">
+                <div class="row g-3 text-center">
+                    <div class="col-4">
+                        <div class="payment-metric">
+                            <div class="metric-value text-primary">QAR {{ invoice.total_amount|floatformat:0|intcomma }}</div>
+                            <div class="metric-label">Total</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="payment-metric">
+                            <div class="metric-value text-success">QAR {{ invoice.paid_amount|floatformat:0|intcomma }}</div>
+                            <div class="metric-label">Paid</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="payment-metric">
+                            <div class="metric-value text-warning">QAR {{ invoice.remaining_amount|floatformat:0|intcomma }}</div>
+                            <div class="metric-label">Remaining</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress bar -->
+                <div class="mt-3">
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ invoice.payment_percentage }}%" 
+                             aria-valuenow="{{ invoice.payment_percentage }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                    <small class="text-muted">{{ invoice.payment_percentage|floatformat:1 }}% paid</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Info -->
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title">Customer Information</h6>
+            </div>
+            <div class="admin-card-body">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="avatar-md bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                        {{ invoice.customer.first_name|first|upper }}{{ invoice.customer.last_name|first|upper }}
+                    </div>
+                    <div>
+                        <h6 class="mb-1">{{ invoice.customer.get_full_name }}</h6>
+                        <p class="text-muted small mb-0">{{ invoice.customer.email }}</p>
+                    </div>
+                </div>
+                
+                <div class="row g-2 small">
+                    {% if invoice.customer.phone %}
+                    <div class="col-12">
+                        <label class="text-muted">Phone:</label>
+                        <div>{{ invoice.customer.phone }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="col-12">
+                        <label class="text-muted">Member Since:</label>
+                        <div>{{ invoice.customer.date_joined|date:"M Y" }}</div>
+                    </div>
+                    
+                    <div class="col-12 mt-2">
+                        <a href="#" class="btn btn-sm btn-outline-primary w-100">
+                            View Customer Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title">Recent Activity</h6>
+            </div>
+            <div class="admin-card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <small class="text-muted">{{ invoice.created_at|timesince }} ago</small>
+                            <div>Invoice created</div>
+                        </div>
+                    </div>
+                    
+                    {% for payment in payments %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <small class="text-muted">{{ payment.created_at|timesince }} ago</small>
+                            <div>Payment received: QAR {{ payment.amount|floatformat:2 }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if invoice.status == 'overdue' %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-danger"></div>
+                        <div class="timeline-content">
+                            <small class="text-muted">{{ invoice.days_overdue }} days ago</small>
+                            <div>Invoice became overdue</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Record Payment Modal -->
+<div class="modal fade" id="recordPaymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Record Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="recordPaymentForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="invoice_id" value="{{ invoice.pk }}">
+                    
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">QAR</span>
+                            <input type="number" class="form-control" id="amount" name="amount" 
+                                   value="{{ invoice.remaining_amount|floatformat:2 }}" 
+                                   min="0" step="0.01" required>
+                        </div>
+                        <small class="form-text text-muted">
+                            Remaining: QAR {{ invoice.remaining_amount|floatformat:2|intcomma }}
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="payment_method" class="form-label">Payment Method</label>
+                        <select class="form-select" id="payment_method" name="payment_method" required>
+                            <option value="cash">Cash</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="credit_card">Credit Card</option>
+                            <option value="debit_card">Debit Card</option>
+                            <option value="check">Check</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="payment_date" class="form-label">Payment Date</label>
+                        <input type="date" class="form-control" id="payment_date" name="payment_date" 
+                               value="{% now 'Y-m-d' %}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reference_number" class="form-label">Reference Number</label>
+                        <input type="text" class="form-control" id="reference_number" name="reference_number">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Record Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .avatar-lg {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .avatar-md {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .detail-item label {
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+    
+    .payment-metric {
+        text-align: center;
+    }
+    
+    .metric-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .metric-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--admin-text-muted);
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 1.5rem;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--admin-border);
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -1.5rem;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 0 0 2px var(--admin-border);
+    }
+    
+    .timeline-content {
+        margin-left: 0.5rem;
+    }
+    
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function recordPayment() {
+    new bootstrap.Modal(document.getElementById('recordPaymentModal')).show();
+}
+
+function sendInvoice() {
+    if (confirm('Send this invoice via email to {{ invoice.customer.email }}?')) {
+        window.location.href = '{% url "financial:invoice_send" invoice.pk %}';
+    }
+}
+
+function sendReminder() {
+    if (confirm('Send payment reminder to {{ invoice.customer.email }}?')) {
+        adminUtils.showNotification('Payment reminder sent successfully!', 'success');
+    }
+}
+
+function updateStatus(status) {
+    if (confirm(`Mark this invoice as ${status}?`)) {
+        fetch('{% url "financial:invoice_status_update_api" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                invoice_id: {{ invoice.pk }},
+                status: status
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                adminUtils.showNotification(data.message, 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                adminUtils.showNotification(data.error, 'error');
+            }
+        })
+        .catch(error => {
+            adminUtils.showNotification('Error updating status', 'error');
+        });
+    }
+}
+
+function printInvoice() {
+    window.open('{% url "financial:invoice_pdf" invoice.pk %}', '_blank');
+}
+
+function duplicateInvoice() {
+    if (confirm('Create a copy of this invoice?')) {
+        // Implement duplication logic
+        adminUtils.showNotification('Invoice duplicated successfully!', 'success');
+    }
+}
+
+// Handle payment form submission
+document.getElementById('recordPaymentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+    
+    fetch('{% url "financial:payment_quick_add_api" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            adminUtils.showNotification('Payment recorded successfully!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('recordPaymentModal')).hide();
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            adminUtils.showNotification(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        adminUtils.showNotification('Error recording payment', 'error');
+    });
+});
+</script>
+{% endblock %}

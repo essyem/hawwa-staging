@@ -1,0 +1,10 @@
+Your verification code for {{ app_name }} is:
+
+{{ code }}
+
+This code will expire in 5 minutes.
+
+If you did not request this code, please contact support: {{ support_email }}
+
+Thanks,
+The {{ app_name }} team

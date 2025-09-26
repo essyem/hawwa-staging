@@ -1,0 +1,17 @@
+{% load crispy_forms_tags %}
+<div class="otp-required mt-4">
+  <h3>Enter one-time code</h3>
+    {% csrf_token %}
+    {# include management form (parent will include either wizard.management_form or management_form) #}
+    {% if otp_form %}
+      {{ otp_form|crispy }}
+    {% else %}
+      <div class="mb-3">
+        <label for="id_otp_token" class="form-label">One-time code</label>
+        <input id="id_otp_token" name="otp_token" class="form-control" type="text" />
+      </div>
+    {% endif %}
+    <div class="d-grid">
+      <button class="btn btn-primary">Verify</button>
+    </div>
+</div>

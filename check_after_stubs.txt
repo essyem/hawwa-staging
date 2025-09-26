@@ -1,0 +1,3421 @@
+OK: django_extensions/widgets/foreignkey_searchinput.html
+OK: auth/widgets/read_only_password_hash.html
+OK: gis/openlayers.html
+OK: gis/openlayers-osm.html
+OK: admin_doc/bookmarklets.html
+OK: admin_doc/model_detail.html
+OK: admin_doc/template_detail.html
+OK: admin_doc/index.html
+OK: admin_doc/model_index.html
+OK: admin_doc/template_tag_index.html
+OK: admin_doc/view_detail.html
+OK: admin_doc/view_index.html
+OK: admin_doc/missing_docutils.html
+OK: admin_doc/template_filter_index.html
+OK: postgres/widgets/split_array.html
+OK: admin/invalid_setup.html
+OK: admin/prepopulated_fields_js.html
+OK: admin/change_list_results.html
+OK: admin/nav_sidebar.html
+OK: admin/date_hierarchy.html
+OK: admin/object_history.html
+OK: admin/popup_response.html
+OK: admin/change_list_object_tools.html
+OK: admin/500.html
+OK: admin/change_list.html
+OK: admin/filter.html
+OK: admin/search_form.html
+OK: admin/app_index.html
+OK: admin/color_theme_toggle.html
+OK: admin/login.html
+OK: admin/base.html
+OK: admin/404.html
+OK: admin/index.html
+OK: admin/delete_selected_confirmation.html
+OK: admin/change_form_object_tools.html
+OK: admin/delete_confirmation.html
+OK: admin/base_site.html
+OK: admin/app_list.html
+OK: admin/actions.html
+OK: admin/pagination.html
+OK: admin/submit_line.html
+OK: admin/change_form.html
+OK: admin/includes/object_delete_summary.html
+OK: admin/includes/fieldset.html
+OK: admin/auth/user/change_password.html
+OK: admin/auth/user/add_form.html
+OK: admin/widgets/date.html
+OK: admin/widgets/url.html
+OK: admin/widgets/foreign_key_raw_id.html
+OK: admin/widgets/split_datetime.html
+OK: admin/widgets/many_to_many_raw_id.html
+OK: admin/widgets/radio.html
+OK: admin/widgets/time.html
+OK: admin/widgets/clearable_file_input.html
+OK: admin/widgets/related_widget_wrapper.html
+OK: admin/edit_inline/tabular.html
+OK: admin/edit_inline/stacked.html
+OK: registration/password_reset_confirm.html
+OK: registration/password_change_form.html
+OK: registration/password_reset_complete.html
+OK: registration/password_change_done.html
+OK: registration/password_reset_email.html
+OK: registration/password_reset_done.html
+OK: registration/logged_out.html
+OK: registration/password_reset_form.html
+OK: csrf_403.html
+OK: technical_404.html
+OK: default_urlconf.html
+OK: directory_index.html
+OK: technical_500.html
+OK: django/forms/ul.html
+OK: django/forms/label.html
+OK: django/forms/table.html
+OK: django/forms/attrs.html
+OK: django/forms/field.html
+OK: django/forms/p.html
+OK: django/forms/div.html
+OK: django/forms/formsets/ul.html
+OK: django/forms/formsets/table.html
+OK: django/forms/formsets/p.html
+OK: django/forms/formsets/div.html
+OK: django/forms/widgets/textarea.html
+OK: django/forms/widgets/hidden.html
+OK: django/forms/widgets/input_option.html
+OK: django/forms/widgets/select_option.html
+OK: django/forms/widgets/multiple_input.html
+OK: django/forms/widgets/datetime.html
+OK: django/forms/widgets/search.html
+OK: django/forms/widgets/date.html
+OK: django/forms/widgets/checkbox.html
+OK: django/forms/widgets/radio_option.html
+OK: django/forms/widgets/url.html
+OK: django/forms/widgets/email.html
+OK: django/forms/widgets/attrs.html
+OK: django/forms/widgets/splitdatetime.html
+OK: django/forms/widgets/input.html
+OK: django/forms/widgets/checkbox_select.html
+OK: django/forms/widgets/text.html
+OK: django/forms/widgets/number.html
+OK: django/forms/widgets/multiwidget.html
+OK: django/forms/widgets/select_date.html
+OK: django/forms/widgets/radio.html
+OK: django/forms/widgets/file.html
+OK: django/forms/widgets/multiple_hidden.html
+OK: django/forms/widgets/color.html
+OK: django/forms/widgets/splithiddendatetime.html
+OK: django/forms/widgets/tel.html
+OK: django/forms/widgets/checkbox_option.html
+OK: django/forms/widgets/time.html
+OK: django/forms/widgets/clearable_file_input.html
+OK: django/forms/widgets/password.html
+OK: django/forms/widgets/select.html
+OK: django/forms/errors/list/ul.html
+OK: django/forms/errors/list/default.html
+OK: django/forms/errors/dict/ul.html
+OK: django/forms/errors/dict/default.html
+OK: bootstrap5/accordion.html
+OK: bootstrap5/uni_formset.html
+OK: bootstrap5/betterform.html
+OK: bootstrap5/errors.html
+OK: bootstrap5/errors_formset.html
+OK: bootstrap5/field.html
+OK: bootstrap5/whole_uni_formset.html
+OK: bootstrap5/accordion-group.html
+OK: bootstrap5/uni_form.html
+OK: bootstrap5/table_inline_formset.html
+OK: bootstrap5/inputs.html
+OK: bootstrap5/display_form.html
+OK: bootstrap5/whole_uni_form.html
+OK: bootstrap5/layout/row.html
+OK: bootstrap5/layout/switch.html
+OK: bootstrap5/layout/buttonholder.html
+OK: bootstrap5/layout/tab-link.html
+OK: bootstrap5/layout/field_errors_block.html
+OK: bootstrap5/layout/fieldset.html
+OK: bootstrap5/layout/help_text_and_errors.html
+OK: bootstrap5/layout/checkboxselectmultiple_inline.html
+OK: bootstrap5/layout/inline_field.html
+OK: bootstrap5/layout/attrs.html
+OK: bootstrap5/layout/floating_field.html
+OK: bootstrap5/layout/field_errors.html
+OK: bootstrap5/layout/alert.html
+OK: bootstrap5/layout/modal.html
+OK: bootstrap5/layout/uneditable_input.html
+OK: bootstrap5/layout/radioselect_inline.html
+OK: bootstrap5/layout/radio_checkbox_select.html
+OK: bootstrap5/layout/prepended_appended_text.html
+OK: bootstrap5/layout/field_file.html
+OK: bootstrap5/layout/baseinput.html
+OK: bootstrap5/layout/button.html
+OK: bootstrap5/layout/div.html
+OK: bootstrap5/layout/formactions.html
+OK: bootstrap5/layout/help_text.html
+OK: bootstrap5/layout/tab.html
+OK: bootstrap5/layout/column.html
+OK: bootstrap5/layout/multifield.html
+OK: bootstrap5/layout/field_with_buttons.html
+OK: bootstrap/field_prependedtext.html
+OK: bootstrap/field_default.html
+OK: bootstrap/field_appendprependtext.html
+OK: bootstrap/field_appendedtext.html
+OK: bootstrap/_field_errors.html
+OK: bootstrap/_field_help_text.html
+OK: bootstrap/_field_errors_block.html
+OK: bootstrap/field.html
+OK: bootstrap/form.html
+OK: django_extensions/widgets/foreignkey_searchinput.html
+OK: auth/widgets/read_only_password_hash.html
+OK: gis/openlayers.html
+OK: gis/openlayers-osm.html
+OK: admin_doc/bookmarklets.html
+OK: admin_doc/model_detail.html
+OK: admin_doc/template_detail.html
+OK: admin_doc/index.html
+OK: admin_doc/model_index.html
+OK: admin_doc/template_tag_index.html
+OK: admin_doc/view_detail.html
+OK: admin_doc/view_index.html
+OK: admin_doc/missing_docutils.html
+OK: admin_doc/template_filter_index.html
+OK: postgres/widgets/split_array.html
+OK: admin/invalid_setup.html
+OK: admin/prepopulated_fields_js.html
+OK: admin/change_list_results.html
+OK: admin/nav_sidebar.html
+OK: admin/date_hierarchy.html
+OK: admin/object_history.html
+OK: admin/popup_response.html
+OK: admin/change_list_object_tools.html
+OK: admin/500.html
+OK: admin/change_list.html
+OK: admin/filter.html
+OK: admin/search_form.html
+OK: admin/app_index.html
+OK: admin/color_theme_toggle.html
+OK: admin/login.html
+OK: admin/base.html
+OK: admin/404.html
+OK: admin/index.html
+OK: admin/delete_selected_confirmation.html
+OK: admin/change_form_object_tools.html
+OK: admin/delete_confirmation.html
+OK: admin/base_site.html
+OK: admin/app_list.html
+OK: admin/actions.html
+OK: admin/pagination.html
+OK: admin/submit_line.html
+OK: admin/change_form.html
+OK: admin/includes/object_delete_summary.html
+OK: admin/includes/fieldset.html
+OK: admin/auth/user/change_password.html
+OK: admin/auth/user/add_form.html
+OK: admin/widgets/date.html
+OK: admin/widgets/url.html
+OK: admin/widgets/foreign_key_raw_id.html
+OK: admin/widgets/split_datetime.html
+OK: admin/widgets/many_to_many_raw_id.html
+OK: admin/widgets/radio.html
+OK: admin/widgets/time.html
+OK: admin/widgets/clearable_file_input.html
+OK: admin/widgets/related_widget_wrapper.html
+OK: admin/edit_inline/tabular.html
+OK: admin/edit_inline/stacked.html
+OK: registration/password_reset_confirm.html
+OK: registration/password_change_form.html
+OK: registration/password_reset_complete.html
+OK: registration/password_change_done.html
+OK: registration/password_reset_email.html
+OK: registration/password_reset_done.html
+OK: registration/logged_out.html
+OK: registration/password_reset_form.html
+OK: csrf_403.html
+OK: technical_404.html
+OK: default_urlconf.html
+OK: directory_index.html
+OK: technical_500.html
+OK: django/forms/ul.html
+OK: django/forms/label.html
+OK: django/forms/table.html
+OK: django/forms/attrs.html
+OK: django/forms/field.html
+OK: django/forms/p.html
+OK: django/forms/div.html
+OK: django/forms/formsets/ul.html
+OK: django/forms/formsets/table.html
+OK: django/forms/formsets/p.html
+OK: django/forms/formsets/div.html
+OK: django/forms/widgets/textarea.html
+OK: django/forms/widgets/hidden.html
+OK: django/forms/widgets/input_option.html
+OK: django/forms/widgets/select_option.html
+OK: django/forms/widgets/multiple_input.html
+OK: django/forms/widgets/datetime.html
+OK: django/forms/widgets/search.html
+OK: django/forms/widgets/date.html
+OK: django/forms/widgets/checkbox.html
+OK: django/forms/widgets/radio_option.html
+OK: django/forms/widgets/url.html
+OK: django/forms/widgets/email.html
+OK: django/forms/widgets/attrs.html
+OK: django/forms/widgets/splitdatetime.html
+OK: django/forms/widgets/input.html
+OK: django/forms/widgets/checkbox_select.html
+OK: django/forms/widgets/text.html
+OK: django/forms/widgets/number.html
+OK: django/forms/widgets/multiwidget.html
+OK: django/forms/widgets/select_date.html
+OK: django/forms/widgets/radio.html
+OK: django/forms/widgets/file.html
+OK: django/forms/widgets/multiple_hidden.html
+OK: django/forms/widgets/color.html
+OK: django/forms/widgets/splithiddendatetime.html
+OK: django/forms/widgets/tel.html
+OK: django/forms/widgets/checkbox_option.html
+OK: django/forms/widgets/time.html
+OK: django/forms/widgets/clearable_file_input.html
+OK: django/forms/widgets/password.html
+OK: django/forms/widgets/select.html
+OK: django/forms/errors/list/ul.html
+OK: django/forms/errors/list/default.html
+OK: django/forms/errors/dict/ul.html
+OK: django/forms/errors/dict/default.html
+OK: rest_framework/raw_data_form.html
+OK: rest_framework/api.html
+OK: rest_framework/login.html
+OK: rest_framework/base.html
+OK: rest_framework/admin.html
+OK: rest_framework/login_base.html
+OK: rest_framework/filters/ordering.html
+OK: rest_framework/filters/search.html
+OK: rest_framework/filters/base.html
+OK: rest_framework/vertical/textarea.html
+OK: rest_framework/vertical/fieldset.html
+OK: rest_framework/vertical/checkbox.html
+OK: rest_framework/vertical/select_multiple.html
+OK: rest_framework/vertical/input.html
+OK: rest_framework/vertical/list_field.html
+OK: rest_framework/vertical/radio.html
+OK: rest_framework/vertical/checkbox_multiple.html
+OK: rest_framework/vertical/dict_field.html
+OK: rest_framework/vertical/select.html
+OK: rest_framework/vertical/list_fieldset.html
+OK: rest_framework/vertical/form.html
+OK: rest_framework/docs/sidebar.html
+OK: rest_framework/docs/error.html
+OK: rest_framework/docs/index.html
+OK: rest_framework/docs/interact.html
+OK: rest_framework/docs/document.html
+OK: rest_framework/docs/link.html
+OK: rest_framework/docs/auth/token.html
+OK: rest_framework/docs/auth/basic.html
+OK: rest_framework/docs/auth/session.html
+OK: rest_framework/docs/langs/shell.html
+OK: rest_framework/docs/langs/python-intro.html
+OK: rest_framework/docs/langs/javascript-intro.html
+OK: rest_framework/docs/langs/shell-intro.html
+OK: rest_framework/docs/langs/python.html
+OK: rest_framework/docs/langs/javascript.html
+OK: rest_framework/horizontal/textarea.html
+OK: rest_framework/horizontal/fieldset.html
+OK: rest_framework/horizontal/checkbox.html
+OK: rest_framework/horizontal/select_multiple.html
+OK: rest_framework/horizontal/input.html
+OK: rest_framework/horizontal/list_field.html
+OK: rest_framework/horizontal/radio.html
+OK: rest_framework/horizontal/checkbox_multiple.html
+OK: rest_framework/horizontal/dict_field.html
+OK: rest_framework/horizontal/select.html
+OK: rest_framework/horizontal/list_fieldset.html
+OK: rest_framework/horizontal/form.html
+OK: rest_framework/inline/textarea.html
+OK: rest_framework/inline/fieldset.html
+OK: rest_framework/inline/checkbox.html
+OK: rest_framework/inline/select_multiple.html
+OK: rest_framework/inline/input.html
+OK: rest_framework/inline/list_field.html
+OK: rest_framework/inline/radio.html
+OK: rest_framework/inline/checkbox_multiple.html
+OK: rest_framework/inline/dict_field.html
+OK: rest_framework/inline/select.html
+OK: rest_framework/inline/list_fieldset.html
+OK: rest_framework/inline/form.html
+OK: rest_framework/admin/dict_value.html
+OK: rest_framework/admin/simple_list_value.html
+OK: rest_framework/admin/list.html
+OK: rest_framework/admin/list_value.html
+OK: rest_framework/admin/detail.html
+OK: rest_framework/pagination/previous_and_next.html
+OK: rest_framework/pagination/numbers.html
+OK: bootstrap5/accordion.html
+OK: bootstrap5/uni_formset.html
+OK: bootstrap5/betterform.html
+OK: bootstrap5/errors.html
+OK: bootstrap5/errors_formset.html
+OK: bootstrap5/field.html
+OK: bootstrap5/whole_uni_formset.html
+OK: bootstrap5/accordion-group.html
+OK: bootstrap5/uni_form.html
+OK: bootstrap5/table_inline_formset.html
+OK: bootstrap5/inputs.html
+OK: bootstrap5/display_form.html
+OK: bootstrap5/whole_uni_form.html
+OK: bootstrap5/layout/row.html
+OK: bootstrap5/layout/switch.html
+OK: bootstrap5/layout/buttonholder.html
+OK: bootstrap5/layout/tab-link.html
+OK: bootstrap5/layout/field_errors_block.html
+OK: bootstrap5/layout/fieldset.html
+OK: bootstrap5/layout/help_text_and_errors.html
+OK: bootstrap5/layout/checkboxselectmultiple_inline.html
+OK: bootstrap5/layout/inline_field.html
+OK: bootstrap5/layout/attrs.html
+OK: bootstrap5/layout/floating_field.html
+OK: bootstrap5/layout/field_errors.html
+OK: bootstrap5/layout/alert.html
+OK: bootstrap5/layout/modal.html
+OK: bootstrap5/layout/uneditable_input.html
+OK: bootstrap5/layout/radioselect_inline.html
+OK: bootstrap5/layout/radio_checkbox_select.html
+OK: bootstrap5/layout/prepended_appended_text.html
+OK: bootstrap5/layout/field_file.html
+OK: bootstrap5/layout/baseinput.html
+OK: bootstrap5/layout/button.html
+OK: bootstrap5/layout/div.html
+OK: bootstrap5/layout/formactions.html
+OK: bootstrap5/layout/help_text.html
+OK: bootstrap5/layout/tab.html
+OK: bootstrap5/layout/column.html
+OK: bootstrap5/layout/multifield.html
+OK: bootstrap5/layout/field_with_buttons.html
+OK: admin/import_export/export.html
+OK: admin/import_export/change_list_import.html
+OK: admin/import_export/import.html
+OK: admin/import_export/change_list.html
+OK: admin/import_export/resource_fields_list.html
+OK: admin/import_export/change_list_import_export.html
+OK: admin/import_export/base.html
+OK: admin/import_export/change_list_export_item.html
+OK: admin/import_export/change_list_export.html
+OK: admin/import_export/change_list_import_item.html
+OK: admin/import_export/change_form.html
+OK: base.html
+ERROR: index.html -> TemplateDoesNotExist: index.html
+ERROR: portal/invoicebase.html -> TemplateDoesNotExist: portal/invoicebase.html
+ERROR: portal/procurement_dashboard.html -> TemplateDoesNotExist: portal/procurement_dashboard.html
+ERROR: portal/invoice_edit.html -> TemplateDoesNotExist: portal/invoice_edit.html
+ERROR: portal/dashboard.html -> TemplateDoesNotExist: portal/dashboard.html
+ERROR: portal/invoice_base.html -> TemplateDoesNotExist: portal/invoice_base.html
+ERROR: portal/invoice_create_clean.html -> TemplateDoesNotExist: portal/invoice_create_clean.html
+ERROR: portal/supplier_form.html -> TemplateDoesNotExist: portal/supplier_form.html
+ERROR: portal/purchase_order_form.html -> TemplateDoesNotExist: portal/purchase_order_form.html
+ERROR: portal/home.html -> TemplateDoesNotExist: portal/home.html
+ERROR: portal/invoice_pdf_clean.html -> TemplateDoesNotExist: portal/invoice_pdf_clean.html
+ERROR: portal/invoice_list.html -> TemplateDoesNotExist: portal/invoice_list.html
+ERROR: portal/barcode_scanner.html -> TemplateDoesNotExist: portal/barcode_scanner.html
+ERROR: portal/purchase_order_detail.html -> TemplateDoesNotExist: portal/purchase_order_detail.html
+ERROR: portal/profile.html -> TemplateDoesNotExist: portal/profile.html
+ERROR: portal/invoice_create_bak.html -> TemplateDoesNotExist: portal/invoice_create_bak.html
+ERROR: portal/export_reports.html -> TemplateDoesNotExist: portal/export_reports.html
+ERROR: portal/report.html -> TemplateDoesNotExist: portal/report.html
+ERROR: portal/enquiry.html -> TemplateDoesNotExist: portal/enquiry.html
+ERROR: portal/customer_detail.html -> TemplateDoesNotExist: portal/customer_detail.html
+ERROR: portal/customer_test.html -> TemplateDoesNotExist: portal/customer_test.html
+ERROR: portal/base.html -> TemplateDoesNotExist: portal/base.html
+ERROR: portal/index.html -> TemplateDoesNotExist: portal/index.html
+ERROR: portal/procurement_base.html -> TemplateDoesNotExist: portal/procurement_base.html
+ERROR: portal/customer_create.html -> TemplateDoesNotExist: portal/customer_create.html
+ERROR: portal/invoice_detail.html -> TemplateDoesNotExist: portal/invoice_detail.html
+ERROR: portal/invoice_pdf.html -> TemplateDoesNotExist: portal/invoice_pdf.html
+ERROR: portal/supplier_list.html -> TemplateDoesNotExist: portal/supplier_list.html
+ERROR: portal/purchase_payment_form.html -> TemplateDoesNotExist: portal/purchase_payment_form.html
+ERROR: portal/customer_list.html -> TemplateDoesNotExist: portal/customer_list.html
+ERROR: portal/report_base.html -> TemplateDoesNotExist: portal/report_base.html
+ERROR: portal/terms.html -> TemplateDoesNotExist: portal/terms.html
+ERROR: portal/invoice_pdf_backup.html -> TemplateDoesNotExist: portal/invoice_pdf_backup.html
+ERROR: portal/purchase_payment_list.html -> TemplateDoesNotExist: portal/purchase_payment_list.html
+ERROR: portal/invoice_create.html -> TemplateDoesNotExist: portal/invoice_create.html
+ERROR: portal/theme-toggle.html -> TemplateDoesNotExist: portal/theme-toggle.html
+ERROR: portal/purchase_order_list.html -> TemplateDoesNotExist: portal/purchase_order_list.html
+ERROR: portal/purchase_payment_detail.html -> TemplateDoesNotExist: portal/purchase_payment_detail.html
+ERROR: portal/invoice_create_backup.html -> TemplateDoesNotExist: portal/invoice_create_backup.html
+ERROR: portal/includes/_header.html -> TemplateDoesNotExist: portal/includes/_header.html
+ERROR: portal/includes/_navigation.html -> TemplateDoesNotExist: portal/includes/_navigation.html
+ERROR: portal/includes/_footer.html -> TemplateDoesNotExist: portal/includes/_footer.html
+ERROR: portal/products/search.html -> TemplateDoesNotExist: portal/products/search.html
+ERROR: portal/widgets/icon_picker.html -> TemplateDoesNotExist: portal/widgets/icon_picker.html
+ERROR: portal/rbac/permission_check.html -> TemplateDoesNotExist: portal/rbac/permission_check.html
+ERROR: finance/dashboard.html -> TemplateDoesNotExist: finance/dashboard.html
+ERROR: finance/transaction_form.html -> TemplateDoesNotExist: finance/transaction_form.html
+ERROR: rbac/register.html -> TemplateDoesNotExist: rbac/register.html
+ERROR: rbac/emails/verification_email.html -> TemplateDoesNotExist: rbac/emails/verification_email.html
+ERROR: sites/almalika/base.html -> TemplateDoesNotExist: sites/almalika/base.html
+ERROR: sites/almalika/index.html -> TemplateDoesNotExist: sites/almalika/index.html
+ERROR: sites/portal/base.html -> TemplateDoesNotExist: sites/portal/base.html
+ERROR: sites/portal/index.html -> TemplateDoesNotExist: sites/portal/index.html
+ERROR: emails/order_confirmation.html -> TemplateDoesNotExist: emails/order_confirmation.html
+OK: admin/base.html
+OK: admin/base_site.html
+ERROR: admin/portal/barcode_generator_dashboard.html -> TemplateDoesNotExist: admin/portal/barcode_generator_dashboard.html
+ERROR: admin/portal/product/change_list.html -> TemplateDoesNotExist: admin/portal/product/change_list.html
+ERROR: admin/portal/invoice/change_form.html -> TemplateDoesNotExist: admin/portal/invoice/change_form.html
+ERROR: admin/procurement/purchaseitem_change_form.html -> TemplateDoesNotExist: admin/procurement/purchaseitem_change_form.html
+ERROR: admin/procurement/purchaseorder_change_form.html -> TemplateDoesNotExist: admin/procurement/purchaseorder_change_form.html
+ERROR: admin/procurement/purchaseorder/change_form.html -> TemplateDoesNotExist: admin/procurement/purchaseorder/change_form.html
+OK: admin/import_export/export.html
+OK: admin/import_export/change_list_import.html
+OK: admin/import_export/import.html
+OK: admin/import_export/change_list.html
+OK: admin/import_export/resource_fields_list.html
+OK: admin/import_export/change_list_import_export.html
+OK: admin/import_export/base.html
+OK: admin/import_export/change_list_export_item.html
+OK: admin/import_export/change_list_export.html
+OK: admin/import_export/change_list_import_item.html
+OK: admin/import_export/change_form.html
+ERROR: registration/register.html -> TemplateDoesNotExist: registration/register.html
+OK: registration/login.html
+ERROR: registration/registration_pending.html -> TemplateDoesNotExist: registration/registration_pending.html
+OK: registration/logged_out.html
+ERROR: registration/registration/register.html -> TemplateDoesNotExist: registration/registration/register.html
+ERROR: registration/registration/login.html -> TemplateDoesNotExist: registration/registration/login.html
+ERROR: registration/registration/logged_out.html -> TemplateDoesNotExist: registration/registration/logged_out.html
+ERROR: compressor/js_preload.html -> TemplateDoesNotExist: compressor/js_preload.html
+ERROR: compressor/js_file.html -> TemplateDoesNotExist: compressor/js_file.html
+ERROR: compressor/css_file.html -> TemplateDoesNotExist: compressor/css_file.html
+ERROR: compressor/css_preload.html -> TemplateDoesNotExist: compressor/css_preload.html
+ERROR: compressor/css_inline.html -> TemplateDoesNotExist: compressor/css_inline.html
+ERROR: compressor/js_inline.html -> TemplateDoesNotExist: compressor/js_inline.html
+ERROR: dummy404.html -> TemplateDoesNotExist: dummy404.html
+ERROR: 500.html -> TemplateDoesNotExist: 500.html
+ERROR: dummy403.html -> TemplateDoesNotExist: dummy403.html
+ERROR: 404.html -> TemplateDoesNotExist: 404.html
+ERROR: list.html -> TemplateDoesNotExist: list.html
+ERROR: blank.html -> TemplateDoesNotExist: blank.html
+OK: admin/guardian/contrib/grappelli/obj_perms_manage.html
+OK: admin/guardian/contrib/grappelli/obj_perms_manage_group.html
+OK: admin/guardian/contrib/grappelli/field.html
+ERROR: admin/guardian/contrib/grappelli/obj_perms_manage_user.html -> TemplateDoesNotExist: admin/guardian/contrib/grappelli/obj_perms_manage_user.html
+ERROR: admin/guardian/model/obj_perms_yes.html -> TemplateDoesNotExist: admin/guardian/model/obj_perms_yes.html
+ERROR: admin/guardian/model/obj_perms_manage.html -> TemplateDoesNotExist: admin/guardian/model/obj_perms_manage.html
+ERROR: admin/guardian/model/obj_perms_manage_group.html -> TemplateDoesNotExist: admin/guardian/model/obj_perms_manage_group.html
+ERROR: admin/guardian/model/field.html -> TemplateDoesNotExist: admin/guardian/model/field.html
+ERROR: admin/guardian/model/obj_perms_no.html -> TemplateDoesNotExist: admin/guardian/model/obj_perms_no.html
+ERROR: admin/guardian/model/obj_perms_manage_user.html -> TemplateDoesNotExist: admin/guardian/model/obj_perms_manage_user.html
+ERROR: admin/guardian/model/change_form.html -> TemplateDoesNotExist: admin/guardian/model/change_form.html
+ERROR: formtools/preview.html -> TemplateDoesNotExist: formtools/preview.html
+ERROR: formtools/form.html -> TemplateDoesNotExist: formtools/form.html
+ERROR: formtools/wizard/wizard_form.html -> TemplateDoesNotExist: formtools/wizard/wizard_form.html
+OK: debug_toolbar/base.html
+ERROR: debug_toolbar/redirect.html -> TemplateDoesNotExist: debug_toolbar/redirect.html
+OK: debug_toolbar/includes/panel_button.html
+OK: debug_toolbar/includes/theme_selector.html
+OK: debug_toolbar/includes/panel_content.html
+ERROR: debug_toolbar/panels/templates.html -> TemplateDoesNotExist: debug_toolbar/panels/templates.html
+ERROR: debug_toolbar/panels/history.html -> TemplateDoesNotExist: debug_toolbar/panels/history.html
+ERROR: debug_toolbar/panels/staticfiles.html -> TemplateDoesNotExist: debug_toolbar/panels/staticfiles.html
+ERROR: debug_toolbar/panels/headers.html -> TemplateDoesNotExist: debug_toolbar/panels/headers.html
+ERROR: debug_toolbar/panels/profiling.html -> TemplateDoesNotExist: debug_toolbar/panels/profiling.html
+ERROR: debug_toolbar/panels/timer.html -> TemplateDoesNotExist: debug_toolbar/panels/timer.html
+ERROR: debug_toolbar/panels/settings.html -> TemplateDoesNotExist: debug_toolbar/panels/settings.html
+ERROR: debug_toolbar/panels/versions.html -> TemplateDoesNotExist: debug_toolbar/panels/versions.html
+ERROR: debug_toolbar/panels/sql_profile.html -> TemplateDoesNotExist: debug_toolbar/panels/sql_profile.html
+ERROR: debug_toolbar/panels/signals.html -> TemplateDoesNotExist: debug_toolbar/panels/signals.html
+ERROR: debug_toolbar/panels/history_tr.html -> TemplateDoesNotExist: debug_toolbar/panels/history_tr.html
+ERROR: debug_toolbar/panels/alerts.html -> TemplateDoesNotExist: debug_toolbar/panels/alerts.html
+ERROR: debug_toolbar/panels/cache.html -> TemplateDoesNotExist: debug_toolbar/panels/cache.html
+ERROR: debug_toolbar/panels/sql_explain.html -> TemplateDoesNotExist: debug_toolbar/panels/sql_explain.html
+ERROR: debug_toolbar/panels/request.html -> TemplateDoesNotExist: debug_toolbar/panels/request.html
+ERROR: debug_toolbar/panels/sql.html -> TemplateDoesNotExist: debug_toolbar/panels/sql.html
+ERROR: debug_toolbar/panels/request_variables.html -> TemplateDoesNotExist: debug_toolbar/panels/request_variables.html
+ERROR: debug_toolbar/panels/template_source.html -> TemplateDoesNotExist: debug_toolbar/panels/template_source.html
+ERROR: debug_toolbar/panels/sql_select.html -> TemplateDoesNotExist: debug_toolbar/panels/sql_select.html
+OK: admin/grappelli_mptt_change_list.html
+ERROR: admin/mptt_change_list.html -> TemplateDoesNotExist: admin/mptt_change_list.html
+OK: admin/grappelli_mptt_change_list_results.html
+ERROR: admin/mptt_filter.html -> TemplateDoesNotExist: admin/mptt_filter.html
+ERROR: admin/mptt_change_list_results.html -> TemplateDoesNotExist: admin/mptt_change_list_results.html
+OK: django_filters/widgets/multiwidget.html
+OK: django_filters/rest_framework/crispy_form.html
+OK: django_filters/rest_framework/form.html
+ERROR: actstream/action.html -> TemplateDoesNotExist: actstream/action.html
+ERROR: actstream/base.html -> TemplateDoesNotExist: actstream/base.html
+ERROR: actstream/followers.html -> TemplateDoesNotExist: actstream/followers.html
+ERROR: actstream/actor.html -> TemplateDoesNotExist: actstream/actor.html
+ERROR: actstream/detail.html -> TemplateDoesNotExist: actstream/detail.html
+ERROR: actstream/following.html -> TemplateDoesNotExist: actstream/following.html
+ERROR: other_wizard_form.html -> TemplateDoesNotExist: other_wizard_form.html
+ERROR: ckeditor/browse.html -> TemplateDoesNotExist: ckeditor/browse.html
+OK: django_extensions/widgets/foreignkey_searchinput.html
+OK: auth/widgets/read_only_password_hash.html
+OK: gis/openlayers.html
+OK: gis/openlayers-osm.html
+OK: admin_doc/bookmarklets.html
+OK: admin_doc/model_detail.html
+OK: admin_doc/template_detail.html
+OK: admin_doc/index.html
+OK: admin_doc/model_index.html
+OK: admin_doc/template_tag_index.html
+OK: admin_doc/view_detail.html
+OK: admin_doc/view_index.html
+OK: admin_doc/missing_docutils.html
+OK: admin_doc/template_filter_index.html
+OK: postgres/widgets/split_array.html
+OK: admin/invalid_setup.html
+OK: admin/prepopulated_fields_js.html
+OK: admin/change_list_results.html
+OK: admin/nav_sidebar.html
+OK: admin/date_hierarchy.html
+OK: admin/object_history.html
+OK: admin/popup_response.html
+OK: admin/change_list_object_tools.html
+OK: admin/500.html
+OK: admin/change_list.html
+OK: admin/filter.html
+OK: admin/search_form.html
+OK: admin/app_index.html
+OK: admin/color_theme_toggle.html
+OK: admin/login.html
+OK: admin/base.html
+OK: admin/404.html
+OK: admin/index.html
+OK: admin/delete_selected_confirmation.html
+OK: admin/change_form_object_tools.html
+OK: admin/delete_confirmation.html
+OK: admin/base_site.html
+OK: admin/app_list.html
+OK: admin/actions.html
+OK: admin/pagination.html
+OK: admin/submit_line.html
+OK: admin/change_form.html
+OK: admin/includes/object_delete_summary.html
+OK: admin/includes/fieldset.html
+OK: admin/auth/user/change_password.html
+OK: admin/auth/user/add_form.html
+OK: admin/widgets/date.html
+OK: admin/widgets/url.html
+OK: admin/widgets/foreign_key_raw_id.html
+OK: admin/widgets/split_datetime.html
+OK: admin/widgets/many_to_many_raw_id.html
+OK: admin/widgets/radio.html
+OK: admin/widgets/time.html
+OK: admin/widgets/clearable_file_input.html
+OK: admin/widgets/related_widget_wrapper.html
+OK: admin/edit_inline/tabular.html
+OK: admin/edit_inline/stacked.html
+OK: registration/password_reset_confirm.html
+OK: registration/password_change_form.html
+OK: registration/password_reset_complete.html
+OK: registration/password_change_done.html
+OK: registration/password_reset_email.html
+OK: registration/password_reset_done.html
+OK: registration/logged_out.html
+OK: registration/password_reset_form.html
+OK: csrf_403.html
+OK: technical_404.html
+OK: default_urlconf.html
+OK: directory_index.html
+OK: technical_500.html
+OK: django/forms/ul.html
+OK: django/forms/label.html
+OK: django/forms/table.html
+OK: django/forms/attrs.html
+OK: django/forms/field.html
+OK: django/forms/p.html
+OK: django/forms/div.html
+OK: django/forms/formsets/ul.html
+OK: django/forms/formsets/table.html
+OK: django/forms/formsets/p.html
+OK: django/forms/formsets/div.html
+OK: django/forms/widgets/textarea.html
+OK: django/forms/widgets/hidden.html
+OK: django/forms/widgets/input_option.html
+OK: django/forms/widgets/select_option.html
+OK: django/forms/widgets/multiple_input.html
+OK: django/forms/widgets/datetime.html
+OK: django/forms/widgets/search.html
+OK: django/forms/widgets/date.html
+OK: django/forms/widgets/checkbox.html
+OK: django/forms/widgets/radio_option.html
+OK: django/forms/widgets/url.html
+OK: django/forms/widgets/email.html
+OK: django/forms/widgets/attrs.html
+OK: django/forms/widgets/splitdatetime.html
+OK: django/forms/widgets/input.html
+OK: django/forms/widgets/checkbox_select.html
+OK: django/forms/widgets/text.html
+OK: django/forms/widgets/number.html
+OK: django/forms/widgets/multiwidget.html
+OK: django/forms/widgets/select_date.html
+OK: django/forms/widgets/radio.html
+OK: django/forms/widgets/file.html
+OK: django/forms/widgets/multiple_hidden.html
+OK: django/forms/widgets/color.html
+OK: django/forms/widgets/splithiddendatetime.html
+OK: django/forms/widgets/tel.html
+OK: django/forms/widgets/checkbox_option.html
+OK: django/forms/widgets/time.html
+OK: django/forms/widgets/clearable_file_input.html
+OK: django/forms/widgets/password.html
+OK: django/forms/widgets/select.html
+OK: django/forms/errors/list/ul.html
+OK: django/forms/errors/list/default.html
+OK: django/forms/errors/dict/ul.html
+OK: django/forms/errors/dict/default.html
+OK: rest_framework/raw_data_form.html
+OK: rest_framework/api.html
+OK: rest_framework/login.html
+OK: rest_framework/base.html
+OK: rest_framework/admin.html
+OK: rest_framework/login_base.html
+OK: rest_framework/filters/ordering.html
+OK: rest_framework/filters/search.html
+OK: rest_framework/filters/base.html
+OK: rest_framework/vertical/textarea.html
+OK: rest_framework/vertical/fieldset.html
+OK: rest_framework/vertical/checkbox.html
+OK: rest_framework/vertical/select_multiple.html
+OK: rest_framework/vertical/input.html
+OK: rest_framework/vertical/list_field.html
+OK: rest_framework/vertical/radio.html
+OK: rest_framework/vertical/checkbox_multiple.html
+OK: rest_framework/vertical/dict_field.html
+OK: rest_framework/vertical/select.html
+OK: rest_framework/vertical/list_fieldset.html
+OK: rest_framework/vertical/form.html
+OK: rest_framework/docs/sidebar.html
+OK: rest_framework/docs/error.html
+OK: rest_framework/docs/index.html
+OK: rest_framework/docs/interact.html
+OK: rest_framework/docs/document.html
+OK: rest_framework/docs/link.html
+OK: rest_framework/docs/auth/token.html
+OK: rest_framework/docs/auth/basic.html
+OK: rest_framework/docs/auth/session.html
+OK: rest_framework/docs/langs/shell.html
+OK: rest_framework/docs/langs/python-intro.html
+OK: rest_framework/docs/langs/javascript-intro.html
+OK: rest_framework/docs/langs/shell-intro.html
+OK: rest_framework/docs/langs/python.html
+OK: rest_framework/docs/langs/javascript.html
+OK: rest_framework/horizontal/textarea.html
+OK: rest_framework/horizontal/fieldset.html
+OK: rest_framework/horizontal/checkbox.html
+OK: rest_framework/horizontal/select_multiple.html
+OK: rest_framework/horizontal/input.html
+OK: rest_framework/horizontal/list_field.html
+OK: rest_framework/horizontal/radio.html
+OK: rest_framework/horizontal/checkbox_multiple.html
+OK: rest_framework/horizontal/dict_field.html
+OK: rest_framework/horizontal/select.html
+OK: rest_framework/horizontal/list_fieldset.html
+OK: rest_framework/horizontal/form.html
+OK: rest_framework/inline/textarea.html
+OK: rest_framework/inline/fieldset.html
+OK: rest_framework/inline/checkbox.html
+OK: rest_framework/inline/select_multiple.html
+OK: rest_framework/inline/input.html
+OK: rest_framework/inline/list_field.html
+OK: rest_framework/inline/radio.html
+OK: rest_framework/inline/checkbox_multiple.html
+OK: rest_framework/inline/dict_field.html
+OK: rest_framework/inline/select.html
+OK: rest_framework/inline/list_fieldset.html
+OK: rest_framework/inline/form.html
+OK: rest_framework/admin/dict_value.html
+OK: rest_framework/admin/simple_list_value.html
+OK: rest_framework/admin/list.html
+OK: rest_framework/admin/list_value.html
+OK: rest_framework/admin/detail.html
+OK: rest_framework/pagination/previous_and_next.html
+OK: rest_framework/pagination/numbers.html
+ERROR: two_factor/_wizard_forms.html -> TemplateDoesNotExist: two_factor/_wizard_forms.html
+ERROR: two_factor/_wizard_actions.html -> TemplateDoesNotExist: two_factor/_wizard_actions.html
+ERROR: two_factor/_base.html -> TemplateDoesNotExist: two_factor/_base.html
+ERROR: two_factor/_base_focus.html -> TemplateDoesNotExist: two_factor/_base_focus.html
+ERROR: two_factor/core/setup_complete.html -> TemplateDoesNotExist: two_factor/core/setup_complete.html
+ERROR: two_factor/core/login.html -> TemplateDoesNotExist: two_factor/core/login.html
+ERROR: two_factor/core/otp_required.html -> TemplateDoesNotExist: two_factor/core/otp_required.html
+ERROR: two_factor/core/setup.html -> TemplateDoesNotExist: two_factor/core/setup.html
+ERROR: two_factor/core/phone_register.html -> TemplateDoesNotExist: two_factor/core/phone_register.html
+ERROR: two_factor/core/backup_tokens.html -> TemplateDoesNotExist: two_factor/core/backup_tokens.html
+ERROR: two_factor/twilio/sms_message.html -> TemplateDoesNotExist: two_factor/twilio/sms_message.html
+ERROR: two_factor/profile/profile.html -> TemplateDoesNotExist: two_factor/profile/profile.html
+ERROR: two_factor/profile/disable.html -> TemplateDoesNotExist: two_factor/profile/disable.html
+ERROR: ckeditor/widget.html -> TemplateDoesNotExist: ckeditor/widget.html
+OK: admin/djcelery/change_list.html
+OK: admin/djcelery/change_periodictask_form.html
+OK: bootstrap5/accordion.html
+OK: bootstrap5/uni_formset.html
+OK: bootstrap5/betterform.html
+OK: bootstrap5/errors.html
+OK: bootstrap5/errors_formset.html
+OK: bootstrap5/field.html
+OK: bootstrap5/whole_uni_formset.html
+OK: bootstrap5/accordion-group.html
+OK: bootstrap5/uni_form.html
+OK: bootstrap5/table_inline_formset.html
+OK: bootstrap5/inputs.html
+OK: bootstrap5/display_form.html
+OK: bootstrap5/whole_uni_form.html
+OK: bootstrap5/layout/row.html
+OK: bootstrap5/layout/switch.html
+OK: bootstrap5/layout/buttonholder.html
+OK: bootstrap5/layout/tab-link.html
+OK: bootstrap5/layout/field_errors_block.html
+OK: bootstrap5/layout/fieldset.html
+OK: bootstrap5/layout/help_text_and_errors.html
+OK: bootstrap5/layout/checkboxselectmultiple_inline.html
+OK: bootstrap5/layout/inline_field.html
+OK: bootstrap5/layout/attrs.html
+OK: bootstrap5/layout/floating_field.html
+OK: bootstrap5/layout/field_errors.html
+OK: bootstrap5/layout/alert.html
+OK: bootstrap5/layout/modal.html
+OK: bootstrap5/layout/uneditable_input.html
+OK: bootstrap5/layout/radioselect_inline.html
+OK: bootstrap5/layout/radio_checkbox_select.html
+OK: bootstrap5/layout/prepended_appended_text.html
+OK: bootstrap5/layout/field_file.html
+OK: bootstrap5/layout/baseinput.html
+OK: bootstrap5/layout/button.html
+OK: bootstrap5/layout/div.html
+OK: bootstrap5/layout/formactions.html
+OK: bootstrap5/layout/help_text.html
+OK: bootstrap5/layout/tab.html
+OK: bootstrap5/layout/column.html
+OK: bootstrap5/layout/multifield.html
+OK: bootstrap5/layout/field_with_buttons.html
+OK: admin/import_export/export.html
+OK: admin/import_export/change_list_import.html
+OK: admin/import_export/import.html
+OK: admin/import_export/change_list.html
+OK: admin/import_export/resource_fields_list.html
+OK: admin/import_export/change_list_import_export.html
+OK: admin/import_export/base.html
+OK: admin/import_export/change_list_export_item.html
+OK: admin/import_export/change_list_export.html
+OK: admin/import_export/change_list_import_item.html
+ERROR: otp_totp/admin/config.html -> TemplateDoesNotExist: otp_totp/admin/config.html
+ERROR: otp_hotp/admin/config.html -> TemplateDoesNotExist: otp_hotp/admin/config.html
+ERROR: otp/admin111/login.html -> TemplateDoesNotExist: otp/admin111/login.html
+ERROR: training/dashboard.html -> TemplateDoesNotExist: training/dashboard.html
+ERROR: training/audit_list.html -> TemplateDoesNotExist: training/audit_list.html
+ERROR: training/my_trainings.html -> TemplateDoesNotExist: training/my_trainings.html
+ERROR: training/home.html -> TemplateDoesNotExist: training/home.html
+ERROR: training/manage_permissions.html -> TemplateDoesNotExist: training/manage_permissions.html
+ERROR: training/analytics.html -> TemplateDoesNotExist: training/analytics.html
+ERROR: training/program_detail.html -> TemplateDoesNotExist: training/program_detail.html
+ERROR: training/programs.html -> TemplateDoesNotExist: training/programs.html
+ERROR: training/audit_detail.html -> TemplateDoesNotExist: training/audit_detail.html
+ERROR: training/quiz_list.html -> TemplateDoesNotExist: training/quiz_list.html
+ERROR: training/course_list.html -> TemplateDoesNotExist: training/course_list.html
+ERROR: training/assign_quiz.html -> TemplateDoesNotExist: training/assign_quiz.html
+ERROR: training/form.html -> TemplateDoesNotExist: training/form.html
+ERROR: hrms/payroll/bank_transfer.html -> TemplateDoesNotExist: hrms/payroll/bank_transfer.html
+ERROR: dashboard/simple.html -> TemplateDoesNotExist: dashboard/simple.html
+ERROR: dashboard/main.html -> TemplateDoesNotExist: dashboard/main.html
+ERROR: test_nav.html -> TemplateDoesNotExist: test_nav.html
+ERROR: test_logo.html -> TemplateDoesNotExist: test_logo.html
+ERROR: docpool_base.html -> TemplateDoesNotExist: docpool_base.html
+OK: base.html
+ERROR: index.html -> TemplateDoesNotExist: index.html
+ERROR: minimal_test.html -> TemplateDoesNotExist: minimal_test.html
+OK: hrms_base.html
+ERROR: reports/home.html -> TemplateDoesNotExist: reports/home.html
+ERROR: reports/employee_report.html -> TemplateDoesNotExist: reports/employee_report.html
+ERROR: reports/reporttemplate_list.html -> TemplateDoesNotExist: reports/reporttemplate_list.html
+ERROR: reports/leave_report.html -> TemplateDoesNotExist: reports/leave_report.html
+ERROR: reports/attendance_form.html -> TemplateDoesNotExist: reports/attendance_form.html
+ERROR: docpool/reference_list.html -> TemplateDoesNotExist: docpool/reference_list.html
+ERROR: docpool/document_detail.html -> TemplateDoesNotExist: docpool/document_detail.html
+ERROR: docpool/document_upload.html -> TemplateDoesNotExist: docpool/document_upload.html
+ERROR: docpool/document_list.html -> TemplateDoesNotExist: docpool/document_list.html
+ERROR: docpool/advanced_search.html -> TemplateDoesNotExist: docpool/advanced_search.html
+ERROR: docpool/search_analytics.html -> TemplateDoesNotExist: docpool/search_analytics.html
+OK: hrms/dashboard.html
+OK: hrms/qatar_theme_demo.html
+OK: hrms/base.html
+ERROR: hrms/setup_wizard.html -> TemplateDoesNotExist: hrms/setup_wizard.html
+OK: hrms/payroll/slip.html
+OK: hrms/payroll/dashboard.html
+OK: hrms/payroll/period_detail.html
+OK: hrms/payroll/bulk_process.html
+OK: hrms/payroll/periods.html
+ERROR: hrms/payroll/slip_pdf.html -> TemplateDoesNotExist: hrms/payroll/slip_pdf.html
+OK: hrms/payroll/settings.html
+ERROR: hrms/payroll/run.html -> TemplateDoesNotExist: hrms/payroll/run.html
+ERROR: hrms/payroll/period_create.html -> TemplateDoesNotExist: hrms/payroll/period_create.html
+OK: hrms/payroll/create.html
+OK: hrms/payroll/reports.html
+OK: hrms/payroll/my_payslips.html
+OK: hrms/payroll/detail.html
+OK: hrms/reports/employeeprofile_list.html
+OK: hrms/reports/dashboard.html
+OK: hrms/reports/employee_report.html
+OK: hrms/reports/pdf_template.html
+OK: hrms/reports/custom_report_list.html
+OK: hrms/reports/payroll_report.html
+OK: hrms/reports/employee_roster.html
+OK: hrms/training/dashboard.html
+OK: hrms/training/my_trainings.html
+OK: hrms/training/program_detail.html
+OK: hrms/training/programs.html
+OK: hrms/training/enrollment_cards.html
+OK: hrms/training/list.html
+OK: hrms/training/form.html
+OK: hrms/employee/profile.html
+OK: hrms/employee/leave_form.html
+OK: hrms/positions/list.html
+OK: hrms/positions/detail.html
+OK: hrms/positions/form.html
+OK: hrms/departments/confirm_delete.html
+OK: hrms/departments/list.html
+OK: hrms/departments/detail.html
+OK: hrms/departments/form.html
+OK: hrms/analytics/dashboard.html
+OK: hrms/analytics/employee_analytics.html
+OK: hrms/employees/profile.html
+OK: hrms/employees/list.html
+OK: hrms/employees/detail.html
+OK: hrms/employees/form.html
+OK: hrms/performance/dashboard.html
+OK: hrms/performance/review_detail.html
+OK: hrms/performance/reviews.html
+OK: hrms/attendance/dashboard.html
+OK: hrms/attendance/user_attendance_with_map.html
+OK: hrms/attendance/request_list.html
+ERROR: hrms/attendance/location_debug.html -> TemplateDoesNotExist: hrms/attendance/location_debug.html
+OK: hrms/attendance/user_attendance_old.html
+OK: hrms/attendance/clock.html
+OK: hrms/attendance/my_log.html
+OK: hrms/attendance/list.html
+OK: hrms/attendance/request_form.html
+OK: hrms/attendance/timesheet.html
+OK: hrms/attendance/user_attendance.html
+OK: hrms/attendance/reports.html
+OK: hrms/leaves/balance.html
+OK: hrms/leaves/list.html
+OK: hrms/leaves/detail.html
+OK: hrms/leaves/form.html
+ERROR: hrms/leave_types/list.html -> TemplateDoesNotExist: hrms/leave_types/list.html
+ERROR: hrms/leave_types/form.html -> TemplateDoesNotExist: hrms/leave_types/form.html
+ERROR: hrms/grades/list.html -> TemplateDoesNotExist: hrms/grades/list.html
+ERROR: hrms/companies/list.html -> TemplateDoesNotExist: hrms/companies/list.html
+ERROR: hrms/emails/payslip_email.html -> TemplateDoesNotExist: hrms/emails/payslip_email.html
+OK: hrms/admin/leave_list.html
+OK: hrms/admin/dashboard.html
+OK: hrms/admin/employee_list.html
+OK: hrms/admin/department_list.html
+ERROR: dashboard/analytics.html -> TemplateDoesNotExist: dashboard/analytics.html
+ERROR: dashboard/simple.html -> TemplateDoesNotExist: dashboard/simple.html
+ERROR: dashboard/user_profile.html -> TemplateDoesNotExist: dashboard/user_profile.html
+ERROR: dashboard/main.html -> TemplateDoesNotExist: dashboard/main.html
+ERROR: errors/503.html -> TemplateDoesNotExist: errors/503.html
+ERROR: errors/500.html -> TemplateDoesNotExist: errors/500.html
+ERROR: errors/502.html -> TemplateDoesNotExist: errors/502.html
+ERROR: errors/504.html -> TemplateDoesNotExist: errors/504.html
+ERROR: errors/404.html -> TemplateDoesNotExist: errors/404.html
+ERROR: errors/403.html -> TemplateDoesNotExist: errors/403.html
+OK: admin/base_site.html
+OK: registration/login.html
+OK: registration/password_reset_done.html
+OK: registration/logged_out.html
+OK: registration/password_reset_form.html
+ERROR: compressor/js_preload.html -> TemplateDoesNotExist: compressor/js_preload.html
+ERROR: compressor/js_file.html -> TemplateDoesNotExist: compressor/js_file.html
+ERROR: compressor/css_file.html -> TemplateDoesNotExist: compressor/css_file.html
+ERROR: compressor/css_preload.html -> TemplateDoesNotExist: compressor/css_preload.html
+ERROR: compressor/css_inline.html -> TemplateDoesNotExist: compressor/css_inline.html
+ERROR: compressor/js_inline.html -> TemplateDoesNotExist: compressor/js_inline.html
+ERROR: admin/taggit/merge_tags_form.html -> TemplateDoesNotExist: admin/taggit/merge_tags_form.html
+ERROR: dummy404.html -> TemplateDoesNotExist: dummy404.html
+ERROR: 500.html -> TemplateDoesNotExist: 500.html
+ERROR: dummy403.html -> TemplateDoesNotExist: dummy403.html
+ERROR: 404.html -> TemplateDoesNotExist: 404.html
+ERROR: list.html -> TemplateDoesNotExist: list.html
+ERROR: blank.html -> TemplateDoesNotExist: blank.html
+OK: admin/guardian/contrib/grappelli/obj_perms_manage.html
+OK: admin/guardian/contrib/grappelli/obj_perms_manage_group.html
+OK: admin/guardian/contrib/grappelli/field.html
+ERROR: admin/guardian/contrib/grappelli/obj_perms_manage_user.html -> TemplateDoesNotExist: admin/guardian/contrib/grappelli/obj_perms_manage_user.html
+ERROR: admin/guardian/model/obj_perms_yes.html -> TemplateDoesNotExist: admin/guardian/model/obj_perms_yes.html
+ERROR: admin/guardian/model/obj_perms_manage.html -> TemplateDoesNotExist: admin/guardian/model/obj_perms_manage.html
+ERROR: admin/guardian/model/obj_perms_manage_group.html -> TemplateDoesNotExist: admin/guardian/model/obj_perms_manage_group.html
+ERROR: admin/guardian/model/field.html -> TemplateDoesNotExist: admin/guardian/model/field.html
+ERROR: admin/guardian/model/obj_perms_no.html -> TemplateDoesNotExist: admin/guardian/model/obj_perms_no.html
+ERROR: admin/guardian/model/obj_perms_manage_user.html -> TemplateDoesNotExist: admin/guardian/model/obj_perms_manage_user.html
+ERROR: admin/guardian/model/change_form.html -> TemplateDoesNotExist: admin/guardian/model/change_form.html
+ERROR: formtools/preview.html -> TemplateDoesNotExist: formtools/preview.html
+ERROR: formtools/form.html -> TemplateDoesNotExist: formtools/form.html
+ERROR: formtools/wizard/wizard_form.html -> TemplateDoesNotExist: formtools/wizard/wizard_form.html
+OK: debug_toolbar/base.html
+ERROR: debug_toolbar/redirect.html -> TemplateDoesNotExist: debug_toolbar/redirect.html
+OK: debug_toolbar/includes/panel_button.html
+OK: debug_toolbar/includes/theme_selector.html
+OK: debug_toolbar/includes/panel_content.html
+ERROR: debug_toolbar/panels/templates.html -> TemplateDoesNotExist: debug_toolbar/panels/templates.html
+ERROR: debug_toolbar/panels/history.html -> TemplateDoesNotExist: debug_toolbar/panels/history.html
+ERROR: debug_toolbar/panels/staticfiles.html -> TemplateDoesNotExist: debug_toolbar/panels/staticfiles.html
+ERROR: debug_toolbar/panels/headers.html -> TemplateDoesNotExist: debug_toolbar/panels/headers.html
+ERROR: debug_toolbar/panels/profiling.html -> TemplateDoesNotExist: debug_toolbar/panels/profiling.html
+ERROR: debug_toolbar/panels/timer.html -> TemplateDoesNotExist: debug_toolbar/panels/timer.html
+ERROR: debug_toolbar/panels/settings.html -> TemplateDoesNotExist: debug_toolbar/panels/settings.html
+ERROR: debug_toolbar/panels/versions.html -> TemplateDoesNotExist: debug_toolbar/panels/versions.html
+ERROR: debug_toolbar/panels/sql_profile.html -> TemplateDoesNotExist: debug_toolbar/panels/sql_profile.html
+ERROR: debug_toolbar/panels/signals.html -> TemplateDoesNotExist: debug_toolbar/panels/signals.html
+ERROR: debug_toolbar/panels/history_tr.html -> TemplateDoesNotExist: debug_toolbar/panels/history_tr.html
+ERROR: debug_toolbar/panels/alerts.html -> TemplateDoesNotExist: debug_toolbar/panels/alerts.html
+ERROR: debug_toolbar/panels/cache.html -> TemplateDoesNotExist: debug_toolbar/panels/cache.html
+ERROR: debug_toolbar/panels/sql_explain.html -> TemplateDoesNotExist: debug_toolbar/panels/sql_explain.html
+ERROR: debug_toolbar/panels/request.html -> TemplateDoesNotExist: debug_toolbar/panels/request.html
+ERROR: debug_toolbar/panels/sql.html -> TemplateDoesNotExist: debug_toolbar/panels/sql.html
+ERROR: debug_toolbar/panels/request_variables.html -> TemplateDoesNotExist: debug_toolbar/panels/request_variables.html
+ERROR: debug_toolbar/panels/template_source.html -> TemplateDoesNotExist: debug_toolbar/panels/template_source.html
+ERROR: debug_toolbar/panels/sql_select.html -> TemplateDoesNotExist: debug_toolbar/panels/sql_select.html
+OK: admin/grappelli_mptt_change_list.html
+ERROR: admin/mptt_change_list.html -> TemplateDoesNotExist: admin/mptt_change_list.html
+OK: admin/grappelli_mptt_change_list_results.html
+ERROR: admin/mptt_filter.html -> TemplateDoesNotExist: admin/mptt_filter.html
+ERROR: admin/mptt_change_list_results.html -> TemplateDoesNotExist: admin/mptt_change_list_results.html
+OK: django_filters/widgets/multiwidget.html
+OK: django_filters/rest_framework/crispy_form.html
+OK: django_filters/rest_framework/form.html
+ERROR: actstream/action.html -> TemplateDoesNotExist: actstream/action.html
+ERROR: actstream/base.html -> TemplateDoesNotExist: actstream/base.html
+ERROR: actstream/followers.html -> TemplateDoesNotExist: actstream/followers.html
+ERROR: actstream/actor.html -> TemplateDoesNotExist: actstream/actor.html
+ERROR: actstream/detail.html -> TemplateDoesNotExist: actstream/detail.html
+ERROR: actstream/following.html -> TemplateDoesNotExist: actstream/following.html
+ERROR: other_wizard_form.html -> TemplateDoesNotExist: other_wizard_form.html
+ERROR: ckeditor/browse.html -> TemplateDoesNotExist: ckeditor/browse.html
+OK: django_extensions/widgets/foreignkey_searchinput.html
+OK: auth/widgets/read_only_password_hash.html
+OK: gis/openlayers.html
+OK: gis/openlayers-osm.html
+OK: admin_doc/bookmarklets.html
+OK: admin_doc/model_detail.html
+OK: admin_doc/template_detail.html
+OK: admin_doc/index.html
+OK: admin_doc/model_index.html
+OK: admin_doc/template_tag_index.html
+OK: admin_doc/view_detail.html
+OK: admin_doc/view_index.html
+OK: admin_doc/missing_docutils.html
+OK: admin_doc/template_filter_index.html
+OK: postgres/widgets/split_array.html
+OK: admin/invalid_setup.html
+OK: admin/prepopulated_fields_js.html
+OK: admin/change_list_results.html
+OK: admin/nav_sidebar.html
+OK: admin/date_hierarchy.html
+OK: admin/object_history.html
+OK: admin/popup_response.html
+OK: admin/change_list_object_tools.html
+OK: admin/500.html
+OK: admin/change_list.html
+OK: admin/filter.html
+OK: admin/search_form.html
+OK: admin/app_index.html
+OK: admin/color_theme_toggle.html
+OK: admin/login.html
+OK: admin/base.html
+OK: admin/404.html
+OK: admin/index.html
+OK: admin/delete_selected_confirmation.html
+OK: admin/change_form_object_tools.html
+OK: admin/delete_confirmation.html
+OK: admin/base_site.html
+OK: admin/app_list.html
+OK: admin/actions.html
+OK: admin/pagination.html
+OK: admin/submit_line.html
+OK: admin/change_form.html
+OK: admin/includes/object_delete_summary.html
+OK: admin/includes/fieldset.html
+OK: admin/auth/user/change_password.html
+OK: admin/auth/user/add_form.html
+OK: admin/widgets/date.html
+OK: admin/widgets/url.html
+OK: admin/widgets/foreign_key_raw_id.html
+OK: admin/widgets/split_datetime.html
+OK: admin/widgets/many_to_many_raw_id.html
+OK: admin/widgets/radio.html
+OK: admin/widgets/time.html
+OK: admin/widgets/clearable_file_input.html
+OK: admin/widgets/related_widget_wrapper.html
+OK: admin/edit_inline/tabular.html
+OK: admin/edit_inline/stacked.html
+OK: registration/password_reset_confirm.html
+OK: registration/password_change_form.html
+OK: registration/password_reset_complete.html
+OK: registration/password_change_done.html
+OK: registration/password_reset_email.html
+OK: registration/password_reset_done.html
+OK: registration/logged_out.html
+OK: registration/password_reset_form.html
+OK: csrf_403.html
+OK: technical_404.html
+OK: default_urlconf.html
+OK: directory_index.html
+OK: technical_500.html
+OK: django/forms/ul.html
+OK: django/forms/label.html
+OK: django/forms/table.html
+OK: django/forms/attrs.html
+OK: django/forms/field.html
+OK: django/forms/p.html
+OK: django/forms/div.html
+OK: django/forms/formsets/ul.html
+OK: django/forms/formsets/table.html
+OK: django/forms/formsets/p.html
+OK: django/forms/formsets/div.html
+OK: django/forms/widgets/textarea.html
+OK: django/forms/widgets/hidden.html
+OK: django/forms/widgets/input_option.html
+OK: django/forms/widgets/select_option.html
+OK: django/forms/widgets/multiple_input.html
+OK: django/forms/widgets/datetime.html
+OK: django/forms/widgets/search.html
+OK: django/forms/widgets/date.html
+OK: django/forms/widgets/checkbox.html
+OK: django/forms/widgets/radio_option.html
+OK: django/forms/widgets/url.html
+OK: django/forms/widgets/email.html
+OK: django/forms/widgets/attrs.html
+OK: django/forms/widgets/splitdatetime.html
+OK: django/forms/widgets/input.html
+OK: django/forms/widgets/checkbox_select.html
+OK: django/forms/widgets/text.html
+OK: django/forms/widgets/number.html
+OK: django/forms/widgets/multiwidget.html
+OK: django/forms/widgets/select_date.html
+OK: django/forms/widgets/radio.html
+OK: django/forms/widgets/file.html
+OK: django/forms/widgets/multiple_hidden.html
+OK: django/forms/widgets/color.html
+OK: django/forms/widgets/splithiddendatetime.html
+OK: django/forms/widgets/tel.html
+OK: django/forms/widgets/checkbox_option.html
+OK: django/forms/widgets/time.html
+OK: django/forms/widgets/clearable_file_input.html
+OK: django/forms/widgets/password.html
+OK: django/forms/widgets/select.html
+OK: django/forms/errors/list/ul.html
+OK: django/forms/errors/list/default.html
+OK: django/forms/errors/dict/ul.html
+OK: django/forms/errors/dict/default.html
+OK: rest_framework/raw_data_form.html
+OK: rest_framework/api.html
+OK: rest_framework/login.html
+OK: rest_framework/base.html
+OK: rest_framework/admin.html
+OK: rest_framework/login_base.html
+OK: rest_framework/filters/ordering.html
+OK: rest_framework/filters/search.html
+OK: rest_framework/filters/base.html
+OK: rest_framework/vertical/textarea.html
+OK: rest_framework/vertical/fieldset.html
+OK: rest_framework/vertical/checkbox.html
+OK: rest_framework/vertical/select_multiple.html
+OK: rest_framework/vertical/input.html
+OK: rest_framework/vertical/list_field.html
+OK: rest_framework/vertical/radio.html
+OK: rest_framework/vertical/checkbox_multiple.html
+OK: rest_framework/vertical/dict_field.html
+OK: rest_framework/vertical/select.html
+OK: rest_framework/vertical/list_fieldset.html
+OK: rest_framework/vertical/form.html
+OK: rest_framework/docs/sidebar.html
+OK: rest_framework/docs/error.html
+OK: rest_framework/docs/index.html
+OK: rest_framework/docs/interact.html
+OK: rest_framework/docs/document.html
+OK: rest_framework/docs/link.html
+OK: rest_framework/docs/auth/token.html
+OK: rest_framework/docs/auth/basic.html
+OK: rest_framework/docs/auth/session.html
+OK: rest_framework/docs/langs/shell.html
+OK: rest_framework/docs/langs/python-intro.html
+OK: rest_framework/docs/langs/javascript-intro.html
+OK: rest_framework/docs/langs/shell-intro.html
+OK: rest_framework/docs/langs/python.html
+OK: rest_framework/docs/langs/javascript.html
+OK: rest_framework/horizontal/textarea.html
+OK: rest_framework/horizontal/fieldset.html
+OK: rest_framework/horizontal/checkbox.html
+OK: rest_framework/horizontal/select_multiple.html
+OK: rest_framework/horizontal/input.html
+OK: rest_framework/horizontal/list_field.html
+OK: rest_framework/horizontal/radio.html
+OK: rest_framework/horizontal/checkbox_multiple.html
+OK: rest_framework/horizontal/dict_field.html
+OK: rest_framework/horizontal/select.html
+OK: rest_framework/horizontal/list_fieldset.html
+OK: rest_framework/horizontal/form.html
+OK: rest_framework/inline/textarea.html
+OK: rest_framework/inline/fieldset.html
+OK: rest_framework/inline/checkbox.html
+OK: rest_framework/inline/select_multiple.html
+OK: rest_framework/inline/input.html
+OK: rest_framework/inline/list_field.html
+OK: rest_framework/inline/radio.html
+OK: rest_framework/inline/checkbox_multiple.html
+OK: rest_framework/inline/dict_field.html
+OK: rest_framework/inline/select.html
+OK: rest_framework/inline/list_fieldset.html
+OK: rest_framework/inline/form.html
+OK: rest_framework/admin/dict_value.html
+OK: rest_framework/admin/simple_list_value.html
+OK: rest_framework/admin/list.html
+OK: rest_framework/admin/list_value.html
+OK: rest_framework/admin/detail.html
+OK: rest_framework/pagination/previous_and_next.html
+OK: rest_framework/pagination/numbers.html
+ERROR: two_factor/_wizard_forms.html -> TemplateDoesNotExist: two_factor/_wizard_forms.html
+ERROR: two_factor/_wizard_actions.html -> TemplateDoesNotExist: two_factor/_wizard_actions.html
+ERROR: two_factor/_base.html -> TemplateDoesNotExist: two_factor/_base.html
+ERROR: two_factor/_base_focus.html -> TemplateDoesNotExist: two_factor/_base_focus.html
+ERROR: two_factor/core/setup_complete.html -> TemplateDoesNotExist: two_factor/core/setup_complete.html
+ERROR: two_factor/core/login.html -> TemplateDoesNotExist: two_factor/core/login.html
+ERROR: two_factor/core/otp_required.html -> TemplateDoesNotExist: two_factor/core/otp_required.html
+ERROR: two_factor/core/setup.html -> TemplateDoesNotExist: two_factor/core/setup.html
+ERROR: two_factor/core/phone_register.html -> TemplateDoesNotExist: two_factor/core/phone_register.html
+ERROR: two_factor/core/backup_tokens.html -> TemplateDoesNotExist: two_factor/core/backup_tokens.html
+ERROR: two_factor/twilio/sms_message.html -> TemplateDoesNotExist: two_factor/twilio/sms_message.html
+ERROR: two_factor/profile/profile.html -> TemplateDoesNotExist: two_factor/profile/profile.html
+ERROR: two_factor/profile/disable.html -> TemplateDoesNotExist: two_factor/profile/disable.html
+ERROR: ckeditor/widget.html -> TemplateDoesNotExist: ckeditor/widget.html
+OK: admin/djcelery/change_list.html
+OK: admin/djcelery/change_periodictask_form.html
+OK: bootstrap5/accordion.html
+OK: bootstrap5/uni_formset.html
+OK: bootstrap5/betterform.html
+OK: bootstrap5/errors.html
+OK: bootstrap5/errors_formset.html
+OK: bootstrap5/field.html
+OK: bootstrap5/whole_uni_formset.html
+OK: bootstrap5/accordion-group.html
+OK: bootstrap5/uni_form.html
+OK: bootstrap5/table_inline_formset.html
+OK: bootstrap5/inputs.html
+OK: bootstrap5/display_form.html
+OK: bootstrap5/whole_uni_form.html
+OK: bootstrap5/layout/row.html
+OK: bootstrap5/layout/switch.html
+OK: bootstrap5/layout/buttonholder.html
+OK: bootstrap5/layout/tab-link.html
+OK: bootstrap5/layout/field_errors_block.html
+OK: bootstrap5/layout/fieldset.html
+OK: bootstrap5/layout/help_text_and_errors.html
+OK: bootstrap5/layout/checkboxselectmultiple_inline.html
+OK: bootstrap5/layout/inline_field.html
+OK: bootstrap5/layout/attrs.html
+OK: bootstrap5/layout/floating_field.html
+OK: bootstrap5/layout/field_errors.html
+OK: bootstrap5/layout/alert.html
+OK: bootstrap5/layout/modal.html
+OK: bootstrap5/layout/uneditable_input.html
+OK: bootstrap5/layout/radioselect_inline.html
+OK: bootstrap5/layout/radio_checkbox_select.html
+OK: bootstrap5/layout/prepended_appended_text.html
+OK: bootstrap5/layout/field_file.html
+OK: bootstrap5/layout/baseinput.html
+OK: bootstrap5/layout/button.html
+OK: bootstrap5/layout/div.html
+OK: bootstrap5/layout/formactions.html
+OK: bootstrap5/layout/help_text.html
+OK: bootstrap5/layout/tab.html
+OK: bootstrap5/layout/column.html
+OK: bootstrap5/layout/multifield.html
+OK: bootstrap5/layout/field_with_buttons.html
+OK: admin/import_export/export.html
+OK: admin/import_export/change_list_import.html
+OK: admin/import_export/import.html
+OK: admin/import_export/change_list.html
+OK: admin/import_export/resource_fields_list.html
+OK: admin/import_export/change_list_import_export.html
+OK: admin/import_export/base.html
+OK: admin/import_export/change_list_export_item.html
+OK: admin/import_export/change_list_export.html
+OK: admin/import_export/change_list_import_item.html
+OK: admin/import_export/change_form.html
+ERROR: otp_totp/admin/config.html -> TemplateDoesNotExist: otp_totp/admin/config.html
+ERROR: otp_hotp/admin/config.html -> TemplateDoesNotExist: otp_hotp/admin/config.html
+ERROR: otp/admin111/login.html -> TemplateDoesNotExist: otp/admin111/login.html
+OK: base.html
+ERROR: inventory/dashboard.html -> TemplateDoesNotExist: inventory/dashboard.html
+OK: admin/base_site.html
+OK: bootstrap/field_prependedtext.html
+OK: bootstrap/field_default.html
+OK: bootstrap/field_appendprependtext.html
+OK: bootstrap/field_appendedtext.html
+OK: bootstrap/_field_errors.html
+OK: bootstrap/_field_help_text.html
+OK: bootstrap/_field_errors_block.html
+OK: bootstrap/field.html
+OK: bootstrap/form.html
+OK: django_extensions/widgets/foreignkey_searchinput.html
+OK: auth/widgets/read_only_password_hash.html
+OK: gis/openlayers.html
+OK: gis/openlayers-osm.html
+OK: admin_doc/bookmarklets.html
+OK: admin_doc/model_detail.html
+OK: admin_doc/template_detail.html
+OK: admin_doc/index.html
+OK: admin_doc/model_index.html
+OK: admin_doc/template_tag_index.html
+OK: admin_doc/view_detail.html
+OK: admin_doc/view_index.html
+OK: admin_doc/missing_docutils.html
+OK: admin_doc/template_filter_index.html
+OK: postgres/widgets/split_array.html
+OK: admin/invalid_setup.html
+OK: admin/prepopulated_fields_js.html
+OK: admin/change_list_results.html
+OK: admin/nav_sidebar.html
+OK: admin/date_hierarchy.html
+OK: admin/object_history.html
+OK: admin/popup_response.html
+OK: admin/change_list_object_tools.html
+OK: admin/500.html
+OK: admin/change_list.html
+OK: admin/filter.html
+OK: admin/search_form.html
+OK: admin/app_index.html
+OK: admin/color_theme_toggle.html
+OK: admin/login.html
+OK: admin/base.html
+OK: admin/404.html
+OK: admin/index.html
+OK: admin/delete_selected_confirmation.html
+OK: admin/change_form_object_tools.html
+OK: admin/delete_confirmation.html
+OK: admin/base_site.html
+OK: admin/app_list.html
+OK: admin/actions.html
+OK: admin/pagination.html
+OK: admin/submit_line.html
+OK: admin/change_form.html
+OK: admin/includes/object_delete_summary.html
+OK: admin/includes/fieldset.html
+OK: admin/auth/user/change_password.html
+OK: admin/auth/user/add_form.html
+OK: admin/widgets/date.html
+OK: admin/widgets/url.html
+OK: admin/widgets/foreign_key_raw_id.html
+OK: admin/widgets/split_datetime.html
+OK: admin/widgets/many_to_many_raw_id.html
+OK: admin/widgets/radio.html
+OK: admin/widgets/time.html
+OK: admin/widgets/clearable_file_input.html
+OK: admin/widgets/related_widget_wrapper.html
+OK: admin/edit_inline/tabular.html
+OK: admin/edit_inline/stacked.html
+OK: registration/password_reset_confirm.html
+OK: registration/password_change_form.html
+OK: registration/password_reset_complete.html
+OK: registration/password_change_done.html
+OK: registration/password_reset_email.html
+OK: registration/password_reset_done.html
+OK: registration/logged_out.html
+OK: registration/password_reset_form.html
+OK: csrf_403.html
+OK: technical_404.html
+OK: default_urlconf.html
+OK: directory_index.html
+OK: technical_500.html
+OK: django/forms/ul.html
+OK: django/forms/label.html
+OK: django/forms/table.html
+OK: django/forms/attrs.html
+OK: django/forms/field.html
+OK: django/forms/p.html
+OK: django/forms/div.html
+OK: django/forms/formsets/ul.html
+OK: django/forms/formsets/table.html
+OK: django/forms/formsets/p.html
+OK: django/forms/formsets/div.html
+OK: django/forms/widgets/textarea.html
+OK: django/forms/widgets/hidden.html
+OK: django/forms/widgets/input_option.html
+OK: django/forms/widgets/select_option.html
+OK: django/forms/widgets/multiple_input.html
+OK: django/forms/widgets/datetime.html
+OK: django/forms/widgets/search.html
+OK: django/forms/widgets/date.html
+OK: django/forms/widgets/checkbox.html
+OK: django/forms/widgets/radio_option.html
+OK: django/forms/widgets/url.html
+OK: django/forms/widgets/email.html
+OK: django/forms/widgets/attrs.html
+OK: django/forms/widgets/splitdatetime.html
+OK: django/forms/widgets/input.html
+OK: django/forms/widgets/checkbox_select.html
+OK: django/forms/widgets/text.html
+OK: django/forms/widgets/number.html
+OK: django/forms/widgets/multiwidget.html
+OK: django/forms/widgets/select_date.html
+OK: django/forms/widgets/radio.html
+OK: django/forms/widgets/file.html
+OK: django/forms/widgets/multiple_hidden.html
+OK: django/forms/widgets/color.html
+OK: django/forms/widgets/splithiddendatetime.html
+OK: django/forms/widgets/tel.html
+OK: django/forms/widgets/checkbox_option.html
+OK: django/forms/widgets/time.html
+OK: django/forms/widgets/clearable_file_input.html
+OK: django/forms/widgets/password.html
+OK: django/forms/widgets/select.html
+OK: django/forms/errors/list/ul.html
+OK: django/forms/errors/list/default.html
+OK: django/forms/errors/dict/ul.html
+OK: django/forms/errors/dict/default.html
+OK: rest_framework/raw_data_form.html
+OK: rest_framework/api.html
+OK: rest_framework/login.html
+OK: rest_framework/base.html
+OK: rest_framework/admin.html
+OK: rest_framework/login_base.html
+OK: rest_framework/filters/ordering.html
+OK: rest_framework/filters/search.html
+OK: rest_framework/filters/base.html
+OK: rest_framework/vertical/textarea.html
+OK: rest_framework/vertical/fieldset.html
+OK: rest_framework/vertical/checkbox.html
+OK: rest_framework/vertical/select_multiple.html
+OK: rest_framework/vertical/input.html
+OK: rest_framework/vertical/list_field.html
+OK: rest_framework/vertical/radio.html
+OK: rest_framework/vertical/checkbox_multiple.html
+OK: rest_framework/vertical/dict_field.html
+OK: rest_framework/vertical/select.html
+OK: rest_framework/vertical/list_fieldset.html
+OK: rest_framework/vertical/form.html
+OK: rest_framework/docs/sidebar.html
+OK: rest_framework/docs/error.html
+OK: rest_framework/docs/index.html
+OK: rest_framework/docs/interact.html
+OK: rest_framework/docs/document.html
+OK: rest_framework/docs/link.html
+OK: rest_framework/docs/auth/token.html
+OK: rest_framework/docs/auth/basic.html
+OK: rest_framework/docs/auth/session.html
+OK: rest_framework/docs/langs/shell.html
+OK: rest_framework/docs/langs/python-intro.html
+OK: rest_framework/docs/langs/javascript-intro.html
+OK: rest_framework/docs/langs/shell-intro.html
+OK: rest_framework/docs/langs/python.html
+OK: rest_framework/docs/langs/javascript.html
+OK: rest_framework/horizontal/textarea.html
+OK: rest_framework/horizontal/fieldset.html
+OK: rest_framework/horizontal/checkbox.html
+OK: rest_framework/horizontal/select_multiple.html
+OK: rest_framework/horizontal/input.html
+OK: rest_framework/horizontal/list_field.html
+OK: rest_framework/horizontal/radio.html
+OK: rest_framework/horizontal/checkbox_multiple.html
+OK: rest_framework/horizontal/dict_field.html
+OK: rest_framework/horizontal/select.html
+OK: rest_framework/horizontal/list_fieldset.html
+OK: rest_framework/horizontal/form.html
+OK: rest_framework/inline/textarea.html
+OK: rest_framework/inline/fieldset.html
+OK: rest_framework/inline/checkbox.html
+OK: rest_framework/inline/select_multiple.html
+OK: rest_framework/inline/input.html
+OK: rest_framework/inline/list_field.html
+OK: rest_framework/inline/radio.html
+OK: rest_framework/inline/checkbox_multiple.html
+OK: rest_framework/inline/dict_field.html
+OK: rest_framework/inline/select.html
+OK: rest_framework/inline/list_fieldset.html
+OK: rest_framework/inline/form.html
+OK: rest_framework/admin/dict_value.html
+OK: rest_framework/admin/simple_list_value.html
+OK: rest_framework/admin/list.html
+OK: rest_framework/admin/list_value.html
+OK: rest_framework/admin/detail.html
+OK: rest_framework/pagination/previous_and_next.html
+OK: rest_framework/pagination/numbers.html
+OK: bootstrap5/accordion.html
+OK: bootstrap5/uni_formset.html
+OK: bootstrap5/betterform.html
+OK: bootstrap5/errors.html
+OK: bootstrap5/errors_formset.html
+OK: bootstrap5/field.html
+OK: bootstrap5/whole_uni_formset.html
+OK: bootstrap5/accordion-group.html
+OK: bootstrap5/uni_form.html
+OK: bootstrap5/table_inline_formset.html
+OK: bootstrap5/inputs.html
+OK: bootstrap5/display_form.html
+OK: bootstrap5/whole_uni_form.html
+OK: bootstrap5/layout/row.html
+OK: bootstrap5/layout/switch.html
+OK: bootstrap5/layout/buttonholder.html
+OK: bootstrap5/layout/tab-link.html
+OK: bootstrap5/layout/field_errors_block.html
+OK: bootstrap5/layout/fieldset.html
+OK: bootstrap5/layout/help_text_and_errors.html
+OK: bootstrap5/layout/checkboxselectmultiple_inline.html
+OK: bootstrap5/layout/inline_field.html
+OK: bootstrap5/layout/attrs.html
+OK: bootstrap5/layout/floating_field.html
+OK: bootstrap5/layout/field_errors.html
+OK: bootstrap5/layout/alert.html
+OK: bootstrap5/layout/modal.html
+OK: bootstrap5/layout/uneditable_input.html
+OK: bootstrap5/layout/radioselect_inline.html
+OK: bootstrap5/layout/radio_checkbox_select.html
+OK: bootstrap5/layout/prepended_appended_text.html
+OK: bootstrap5/layout/field_file.html
+OK: bootstrap5/layout/baseinput.html
+OK: bootstrap5/layout/button.html
+OK: bootstrap5/layout/div.html
+OK: bootstrap5/layout/formactions.html
+OK: bootstrap5/layout/help_text.html
+OK: bootstrap5/layout/tab.html
+OK: bootstrap5/layout/column.html
+OK: bootstrap5/layout/multifield.html
+OK: bootstrap5/layout/field_with_buttons.html
+OK: admin/import_export/export.html
+OK: admin/import_export/change_list_import.html
+OK: admin/import_export/import.html
+OK: admin/import_export/change_list.html
+OK: admin/import_export/resource_fields_list.html
+OK: admin/import_export/change_list_import_export.html
+OK: admin/import_export/base.html
+OK: admin/import_export/change_list_export_item.html
+OK: admin/import_export/change_list_export.html
+OK: admin/import_export/change_list_import_item.html
+OK: admin/import_export/change_form.html
+ERROR: base_simple.html -> TemplateDoesNotExist: base_simple.html
+OK: base.html
+ERROR: index.html -> TemplateDoesNotExist: index.html
+ERROR: includes/_navigation.html -> TemplateDoesNotExist: includes/_navigation.html
+ERROR: portal/invoicebase.html -> TemplateDoesNotExist: portal/invoicebase.html
+ERROR: portal/procurement_dashboard.html -> TemplateDoesNotExist: portal/procurement_dashboard.html
+ERROR: portal/invoice_edit.html -> TemplateDoesNotExist: portal/invoice_edit.html
+ERROR: portal/dashboard.html -> TemplateDoesNotExist: portal/dashboard.html
+ERROR: portal/invoice_base_new.html -> TemplateDoesNotExist: portal/invoice_base_new.html
+ERROR: portal/invoice_base.html -> TemplateDoesNotExist: portal/invoice_base.html
+ERROR: portal/invoice_create_clean.html -> TemplateDoesNotExist: portal/invoice_create_clean.html
+ERROR: portal/supplier_form.html -> TemplateDoesNotExist: portal/supplier_form.html
+ERROR: portal/_dashboard_summary.html -> TemplateDoesNotExist: portal/_dashboard_summary.html
+ERROR: portal/purchase_order_form.html -> TemplateDoesNotExist: portal/purchase_order_form.html
+ERROR: portal/home.html -> TemplateDoesNotExist: portal/home.html
+ERROR: portal/invoice_pdf_clean.html -> TemplateDoesNotExist: portal/invoice_pdf_clean.html
+ERROR: portal/invoice_list.html -> TemplateDoesNotExist: portal/invoice_list.html
+ERROR: portal/barcode_scanner.html -> TemplateDoesNotExist: portal/barcode_scanner.html
+ERROR: portal/purchase_order_detail.html -> TemplateDoesNotExist: portal/purchase_order_detail.html
+ERROR: portal/profile.html -> TemplateDoesNotExist: portal/profile.html
+ERROR: portal/reports_base.html -> TemplateDoesNotExist: portal/reports_base.html
+ERROR: portal/invoice_create_bak.html -> TemplateDoesNotExist: portal/invoice_create_bak.html
+ERROR: portal/export_reports.html -> TemplateDoesNotExist: portal/export_reports.html
+ERROR: portal/report.html -> TemplateDoesNotExist: portal/report.html
+ERROR: portal/enquiry.html -> TemplateDoesNotExist: portal/enquiry.html
+ERROR: portal/customer_detail.html -> TemplateDoesNotExist: portal/customer_detail.html
+ERROR: portal/customer_test.html -> TemplateDoesNotExist: portal/customer_test.html
+ERROR: portal/base.html -> TemplateDoesNotExist: portal/base.html
+ERROR: portal/index.html -> TemplateDoesNotExist: portal/index.html
+ERROR: portal/dashboard_enhanced.html -> TemplateDoesNotExist: portal/dashboard_enhanced.html
+ERROR: portal/procurement_base.html -> TemplateDoesNotExist: portal/procurement_base.html
+ERROR: portal/customer_create.html -> TemplateDoesNotExist: portal/customer_create.html
+ERROR: portal/invoice_detail.html -> TemplateDoesNotExist: portal/invoice_detail.html
+ERROR: portal/invoice_pdf.html -> TemplateDoesNotExist: portal/invoice_pdf.html
+ERROR: portal/supplier_list.html -> TemplateDoesNotExist: portal/supplier_list.html
+ERROR: portal/purchase_payment_form.html -> TemplateDoesNotExist: portal/purchase_payment_form.html
+ERROR: portal/customer_list.html -> TemplateDoesNotExist: portal/customer_list.html
+ERROR: portal/report_base.html -> TemplateDoesNotExist: portal/report_base.html
+ERROR: portal/terms.html -> TemplateDoesNotExist: portal/terms.html
+ERROR: portal/invoice_pdf_backup.html -> TemplateDoesNotExist: portal/invoice_pdf_backup.html
+ERROR: portal/purchase_payment_list.html -> TemplateDoesNotExist: portal/purchase_payment_list.html
+ERROR: portal/invoice_create.html -> TemplateDoesNotExist: portal/invoice_create.html
+ERROR: portal/theme-toggle.html -> TemplateDoesNotExist: portal/theme-toggle.html
+ERROR: portal/purchase_order_list.html -> TemplateDoesNotExist: portal/purchase_order_list.html
+ERROR: portal/purchase_payment_detail.html -> TemplateDoesNotExist: portal/purchase_payment_detail.html
+ERROR: portal/invoice_create_backup.html -> TemplateDoesNotExist: portal/invoice_create_backup.html
+ERROR: portal/includes/_header.html -> TemplateDoesNotExist: portal/includes/_header.html
+ERROR: portal/includes/_navigation.html -> TemplateDoesNotExist: portal/includes/_navigation.html
+ERROR: portal/includes/_footer.html -> TemplateDoesNotExist: portal/includes/_footer.html
+ERROR: portal/products/product_dashboard.html -> TemplateDoesNotExist: portal/products/product_dashboard.html
+ERROR: portal/products/search.html -> TemplateDoesNotExist: portal/products/search.html
+ERROR: portal/products/public_product_detail.html -> TemplateDoesNotExist: portal/products/public_product_detail.html
+ERROR: portal/products/product_list.html -> TemplateDoesNotExist: portal/products/product_list.html
+ERROR: portal/products/search_empty.html -> TemplateDoesNotExist: portal/products/search_empty.html
+ERROR: portal/products/public_catalog.html -> TemplateDoesNotExist: portal/products/public_catalog.html
+ERROR: portal/products/product_detail.html -> TemplateDoesNotExist: portal/products/product_detail.html
+ERROR: portal/products/product_form.html -> TemplateDoesNotExist: portal/products/product_form.html
+ERROR: portal/widgets/icon_picker.html -> TemplateDoesNotExist: portal/widgets/icon_picker.html
+ERROR: portal/cart/cart.html -> TemplateDoesNotExist: portal/cart/cart.html
+ERROR: portal/cart/checkout.html -> TemplateDoesNotExist: portal/cart/checkout.html
+ERROR: portal/cart/order_confirmation.html -> TemplateDoesNotExist: portal/cart/order_confirmation.html
+ERROR: portal/rbac/permission_check.html -> TemplateDoesNotExist: portal/rbac/permission_check.html
+ERROR: procurement/procurement_dashboard.html -> TemplateDoesNotExist: procurement/procurement_dashboard.html
+ERROR: procurement/supplier_form.html -> TemplateDoesNotExist: procurement/supplier_form.html
+ERROR: procurement/purchase_order_form.html -> TemplateDoesNotExist: procurement/purchase_order_form.html
+ERROR: procurement/purchase_order_detail.html -> TemplateDoesNotExist: procurement/purchase_order_detail.html
+ERROR: procurement/procurement_base.html -> TemplateDoesNotExist: procurement/procurement_base.html
+ERROR: procurement/supplier_list.html -> TemplateDoesNotExist: procurement/supplier_list.html
+ERROR: procurement/purchase_payment_form.html -> TemplateDoesNotExist: procurement/purchase_payment_form.html
+ERROR: procurement/purchase_payment_list.html -> TemplateDoesNotExist: procurement/purchase_payment_list.html
+ERROR: procurement/purchase_order_list.html -> TemplateDoesNotExist: procurement/purchase_order_list.html
+ERROR: procurement/products/product_list.html -> TemplateDoesNotExist: procurement/products/product_list.html
+ERROR: procurement/products/product_detail.html -> TemplateDoesNotExist: procurement/products/product_detail.html
+ERROR: procurement/products/product_form.html -> TemplateDoesNotExist: procurement/products/product_form.html
+ERROR: finance/transaction_detail.html -> TemplateDoesNotExist: finance/transaction_detail.html
+ERROR: finance/dashboard.html -> TemplateDoesNotExist: finance/dashboard.html
+ERROR: finance/daily_revenue_pdf.html -> TemplateDoesNotExist: finance/daily_revenue_pdf.html
+ERROR: finance/transaction_list.html -> TemplateDoesNotExist: finance/transaction_list.html
+ERROR: finance/index.html -> TemplateDoesNotExist: finance/index.html
+ERROR: finance/finance_base.html -> TemplateDoesNotExist: finance/finance_base.html
+ERROR: finance/daily_revenue_form.html -> TemplateDoesNotExist: finance/daily_revenue_form.html
+ERROR: finance/daily_revenue_dashboard.html -> TemplateDoesNotExist: finance/daily_revenue_dashboard.html
+ERROR: finance/reports.html -> TemplateDoesNotExist: finance/reports.html
+ERROR: finance/transaction_form.html -> TemplateDoesNotExist: finance/transaction_form.html
+ERROR: rbac/register.html -> TemplateDoesNotExist: rbac/register.html
+ERROR: rbac/emails/verification_email.html -> TemplateDoesNotExist: rbac/emails/verification_email.html
+ERROR: emails/order_confirmation.html -> TemplateDoesNotExist: emails/order_confirmation.html
+OK: admin/base.html
+OK: admin/base_site.html
+ERROR: admin/portal/barcode_generator_dashboard.html -> TemplateDoesNotExist: admin/portal/barcode_generator_dashboard.html
+ERROR: admin/portal/product/change_list.html -> TemplateDoesNotExist: admin/portal/product/change_list.html
+ERROR: admin/portal/invoice/change_form.html -> TemplateDoesNotExist: admin/portal/invoice/change_form.html
+ERROR: admin/procurement/purchaseitem_change_form.html -> TemplateDoesNotExist: admin/procurement/purchaseitem_change_form.html
+ERROR: admin/procurement/purchaseorder_change_form.html -> TemplateDoesNotExist: admin/procurement/purchaseorder_change_form.html
+ERROR: admin/procurement/purchaseorder/change_form.html -> TemplateDoesNotExist: admin/procurement/purchaseorder/change_form.html
+OK: admin/import_export/export.html
+OK: admin/import_export/change_list_import.html
+OK: admin/import_export/import.html
+OK: admin/import_export/change_list.html
+OK: admin/import_export/resource_fields_list.html
+OK: admin/import_export/change_list_import_export.html
+OK: admin/import_export/base.html
+OK: admin/import_export/change_list_export_item.html
+OK: admin/import_export/change_list_export.html
+OK: admin/import_export/change_list_import_item.html
+OK: admin/import_export/change_form.html
+ERROR: registration/register.html -> TemplateDoesNotExist: registration/register.html
+OK: registration/login.html
+ERROR: registration/registration_pending.html -> TemplateDoesNotExist: registration/registration_pending.html
+OK: registration/logged_out.html
+ERROR: registration/registration/register.html -> TemplateDoesNotExist: registration/registration/register.html
+ERROR: registration/registration/login.html -> TemplateDoesNotExist: registration/registration/login.html
+ERROR: registration/registration/logged_out.html -> TemplateDoesNotExist: registration/registration/logged_out.html
+ERROR: django_bootstrap5/bootstrap5.html -> TemplateDoesNotExist: django_bootstrap5/bootstrap5.html
+ERROR: django_bootstrap5/form_errors.html -> TemplateDoesNotExist: django_bootstrap5/form_errors.html
+ERROR: django_bootstrap5/field_errors.html -> TemplateDoesNotExist: django_bootstrap5/field_errors.html
+ERROR: django_bootstrap5/pagination.html -> TemplateDoesNotExist: django_bootstrap5/pagination.html
+ERROR: django_bootstrap5/field_help_text.html -> TemplateDoesNotExist: django_bootstrap5/field_help_text.html
+ERROR: django_bootstrap5/messages.html -> TemplateDoesNotExist: django_bootstrap5/messages.html
+ERROR: django_bootstrap5/widgets/radio_select.html -> TemplateDoesNotExist: django_bootstrap5/widgets/radio_select.html
+ERROR: django_bootstrap5/widgets/radio_select_button_group.html -> TemplateDoesNotExist: django_bootstrap5/widgets/radio_select_button_group.html
+ERROR: django_bootstrap5/widgets/clearable_file_input.html -> TemplateDoesNotExist: django_bootstrap5/widgets/clearable_file_input.html
+OK: admin/charfield_filters/dropdown_filter.html
+OK: admin/charfield_filters/autocomplete_select_filter.html
+OK: admin/charfield_filters/autocomplete_filter.html
+OK: auth/widgets/read_only_password_hash.html
+OK: gis/openlayers.html
+OK: gis/openlayers-osm.html
+ERROR: gis/admin/openlayers.html -> TemplateDoesNotExist: gis/admin/openlayers.html
+ERROR: gis/admin/osm.html -> TemplateDoesNotExist: gis/admin/osm.html
+OK: admin_doc/bookmarklets.html
+OK: admin_doc/model_detail.html
+OK: admin_doc/template_detail.html
+OK: admin_doc/index.html
+OK: admin_doc/model_index.html
+OK: admin_doc/template_tag_index.html
+OK: admin_doc/view_detail.html
+OK: admin_doc/view_index.html
+OK: admin_doc/missing_docutils.html
+OK: admin_doc/template_filter_index.html
+OK: postgres/widgets/split_array.html
+OK: admin/invalid_setup.html
+OK: admin/prepopulated_fields_js.html
+OK: admin/change_list_results.html
+OK: admin/nav_sidebar.html
+OK: admin/date_hierarchy.html
+OK: admin/object_history.html
+OK: admin/popup_response.html
+OK: admin/change_list_object_tools.html
+OK: admin/500.html
+OK: admin/change_list.html
+OK: admin/filter.html
+OK: admin/search_form.html
+OK: admin/app_index.html
+OK: admin/color_theme_toggle.html
+OK: admin/login.html
+OK: admin/base.html
+OK: admin/404.html
+OK: admin/index.html
+OK: admin/delete_selected_confirmation.html
+OK: admin/change_form_object_tools.html
+OK: admin/delete_confirmation.html
+OK: admin/base_site.html
+OK: admin/app_list.html
+OK: admin/actions.html
+OK: admin/pagination.html
+OK: admin/submit_line.html
+OK: admin/change_form.html
+OK: admin/includes/object_delete_summary.html
+OK: admin/includes/fieldset.html
+OK: admin/auth/user/change_password.html
+OK: admin/auth/user/add_form.html
+OK: admin/widgets/date.html
+OK: admin/widgets/url.html
+OK: admin/widgets/foreign_key_raw_id.html
+OK: admin/widgets/split_datetime.html
+OK: admin/widgets/many_to_many_raw_id.html
+OK: admin/widgets/radio.html
+OK: admin/widgets/time.html
+OK: admin/widgets/clearable_file_input.html
+OK: admin/widgets/related_widget_wrapper.html
+OK: admin/edit_inline/tabular.html
+OK: admin/edit_inline/stacked.html
+OK: registration/password_reset_confirm.html
+OK: registration/password_change_form.html
+OK: registration/password_reset_complete.html
+OK: registration/password_change_done.html
+OK: registration/password_reset_email.html
+OK: registration/password_reset_done.html
+OK: registration/logged_out.html
+OK: registration/password_reset_form.html
+OK: technical_404.html
+OK: default_urlconf.html
+OK: technical_500.html
+OK: django/forms/ul.html
+OK: django/forms/label.html
+OK: django/forms/table.html
+OK: django/forms/attrs.html
+OK: django/forms/p.html
+ERROR: django/forms/default.html -> TemplateDoesNotExist: django/forms/default.html
+OK: django/forms/div.html
+OK: django/forms/formsets/ul.html
+OK: django/forms/formsets/table.html
+OK: django/forms/formsets/p.html
+ERROR: django/forms/formsets/default.html -> TemplateDoesNotExist: django/forms/formsets/default.html
+OK: django/forms/formsets/div.html
+OK: django/forms/widgets/textarea.html
+OK: django/forms/widgets/hidden.html
+OK: django/forms/widgets/input_option.html
+OK: django/forms/widgets/select_option.html
+OK: django/forms/widgets/multiple_input.html
+OK: django/forms/widgets/datetime.html
+OK: django/forms/widgets/date.html
+OK: django/forms/widgets/checkbox.html
+OK: django/forms/widgets/radio_option.html
+OK: django/forms/widgets/url.html
+OK: django/forms/widgets/email.html
+OK: django/forms/widgets/attrs.html
+OK: django/forms/widgets/splitdatetime.html
+OK: django/forms/widgets/input.html
+OK: django/forms/widgets/checkbox_select.html
+OK: django/forms/widgets/text.html
+OK: django/forms/widgets/number.html
+OK: django/forms/widgets/multiwidget.html
+OK: django/forms/widgets/select_date.html
+OK: django/forms/widgets/radio.html
+OK: django/forms/widgets/file.html
+OK: django/forms/widgets/multiple_hidden.html
+OK: django/forms/widgets/splithiddendatetime.html
+OK: django/forms/widgets/checkbox_option.html
+OK: django/forms/widgets/time.html
+OK: django/forms/widgets/clearable_file_input.html
+OK: django/forms/widgets/password.html
+OK: django/forms/widgets/select.html
+OK: django/forms/errors/list/ul.html
+OK: django/forms/errors/list/default.html
+OK: django/forms/errors/dict/ul.html
+OK: django/forms/errors/dict/default.html
+OK: rest_framework/raw_data_form.html
+OK: rest_framework/api.html
+OK: rest_framework/login.html
+OK: rest_framework/base.html
+OK: rest_framework/admin.html
+OK: rest_framework/login_base.html
+OK: rest_framework/filters/ordering.html
+OK: rest_framework/filters/search.html
+OK: rest_framework/filters/base.html
+OK: rest_framework/vertical/textarea.html
+OK: rest_framework/vertical/fieldset.html
+OK: rest_framework/vertical/checkbox.html
+OK: rest_framework/vertical/select_multiple.html
+OK: rest_framework/vertical/input.html
+OK: rest_framework/vertical/list_field.html
+OK: rest_framework/vertical/radio.html
+OK: rest_framework/vertical/checkbox_multiple.html
+OK: rest_framework/vertical/dict_field.html
+OK: rest_framework/vertical/select.html
+OK: rest_framework/vertical/list_fieldset.html
+OK: rest_framework/vertical/form.html
+OK: rest_framework/docs/sidebar.html
+OK: rest_framework/docs/error.html
+OK: rest_framework/docs/index.html
+OK: rest_framework/docs/interact.html
+OK: rest_framework/docs/document.html
+OK: rest_framework/docs/link.html
+OK: rest_framework/docs/auth/token.html
+OK: rest_framework/docs/auth/basic.html
+OK: rest_framework/docs/auth/session.html
+OK: rest_framework/docs/langs/shell.html
+OK: rest_framework/docs/langs/python-intro.html
+OK: rest_framework/docs/langs/javascript-intro.html
+OK: rest_framework/docs/langs/shell-intro.html
+OK: rest_framework/docs/langs/python.html
+OK: rest_framework/docs/langs/javascript.html
+OK: rest_framework/horizontal/textarea.html
+OK: rest_framework/horizontal/fieldset.html
+OK: rest_framework/horizontal/checkbox.html
+OK: rest_framework/horizontal/select_multiple.html
+OK: rest_framework/horizontal/input.html
+OK: rest_framework/horizontal/list_field.html
+OK: rest_framework/horizontal/radio.html
+OK: rest_framework/horizontal/checkbox_multiple.html
+OK: rest_framework/horizontal/dict_field.html
+OK: rest_framework/horizontal/select.html
+OK: rest_framework/horizontal/list_fieldset.html
+OK: rest_framework/horizontal/form.html
+OK: rest_framework/inline/textarea.html
+OK: rest_framework/inline/fieldset.html
+OK: rest_framework/inline/checkbox.html
+OK: rest_framework/inline/select_multiple.html
+OK: rest_framework/inline/input.html
+OK: rest_framework/inline/list_field.html
+OK: rest_framework/inline/radio.html
+OK: rest_framework/inline/checkbox_multiple.html
+OK: rest_framework/inline/dict_field.html
+OK: rest_framework/inline/select.html
+OK: rest_framework/inline/list_fieldset.html
+OK: rest_framework/inline/form.html
+OK: rest_framework/admin/dict_value.html
+OK: rest_framework/admin/simple_list_value.html
+OK: rest_framework/admin/list.html
+OK: rest_framework/admin/list_value.html
+OK: rest_framework/admin/detail.html
+OK: rest_framework/pagination/previous_and_next.html
+OK: rest_framework/pagination/numbers.html
+ERROR: bootstrap5/bootstrap5.html -> TemplateDoesNotExist: bootstrap5/bootstrap5.html
+ERROR: bootstrap5/form_errors.html -> TemplateDoesNotExist: bootstrap5/form_errors.html
+ERROR: bootstrap5/field_errors.html -> TemplateDoesNotExist: bootstrap5/field_errors.html
+ERROR: bootstrap5/pagination.html -> TemplateDoesNotExist: bootstrap5/pagination.html
+ERROR: bootstrap5/field_help_text.html -> TemplateDoesNotExist: bootstrap5/field_help_text.html
+ERROR: bootstrap5/messages.html -> TemplateDoesNotExist: bootstrap5/messages.html
+ERROR: bootstrap5/widgets/radio_select_button_group.html -> TemplateDoesNotExist: bootstrap5/widgets/radio_select_button_group.html
+OK: bootstrap5/accordion.html
+OK: bootstrap5/uni_formset.html
+OK: bootstrap5/betterform.html
+OK: bootstrap5/errors.html
+OK: bootstrap5/errors_formset.html
+OK: bootstrap5/field.html
+OK: bootstrap5/whole_uni_formset.html
+OK: bootstrap5/accordion-group.html
+OK: bootstrap5/uni_form.html
+OK: bootstrap5/table_inline_formset.html
+OK: bootstrap5/inputs.html
+OK: bootstrap5/display_form.html
+OK: bootstrap5/whole_uni_form.html
+OK: bootstrap5/layout/row.html
+OK: bootstrap5/layout/switch.html
+OK: bootstrap5/layout/buttonholder.html
+OK: bootstrap5/layout/tab-link.html
+OK: bootstrap5/layout/field_errors_block.html
+OK: bootstrap5/layout/fieldset.html
+OK: bootstrap5/layout/help_text_and_errors.html
+OK: bootstrap5/layout/checkboxselectmultiple_inline.html
+OK: bootstrap5/layout/inline_field.html
+OK: bootstrap5/layout/attrs.html
+OK: bootstrap5/layout/floating_field.html
+OK: bootstrap5/layout/field_errors.html
+OK: bootstrap5/layout/alert.html
+OK: bootstrap5/layout/modal.html
+OK: bootstrap5/layout/uneditable_input.html
+OK: bootstrap5/layout/radioselect_inline.html
+OK: bootstrap5/layout/radio_checkbox_select.html
+OK: bootstrap5/layout/prepended_appended_text.html
+OK: bootstrap5/layout/field_file.html
+OK: bootstrap5/layout/baseinput.html
+OK: bootstrap5/layout/button.html
+OK: bootstrap5/layout/div.html
+OK: bootstrap5/layout/formactions.html
+OK: bootstrap5/layout/help_text.html
+OK: bootstrap5/layout/tab.html
+OK: bootstrap5/layout/column.html
+OK: bootstrap5/layout/multifield.html
+OK: bootstrap5/layout/field_with_buttons.html
+ERROR: compressor/js_preload.html -> TemplateDoesNotExist: compressor/js_preload.html
+ERROR: compressor/js_file.html -> TemplateDoesNotExist: compressor/js_file.html
+ERROR: compressor/css_file.html -> TemplateDoesNotExist: compressor/css_file.html
+ERROR: compressor/css_preload.html -> TemplateDoesNotExist: compressor/css_preload.html
+ERROR: compressor/css_inline.html -> TemplateDoesNotExist: compressor/css_inline.html
+ERROR: compressor/js_inline.html -> TemplateDoesNotExist: compressor/js_inline.html
+ERROR: admin/taggit/merge_tags_form.html -> TemplateDoesNotExist: admin/taggit/merge_tags_form.html
+OK: admin/grappelli_mptt_change_list.html
+ERROR: admin/mptt_change_list.html -> TemplateDoesNotExist: admin/mptt_change_list.html
+OK: admin/grappelli_mptt_change_list_results.html
+ERROR: admin/mptt_filter.html -> TemplateDoesNotExist: admin/mptt_filter.html
+ERROR: admin/mptt_change_list_results.html -> TemplateDoesNotExist: admin/mptt_change_list_results.html
+OK: django_filters/widgets/multiwidget.html
+OK: django_filters/rest_framework/crispy_form.html
+OK: django_filters/rest_framework/form.html
+ERROR: ckeditor/browse.html -> TemplateDoesNotExist: ckeditor/browse.html
+OK: django_extensions/widgets/foreignkey_searchinput.html
+OK: auth/widgets/read_only_password_hash.html
+OK: gis/openlayers.html
+OK: gis/openlayers-osm.html
+OK: admin_doc/bookmarklets.html
+OK: admin_doc/model_detail.html
+OK: admin_doc/template_detail.html
+OK: admin_doc/index.html
+OK: admin_doc/model_index.html
+OK: admin_doc/template_tag_index.html
+OK: admin_doc/view_detail.html
+OK: admin_doc/view_index.html
+OK: admin_doc/missing_docutils.html
+OK: admin_doc/template_filter_index.html
+OK: postgres/widgets/split_array.html
+OK: admin/invalid_setup.html
+OK: admin/prepopulated_fields_js.html
+OK: admin/change_list_results.html
+OK: admin/nav_sidebar.html
+OK: admin/date_hierarchy.html
+OK: admin/object_history.html
+OK: admin/popup_response.html
+OK: admin/change_list_object_tools.html
+OK: admin/500.html
+OK: admin/change_list.html
+OK: admin/filter.html
+OK: admin/search_form.html
+OK: admin/app_index.html
+OK: admin/color_theme_toggle.html
+OK: admin/login.html
+OK: admin/base.html
+OK: admin/404.html
+OK: admin/index.html
+OK: admin/delete_selected_confirmation.html
+OK: admin/change_form_object_tools.html
+OK: admin/delete_confirmation.html
+OK: admin/base_site.html
+OK: admin/app_list.html
+OK: admin/actions.html
+OK: admin/pagination.html
+OK: admin/submit_line.html
+OK: admin/change_form.html
+OK: admin/includes/object_delete_summary.html
+OK: admin/includes/fieldset.html
+OK: admin/auth/user/change_password.html
+OK: admin/auth/user/add_form.html
+OK: admin/widgets/date.html
+OK: admin/widgets/url.html
+OK: admin/widgets/foreign_key_raw_id.html
+OK: admin/widgets/split_datetime.html
+OK: admin/widgets/many_to_many_raw_id.html
+OK: admin/widgets/radio.html
+OK: admin/widgets/time.html
+OK: admin/widgets/clearable_file_input.html
+OK: admin/widgets/related_widget_wrapper.html
+OK: admin/edit_inline/tabular.html
+OK: admin/edit_inline/stacked.html
+OK: registration/password_reset_confirm.html
+OK: registration/password_change_form.html
+OK: registration/password_reset_complete.html
+OK: registration/password_change_done.html
+OK: registration/password_reset_email.html
+OK: registration/password_reset_done.html
+OK: registration/logged_out.html
+OK: registration/password_reset_form.html
+OK: csrf_403.html
+OK: technical_404.html
+OK: default_urlconf.html
+OK: directory_index.html
+OK: technical_500.html
+OK: django/forms/ul.html
+OK: django/forms/label.html
+OK: django/forms/table.html
+OK: django/forms/attrs.html
+OK: django/forms/field.html
+OK: django/forms/p.html
+OK: django/forms/div.html
+OK: django/forms/formsets/ul.html
+OK: django/forms/formsets/table.html
+OK: django/forms/formsets/p.html
+OK: django/forms/formsets/div.html
+OK: django/forms/widgets/textarea.html
+OK: django/forms/widgets/hidden.html
+OK: django/forms/widgets/input_option.html
+OK: django/forms/widgets/select_option.html
+OK: django/forms/widgets/multiple_input.html
+OK: django/forms/widgets/datetime.html
+OK: django/forms/widgets/search.html
+OK: django/forms/widgets/date.html
+OK: django/forms/widgets/checkbox.html
+OK: django/forms/widgets/radio_option.html
+OK: django/forms/widgets/url.html
+OK: django/forms/widgets/email.html
+OK: django/forms/widgets/attrs.html
+OK: django/forms/widgets/splitdatetime.html
+OK: django/forms/widgets/input.html
+OK: django/forms/widgets/checkbox_select.html
+OK: django/forms/widgets/text.html
+OK: django/forms/widgets/number.html
+OK: django/forms/widgets/multiwidget.html
+OK: django/forms/widgets/select_date.html
+OK: django/forms/widgets/radio.html
+OK: django/forms/widgets/file.html
+OK: django/forms/widgets/multiple_hidden.html
+OK: django/forms/widgets/color.html
+OK: django/forms/widgets/splithiddendatetime.html
+OK: django/forms/widgets/tel.html
+OK: django/forms/widgets/checkbox_option.html
+OK: django/forms/widgets/time.html
+OK: django/forms/widgets/clearable_file_input.html
+OK: django/forms/widgets/password.html
+OK: django/forms/widgets/select.html
+OK: django/forms/errors/list/ul.html
+OK: django/forms/errors/list/default.html
+OK: django/forms/errors/dict/ul.html
+OK: django/forms/errors/dict/default.html
+OK: rest_framework/raw_data_form.html
+OK: rest_framework/api.html
+OK: rest_framework/login.html
+OK: rest_framework/base.html
+OK: rest_framework/admin.html
+OK: rest_framework/login_base.html
+OK: rest_framework/filters/ordering.html
+OK: rest_framework/filters/search.html
+OK: rest_framework/filters/base.html
+OK: rest_framework/vertical/textarea.html
+OK: rest_framework/vertical/fieldset.html
+OK: rest_framework/vertical/checkbox.html
+OK: rest_framework/vertical/select_multiple.html
+OK: rest_framework/vertical/input.html
+OK: rest_framework/vertical/list_field.html
+OK: rest_framework/vertical/radio.html
+OK: rest_framework/vertical/checkbox_multiple.html
+OK: rest_framework/vertical/dict_field.html
+OK: rest_framework/vertical/select.html
+OK: rest_framework/vertical/list_fieldset.html
+OK: rest_framework/vertical/form.html
+OK: rest_framework/docs/sidebar.html
+OK: rest_framework/docs/error.html
+OK: rest_framework/docs/index.html
+OK: rest_framework/docs/interact.html
+OK: rest_framework/docs/document.html
+OK: rest_framework/docs/link.html
+OK: rest_framework/docs/auth/token.html
+OK: rest_framework/docs/auth/basic.html
+OK: rest_framework/docs/auth/session.html
+OK: rest_framework/docs/langs/shell.html
+OK: rest_framework/docs/langs/python-intro.html
+OK: rest_framework/docs/langs/javascript-intro.html
+OK: rest_framework/docs/langs/shell-intro.html
+OK: rest_framework/docs/langs/python.html
+OK: rest_framework/docs/langs/javascript.html
+OK: rest_framework/horizontal/textarea.html
+OK: rest_framework/horizontal/fieldset.html
+OK: rest_framework/horizontal/checkbox.html
+OK: rest_framework/horizontal/select_multiple.html
+OK: rest_framework/horizontal/input.html
+OK: rest_framework/horizontal/list_field.html
+OK: rest_framework/horizontal/radio.html
+OK: rest_framework/horizontal/checkbox_multiple.html
+OK: rest_framework/horizontal/dict_field.html
+OK: rest_framework/horizontal/select.html
+OK: rest_framework/horizontal/list_fieldset.html
+OK: rest_framework/horizontal/form.html
+OK: rest_framework/inline/textarea.html
+OK: rest_framework/inline/fieldset.html
+OK: rest_framework/inline/checkbox.html
+OK: rest_framework/inline/select_multiple.html
+OK: rest_framework/inline/input.html
+OK: rest_framework/inline/list_field.html
+OK: rest_framework/inline/radio.html
+OK: rest_framework/inline/checkbox_multiple.html
+OK: rest_framework/inline/dict_field.html
+OK: rest_framework/inline/select.html
+OK: rest_framework/inline/list_fieldset.html
+OK: rest_framework/inline/form.html
+OK: rest_framework/admin/dict_value.html
+OK: rest_framework/admin/simple_list_value.html
+OK: rest_framework/admin/list.html
+OK: rest_framework/admin/list_value.html
+OK: rest_framework/admin/detail.html
+OK: rest_framework/pagination/previous_and_next.html
+OK: rest_framework/pagination/numbers.html
+ERROR: ckeditor/widget.html -> TemplateDoesNotExist: ckeditor/widget.html
+OK: bootstrap5/accordion.html
+OK: bootstrap5/uni_formset.html
+OK: bootstrap5/betterform.html
+OK: bootstrap5/errors.html
+OK: bootstrap5/errors_formset.html
+OK: bootstrap5/field.html
+OK: bootstrap5/whole_uni_formset.html
+OK: bootstrap5/accordion-group.html
+OK: bootstrap5/uni_form.html
+OK: bootstrap5/table_inline_formset.html
+OK: bootstrap5/inputs.html
+OK: bootstrap5/display_form.html
+OK: bootstrap5/whole_uni_form.html
+OK: bootstrap5/layout/row.html
+OK: bootstrap5/layout/switch.html
+OK: bootstrap5/layout/buttonholder.html
+OK: bootstrap5/layout/tab-link.html
+OK: bootstrap5/layout/field_errors_block.html
+OK: bootstrap5/layout/fieldset.html
+OK: bootstrap5/layout/help_text_and_errors.html
+OK: bootstrap5/layout/checkboxselectmultiple_inline.html
+OK: bootstrap5/layout/inline_field.html
+OK: bootstrap5/layout/attrs.html
+OK: bootstrap5/layout/floating_field.html
+OK: bootstrap5/layout/field_errors.html
+OK: bootstrap5/layout/alert.html
+OK: bootstrap5/layout/modal.html
+OK: bootstrap5/layout/uneditable_input.html
+OK: bootstrap5/layout/radioselect_inline.html
+OK: bootstrap5/layout/radio_checkbox_select.html
+OK: bootstrap5/layout/prepended_appended_text.html
+OK: bootstrap5/layout/field_file.html
+OK: bootstrap5/layout/baseinput.html
+OK: bootstrap5/layout/button.html
+OK: bootstrap5/layout/div.html
+OK: bootstrap5/layout/formactions.html
+OK: bootstrap5/layout/help_text.html
+OK: bootstrap5/layout/tab.html
+OK: bootstrap5/layout/column.html
+OK: bootstrap5/layout/multifield.html
+OK: bootstrap5/layout/field_with_buttons.html
+OK: admin/import_export/export.html
+OK: admin/import_export/change_list_import.html
+OK: admin/import_export/import.html
+OK: admin/import_export/change_list.html
+OK: admin/import_export/resource_fields_list.html
+OK: admin/import_export/change_list_import_export.html
+OK: admin/import_export/base.html
+OK: admin/import_export/change_list_export_item.html
+OK: admin/import_export/change_list_export.html
+OK: admin/import_export/change_list_import_item.html
+OK: admin/import_export/change_form.html
+ERROR: formtools/preview.html -> TemplateDoesNotExist: formtools/preview.html
+ERROR: formtools/form.html -> TemplateDoesNotExist: formtools/form.html
+ERROR: formtools/wizard/wizard_form.html -> TemplateDoesNotExist: formtools/wizard/wizard_form.html
+ERROR: other_wizard_form.html -> TemplateDoesNotExist: other_wizard_form.html
+OK: auth/widgets/read_only_password_hash.html
+OK: gis/openlayers.html
+OK: gis/openlayers-osm.html
+OK: admin_doc/bookmarklets.html
+OK: admin_doc/model_detail.html
+OK: admin_doc/template_detail.html
+OK: admin_doc/index.html
+OK: admin_doc/model_index.html
+OK: admin_doc/template_tag_index.html
+OK: admin_doc/view_detail.html
+OK: admin_doc/view_index.html
+OK: admin_doc/missing_docutils.html
+OK: admin_doc/template_filter_index.html
+OK: postgres/widgets/split_array.html
+OK: admin/invalid_setup.html
+OK: admin/prepopulated_fields_js.html
+OK: admin/change_list_results.html
+OK: admin/nav_sidebar.html
+OK: admin/date_hierarchy.html
+OK: admin/object_history.html
+OK: admin/popup_response.html
+OK: admin/change_list_object_tools.html
+OK: admin/500.html
+OK: admin/change_list.html
+OK: admin/filter.html
+OK: admin/search_form.html
+OK: admin/app_index.html
+OK: admin/color_theme_toggle.html
+OK: admin/login.html
+OK: admin/base.html
+OK: admin/404.html
+OK: admin/index.html
+OK: admin/delete_selected_confirmation.html
+OK: admin/change_form_object_tools.html
+OK: admin/delete_confirmation.html
+OK: admin/base_site.html
+OK: admin/app_list.html
+OK: admin/actions.html
+OK: admin/pagination.html
+OK: admin/submit_line.html
+OK: admin/change_form.html
+OK: admin/includes/object_delete_summary.html
+OK: admin/includes/fieldset.html
+OK: admin/auth/user/change_password.html
+OK: admin/auth/user/add_form.html
+OK: admin/widgets/date.html
+OK: admin/widgets/url.html
+OK: admin/widgets/foreign_key_raw_id.html
+OK: admin/widgets/split_datetime.html
+OK: admin/widgets/many_to_many_raw_id.html
+OK: admin/widgets/radio.html
+OK: admin/widgets/time.html
+OK: admin/widgets/clearable_file_input.html
+OK: admin/widgets/related_widget_wrapper.html
+OK: admin/edit_inline/tabular.html
+OK: admin/edit_inline/stacked.html
+OK: registration/password_reset_confirm.html
+OK: registration/password_change_form.html
+OK: registration/password_reset_complete.html
+OK: registration/password_change_done.html
+OK: registration/password_reset_email.html
+OK: registration/password_reset_done.html
+OK: registration/logged_out.html
+OK: registration/password_reset_form.html
+OK: csrf_403.html
+OK: technical_404.html
+OK: default_urlconf.html
+OK: directory_index.html
+OK: technical_500.html
+OK: django/forms/ul.html
+OK: django/forms/label.html
+OK: django/forms/table.html
+OK: django/forms/attrs.html
+OK: django/forms/field.html
+OK: django/forms/p.html
+OK: django/forms/div.html
+OK: django/forms/formsets/ul.html
+OK: django/forms/formsets/table.html
+OK: django/forms/formsets/p.html
+OK: django/forms/formsets/div.html
+OK: django/forms/widgets/textarea.html
+OK: django/forms/widgets/hidden.html
+OK: django/forms/widgets/input_option.html
+OK: django/forms/widgets/select_option.html
+OK: django/forms/widgets/multiple_input.html
+OK: django/forms/widgets/datetime.html
+OK: django/forms/widgets/search.html
+OK: django/forms/widgets/date.html
+OK: django/forms/widgets/checkbox.html
+OK: django/forms/widgets/radio_option.html
+OK: django/forms/widgets/url.html
+OK: django/forms/widgets/email.html
+OK: django/forms/widgets/attrs.html
+OK: django/forms/widgets/splitdatetime.html
+OK: django/forms/widgets/input.html
+OK: django/forms/widgets/checkbox_select.html
+OK: django/forms/widgets/text.html
+OK: django/forms/widgets/number.html
+OK: django/forms/widgets/multiwidget.html
+OK: django/forms/widgets/select_date.html
+OK: django/forms/widgets/radio.html
+OK: django/forms/widgets/file.html
+OK: django/forms/widgets/multiple_hidden.html
+OK: django/forms/widgets/color.html
+OK: django/forms/widgets/splithiddendatetime.html
+OK: django/forms/widgets/tel.html
+OK: django/forms/widgets/checkbox_option.html
+OK: django/forms/widgets/time.html
+OK: django/forms/widgets/clearable_file_input.html
+OK: django/forms/widgets/password.html
+OK: django/forms/widgets/select.html
+OK: django/forms/errors/list/ul.html
+OK: django/forms/errors/list/default.html
+OK: django/forms/errors/dict/ul.html
+OK: django/forms/errors/dict/default.html
+OK: rest_framework/raw_data_form.html
+OK: rest_framework/api.html
+OK: rest_framework/login.html
+OK: rest_framework/base.html
+OK: rest_framework/admin.html
+OK: rest_framework/login_base.html
+OK: rest_framework/filters/ordering.html
+OK: rest_framework/filters/search.html
+OK: rest_framework/filters/base.html
+OK: rest_framework/vertical/textarea.html
+OK: rest_framework/vertical/fieldset.html
+OK: rest_framework/vertical/checkbox.html
+OK: rest_framework/vertical/select_multiple.html
+OK: rest_framework/vertical/input.html
+OK: rest_framework/vertical/list_field.html
+OK: rest_framework/vertical/radio.html
+OK: rest_framework/vertical/checkbox_multiple.html
+OK: rest_framework/vertical/dict_field.html
+OK: rest_framework/vertical/select.html
+OK: rest_framework/vertical/list_fieldset.html
+OK: rest_framework/vertical/form.html
+OK: rest_framework/docs/sidebar.html
+OK: rest_framework/docs/error.html
+OK: rest_framework/docs/index.html
+OK: rest_framework/docs/interact.html
+OK: rest_framework/docs/document.html
+OK: rest_framework/docs/link.html
+OK: rest_framework/docs/auth/token.html
+OK: rest_framework/docs/auth/basic.html
+OK: rest_framework/docs/auth/session.html
+OK: rest_framework/docs/langs/shell.html
+OK: rest_framework/docs/langs/python-intro.html
+OK: rest_framework/docs/langs/javascript-intro.html
+OK: rest_framework/docs/langs/shell-intro.html
+OK: rest_framework/docs/langs/python.html
+OK: rest_framework/docs/langs/javascript.html
+OK: rest_framework/horizontal/textarea.html
+OK: rest_framework/horizontal/fieldset.html
+OK: rest_framework/horizontal/checkbox.html
+OK: rest_framework/horizontal/select_multiple.html
+OK: rest_framework/horizontal/input.html
+OK: rest_framework/horizontal/list_field.html
+OK: rest_framework/horizontal/radio.html
+OK: rest_framework/horizontal/checkbox_multiple.html
+OK: rest_framework/horizontal/dict_field.html
+OK: rest_framework/horizontal/select.html
+OK: rest_framework/horizontal/list_fieldset.html
+OK: rest_framework/horizontal/form.html
+OK: rest_framework/inline/textarea.html
+OK: rest_framework/inline/fieldset.html
+OK: rest_framework/inline/checkbox.html
+OK: rest_framework/inline/select_multiple.html
+OK: rest_framework/inline/input.html
+OK: rest_framework/inline/list_field.html
+OK: rest_framework/inline/radio.html
+OK: rest_framework/inline/checkbox_multiple.html
+OK: rest_framework/inline/dict_field.html
+OK: rest_framework/inline/select.html
+OK: rest_framework/inline/list_fieldset.html
+OK: rest_framework/inline/form.html
+OK: rest_framework/admin/dict_value.html
+OK: rest_framework/admin/simple_list_value.html
+OK: rest_framework/admin/list.html
+OK: rest_framework/admin/list_value.html
+OK: rest_framework/admin/detail.html
+OK: rest_framework/pagination/previous_and_next.html
+OK: rest_framework/pagination/numbers.html
+ERROR: two_factor/_wizard_forms.html -> TemplateDoesNotExist: two_factor/_wizard_forms.html
+ERROR: two_factor/_wizard_actions.html -> TemplateDoesNotExist: two_factor/_wizard_actions.html
+ERROR: two_factor/_base.html -> TemplateDoesNotExist: two_factor/_base.html
+ERROR: two_factor/_base_focus.html -> TemplateDoesNotExist: two_factor/_base_focus.html
+ERROR: two_factor/core/setup_complete.html -> TemplateDoesNotExist: two_factor/core/setup_complete.html
+ERROR: two_factor/core/login.html -> TemplateDoesNotExist: two_factor/core/login.html
+ERROR: two_factor/core/otp_required.html -> TemplateDoesNotExist: two_factor/core/otp_required.html
+ERROR: two_factor/core/setup.html -> TemplateDoesNotExist: two_factor/core/setup.html
+ERROR: two_factor/core/phone_register.html -> TemplateDoesNotExist: two_factor/core/phone_register.html
+ERROR: two_factor/core/backup_tokens.html -> TemplateDoesNotExist: two_factor/core/backup_tokens.html
+ERROR: two_factor/twilio/sms_message.html -> TemplateDoesNotExist: two_factor/twilio/sms_message.html
+ERROR: two_factor/profile/profile.html -> TemplateDoesNotExist: two_factor/profile/profile.html
+ERROR: two_factor/profile/disable.html -> TemplateDoesNotExist: two_factor/profile/disable.html
+OK: bootstrap5/accordion.html
+OK: bootstrap5/uni_formset.html
+OK: bootstrap5/betterform.html
+OK: bootstrap5/errors.html
+OK: bootstrap5/errors_formset.html
+OK: bootstrap5/field.html
+OK: bootstrap5/whole_uni_formset.html
+OK: bootstrap5/accordion-group.html
+OK: bootstrap5/uni_form.html
+OK: bootstrap5/table_inline_formset.html
+OK: bootstrap5/inputs.html
+OK: bootstrap5/display_form.html
+OK: bootstrap5/whole_uni_form.html
+OK: bootstrap5/layout/row.html
+OK: bootstrap5/layout/switch.html
+OK: bootstrap5/layout/buttonholder.html
+OK: bootstrap5/layout/tab-link.html
+OK: bootstrap5/layout/field_errors_block.html
+OK: bootstrap5/layout/fieldset.html
+OK: bootstrap5/layout/help_text_and_errors.html
+OK: bootstrap5/layout/checkboxselectmultiple_inline.html
+OK: bootstrap5/layout/inline_field.html
+OK: bootstrap5/layout/attrs.html
+OK: bootstrap5/layout/floating_field.html
+OK: bootstrap5/layout/field_errors.html
+OK: bootstrap5/layout/alert.html
+OK: bootstrap5/layout/modal.html
+OK: bootstrap5/layout/uneditable_input.html
+OK: bootstrap5/layout/radioselect_inline.html
+OK: bootstrap5/layout/radio_checkbox_select.html
+OK: bootstrap5/layout/prepended_appended_text.html
+OK: bootstrap5/layout/field_file.html
+OK: bootstrap5/layout/baseinput.html
+OK: bootstrap5/layout/button.html
+OK: bootstrap5/layout/div.html
+OK: bootstrap5/layout/formactions.html
+OK: bootstrap5/layout/help_text.html
+OK: bootstrap5/layout/tab.html
+OK: bootstrap5/layout/column.html
+OK: bootstrap5/layout/multifield.html
+OK: bootstrap5/layout/field_with_buttons.html
+ERROR: otp_totp/admin/config.html -> TemplateDoesNotExist: otp_totp/admin/config.html
+ERROR: otp_hotp/admin/config.html -> TemplateDoesNotExist: otp_hotp/admin/config.html
+ERROR: otp/admin111/login.html -> TemplateDoesNotExist: otp/admin111/login.html
+OK: base.html
+ERROR: legal/privacy_policy.html -> TemplateDoesNotExist: legal/privacy_policy.html
+ERROR: legal/terms_of_service.html -> TemplateDoesNotExist: legal/terms_of_service.html
+ERROR: legal/legal_hub.html -> TemplateDoesNotExist: legal/legal_hub.html
+ERROR: legal/cookie_policy.html -> TemplateDoesNotExist: legal/cookie_policy.html
+ERROR: finance/dashboard.html -> TemplateDoesNotExist: finance/dashboard.html
+ERROR: finance/expense_form.html -> TemplateDoesNotExist: finance/expense_form.html
+ERROR: finance/revenue_list.html -> TemplateDoesNotExist: finance/revenue_list.html
+ERROR: finance/expense_list.html -> TemplateDoesNotExist: finance/expense_list.html
+ERROR: finance/revenue_form.html -> TemplateDoesNotExist: finance/revenue_form.html
+ERROR: finance/reports.html -> TemplateDoesNotExist: finance/reports.html
+ERROR: bcard/card_not_available.html -> TemplateDoesNotExist: bcard/card_not_available.html
+ERROR: bcard/dashboard.html -> TemplateDoesNotExist: bcard/dashboard.html
+ERROR: bcard/home.html -> TemplateDoesNotExist: bcard/home.html
+ERROR: bcard/nfc_write.html -> TemplateDoesNotExist: bcard/nfc_write.html
+ERROR: bcard/card_list.html -> TemplateDoesNotExist: bcard/card_list.html
+ERROR: bcard/nfc_edit.html -> TemplateDoesNotExist: bcard/nfc_edit.html
+ERROR: bcard/nfc_read.html -> TemplateDoesNotExist: bcard/nfc_read.html
+ERROR: bcard/create_old.html -> TemplateDoesNotExist: bcard/create_old.html
+ERROR: bcard/my_cards.html -> TemplateDoesNotExist: bcard/my_cards.html
+ERROR: bcard/gallery_demo.html -> TemplateDoesNotExist: bcard/gallery_demo.html
+ERROR: bcard/edit.html -> TemplateDoesNotExist: bcard/edit.html
+ERROR: bcard/create_new.html -> TemplateDoesNotExist: bcard/create_new.html
+ERROR: bcard/create.html -> TemplateDoesNotExist: bcard/create.html
+ERROR: bcard/nfc_detail.html -> TemplateDoesNotExist: bcard/nfc_detail.html
+ERROR: bcard/nfc_test.html -> TemplateDoesNotExist: bcard/nfc_test.html
+ERROR: bcard/detail.html -> TemplateDoesNotExist: bcard/detail.html
+ERROR: bcard/analytics/card_detail.html -> TemplateDoesNotExist: bcard/analytics/card_detail.html
+ERROR: bcard/analytics/user_dashboard.html -> TemplateDoesNotExist: bcard/analytics/user_dashboard.html
+ERROR: emails/email_verification.html -> TemplateDoesNotExist: emails/email_verification.html
+ERROR: emails/welcome_email.html -> TemplateDoesNotExist: emails/welcome_email.html
+ERROR: registration/email_verification_sent.html -> TemplateDoesNotExist: registration/email_verification_sent.html
+ERROR: registration/email_verification.html -> TemplateDoesNotExist: registration/email_verification.html
+OK: registration/password_change_form.html
+ERROR: registration/profile.html -> TemplateDoesNotExist: registration/profile.html
+ERROR: registration/signup.html -> TemplateDoesNotExist: registration/signup.html
+ERROR: registration/profile_settings.html -> TemplateDoesNotExist: registration/profile_settings.html
+OK: registration/password_change_done.html
+ERROR: registration/register.html -> TemplateDoesNotExist: registration/register.html
+OK: registration/login.html
+ERROR: registration/email_verification_result.html -> TemplateDoesNotExist: registration/email_verification_result.html
+OK: registration/logged_out.html
+ERROR: registration/resend_verification.html -> TemplateDoesNotExist: registration/resend_verification.html
+ERROR: registration/logout_confirm.html -> TemplateDoesNotExist: registration/logout_confirm.html
+ERROR: training/dashboard.html -> TemplateDoesNotExist: training/dashboard.html
+ERROR: training/audit_list.html -> TemplateDoesNotExist: training/audit_list.html
+ERROR: training/my_trainings.html -> TemplateDoesNotExist: training/my_trainings.html
+ERROR: training/home.html -> TemplateDoesNotExist: training/home.html
+ERROR: training/manage_permissions.html -> TemplateDoesNotExist: training/manage_permissions.html
+ERROR: training/analytics.html -> TemplateDoesNotExist: training/analytics.html
+ERROR: training/program_detail.html -> TemplateDoesNotExist: training/program_detail.html
+ERROR: training/programs.html -> TemplateDoesNotExist: training/programs.html
+ERROR: training/audit_detail.html -> TemplateDoesNotExist: training/audit_detail.html
+ERROR: training/quiz_list.html -> TemplateDoesNotExist: training/quiz_list.html
+ERROR: training/course_list.html -> TemplateDoesNotExist: training/course_list.html
+ERROR: training/assign_quiz.html -> TemplateDoesNotExist: training/assign_quiz.html
+ERROR: training/form.html -> TemplateDoesNotExist: training/form.html
+ERROR: hrms/payroll/bank_transfer.html -> TemplateDoesNotExist: hrms/payroll/bank_transfer.html
+ERROR: dashboard/simple.html -> TemplateDoesNotExist: dashboard/simple.html
+ERROR: dashboard/main.html -> TemplateDoesNotExist: dashboard/main.html
+ERROR: test_nav.html -> TemplateDoesNotExist: test_nav.html
+ERROR: test_logo.html -> TemplateDoesNotExist: test_logo.html
+ERROR: docpool_base.html -> TemplateDoesNotExist: docpool_base.html
+OK: base.html
+ERROR: index.html -> TemplateDoesNotExist: index.html
+ERROR: minimal_test.html -> TemplateDoesNotExist: minimal_test.html
+OK: hrms_base.html
+ERROR: reports/home.html -> TemplateDoesNotExist: reports/home.html
+ERROR: reports/employee_report.html -> TemplateDoesNotExist: reports/employee_report.html
+ERROR: reports/reporttemplate_list.html -> TemplateDoesNotExist: reports/reporttemplate_list.html
+ERROR: reports/leave_report.html -> TemplateDoesNotExist: reports/leave_report.html
+ERROR: docpool/reference_list.html -> TemplateDoesNotExist: docpool/reference_list.html
+ERROR: docpool/document_detail.html -> TemplateDoesNotExist: docpool/document_detail.html
+ERROR: docpool/document_upload.html -> TemplateDoesNotExist: docpool/document_upload.html
+ERROR: docpool/document_list.html -> TemplateDoesNotExist: docpool/document_list.html
+OK: hrms/dashboard.html
+OK: hrms/qatar_theme_demo.html
+OK: hrms/base.html
+ERROR: hrms/setup_wizard.html -> TemplateDoesNotExist: hrms/setup_wizard.html
+OK: hrms/payroll/slip.html
+OK: hrms/payroll/dashboard.html
+OK: hrms/payroll/period_detail.html
+OK: hrms/payroll/bulk_process.html
+OK: hrms/payroll/periods.html
+ERROR: hrms/payroll/slip_pdf.html -> TemplateDoesNotExist: hrms/payroll/slip_pdf.html
+OK: hrms/payroll/settings.html
+ERROR: hrms/payroll/run.html -> TemplateDoesNotExist: hrms/payroll/run.html
+ERROR: hrms/payroll/period_create.html -> TemplateDoesNotExist: hrms/payroll/period_create.html
+OK: hrms/payroll/create.html
+OK: hrms/payroll/reports.html
+OK: hrms/payroll/my_payslips.html
+OK: hrms/payroll/detail.html
+OK: hrms/reports/employeeprofile_list.html
+OK: hrms/reports/dashboard.html
+OK: hrms/reports/employee_report.html
+OK: hrms/reports/pdf_template.html
+OK: hrms/reports/custom_report_list.html
+OK: hrms/reports/payroll_report.html
+OK: hrms/reports/employee_roster.html
+OK: hrms/training/dashboard.html
+OK: hrms/training/my_trainings.html
+OK: hrms/training/program_detail.html
+OK: hrms/training/programs.html
+OK: hrms/training/enrollment_cards.html
+OK: hrms/training/list.html
+OK: hrms/training/form.html
+OK: hrms/employee/profile.html
+OK: hrms/employee/leave_form.html
+OK: hrms/positions/list.html
+OK: hrms/positions/detail.html
+OK: hrms/positions/form.html
+OK: hrms/departments/confirm_delete.html
+OK: hrms/departments/list.html
+OK: hrms/departments/detail.html
+OK: hrms/departments/form.html
+OK: hrms/analytics/dashboard.html
+OK: hrms/analytics/employee_analytics.html
+OK: hrms/employees/profile.html
+OK: hrms/employees/list.html
+OK: hrms/employees/detail.html
+OK: hrms/employees/form.html
+OK: hrms/performance/dashboard.html
+OK: hrms/performance/review_detail.html
+OK: hrms/performance/reviews.html
+OK: hrms/attendance/dashboard.html
+OK: hrms/attendance/user_attendance_with_map.html
+ERROR: hrms/attendance/location_debug.html -> TemplateDoesNotExist: hrms/attendance/location_debug.html
+OK: hrms/attendance/user_attendance_old.html
+OK: hrms/attendance/clock.html
+OK: hrms/attendance/my_log.html
+OK: hrms/attendance/list.html
+OK: hrms/attendance/request_form.html
+OK: hrms/attendance/user_attendance.html
+OK: hrms/attendance/reports.html
+OK: hrms/leaves/balance.html
+OK: hrms/leaves/list.html
+OK: hrms/leaves/detail.html
+OK: hrms/leaves/form.html
+ERROR: hrms/leave_types/list.html -> TemplateDoesNotExist: hrms/leave_types/list.html
+ERROR: hrms/leave_types/form.html -> TemplateDoesNotExist: hrms/leave_types/form.html
+ERROR: hrms/grades/list.html -> TemplateDoesNotExist: hrms/grades/list.html
+ERROR: hrms/companies/list.html -> TemplateDoesNotExist: hrms/companies/list.html
+ERROR: hrms/emails/payslip_email.html -> TemplateDoesNotExist: hrms/emails/payslip_email.html
+OK: hrms/admin/leave_list.html
+OK: hrms/admin/dashboard.html
+OK: hrms/admin/employee_list.html
+OK: hrms/admin/department_list.html
+ERROR: dashboard/analytics.html -> TemplateDoesNotExist: dashboard/analytics.html
+ERROR: dashboard/simple.html -> TemplateDoesNotExist: dashboard/simple.html
+ERROR: dashboard/user_profile.html -> TemplateDoesNotExist: dashboard/user_profile.html
+ERROR: dashboard/main.html -> TemplateDoesNotExist: dashboard/main.html
+ERROR: errors/503.html -> TemplateDoesNotExist: errors/503.html
+ERROR: errors/500.html -> TemplateDoesNotExist: errors/500.html
+ERROR: errors/502.html -> TemplateDoesNotExist: errors/502.html
+ERROR: errors/504.html -> TemplateDoesNotExist: errors/504.html
+ERROR: errors/404.html -> TemplateDoesNotExist: errors/404.html
+ERROR: errors/403.html -> TemplateDoesNotExist: errors/403.html
+OK: admin/base_site.html
+OK: registration/login.html
+OK: registration/password_reset_done.html
+OK: registration/logged_out.html
+OK: registration/password_reset_form.html
+ERROR: admin/tree_list_results.html -> TemplateDoesNotExist: admin/tree_list_results.html
+ERROR: admin/tree_change_list_results.html -> TemplateDoesNotExist: admin/tree_change_list_results.html
+ERROR: admin/tree_change_list.html -> TemplateDoesNotExist: admin/tree_change_list.html
+ERROR: admin/tree_list.html -> TemplateDoesNotExist: admin/tree_list.html
+OK: django_extensions/widgets/foreignkey_searchinput.html
+OK: auth/widgets/read_only_password_hash.html
+OK: gis/openlayers.html
+OK: gis/openlayers-osm.html
+OK: admin_doc/bookmarklets.html
+OK: admin_doc/model_detail.html
+OK: admin_doc/template_detail.html
+OK: admin_doc/index.html
+OK: admin_doc/model_index.html
+OK: admin_doc/template_tag_index.html
+OK: admin_doc/view_detail.html
+OK: admin_doc/view_index.html
+OK: admin_doc/missing_docutils.html
+OK: admin_doc/template_filter_index.html
+OK: postgres/widgets/split_array.html
+OK: admin/invalid_setup.html
+OK: admin/prepopulated_fields_js.html
+OK: admin/change_list_results.html
+OK: admin/nav_sidebar.html
+OK: admin/date_hierarchy.html
+OK: admin/object_history.html
+OK: admin/popup_response.html
+OK: admin/change_list_object_tools.html
+OK: admin/500.html
+OK: admin/change_list.html
+OK: admin/filter.html
+OK: admin/search_form.html
+OK: admin/app_index.html
+OK: admin/color_theme_toggle.html
+OK: admin/login.html
+OK: admin/base.html
+OK: admin/404.html
+OK: admin/index.html
+OK: admin/delete_selected_confirmation.html
+OK: admin/change_form_object_tools.html
+OK: admin/delete_confirmation.html
+OK: admin/base_site.html
+OK: admin/app_list.html
+OK: admin/actions.html
+OK: admin/pagination.html
+OK: admin/submit_line.html
+OK: admin/change_form.html
+OK: admin/includes/object_delete_summary.html
+OK: admin/includes/fieldset.html
+OK: admin/auth/user/change_password.html
+OK: admin/auth/user/add_form.html
+OK: admin/widgets/date.html
+OK: admin/widgets/url.html
+OK: admin/widgets/foreign_key_raw_id.html
+OK: admin/widgets/split_datetime.html
+OK: admin/widgets/many_to_many_raw_id.html
+OK: admin/widgets/radio.html
+OK: admin/widgets/time.html
+OK: admin/widgets/clearable_file_input.html
+OK: admin/widgets/related_widget_wrapper.html
+OK: admin/edit_inline/tabular.html
+OK: admin/edit_inline/stacked.html
+OK: registration/password_reset_confirm.html
+OK: registration/password_change_form.html
+OK: registration/password_reset_complete.html
+OK: registration/password_change_done.html
+OK: registration/password_reset_email.html
+OK: registration/password_reset_done.html
+OK: registration/logged_out.html
+OK: registration/password_reset_form.html
+OK: csrf_403.html
+OK: technical_404.html
+OK: default_urlconf.html
+OK: directory_index.html
+OK: technical_500.html
+OK: django/forms/ul.html
+OK: django/forms/label.html
+OK: django/forms/table.html
+OK: django/forms/attrs.html
+OK: django/forms/field.html
+OK: django/forms/p.html
+OK: django/forms/div.html
+OK: django/forms/formsets/ul.html
+OK: django/forms/formsets/table.html
+OK: django/forms/formsets/p.html
+OK: django/forms/formsets/div.html
+OK: django/forms/widgets/textarea.html
+OK: django/forms/widgets/hidden.html
+OK: django/forms/widgets/input_option.html
+OK: django/forms/widgets/select_option.html
+OK: django/forms/widgets/multiple_input.html
+OK: django/forms/widgets/datetime.html
+OK: django/forms/widgets/search.html
+OK: django/forms/widgets/date.html
+OK: django/forms/widgets/checkbox.html
+OK: django/forms/widgets/radio_option.html
+OK: django/forms/widgets/url.html
+OK: django/forms/widgets/email.html
+OK: django/forms/widgets/attrs.html
+OK: django/forms/widgets/splitdatetime.html
+OK: django/forms/widgets/input.html
+OK: django/forms/widgets/checkbox_select.html
+OK: django/forms/widgets/text.html
+OK: django/forms/widgets/number.html
+OK: django/forms/widgets/multiwidget.html
+OK: django/forms/widgets/select_date.html
+OK: django/forms/widgets/radio.html
+OK: django/forms/widgets/file.html
+OK: django/forms/widgets/multiple_hidden.html
+OK: django/forms/widgets/color.html
+OK: django/forms/widgets/splithiddendatetime.html
+OK: django/forms/widgets/tel.html
+OK: django/forms/widgets/checkbox_option.html
+OK: django/forms/widgets/time.html
+OK: django/forms/widgets/clearable_file_input.html
+OK: django/forms/widgets/password.html
+OK: django/forms/widgets/select.html
+OK: django/forms/errors/list/ul.html
+OK: django/forms/errors/list/default.html
+OK: django/forms/errors/dict/ul.html
+OK: django/forms/errors/dict/default.html
+OK: rest_framework/raw_data_form.html
+OK: rest_framework/api.html
+OK: rest_framework/login.html
+OK: rest_framework/base.html
+OK: rest_framework/admin.html
+OK: rest_framework/login_base.html
+OK: rest_framework/filters/ordering.html
+OK: rest_framework/filters/search.html
+OK: rest_framework/filters/base.html
+OK: rest_framework/vertical/textarea.html
+OK: rest_framework/vertical/fieldset.html
+OK: rest_framework/vertical/checkbox.html
+OK: rest_framework/vertical/select_multiple.html
+OK: rest_framework/vertical/input.html
+OK: rest_framework/vertical/list_field.html
+OK: rest_framework/vertical/radio.html
+OK: rest_framework/vertical/checkbox_multiple.html
+OK: rest_framework/vertical/dict_field.html
+OK: rest_framework/vertical/select.html
+OK: rest_framework/vertical/list_fieldset.html
+OK: rest_framework/vertical/form.html
+OK: rest_framework/docs/sidebar.html
+OK: rest_framework/docs/error.html
+OK: rest_framework/docs/index.html
+OK: rest_framework/docs/interact.html
+OK: rest_framework/docs/document.html
+OK: rest_framework/docs/link.html
+OK: rest_framework/docs/auth/token.html
+OK: rest_framework/docs/auth/basic.html
+OK: rest_framework/docs/auth/session.html
+OK: rest_framework/docs/langs/shell.html
+OK: rest_framework/docs/langs/python-intro.html
+OK: rest_framework/docs/langs/javascript-intro.html
+OK: rest_framework/docs/langs/shell-intro.html
+OK: rest_framework/docs/langs/python.html
+OK: rest_framework/docs/langs/javascript.html
+OK: rest_framework/horizontal/textarea.html
+OK: rest_framework/horizontal/fieldset.html
+OK: rest_framework/horizontal/checkbox.html
+OK: rest_framework/horizontal/select_multiple.html
+OK: rest_framework/horizontal/input.html
+OK: rest_framework/horizontal/list_field.html
+OK: rest_framework/horizontal/radio.html
+OK: rest_framework/horizontal/checkbox_multiple.html
+OK: rest_framework/horizontal/dict_field.html
+OK: rest_framework/horizontal/select.html
+OK: rest_framework/horizontal/list_fieldset.html
+OK: rest_framework/horizontal/form.html
+OK: rest_framework/inline/textarea.html
+OK: rest_framework/inline/fieldset.html
+OK: rest_framework/inline/checkbox.html
+OK: rest_framework/inline/select_multiple.html
+OK: rest_framework/inline/input.html
+OK: rest_framework/inline/list_field.html
+OK: rest_framework/inline/radio.html
+OK: rest_framework/inline/checkbox_multiple.html
+OK: rest_framework/inline/dict_field.html
+OK: rest_framework/inline/select.html
+OK: rest_framework/inline/list_fieldset.html
+OK: rest_framework/inline/form.html
+OK: rest_framework/admin/dict_value.html
+OK: rest_framework/admin/simple_list_value.html
+OK: rest_framework/admin/list.html
+OK: rest_framework/admin/list_value.html
+OK: rest_framework/admin/detail.html
+OK: rest_framework/pagination/previous_and_next.html
+OK: rest_framework/pagination/numbers.html
+OK: bootstrap5/accordion.html
+OK: bootstrap5/uni_formset.html
+OK: bootstrap5/betterform.html
+OK: bootstrap5/errors.html
+OK: bootstrap5/errors_formset.html
+OK: bootstrap5/field.html
+OK: bootstrap5/whole_uni_formset.html
+OK: bootstrap5/accordion-group.html
+OK: bootstrap5/uni_form.html
+OK: bootstrap5/table_inline_formset.html
+OK: bootstrap5/inputs.html
+OK: bootstrap5/display_form.html
+OK: bootstrap5/whole_uni_form.html
+OK: bootstrap5/layout/row.html
+OK: bootstrap5/layout/buttonholder.html
+OK: bootstrap5/layout/tab-link.html
+OK: bootstrap5/layout/field_errors_block.html
+OK: bootstrap5/layout/fieldset.html
+OK: bootstrap5/layout/help_text_and_errors.html
+OK: bootstrap5/layout/checkboxselectmultiple_inline.html
+OK: bootstrap5/layout/inline_field.html
+OK: bootstrap5/layout/attrs.html
+OK: bootstrap5/layout/floating_field.html
+OK: bootstrap5/layout/field_errors.html
+OK: bootstrap5/layout/alert.html
+OK: bootstrap5/layout/uneditable_input.html
+OK: bootstrap5/layout/radioselect_inline.html
+OK: bootstrap5/layout/radio_checkbox_select.html
+OK: bootstrap5/layout/prepended_appended_text.html
+OK: bootstrap5/layout/field_file.html
+OK: bootstrap5/layout/baseinput.html
+OK: bootstrap5/layout/button.html
+OK: bootstrap5/layout/div.html
+OK: bootstrap5/layout/formactions.html
+OK: bootstrap5/layout/help_text.html
+OK: bootstrap5/layout/tab.html
+OK: bootstrap5/layout/column.html
+OK: bootstrap5/layout/multifield.html
+OK: bootstrap5/layout/field_with_buttons.html
+ERROR: favicon_test.html -> TemplateDoesNotExist: favicon_test.html
+ERROR: 500.html -> TemplateDoesNotExist: 500.html
+OK: base.html
+ERROR: 404.html -> TemplateDoesNotExist: 404.html
+ERROR: 403.html -> TemplateDoesNotExist: 403.html
+ERROR: includes/crispy_form.html -> TemplateDoesNotExist: includes/crispy_form.html
+ERROR: includes/analytics.html -> TemplateDoesNotExist: includes/analytics.html
+ERROR: includes/favicon.html -> TemplateDoesNotExist: includes/favicon.html
+ERROR: includes/seo_meta.html -> TemplateDoesNotExist: includes/seo_meta.html
+ERROR: portal/home.html -> TemplateDoesNotExist: portal/home.html
+ERROR: portal/demo_access.html -> TemplateDoesNotExist: portal/demo_access.html
+ERROR: portal/analytics.html -> TemplateDoesNotExist: portal/analytics.html
+ERROR: portal/demo_app.html -> TemplateDoesNotExist: portal/demo_app.html
+ERROR: portal/demo_request.html -> TemplateDoesNotExist: portal/demo_request.html
+ERROR: portal/about.html -> TemplateDoesNotExist: portal/about.html
+ERROR: portal/email_test.html -> TemplateDoesNotExist: portal/email_test.html
+ERROR: portal/demo_request_success.html -> TemplateDoesNotExist: portal/demo_request_success.html
+ERROR: reports/dashboard.html -> TemplateDoesNotExist: reports/dashboard.html
+ERROR: reports/analytics.html -> TemplateDoesNotExist: reports/analytics.html
+ERROR: reports/trendzapps_report.html -> TemplateDoesNotExist: reports/trendzapps_report.html
+ERROR: finance/dashboard.html -> TemplateDoesNotExist: finance/dashboard.html
+ERROR: finance/analytics.html -> TemplateDoesNotExist: finance/analytics.html
+ERROR: finance/reports.html -> TemplateDoesNotExist: finance/reports.html
+ERROR: leads/dashboard.html -> TemplateDoesNotExist: leads/dashboard.html
+ERROR: leads/lead_detail.html -> TemplateDoesNotExist: leads/lead_detail.html
+ERROR: leads/analytics.html -> TemplateDoesNotExist: leads/analytics.html
+ERROR: leads/lead_list.html -> TemplateDoesNotExist: leads/lead_list.html
+ERROR: incidents/dashboard.html -> TemplateDoesNotExist: incidents/dashboard.html
+ERROR: incidents/analytics.html -> TemplateDoesNotExist: incidents/analytics.html
+ERROR: incidents/knowledge_base.html -> TemplateDoesNotExist: incidents/knowledge_base.html
+ERROR: incidents/ticket_detail.html -> TemplateDoesNotExist: incidents/ticket_detail.html
+ERROR: incidents/create_ticket.html -> TemplateDoesNotExist: incidents/create_ticket.html
+ERROR: incidents/ticket_list.html -> TemplateDoesNotExist: incidents/ticket_list.html
+ERROR: incidents/management/category_list.html -> TemplateDoesNotExist: incidents/management/category_list.html
+ERROR: incidents/management/status_list.html -> TemplateDoesNotExist: incidents/management/status_list.html
+ERROR: incidents/management/performance_metrics.html -> TemplateDoesNotExist: incidents/management/performance_metrics.html
+ERROR: incidents/management/portfolio_list.html -> TemplateDoesNotExist: incidents/management/portfolio_list.html
+ERROR: incidents/management/priority_list.html -> TemplateDoesNotExist: incidents/management/priority_list.html
+ERROR: incidents/client/dashboard.html -> TemplateDoesNotExist: incidents/client/dashboard.html
+ERROR: incidents/client/profile.html -> TemplateDoesNotExist: incidents/client/profile.html
+ERROR: incidents/client/knowledge_base.html -> TemplateDoesNotExist: incidents/client/knowledge_base.html
+ERROR: incidents/client/ticket_detail.html -> TemplateDoesNotExist: incidents/client/ticket_detail.html
+ERROR: incidents/client/submit_ticket.html -> TemplateDoesNotExist: incidents/client/submit_ticket.html
+ERROR: incidents/client/kb_article.html -> TemplateDoesNotExist: incidents/client/kb_article.html
+ERROR: incidents/client/tickets.html -> TemplateDoesNotExist: incidents/client/tickets.html
+ERROR: incidents/client/public_form.html -> TemplateDoesNotExist: incidents/client/public_form.html
+ERROR: incidents/client/pending_approval.html -> TemplateDoesNotExist: incidents/client/pending_approval.html
+ERROR: incidents/client/ticket_success.html -> TemplateDoesNotExist: incidents/client/ticket_success.html
+ERROR: incidents/emails/ticket_update.html -> TemplateDoesNotExist: incidents/emails/ticket_update.html
+ERROR: incidents/emails/new_comment.html -> TemplateDoesNotExist: incidents/emails/new_comment.html
+ERROR: registration/registration_success.html -> TemplateDoesNotExist: registration/registration_success.html
+ERROR: registration/register.html -> TemplateDoesNotExist: registration/register.html
+OK: registration/login.html
+OK: registration/password_reset_done.html
+OK: registration/logged_out.html
+OK: registration/password_reset_form.html
+ERROR: registration/logout_confirm.html -> TemplateDoesNotExist: registration/logout_confirm.html
+OK: base.html
+ERROR: finance/transaction_detail.html -> TemplateDoesNotExist: finance/transaction_detail.html
+ERROR: finance/dashboard.html -> TemplateDoesNotExist: finance/dashboard.html
+ERROR: finance/transaction_list.html -> TemplateDoesNotExist: finance/transaction_list.html
+ERROR: finance/loan_approve.html -> TemplateDoesNotExist: finance/loan_approve.html
+ERROR: finance/loan_list.html -> TemplateDoesNotExist: finance/loan_list.html
+ERROR: finance/loan_detail.html -> TemplateDoesNotExist: finance/loan_detail.html
+ERROR: finance/monthly_fee_list.html -> TemplateDoesNotExist: finance/monthly_fee_list.html
+ERROR: finance/expense_form.html -> TemplateDoesNotExist: finance/expense_form.html
+ERROR: finance/expense_list.html -> TemplateDoesNotExist: finance/expense_list.html
+ERROR: finance/monthly_fee_form.html -> TemplateDoesNotExist: finance/monthly_fee_form.html
+ERROR: finance/loan_form.html -> TemplateDoesNotExist: finance/loan_form.html
+ERROR: finance/reports.html -> TemplateDoesNotExist: finance/reports.html
+ERROR: finance/installment_list.html -> TemplateDoesNotExist: finance/installment_list.html
+OK: bvfund/contribution_form.html
+OK: bvfund/loan_application.html
+OK: bvfund/admin_dashboard.html
+OK: bvfund/contribution_list.html
+ERROR: bvfund/user_dashboard.html -> TemplateDoesNotExist: bvfund/user_dashboard.html
+OK: bvfund/loan_list.html
+OK: bvfund/loan_detail.html
+OK: bvfund/expense_form.html
+ERROR: bvfund/receipt.html -> TemplateDoesNotExist: bvfund/receipt.html
+OK: bvfund/member_detail.html
+OK: bvfund/expense_list.html
+ERROR: bvfund/member_list.html -> TemplateDoesNotExist: bvfund/member_list.html
+ERROR: bvfund/member_form.html -> TemplateDoesNotExist: bvfund/member_form.html
+ERROR: bvfund/repayment_form.html -> TemplateDoesNotExist: bvfund/repayment_form.html
+ERROR: bvfund/reports.html -> TemplateDoesNotExist: bvfund/reports.html
+OK: bvfund/export_data.html
+ERROR: bvfund/my_receipts.html -> TemplateDoesNotExist: bvfund/my_receipts.html
+ERROR: bvfund/member_portal/dashboard.html -> TemplateDoesNotExist: bvfund/member_portal/dashboard.html
+ERROR: bvfund/member_portal/profile.html -> TemplateDoesNotExist: bvfund/member_portal/profile.html
+ERROR: bvfund/member_portal/loan_detail.html -> TemplateDoesNotExist: bvfund/member_portal/loan_detail.html
+ERROR: bvfund/member_portal/change_password.html -> TemplateDoesNotExist: bvfund/member_portal/change_password.html
+ERROR: bvfund/member_portal/contributions.html -> TemplateDoesNotExist: bvfund/member_portal/contributions.html
+ERROR: bvfund/member_portal/login.html -> TemplateDoesNotExist: bvfund/member_portal/login.html
+ERROR: bvfund/member_portal/loans.html -> TemplateDoesNotExist: bvfund/member_portal/loans.html
+OK: registration/login.html
+OK: bootstrap/field_prependedtext.html
+OK: bootstrap/field_default.html
+OK: bootstrap/field_appendprependtext.html
+OK: bootstrap/field_appendedtext.html
+OK: django_filters/widgets/multiwidget.html
+OK: django_filters/rest_framework/crispy_form.html
+OK: django_filters/rest_framework/form.html
+OK: drf-yasg/redoc.html
+OK: drf-yasg/redoc-old.html
+OK: drf-yasg/swagger-ui.html
+OK: bootstrap/_field_errors.html
+OK: bootstrap/_field_help_text.html
+OK: bootstrap/_field_errors_block.html
+OK: bootstrap/field.html
+OK: bootstrap/form.html
+OK: django_extensions/widgets/foreignkey_searchinput.html
+OK: auth/widgets/read_only_password_hash.html
+OK: gis/openlayers.html
+OK: gis/openlayers-osm.html
+OK: admin_doc/bookmarklets.html
+OK: admin_doc/model_detail.html
+OK: admin_doc/template_detail.html
+OK: admin_doc/index.html
+OK: admin_doc/model_index.html
+OK: admin_doc/template_tag_index.html
+OK: admin_doc/view_detail.html
+OK: admin_doc/view_index.html
+OK: admin_doc/missing_docutils.html
+OK: admin_doc/template_filter_index.html
+OK: postgres/widgets/split_array.html
+OK: admin/invalid_setup.html
+OK: admin/prepopulated_fields_js.html
+OK: admin/change_list_results.html
+OK: admin/nav_sidebar.html
+OK: admin/date_hierarchy.html
+OK: admin/object_history.html
+OK: admin/popup_response.html
+OK: admin/change_list_object_tools.html
+OK: admin/500.html
+OK: admin/change_list.html
+OK: admin/filter.html
+OK: admin/search_form.html
+OK: admin/app_index.html
+OK: admin/color_theme_toggle.html
+OK: admin/login.html
+OK: admin/base.html
+OK: admin/404.html
+OK: admin/index.html
+OK: admin/delete_selected_confirmation.html
+OK: admin/change_form_object_tools.html
+OK: admin/delete_confirmation.html
+OK: admin/base_site.html
+OK: admin/app_list.html
+OK: admin/actions.html
+OK: admin/pagination.html
+OK: admin/submit_line.html
+OK: admin/change_form.html
+OK: admin/includes/object_delete_summary.html
+OK: admin/includes/fieldset.html
+OK: admin/auth/user/change_password.html
+OK: admin/auth/user/add_form.html
+OK: admin/widgets/date.html
+OK: admin/widgets/url.html
+OK: admin/widgets/foreign_key_raw_id.html
+OK: admin/widgets/split_datetime.html
+OK: admin/widgets/many_to_many_raw_id.html
+OK: admin/widgets/radio.html
+OK: admin/widgets/time.html
+OK: admin/widgets/clearable_file_input.html
+OK: admin/widgets/related_widget_wrapper.html
+OK: admin/edit_inline/tabular.html
+OK: admin/edit_inline/stacked.html
+OK: registration/password_reset_confirm.html
+OK: registration/password_change_form.html
+OK: registration/password_reset_complete.html
+OK: registration/password_change_done.html
+OK: registration/password_reset_email.html
+OK: registration/password_reset_done.html
+OK: registration/logged_out.html
+OK: registration/password_reset_form.html
+OK: csrf_403.html
+OK: technical_404.html
+OK: default_urlconf.html
+OK: directory_index.html
+OK: technical_500.html
+OK: django/forms/ul.html
+OK: django/forms/label.html
+OK: django/forms/table.html
+OK: django/forms/attrs.html
+OK: django/forms/field.html
+OK: django/forms/p.html
+OK: django/forms/div.html
+OK: django/forms/formsets/ul.html
+OK: django/forms/formsets/table.html
+OK: django/forms/formsets/p.html
+OK: django/forms/formsets/div.html
+OK: django/forms/widgets/textarea.html
+OK: django/forms/widgets/hidden.html
+OK: django/forms/widgets/input_option.html
+OK: django/forms/widgets/select_option.html
+OK: django/forms/widgets/multiple_input.html
+OK: django/forms/widgets/datetime.html
+OK: django/forms/widgets/search.html
+OK: django/forms/widgets/date.html
+OK: django/forms/widgets/checkbox.html
+OK: django/forms/widgets/radio_option.html
+OK: django/forms/widgets/url.html
+OK: django/forms/widgets/email.html
+OK: django/forms/widgets/attrs.html
+OK: django/forms/widgets/splitdatetime.html
+OK: django/forms/widgets/input.html
+OK: django/forms/widgets/checkbox_select.html
+OK: django/forms/widgets/text.html
+OK: django/forms/widgets/number.html
+OK: django/forms/widgets/multiwidget.html
+OK: django/forms/widgets/select_date.html
+OK: django/forms/widgets/radio.html
+OK: django/forms/widgets/file.html
+OK: django/forms/widgets/multiple_hidden.html
+OK: django/forms/widgets/color.html
+OK: django/forms/widgets/splithiddendatetime.html
+OK: django/forms/widgets/tel.html
+OK: django/forms/widgets/checkbox_option.html
+OK: django/forms/widgets/time.html
+OK: django/forms/widgets/clearable_file_input.html
+OK: django/forms/widgets/password.html
+OK: django/forms/widgets/select.html
+OK: django/forms/errors/list/ul.html
+OK: django/forms/errors/list/default.html
+OK: django/forms/errors/dict/ul.html
+OK: django/forms/errors/dict/default.html
+OK: rest_framework/raw_data_form.html
+OK: rest_framework/api.html
+OK: rest_framework/login.html
+OK: rest_framework/base.html
+OK: rest_framework/admin.html
+OK: rest_framework/login_base.html
+OK: rest_framework/filters/ordering.html
+OK: rest_framework/filters/search.html
+OK: rest_framework/filters/base.html
+OK: rest_framework/vertical/textarea.html
+OK: rest_framework/vertical/fieldset.html
+OK: rest_framework/vertical/checkbox.html
+OK: rest_framework/vertical/select_multiple.html
+OK: rest_framework/vertical/input.html
+OK: rest_framework/vertical/list_field.html
+OK: rest_framework/vertical/radio.html
+OK: rest_framework/vertical/checkbox_multiple.html
+OK: rest_framework/vertical/dict_field.html
+OK: rest_framework/vertical/select.html
+OK: rest_framework/vertical/list_fieldset.html
+OK: rest_framework/vertical/form.html
+OK: rest_framework/docs/sidebar.html
+OK: rest_framework/docs/error.html
+OK: rest_framework/docs/index.html
+OK: rest_framework/docs/interact.html
+OK: rest_framework/docs/document.html
+OK: rest_framework/docs/link.html
+OK: rest_framework/docs/auth/token.html
+OK: rest_framework/docs/auth/basic.html
+OK: rest_framework/docs/auth/session.html
+OK: rest_framework/docs/langs/shell.html
+OK: rest_framework/docs/langs/python-intro.html
+OK: rest_framework/docs/langs/javascript-intro.html
+OK: rest_framework/docs/langs/shell-intro.html
+OK: rest_framework/docs/langs/python.html
+OK: rest_framework/docs/langs/javascript.html
+OK: rest_framework/horizontal/textarea.html
+OK: rest_framework/horizontal/fieldset.html
+OK: rest_framework/horizontal/checkbox.html
+OK: rest_framework/horizontal/select_multiple.html
+OK: rest_framework/horizontal/input.html
+OK: rest_framework/horizontal/list_field.html
+OK: rest_framework/horizontal/radio.html
+OK: rest_framework/horizontal/checkbox_multiple.html
+OK: rest_framework/horizontal/dict_field.html
+OK: rest_framework/horizontal/select.html
+OK: rest_framework/horizontal/list_fieldset.html
+OK: rest_framework/horizontal/form.html
+OK: rest_framework/inline/textarea.html
+OK: rest_framework/inline/fieldset.html
+OK: rest_framework/inline/checkbox.html
+OK: rest_framework/inline/select_multiple.html
+OK: rest_framework/inline/input.html
+OK: rest_framework/inline/list_field.html
+OK: rest_framework/inline/radio.html
+OK: rest_framework/inline/checkbox_multiple.html
+OK: rest_framework/inline/dict_field.html
+OK: rest_framework/inline/select.html
+OK: rest_framework/inline/list_fieldset.html
+OK: rest_framework/inline/form.html
+OK: rest_framework/admin/dict_value.html
+OK: rest_framework/admin/simple_list_value.html
+OK: rest_framework/admin/list.html
+OK: rest_framework/admin/list_value.html
+OK: rest_framework/admin/detail.html
+OK: rest_framework/pagination/previous_and_next.html
+OK: rest_framework/pagination/numbers.html
+OK: bootstrap5/accordion.html
+OK: bootstrap5/uni_formset.html
+OK: bootstrap5/betterform.html
+OK: bootstrap5/errors.html
+OK: bootstrap5/errors_formset.html
+OK: bootstrap5/field.html
+OK: bootstrap5/whole_uni_formset.html
+OK: bootstrap5/accordion-group.html
+OK: bootstrap5/uni_form.html
+OK: bootstrap5/table_inline_formset.html
+OK: bootstrap5/inputs.html
+OK: bootstrap5/display_form.html
+OK: bootstrap5/whole_uni_form.html
+OK: bootstrap5/layout/row.html
+OK: bootstrap5/layout/switch.html
+OK: bootstrap5/layout/buttonholder.html
+OK: bootstrap5/layout/tab-link.html
+OK: bootstrap5/layout/field_errors_block.html
+OK: bootstrap5/layout/fieldset.html
+OK: bootstrap5/layout/help_text_and_errors.html
+OK: bootstrap5/layout/checkboxselectmultiple_inline.html
+OK: bootstrap5/layout/inline_field.html
+OK: bootstrap5/layout/attrs.html
+OK: bootstrap5/layout/floating_field.html
+OK: bootstrap5/layout/field_errors.html
+OK: bootstrap5/layout/alert.html
+OK: bootstrap5/layout/modal.html
+OK: bootstrap5/layout/uneditable_input.html
+OK: bootstrap5/layout/radioselect_inline.html
+OK: bootstrap5/layout/radio_checkbox_select.html
+OK: bootstrap5/layout/prepended_appended_text.html
+OK: bootstrap5/layout/field_file.html
+OK: bootstrap5/layout/baseinput.html
+OK: bootstrap5/layout/button.html
+OK: bootstrap5/layout/div.html
+OK: bootstrap5/layout/formactions.html
+OK: bootstrap5/layout/help_text.html
+OK: bootstrap5/layout/tab.html
+OK: bootstrap5/layout/column.html
+OK: bootstrap5/layout/multifield.html
+OK: bootstrap5/layout/field_with_buttons.html
+OK: admin/import_export/export.html
+OK: admin/import_export/change_list_import.html
+OK: admin/import_export/import.html
+OK: admin/import_export/change_list.html
+OK: admin/import_export/resource_fields_list.html
+OK: admin/import_export/change_list_import_export.html
+OK: admin/import_export/base.html
+OK: admin/import_export/change_list_export_item.html
+OK: admin/import_export/change_list_export.html
+OK: admin/import_export/change_list_import_item.html
+OK: admin/import_export/change_form.html
+OK: change_management/cr_detail.html
+OK: change_management/admin/dashboard.html
+OK: change_management/admin/assign_confirmation.html
+OK: admin/financial/import_preview.html
+OK: admin/financial/import_costs.html
+OK: admin/financial/import_result.html
+OK: admin/financial/invoiceitem_changelist.html
+OK: csrf_403.html
+OK: technical_404.html
+OK: default_urlconf.html
+OK: base.html
+OK: directory_index.html
+OK: technical_500.html
+OK: hrms_base.html
+OK: includes/left_sidebar.html
+OK: includes/mobile_sidebar.html
+OK: includes/left_sidebar_content.html
+OK: includes/header.html
+OK: bootstrap/_field_errors.html
+OK: bootstrap/field_prependedtext.html
+OK: bootstrap/_field_help_text.html
+OK: bootstrap/field_default.html
+OK: bootstrap/_field_errors_block.html
+OK: bootstrap/field.html
+OK: bootstrap/field_appendprependtext.html
+OK: bootstrap/field_appendedtext.html
+OK: bootstrap/form.html
+OK: ai_buddy/conversation_list.html
+OK: ai_buddy/home.html
+OK: ai_buddy/profile_settings.html
+OK: ai_buddy/conversation_detail.html
+OK: ai_buddy/wellness_tracking.html
+OK: ai_buddy/milestone_list.html
+OK: ai_buddy/recommendation_list.html
+OK: change_management/change_list.html
+OK: change_management/cr_detail.html
+OK: change_management/admin/dashboard.html
+OK: change_management/admin/assign_confirmation.html
+OK: core/home.html
+OK: core/about.html
+OK: core/privacy.html
+OK: core/contact.html
+OK: core/faq.html
+OK: core/terms.html
+OK: vendors/dashboard.html
+OK: vendors/documents.html
+OK: vendors/availability.html
+OK: vendors/analytics.html
+OK: vendors/booking_detail.html
+OK: vendors/payments.html
+OK: vendors/services.html
+OK: vendors/bookings.html
+OK: vendors/profile_detail.html
+OK: vendors/profile_update.html
+OK: debug_toolbar/base.html
+OK: debug_toolbar/includes/panel_button.html
+OK: debug_toolbar/includes/theme_selector.html
+OK: debug_toolbar/includes/panel_content.html
+OK: base/_header.html
+OK: base/navbar.html
+OK: base/footer.html
+OK: base/base.html
+OK: django_filters/widgets/multiwidget.html
+OK: django_filters/rest_framework/crispy_form.html
+OK: django_filters/rest_framework/form.html
+OK: drf-yasg/redoc.html
+OK: drf-yasg/redoc-old.html
+OK: drf-yasg/swagger-ui.html
+OK: wellness/add_review.html
+OK: wellness/program_list.html
+OK: wellness/category_list.html
+OK: wellness/wellness_home.html
+OK: wellness/session_list.html
+OK: wellness/program_detail.html
+OK: wellness/category_detail.html
+OK: wellness/enroll_session.html
+OK: wellness/session_detail.html
+OK: wellness/user_enrollments.html
+OK: admin_dashboard/dashboard.html
+OK: admin_dashboard/booking_management.html
+OK: admin_dashboard/user_management.html
+OK: admin_dashboard/vendor_management.html
+OK: analytics/dashboard.html
+OK: analytics/assignment_dashboard.html
+OK: analytics/no_vendor_profile.html
+OK: analytics/assignment_logs.html
+OK: analytics/assignment_analytics.html
+OK: analytics/rankings.html
+OK: analytics/vendor_assignment_detail.html
+OK: analytics/vendor_dashboard.html
+OK: analytics/trends.html
+OK: analytics/vendor_detail.html
+OK: reporting/dashboard.html
+OK: django/forms/ul.html
+OK: django/forms/label.html
+OK: django/forms/table.html
+OK: django/forms/attrs.html
+OK: django/forms/field.html
+OK: django/forms/p.html
+OK: django/forms/div.html
+OK: django/forms/formsets/ul.html
+OK: django/forms/formsets/table.html
+OK: django/forms/formsets/p.html
+OK: django/forms/formsets/div.html
+OK: django/forms/widgets/textarea.html
+OK: django/forms/widgets/hidden.html
+OK: django/forms/widgets/input_option.html
+OK: django/forms/widgets/select_option.html
+OK: django/forms/widgets/multiple_input.html
+OK: django/forms/widgets/datetime.html
+OK: django/forms/widgets/search.html
+OK: django/forms/widgets/date.html
+OK: django/forms/widgets/checkbox.html
+OK: django/forms/widgets/radio_option.html
+OK: django/forms/widgets/url.html
+OK: django/forms/widgets/email.html
+OK: django/forms/widgets/attrs.html
+OK: django/forms/widgets/splitdatetime.html
+OK: django/forms/widgets/input.html
+OK: django/forms/widgets/checkbox_select.html
+OK: django/forms/widgets/text.html
+OK: django/forms/widgets/number.html
+OK: django/forms/widgets/multiwidget.html
+OK: django/forms/widgets/select_date.html
+OK: django/forms/widgets/radio.html
+OK: django/forms/widgets/file.html
+OK: django/forms/widgets/multiple_hidden.html
+OK: django/forms/widgets/color.html
+OK: django/forms/widgets/splithiddendatetime.html
+OK: django/forms/widgets/tel.html
+OK: django/forms/widgets/checkbox_option.html
+OK: django/forms/widgets/time.html
+OK: django/forms/widgets/clearable_file_input.html
+OK: django/forms/widgets/password.html
+OK: django/forms/widgets/select.html
+OK: django/forms/errors/list/ul.html
+OK: django/forms/errors/list/default.html
+OK: django/forms/errors/dict/ul.html
+OK: django/forms/errors/dict/default.html
+OK: gis/openlayers.html
+OK: gis/openlayers-osm.html
+OK: hrms/dashboard.html
+OK: hrms/qatar_theme_demo.html
+OK: hrms/base.html
+OK: hrms/payroll/slip.html
+OK: hrms/payroll/dashboard.html
+OK: hrms/payroll/approve_pending.html
+OK: hrms/payroll/period_detail.html
+OK: hrms/payroll/bulk_process.html
+OK: hrms/payroll/periods.html
+OK: hrms/payroll/settings.html
+OK: hrms/payroll/update.html
+OK: hrms/payroll/create.html
+OK: hrms/payroll/reports.html
+OK: hrms/payroll/my_payslips.html
+OK: hrms/payroll/detail.html
+OK: hrms/reports/employeeprofile_list.html
+OK: hrms/reports/dashboard.html
+OK: hrms/reports/employee_report.html
+OK: hrms/reports/attendance_report.html
+OK: hrms/reports/custom_report_form.html
+OK: hrms/reports/pdf_template.html
+OK: hrms/reports/custom_report_list.html
+OK: hrms/reports/custom_report_detail.html
+OK: hrms/reports/payroll_report.html
+OK: hrms/reports/scheduled_report_form.html
+OK: hrms/reports/employee_roster.html
+OK: hrms/reports/scheduled_report_list.html
+OK: hrms/training/dashboard.html
+OK: hrms/training/my_trainings.html
+OK: hrms/training/program_detail.html
+OK: hrms/training/programs.html
+OK: hrms/training/enrollment_cards.html
+OK: hrms/training/list.html
+OK: hrms/training/form.html
+OK: hrms/employee/profile.html
+OK: hrms/employee/leave_form.html
+OK: hrms/positions/list.html
+OK: hrms/positions/detail.html
+OK: hrms/positions/form.html
+OK: hrms/departments/confirm_delete.html
+OK: hrms/departments/list.html
+OK: hrms/departments/detail.html
+OK: hrms/departments/form.html
+OK: hrms/vendor_integration/dashboard.html
+OK: hrms/vendor_integration/assignment_list.html
+OK: hrms/vendor_integration/staff_detail.html
+OK: hrms/vendor_integration/staff_create.html
+OK: hrms/vendor_integration/staff_list.html
+OK: hrms/analytics/dashboard.html
+OK: hrms/analytics/leave_analytics.html
+OK: hrms/analytics/employee_analytics.html
+OK: hrms/analytics/payroll_analytics.html
+OK: hrms/analytics/training_analytics.html
+OK: hrms/employees/profile.html
+OK: hrms/employees/list.html
+OK: hrms/employees/detail.html
+OK: hrms/employees/form.html
+OK: hrms/performance/dashboard.html
+OK: hrms/performance/review_detail.html
+OK: hrms/performance/reviews.html
+OK: hrms/attendance/schedule_list.html
+OK: hrms/attendance/dashboard.html
+OK: hrms/attendance/user_attendance_with_map.html
+OK: hrms/attendance/request_list.html
+OK: hrms/attendance/user_attendance_old.html
+OK: hrms/attendance/clock.html
+OK: hrms/attendance/my_log.html
+OK: hrms/attendance/clock_inout.html
+OK: hrms/attendance/list.html
+OK: hrms/attendance/schedule_form.html
+OK: hrms/attendance/request_form.html
+OK: hrms/attendance/timesheet.html
+OK: hrms/attendance/user_attendance.html
+OK: hrms/attendance/reports.html
+OK: hrms/leaves/balance.html
+OK: hrms/leaves/list.html
+OK: hrms/leaves/detail.html
+OK: hrms/leaves/form.html
+OK: hrms/admin/leave_list.html
+OK: hrms/admin/dashboard.html
+OK: hrms/admin/employee_list.html
+OK: hrms/admin/department_list.html
+OK: admin_doc/bookmarklets.html
+OK: admin_doc/model_detail.html
+OK: admin_doc/template_detail.html
+OK: admin_doc/index.html
+OK: admin_doc/model_index.html
+OK: admin_doc/template_tag_index.html
+OK: admin_doc/view_detail.html
+OK: admin_doc/view_index.html
+OK: admin_doc/missing_docutils.html
+OK: admin_doc/template_filter_index.html
+OK: postgres/widgets/split_array.html
+OK: bookings/booking_cancel.html
+OK: bookings/book_service.html
+OK: bookings/booking_dashboard.html
+OK: bookings/booking_detail.html
+OK: bookings/booking_update.html
+OK: bookings/booking_list.html
+OK: bookings/booking_submit.html
+OK: bookings/booking_create.html
+OK: bookings/booking_form.html
+OK: bookings/emails/booking_confirmation.html
+OK: bookings/emails/booking_status_update.html
+OK: bvfund/contribution_form.html
+OK: bvfund/loan_application.html
+OK: bvfund/admin_dashboard.html
+OK: bvfund/contribution_list.html
+OK: bvfund/loan_list.html
+OK: bvfund/loan_detail.html
+OK: bvfund/expense_form.html
+OK: bvfund/member_detail.html
+OK: bvfund/expense_list.html
+OK: bvfund/export_data.html
+OK: emails/subscription_cancelled.html
+OK: services/service_inquiry.html
+OK: services/homecare_list.html
+OK: services/service_detail.html
+OK: services/service_list_ifcc.html
+OK: services/accommodation_list.html
+OK: services/list.html
+OK: services/service_form.html
+OK: services/inquiry_success.html
+OK: services/service_category.html
+OK: services/service_list.html
+OK: services/wellness_list.html
+OK: services/nutrition_list.html
+OK: admin/grappelli_mptt_change_list.html
+OK: admin/platform_stats.html
+OK: admin/system_health.html
+OK: admin/user_management.html
+OK: admin/grappelli_mptt_change_list_results.html
+OK: admin/guardian/contrib/grappelli/obj_perms_manage.html
+OK: admin/guardian/contrib/grappelli/obj_perms_manage_group.html
+OK: admin/guardian/contrib/grappelli/field.html
+OK: admin/charfield_filters/dropdown_filter.html
+OK: admin/charfield_filters/autocomplete_select_filter.html
+OK: admin/charfield_filters/autocomplete_filter.html
+OK: admin/financial/trial_balance.html
+OK: admin/djcelery/change_list.html
+OK: admin/djcelery/change_periodictask_form.html
+OK: accounts/register_choice.html
+OK: accounts/profile.html
+OK: accounts/booking_history.html
+OK: accounts/register.html
+OK: accounts/login.html
+OK: accounts/profile_dashboard.html
+OK: accounts/profile_edit.html
+OK: accounts/security_settings.html
+OK: accounts/preferences.html
+OK: registration/login.html
+
+Templates scanned: 3366
+Errors: 581
+
+TemplateDoesNotExist: 581
+ - index.html: index.html
+ - portal/invoicebase.html: portal/invoicebase.html
+ - portal/procurement_dashboard.html: portal/procurement_dashboard.html
+ - portal/invoice_edit.html: portal/invoice_edit.html
+ - portal/dashboard.html: portal/dashboard.html
+ - portal/invoice_base.html: portal/invoice_base.html
+ - portal/invoice_create_clean.html: portal/invoice_create_clean.html
+ - portal/supplier_form.html: portal/supplier_form.html
+ - portal/purchase_order_form.html: portal/purchase_order_form.html
+ - portal/home.html: portal/home.html
+ - portal/invoice_pdf_clean.html: portal/invoice_pdf_clean.html
+ - portal/invoice_list.html: portal/invoice_list.html
+ - portal/barcode_scanner.html: portal/barcode_scanner.html
+ - portal/purchase_order_detail.html: portal/purchase_order_detail.html
+ - portal/profile.html: portal/profile.html
+ - portal/invoice_create_bak.html: portal/invoice_create_bak.html
+ - portal/export_reports.html: portal/export_reports.html
+ - portal/report.html: portal/report.html
+ - portal/enquiry.html: portal/enquiry.html
+ - portal/customer_detail.html: portal/customer_detail.html
+ - portal/customer_test.html: portal/customer_test.html
+ - portal/base.html: portal/base.html
+ - portal/index.html: portal/index.html
+ - portal/procurement_base.html: portal/procurement_base.html
+ - portal/customer_create.html: portal/customer_create.html
+ - portal/invoice_detail.html: portal/invoice_detail.html
+ - portal/invoice_pdf.html: portal/invoice_pdf.html
+ - portal/supplier_list.html: portal/supplier_list.html
+ - portal/purchase_payment_form.html: portal/purchase_payment_form.html
+ - portal/customer_list.html: portal/customer_list.html
+ - portal/report_base.html: portal/report_base.html
+ - portal/terms.html: portal/terms.html
+ - portal/invoice_pdf_backup.html: portal/invoice_pdf_backup.html
+ - portal/purchase_payment_list.html: portal/purchase_payment_list.html
+ - portal/invoice_create.html: portal/invoice_create.html
+ - portal/theme-toggle.html: portal/theme-toggle.html
+ - portal/purchase_order_list.html: portal/purchase_order_list.html
+ - portal/purchase_payment_detail.html: portal/purchase_payment_detail.html
+ - portal/invoice_create_backup.html: portal/invoice_create_backup.html
+ - portal/includes/_header.html: portal/includes/_header.html
+ - portal/includes/_navigation.html: portal/includes/_navigation.html
+ - portal/includes/_footer.html: portal/includes/_footer.html
+ - portal/products/search.html: portal/products/search.html
+ - portal/widgets/icon_picker.html: portal/widgets/icon_picker.html
+ - portal/rbac/permission_check.html: portal/rbac/permission_check.html
+ - finance/dashboard.html: finance/dashboard.html
+ - finance/transaction_form.html: finance/transaction_form.html
+ - rbac/register.html: rbac/register.html
+ - rbac/emails/verification_email.html: rbac/emails/verification_email.html
+ - sites/almalika/base.html: sites/almalika/base.html

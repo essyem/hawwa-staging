@@ -1,0 +1,12 @@
+<!-- Compatibility stub: simple OTP required form -->
+<div class="otp-required container mt-4">
+	<h3>Enter one-time code</h3>
+	<form method="post">
+		{% csrf_token %}
+			{# management_form is required by form-wizard post processing in two_factor views #}
+			{% if management_form %}
+				{{ management_form.as_hidden }}
+			{% endif %}
+{% include 'accounts/two_factor_otp_required.html' %}
+	</form>
+</div>

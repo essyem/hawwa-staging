@@ -1,0 +1,777 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Financial Reports - Hawwa Admin{% endblock %}
+
+{% block page_title %}Financial Reports{% endblock %}
+{% block page_subtitle %}Comprehensive financial analytics and insights{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'financial:dashboard' %}">Financial</a></li>
+<li class="breadcrumb-item active">Reports</li>
+{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <!-- Header Actions -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'financial:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-chart-line me-2"></i>Dashboard
+            </a>
+            <a href="{% url 'financial:invoice_list' %}" class="btn btn-outline-primary ms-2">
+                <i class="fas fa-file-invoice me-2"></i>Invoices
+            </a>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="fas fa-download me-2"></i>Export Reports
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#"><i class="fas fa-file-excel me-2"></i>Export to Excel</a></li>
+                <li><a class="dropdown-item" href="#"><i class="fas fa-file-pdf me-2"></i>Export to PDF</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#"><i class="fas fa-chart-bar me-2"></i>Dashboard Summary</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Key Metrics (Vertical layout like invoices) -->
+    <div class="admin-card mb-4">
+        <div class="admin-card-header">
+            <h5 class="admin-card-title mb-0">
+                <i class="fas fa-chart-bar me-2"></i>Key Financial Metrics
+            </h5>
+        </div>
+        <div class="admin-card-body">
+            <div class="metrics-list">
+                <div class="metric-item d-flex justify-content-between align-items-center py-3 border-bottom">
+                    <div class="d-flex align-items-center">
+                        <div class="metric-icon bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold">Monthly Revenue</div>
+                            <small class="text-muted">Total income this month</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fs-4 fw-bold text-success">QAR {{ monthly_revenue|floatformat:0|default:"168,474" }}</div>
+                    </div>
+                </div>
+                
+                <div class="metric-item d-flex justify-content-between align-items-center py-3 border-bottom">
+                    <div class="d-flex align-items-center">
+                        <div class="metric-icon bg-danger text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold">Monthly Expenses</div>
+                            <small class="text-muted">Total spending this month</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fs-4 fw-bold text-danger">QAR {{ monthly_expenses|floatformat:0|default:"25,841" }}</div>
+                    </div>
+                </div>
+                
+                <div class="metric-item d-flex justify-content-between align-items-center py-3 border-bottom">
+                    <div class="d-flex align-items-center">
+                        <div class="metric-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold">Net Profit</div>
+                            <small class="text-muted">Revenue minus expenses</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fs-4 fw-bold text-primary">QAR {{ net_profit|floatformat:0|default:"194,314" }}</div>
+                    </div>
+                </div>
+                
+                <div class="metric-item d-flex justify-content-between align-items-center py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="metric-icon bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold">Outstanding</div>
+                            <small class="text-muted">Pending payments</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fs-4 fw-bold text-warning">QAR {{ outstanding_invoices|floatformat:0|default:"0" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Chart -->
+    <div class="admin-card mb-4">
+        <div class="admin-card-header d-flex justify-content-between align-items-center">
+            <h5 class="admin-card-title mb-0">
+                <i class="fas fa-chart-area me-2"></i>Revenue & Expense Trend
+            </h5>
+            <div class="card-actions">
+                <select class="form-select form-select-sm" id="chartPeriod">
+                    <option value="6m">Last 6 Months</option>
+                    <option value="12m" selected>Last 12 Months</option>
+                    <option value="24m">Last 24 Months</option>
+                </select>
+            </div>
+        </div>
+        <div class="admin-card-body">
+            <canvas id="revenueChart" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- Expense Categories -->
+    <div class="admin-card mb-4">
+        <div class="admin-card-header">
+            <h5 class="admin-card-title mb-0">
+                <i class="fas fa-pie-chart me-2"></i>Expense Categories
+            </h5>
+        </div>
+        <div class="admin-card-body">
+            <canvas id="expenseChart" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- Invoice Status Summary -->
+    <div class="admin-card mb-4">
+        <div class="admin-card-header d-flex justify-content-between align-items-center">
+            <h5 class="admin-card-title mb-0">
+                <i class="fas fa-file-invoice me-2"></i>Invoice Status Summary
+            </h5>
+            <a href="{% url 'financial:invoice_list' %}" class="btn btn-sm btn-outline-primary">
+                View All <i class="fas fa-external-link-alt ms-1"></i>
+            </a>
+        </div>
+        <div class="admin-card-body">
+            <div class="invoice-status-list">
+                <div class="status-item d-flex justify-content-between align-items-center py-3 border-bottom">
+                    <div class="d-flex align-items-center">
+                        <div class="status-icon bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold">Paid Invoices</div>
+                            <small class="text-muted">Successfully completed payments</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fs-4 fw-bold text-success">147</div>
+                    </div>
+                </div>
+                
+                <div class="status-item d-flex justify-content-between align-items-center py-3 border-bottom">
+                    <div class="d-flex align-items-center">
+                        <div class="status-icon bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold">Pending Invoices</div>
+                            <small class="text-muted">Awaiting payment</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fs-4 fw-bold text-warning">23</div>
+                    </div>
+                </div>
+                
+                <div class="status-item d-flex justify-content-between align-items-center py-3 border-bottom">
+                    <div class="d-flex align-items-center">
+                        <div class="status-icon bg-danger text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold">Overdue Invoices</div>
+                            <small class="text-muted">Past due date</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fs-4 fw-bold text-danger">8</div>
+                    </div>
+                </div>
+                
+                <div class="status-item d-flex justify-content-between align-items-center py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="status-icon bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold">Draft Invoices</div>
+                            <small class="text-muted">Not yet sent</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fs-4 fw-bold text-secondary">12</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Methods -->
+    <div class="admin-card mb-4">
+        <div class="admin-card-header d-flex justify-content-between align-items-center">
+            <h5 class="admin-card-title mb-0">
+                <i class="fas fa-credit-card me-2"></i>Payment Methods Analysis
+            </h5>
+            <a href="{% url 'financial:payment_list' %}" class="btn btn-sm btn-outline-primary">
+                View All <i class="fas fa-external-link-alt ms-1"></i>
+            </a>
+        </div>
+        <div class="admin-card-body">
+            <div class="payment-methods">
+                <div class="payment-method-item">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="method-name">
+                            <i class="fas fa-credit-card me-2 text-primary"></i>Credit Card
+                        </span>
+                        <span class="method-percentage fw-bold">45%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" style="width: 45%"></div>
+                    </div>
+                </div>
+                
+                <div class="payment-method-item">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="method-name">
+                            <i class="fas fa-university me-2 text-success"></i>Bank Transfer
+                        </span>
+                        <span class="method-percentage fw-bold">30%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" style="width: 30%"></div>
+                    </div>
+                </div>
+                
+                <div class="payment-method-item">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="method-name">
+                            <i class="fas fa-money-bill me-2 text-warning"></i>Cash
+                        </span>
+                        <span class="method-percentage fw-bold">15%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-warning" style="width: 15%"></div>
+                    </div>
+                </div>
+                
+                <div class="payment-method-item">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="method-name">
+                            <i class="fas fa-globe me-2 text-info"></i>Online Payment
+                        </span>
+                        <span class="method-percentage fw-bold">10%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-info" style="width: 10%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h5 class="admin-card-title mb-0">
+                <i class="fas fa-lightning-bolt me-2"></i>Quick Actions
+            </h5>
+        </div>
+    <!-- Quick Actions -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h5 class="admin-card-title mb-0">
+                <i class="fas fa-lightning-bolt me-2"></i>Quick Actions
+            </h5>
+        </div>
+        <div class="admin-card-body">
+            <div class="quick-actions-list">
+                <a href="{% url 'financial:invoice_create' %}" class="quick-action-item d-flex align-items-center py-3 border-bottom text-decoration-none">
+                    <div class="action-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold text-dark">Create Invoice</div>
+                        <small class="text-muted">Generate new invoice for client</small>
+                    </div>
+                    <i class="fas fa-chevron-right text-muted"></i>
+                </a>
+                
+                <a href="{% url 'financial:payment_create' %}" class="quick-action-item d-flex align-items-center py-3 border-bottom text-decoration-none">
+                    <div class="action-icon bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold text-dark">Record Payment</div>
+                        <small class="text-muted">Log received payments</small>
+                    </div>
+                    <i class="fas fa-chevron-right text-muted"></i>
+                </a>
+                
+                <a href="{% url 'financial:expense_create' %}" class="quick-action-item d-flex align-items-center py-3 border-bottom text-decoration-none">
+                    <div class="action-icon bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold text-dark">Add Expense</div>
+                        <small class="text-muted">Track business expenses</small>
+                    </div>
+                    <i class="fas fa-chevron-right text-muted"></i>
+                </a>
+                
+                <a href="#" class="quick-action-item d-flex align-items-center py-3 text-decoration-none" onclick="generateReport()">
+                    <div class="action-icon bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold text-dark">Generate Report</div>
+                        <small class="text-muted">Export financial reports</small>
+                    </div>
+                    <i class="fas fa-chevron-right text-muted"></i>
+                </a>
+            </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<style>
+/* Stats Cards */
+.stats-card {
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    border: none;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--card-accent, #667eea);
+}
+
+.stats-revenue::before { background: linear-gradient(45deg, #28a745, #20c997); }
+.stats-expenses::before { background: linear-gradient(45deg, #dc3545, #fd7e14); }
+.stats-profit::before { background: linear-gradient(45deg, #007bff, #6610f2); }
+.stats-outstanding::before { background: linear-gradient(45deg, #ffc107, #fd7e14); }
+
+.stats-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.stats-revenue .stats-icon { background: linear-gradient(135deg, #28a745, #20c997); }
+.stats-expenses .stats-icon { background: linear-gradient(135deg, #dc3545, #fd7e14); }
+.stats-profit .stats-icon { background: linear-gradient(135deg, #007bff, #6610f2); }
+.stats-outstanding .stats-icon { background: linear-gradient(135deg, #ffc107, #fd7e14); }
+
+.stats-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.stats-label {
+    font-size: 0.9rem;
+    color: #718096;
+    margin: 0;
+    font-weight: 500;
+}
+
+.stats-trend {
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.trend-indicator {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.trend-up {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.trend-down {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.trend-warning {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+/* Admin Cards */
+.admin-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.admin-card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: between;
+    align-items: center;
+}
+
+.admin-card-header h6 {
+    margin: 0;
+    color: #495057;
+    font-weight: 600;
+}
+
+.card-actions .form-select {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    width: auto;
+}
+
+.admin-card-body {
+    padding: 1.5rem;
+}
+
+/* Metric Cards */
+.metric-card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.metric-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.metric-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: white;
+}
+
+.metric-paid .metric-icon { background: #28a745; }
+.metric-pending .metric-icon { background: #ffc107; }
+.metric-overdue .metric-icon { background: #dc3545; }
+.metric-draft .metric-icon { background: #6c757d; }
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0;
+}
+
+.metric-label {
+    font-size: 0.8rem;
+    color: #718096;
+    margin: 0;
+}
+
+/* Payment Methods */
+.payment-method-item {
+    margin-bottom: 1.5rem;
+}
+
+.payment-method-item:last-child {
+    margin-bottom: 0;
+}
+
+.method-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.method-percentage {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #4a5568;
+}
+
+.progress {
+    background-color: #e2e8f0;
+    border-radius: 4px;
+}
+
+/* Quick Actions */
+.quick-action-card {
+    display: block;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: #495057;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.quick-action-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 4px 12px rgba(0,123,255,0.15);
+    color: #007bff;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+.action-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: inherit;
+}
+
+.action-text {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .stats-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stats-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .stats-icon {
+        margin: 0 auto;
+    }
+    
+    .stats-value {
+        font-size: 1.5rem;
+    }
+    
+    .metric-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .quick-action-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .action-icon {
+        font-size: 1.5rem;
+    }
+
+    /* Force full width on mobile */
+    .admin-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .admin-card-body {
+        padding: 1rem;
+    }
+    
+    /* Ensure charts stack vertically */
+    .row .col-lg-8,
+    .row .col-lg-6,
+    .row .col-lg-4 {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-container {
+        padding: 0.5rem;
+    }
+    
+    .stats-card {
+        padding: 0.875rem;
+    }
+    
+    .stats-value {
+        font-size: 1.25rem;
+    }
+    
+    .stats-label {
+        font-size: 0.75rem;
+    }
+    
+    .quick-action-card {
+        padding: 0.875rem;
+    }
+    
+    .admin-card-header {
+        padding: 0.75rem 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .admin-card-body {
+        padding: 0.875rem;
+    }
+    
+    .btn-group {
+        width: 100%;
+    }
+    
+    .dropdown-menu {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Revenue Chart
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Revenue',
+                data: [12000, 19000, 15000, 25000, 22000, 30000, 28000, 35000, 32000, 40000, 38000, 45000],
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }, {
+                label: 'Expenses',
+                data: [8000, 12000, 9000, 15000, 13000, 18000, 16000, 20000, 19000, 22000, 21000, 25000],
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'QAR ' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Expense Categories Chart
+    const expenseCtx = document.getElementById('expenseChart').getContext('2d');
+    const expenseChart = new Chart(expenseCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Operational', 'Marketing', 'Equipment', 'Supplies', 'Utilities'],
+            datasets: [{
+                data: [35, 25, 20, 12, 8],
+                backgroundColor: [
+                    '#007bff',
+                    '#28a745',
+                    '#ffc107',
+                    '#dc3545',
+                    '#6f42c1'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                }
+            }
+        }
+    });
+});
+
+function generateReport() {
+    // Placeholder for report generation
+    alert('Report generation feature will be implemented soon!');
+}
+</script>
+{% endblock %}

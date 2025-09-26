@@ -1,0 +1,9 @@
+/* Site-wide overrides to ensure navigation dropdowns render above content */
+/* Previously inlined in templates/base/base.html */
+.navbar, header, .navbar-nav, .dropdown-menu {
+    position: relative;
+    z-index: 1050; /* above default page content */
+}
+.dropdown-menu {
+    z-index: 2000; /* ensure menu appears above modals/overlays */
+}

@@ -1,0 +1,105 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <p>This is a preview of the import. Review matched rows below. When you commit, changes will be applied.</p>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="commit_payload" value="{{ commit_payload }}" />
+        <table border="1" cellpadding="6">
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>Description</th>
+                    <th>Cost</th>
+                    <th>Currency</th>
+                    <th>Matched?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in preview_rows %}
+                <tr>
+                    <td>
+                        <input type="text" name="row_invoice_{{ forloop.counter0 }}" value="{{ r.invoice }}" />
+                    </td>
+                    <td>
+                        <input type="text" name="row_description_{{ forloop.counter0 }}" value="{{ r.description }}" />
+                    </td>
+                    <td>
+                        <input type="text" name="row_cost_{{ forloop.counter0 }}" value="{{ r.cost }}" />
+                    </td>
+                    <td>
+                        <input type="text" name="row_currency_{{ forloop.counter0 }}" value="{{ r.currency }}" />
+                    </td>
+                    <td>
+                            {% if r.suggestions.descriptions or r.suggestions.invoices %}
+                                <div style="margin-top:6px;"><strong>Suggestions:</strong>
+                                    <ul>
+                                        {% for d in r.suggestions.descriptions %}
+                                            <li><a href="#" class="apply-suggestion" data-row="{{ forloop.counter0 }}" data-field="description" data-value="{{ d }}">Description: {{ d }}</a></li>
+                                        {% endfor %}
+                                        {% for i in r.suggestions.invoices %}
+                                            <li><a href="#" class="apply-suggestion" data-row="{{ forloop.counter0 }}" data-field="invoice" data-value="{{ i }}">Invoice: {{ i }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        {% if r.matched %}
+                            Yes
+                        {% else %}
+                            No
+                            {% if r.suggestions.descriptions or r.suggestions.invoices %}
+                                <div style="margin-top:6px;"><strong>Suggestions:</strong>
+                                    <ul>
+                                        {% for d in r.suggestions.descriptions %}
+                                            <li>Description: {{ d }}</li>
+                                        {% endfor %}
+                                        {% for i in r.suggestions.invoices %}
+                                            <li>Invoice: {{ i }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <input type="hidden" name="rows_count" value="{{ preview_rows|length }}" />
+        <p>
+            <button type="submit">Commit Import</button>
+        </p>
+    </form>
+        <script>
+            // Small helper: when clicking a suggestion link, copy value into the appropriate input
+            document.addEventListener('click', function (e) {
+                var t = e.target;
+                if (t && t.classList && t.classList.contains('apply-suggestion')) {
+                    e.preventDefault();
+                    var row = t.getAttribute('data-row');
+                    var field = t.getAttribute('data-field');
+                    var value = t.getAttribute('data-value');
+                    var inputName = 'row_' + (field === 'invoice' ? 'invoice_' + row : (field + '_' + row));
+                    // normalize inputName for description/invoice/cost/currency
+                    if (field === 'invoice') inputName = 'row_invoice_' + row;
+                    if (field === 'description') inputName = 'row_description_' + row;
+                    if (field === 'cost') inputName = 'row_cost_' + row;
+                    if (field === 'currency') inputName = 'row_currency_' + row;
+                    var input = document.getElementsByName(inputName)[0];
+                    if (input) {
+                        input.value = value;
+                        // visually highlight the input briefly
+                        input.style.backgroundColor = '#ffffcc';
+                        setTimeout(function() { input.style.backgroundColor = ''; }, 1200);
+                    }
+                }
+            }, false);
+        </script>
+    <p><a href="/admin/financial/invoiceitem/">Back to Invoice Items</a></p>
+</body>
+</html>

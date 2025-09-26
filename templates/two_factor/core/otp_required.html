@@ -1,0 +1,8 @@
+<!-- STUB: two_factor/core/otp_required.html -->
+<div class="otp-required">
+  <p>OTP required — enter code below:</p>
+  <form method="post">{% csrf_token %}
+    <input name="otp_token" type="text" />
+    <button type="submit">Verify</button>
+  </form>
+</div>

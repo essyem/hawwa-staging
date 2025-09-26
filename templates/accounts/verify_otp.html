@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Enter verification code{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Enter the one-time code</h2>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="mb-3">
+      {{ form.email.label_tag }}
+      {% if request.GET.email %}
+        <input type="email" name="email" value="{{ request.GET.email }}" class="form-control" />
+      {% else %}
+        {{ form.email }}
+      {% endif %}
+      {{ form.email.errors }}
+    </div>
+    <div class="mb-3">
+      {{ form.code.label_tag }}
+      {{ form.code }}
+      {{ form.code.errors }}
+    </div>
+    <button type="submit" class="btn btn-primary">Verify</button>
+  </form>
+</div>
+{% endblock %}

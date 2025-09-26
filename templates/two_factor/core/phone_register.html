@@ -1,0 +1,6 @@
+<!-- STUB: two_factor/core/phone_register.html -->
+{% extends 'two_factor/_base.html' %}
+{% block two_factor_content %}
+<h2>Register phone for SMS</h2>
+<form method="post">{% csrf_token %}{{ form.as_p }}<button>Register</button></form>
+{% endblock %}

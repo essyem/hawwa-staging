@@ -1,0 +1,376 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}
+{% if object %}Edit Invoice #{{ object.invoice_number }}{% else %}Create Invoice{% endif %} - Hawwa Admin
+{% endblock %}
+
+{% block page_title %}
+{% if object %}Edit Invoice{% else %}Create Invoice{% endif %}
+{% endblock %}
+
+{% block page_subtitle %}
+{% if object %}Invoice #{{ object.invoice_number }}{% else %}Create a new invoice{% endif %}
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'financial:dashboard' %}">Financial</a></li>
+<li class="breadcrumb-item"><a href="{% url 'financial:invoice_list' %}">Invoices</a></li>
+{% if object %}
+<li class="breadcrumb-item"><a href="{% url 'financial:invoice_detail' object.pk %}">Invoice #{{ object.invoice_number }}</a></li>
+<li class="breadcrumb-item active">Edit</li>
+{% else %}
+<li class="breadcrumb-item active">Create</li>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <!-- Header Actions -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'financial:invoice_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Invoices
+            </a>
+            {% if object %}
+            <a href="{% url 'financial:invoice_detail' object.pk %}" class="btn btn-outline-info ms-2">
+                <i class="fas fa-eye me-2"></i>View Invoice
+            </a>
+            {% endif %}
+        </div>
+        <div>
+            {% if object %}
+            <span class="badge badge-{{ object.status|lower }} fs-6">{{ object.get_status_display }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Invoice Form -->
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        
+        <div class="row g-4">
+            <!-- Main Invoice Details -->
+            <div class="col-lg-8">
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title mb-0">
+                            <i class="fas fa-file-invoice me-2"></i>Invoice Details
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="row g-3">
+                            <!-- Customer -->
+                            <div class="col-md-6">
+                                <label for="{{ form.customer.id_for_label }}" class="form-label">
+                                    Customer <span class="text-danger">*</span>
+                                </label>
+                                {{ form.customer }}
+                                {% if form.customer.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.customer.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Invoice Type -->
+                            <div class="col-md-6">
+                                <label for="{{ form.invoice_type.id_for_label }}" class="form-label">
+                                    Invoice Type
+                                </label>
+                                {{ form.invoice_type }}
+                                {% if form.invoice_type.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.invoice_type.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-6">
+                                <label for="{{ form.status.id_for_label }}" class="form-label">
+                                    Status
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.status.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Due Date -->
+                            <div class="col-md-6">
+                                <label for="{{ form.due_date.id_for_label }}" class="form-label">
+                                    Due Date <span class="text-danger">*</span>
+                                </label>
+                                {{ form.due_date }}
+                                {% if form.due_date.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.due_date.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="col-12">
+                                <label for="{{ form.notes.id_for_label }}" class="form-label">
+                                    Notes
+                                </label>
+                                {{ form.notes }}
+                                {% if form.notes.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.notes.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">Public notes that will appear on the invoice</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Billing Information -->
+                {% if object %}
+                <div class="admin-card mt-4">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title mb-0">
+                            <i class="fas fa-address-card me-2"></i>Billing Information
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.billing_name.id_for_label }}" class="form-label">
+                                    Billing Name
+                                </label>
+                                {{ form.billing_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.billing_email.id_for_label }}" class="form-label">
+                                    Billing Email
+                                </label>
+                                {{ form.billing_email }}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.billing_phone.id_for_label }}" class="form-label">
+                                    Billing Phone
+                                </label>
+                                {{ form.billing_phone }}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.billing_city.id_for_label }}" class="form-label">
+                                    City
+                                </label>
+                                {{ form.billing_city }}
+                            </div>
+                            <div class="col-12">
+                                <label for="{{ form.billing_address.id_for_label }}" class="form-label">
+                                    Address
+                                </label>
+                                {{ form.billing_address }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Invoice Summary -->
+                {% if object %}
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title mb-0">
+                            <i class="fas fa-calculator me-2"></i>Invoice Summary
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="invoice-summary">
+                            <div class="summary-row">
+                                <span>Subtotal</span>
+                                <span class="fw-bold">QAR {{ object.subtotal|floatformat:2 }}</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Tax</span>
+                                <span class="fw-bold">QAR {{ object.tax_amount|floatformat:2 }}</span>
+                            </div>
+                            {% if object.discount_amount %}
+                            <div class="summary-row text-success">
+                                <span>Discount</span>
+                                <span class="fw-bold">-QAR {{ object.discount_amount|floatformat:2 }}</span>
+                            </div>
+                            {% endif %}
+                            <hr>
+                            <div class="summary-row total">
+                                <span>Total</span>
+                                <span class="fw-bold">QAR {{ object.total_amount|floatformat:2 }}</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Paid</span>
+                                <span class="fw-bold text-success">QAR {{ object.paid_amount|floatformat:2 }}</span>
+                            </div>
+                            <div class="summary-row balance">
+                                <span>Balance Due</span>
+                                <span class="fw-bold {% if object.balance_due > 0 %}text-danger{% else %}text-success{% endif %}">
+                                    QAR {{ object.balance_due|floatformat:2 }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Quick Actions -->
+                <div class="admin-card mt-4">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title mb-0">
+                            <i class="fas fa-lightning-bolt me-2"></i>Actions
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-admin-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {% if object %}Update Invoice{% else %}Create Invoice{% endif %}
+                            </button>
+                            
+                            {% if object %}
+                            <a href="{% url 'financial:invoice_pdf' object.pk %}" class="btn btn-outline-info" target="_blank">
+                                <i class="fas fa-file-pdf me-2"></i>Download PDF
+                            </a>
+                            
+                            {% if object.status == 'draft' %}
+                            <button type="button" class="btn btn-outline-success" onclick="sendInvoice({{ object.pk }})">
+                                <i class="fas fa-paper-plane me-2"></i>Send Invoice
+                            </button>
+                            {% endif %}
+                            
+                            <hr>
+                            
+                            <a href="{% url 'financial:invoice_delete' object.pk %}" class="btn btn-outline-danger">
+                                <i class="fas fa-trash me-2"></i>Delete Invoice
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.invoice-summary {
+    font-size: 0.9rem;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.summary-row.total {
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-top: 2px solid #dee2e6;
+    border-bottom: 2px solid #dee2e6;
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+}
+
+.summary-row.balance {
+    font-size: 1.05rem;
+    font-weight: bold;
+    background: #f8f9fa;
+    margin: 0 -1rem;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-top: 0.5rem;
+}
+
+.badge-draft { background-color: #6c757d; }
+.badge-pending { background-color: #ffc107; color: #000; }
+.badge-sent { background-color: #17a2b8; }
+.badge-paid { background-color: #28a745; }
+.badge-partially_paid { background-color: #fd7e14; }
+.badge-overdue { background-color: #dc3545; }
+.badge-cancelled { background-color: #6c757d; }
+.badge-refunded { background-color: #e83e8c; }
+
+/* Form styling */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function sendInvoice(invoiceId) {
+    if (confirm('Are you sure you want to send this invoice to the customer?')) {
+        fetch(`/financial/invoices/${invoiceId}/send/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Invoice sent successfully!');
+                location.reload();
+            } else {
+                alert('Error sending invoice: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Error sending invoice');
+            console.error('Error:', error);
+        });
+    }
+}
+
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %}

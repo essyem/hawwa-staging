@@ -1,0 +1,486 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+{% load humanize %}
+{% load financial_tags %}
+
+{% block title %}Invoices - Hawwa Admin{% endblock %}
+
+{% block page_title %}Invoices{% endblock %}
+{% block page_subtitle %}Manage and track all your invoices{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'financial:dashboard' %}">Financial</a></li>
+<li class="breadcrumb-item active">Invoices</li>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'financial:invoice_create' %}" class="btn btn-admin-primary">
+    <i class="fas fa-plus me-2"></i>New Invoice
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Filters and Search -->
+<div class="admin-card mb-4">
+    <div class="admin-card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-lg-3 col-md-6 col-12">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ current_search }}" placeholder="Invoice number, customer...">
+            </div>
+            <div class="col-lg-2 col-md-6 col-12">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Statuses</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if value == current_status %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6 col-12">
+                <label for="date_from" class="form-label">From Date</label>
+                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from }}">
+            </div>
+            <div class="col-lg-2 col-md-6 col-12">
+                <label for="date_to" class="form-label">To Date</label>
+                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to }}">
+            </div>
+            <div class="col-lg-3 col-12">
+                <button type="submit" class="btn btn-admin-primary me-2">
+                    <i class="fas fa-search me-1"></i>Filter
+                </button>
+                <a href="{% url 'financial:invoice_list' %}" class="btn btn-admin-secondary">
+                    <i class="fas fa-times me-1"></i>Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Invoice Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-value">{{ all_invoices.count }}</div>
+            <div class="stats-label">Total Invoices</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-value">{% invoice_count_by_status all_invoices 'paid' %}</div>
+            <div class="stats-label">Paid</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-value">{% invoice_count_by_status all_invoices 'pending' %}</div>
+            <div class="stats-label">Pending</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-value">{% invoice_count_by_status all_invoices 'overdue' %}</div>
+            <div class="stats-label">Overdue</div>
+        </div>
+    </div>
+</div>
+
+<!-- Invoices Table -->
+<div class="admin-card">
+    <div class="admin-card-header d-flex justify-content-between align-items-center">
+        <h5 class="admin-card-title mb-0">
+            Invoices 
+            <span class="badge bg-secondary ms-2">{{ invoices.count }}</span>
+        </h5>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-admin-secondary" onclick="exportInvoices()">
+                <i class="fas fa-download me-1"></i>Export
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-admin-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-cog me-1"></i>Actions
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="bulkStatusUpdate()">
+                        <i class="fas fa-edit me-2"></i>Bulk Status Update
+                    </a></li>
+                    <li><a class="dropdown-item" href="#" onclick="bulkSend()">
+                        <i class="fas fa-paper-plane me-2"></i>Send Selected
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="bulkDelete()">
+                        <i class="fas fa-trash me-2"></i>Delete Selected
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="admin-table">
+        {% if invoices %}
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                    </th>
+                    <th>Invoice #</th>
+                    <th>Customer</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Due Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                <tr class="invoice-row" data-invoice-id="{{ invoice.pk }}">
+                    <td>
+                        <input type="checkbox" class="invoice-checkbox" value="{{ invoice.pk }}">
+                    </td>
+                    <td>
+                        <a href="{% url 'financial:invoice_detail' invoice.pk %}" 
+                           class="fw-bold text-decoration-none">
+                            #{{ invoice.invoice_number }}
+                        </a>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                {{ invoice.customer.first_name|first|upper }}{{ invoice.customer.last_name|first|upper }}
+                            </div>
+                            <div>
+                                <div class="fw-medium">{{ invoice.customer.get_full_name }}</div>
+                                <small class="text-muted">{{ invoice.customer.email }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if invoice.service %}
+                        <span class="badge bg-light text-dark">{{ invoice.service.name }}</span>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ invoice.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <span class="{% if invoice.status == 'overdue' %}text-danger{% endif %}">
+                            {{ invoice.due_date|date:"M d, Y" }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="fw-bold">QAR {{ invoice.total_amount|floatformat:2|intcomma }}</span>
+                    </td>
+                    <td>
+                        <span class="status-badge status-{{ invoice.status }}">
+                            {{ invoice.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-link text-muted" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'financial:invoice_detail' invoice.pk %}">
+                                    <i class="fas fa-eye me-2"></i>View
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'financial:invoice_update' invoice.pk %}">
+                                    <i class="fas fa-edit me-2"></i>Edit
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'financial:invoice_pdf' invoice.pk %}">
+                                    <i class="fas fa-file-pdf me-2"></i>Download PDF
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'financial:invoice_send' invoice.pk %}">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Email
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateInvoiceStatus({{ invoice.pk }}, 'paid')">
+                                    <i class="fas fa-check me-2"></i>Mark as Paid
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateInvoiceStatus({{ invoice.pk }}, 'pending')">
+                                    <i class="fas fa-clock me-2"></i>Mark as Pending
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'financial:invoice_delete' invoice.pk %}">
+                                    <i class="fas fa-trash me-2"></i>Delete
+                                </a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-file-invoice fa-4x text-muted mb-3"></i>
+            <h5 class="text-muted">No invoices found</h5>
+            <p class="text-muted mb-4">Get started by creating your first invoice</p>
+            <a href="{% url 'financial:invoice_create' %}" class="btn btn-admin-primary">
+                <i class="fas fa-plus me-2"></i>Create Invoice
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="admin-card-body border-top">
+        <nav aria-label="Invoice pagination">
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Previous</a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Last</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Quick Payment Modal -->
+<div class="modal fade" id="quickPaymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Record Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickPaymentForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="payment_invoice_id" name="invoice_id">
+                    <div class="mb-3">
+                        <label for="payment_amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="payment_amount" name="amount" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="payment_method" class="form-label">Payment Method</label>
+                        <select class="form-select" id="payment_method" name="payment_method" required>
+                            <option value="cash">Cash</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="credit_card">Credit Card</option>
+                            <option value="check">Check</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-admin-primary" onclick="submitQuickPayment()">Record Payment</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+    
+    .status-paid {
+        background: #d1f2eb;
+        color: #0c7b3b;
+    }
+    
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-overdue {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-draft {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .invoice-row:hover {
+        background-color: rgba(0, 120, 212, 0.02);
+    }
+    
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        font-size: 0.75rem;
+    }
+    
+    .stats-card::before {
+        background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-primary-hover) 100%);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.invoice-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+}
+
+function updateInvoiceStatus(invoiceId, status) {
+    if (confirm('Are you sure you want to update this invoice status?')) {
+        fetch('{% url "financial:invoice_status_update_api" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                invoice_id: invoiceId,
+                status: status
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                adminUtils.showNotification(data.message, 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                adminUtils.showNotification(data.error, 'error');
+            }
+        })
+        .catch(error => {
+            adminUtils.showNotification('Error updating invoice status', 'error');
+        });
+    }
+}
+
+function exportInvoices() {
+    const searchParams = new URLSearchParams(window.location.search);
+    window.open('{% url "financial:export_report" "invoices" %}?' + searchParams.toString(), '_blank');
+}
+
+function bulkStatusUpdate() {
+    const selected = getSelectedInvoices();
+    if (selected.length === 0) {
+        adminUtils.showNotification('Please select at least one invoice', 'warning');
+        return;
+    }
+    
+    const status = prompt('Enter new status (paid, pending, overdue, draft):');
+    if (status && ['paid', 'pending', 'overdue', 'draft'].includes(status)) {
+        // Implement bulk update
+        adminUtils.showNotification(`Updating ${selected.length} invoices...`, 'info');
+    }
+}
+
+function bulkSend() {
+    const selected = getSelectedInvoices();
+    if (selected.length === 0) {
+        adminUtils.showNotification('Please select at least one invoice', 'warning');
+        return;
+    }
+    
+    if (confirm(`Send ${selected.length} selected invoices via email?`)) {
+        adminUtils.showNotification('Sending invoices...', 'info');
+        // Implement bulk send
+    }
+}
+
+function bulkDelete() {
+    const selected = getSelectedInvoices();
+    if (selected.length === 0) {
+        adminUtils.showNotification('Please select at least one invoice', 'warning');
+        return;
+    }
+    
+    if (confirm(`Delete ${selected.length} selected invoices? This action cannot be undone.`)) {
+        // Implement bulk delete
+        adminUtils.showNotification('Deleting invoices...', 'info');
+    }
+}
+
+function getSelectedInvoices() {
+    const checkboxes = document.querySelectorAll('.invoice-checkbox:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+function recordQuickPayment(invoiceId, amount) {
+    document.getElementById('payment_invoice_id').value = invoiceId;
+    document.getElementById('payment_amount').value = amount;
+    new bootstrap.Modal(document.getElementById('quickPaymentModal')).show();
+}
+
+function submitQuickPayment() {
+    const formData = new FormData(document.getElementById('quickPaymentForm'));
+    const data = Object.fromEntries(formData);
+    
+    fetch('{% url "financial:payment_quick_add_api" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            adminUtils.showNotification(data.message, 'success');
+            bootstrap.Modal.getInstance(document.getElementById('quickPaymentModal')).hide();
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            adminUtils.showNotification(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        adminUtils.showNotification('Error recording payment', 'error');
+    });
+}
+
+// Auto-refresh every 30 seconds for real-time updates
+setInterval(function() {
+    // Only refresh if no modals are open
+    if (!document.querySelector('.modal.show')) {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('ajax', '1');
+        
+        fetch(currentUrl)
+            .then(response => response.text())
+            .then(html => {
+                // Update table content without full reload
+                // Implementation depends on your needs
+            })
+            .catch(error => console.log('Auto-refresh error:', error));
+    }
+}, 30000);
+</script>
+{% endblock %}

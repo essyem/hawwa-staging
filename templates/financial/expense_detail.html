@@ -1,0 +1,270 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Expense Details - Hawwa Admin{% endblock %}
+
+{% block page_title %}Expense Details{% endblock %}
+{% block page_subtitle %}{{ expense.description }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'financial:dashboard' %}">Financial</a></li>
+<li class="breadcrumb-item"><a href="{% url 'financial:expense_list' %}">Expenses</a></li>
+<li class="breadcrumb-item active">Details</li>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'financial:expense_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Expenses
+            </a>
+        </div>
+        <div>
+            <a href="{% url 'financial:expense_update' expense.pk %}" class="btn btn-primary">
+                <i class="fas fa-edit me-2"></i>Edit Expense
+            </a>
+            <a href="{% url 'financial:expense_delete' expense.pk %}" class="btn btn-outline-danger ms-2">
+                <i class="fas fa-trash me-2"></i>Delete
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Details -->
+        <div class="col-lg-8">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h6 class="mb-0"><i class="fas fa-receipt me-2"></i>Expense Information</h6>
+                </div>
+                <div class="admin-card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="detail-label">Description</label>
+                                <div class="detail-value">{{ expense.description }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="detail-label">Amount</label>
+                                <div class="detail-value amount">QAR {{ expense.amount|floatformat:2 }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="detail-label">Expense Type</label>
+                                <div class="detail-value">
+                                    <span class="badge bg-info">{{ expense.get_expense_type_display }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="detail-label">Category</label>
+                                <div class="detail-value">
+                                    {% if expense.category %}
+                                        {{ expense.category.name }}
+                                    {% else %}
+                                        <span class="text-muted">Uncategorized</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="detail-label">Expense Date</label>
+                                <div class="detail-value">
+                                    {{ expense.expense_date|date:"F d, Y" }}
+                                    <small class="text-muted d-block">{{ expense.expense_date|timesince }} ago</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="detail-label">Status</label>
+                                <div class="detail-value">
+                                    <div class="d-flex gap-2">
+                                        {% if expense.is_approved %}
+                                            <span class="badge bg-success">Approved</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending Approval</span>
+                                        {% endif %}
+                                        {% if expense.is_paid %}
+                                            <span class="badge bg-primary">Paid</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Unpaid</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if expense.payment_date %}
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="detail-label">Payment Date</label>
+                                <div class="detail-value">{{ expense.payment_date|date:"F d, Y" }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if expense.notes %}
+                        <div class="col-md-12">
+                            <div class="detail-item">
+                                <label class="detail-label">Notes</label>
+                                <div class="detail-value">{{ expense.notes|linebreaks }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Vendor Information -->
+            {% if expense.vendor_name or expense.vendor_email or expense.vendor_phone %}
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <h6 class="mb-0"><i class="fas fa-building me-2"></i>Vendor Information</h6>
+                </div>
+                <div class="admin-card-body">
+                    {% if expense.vendor_name %}
+                    <div class="detail-item mb-3">
+                        <label class="detail-label">Name</label>
+                        <div class="detail-value">{{ expense.vendor_name }}</div>
+                    </div>
+                    {% endif %}
+                    {% if expense.vendor_email %}
+                    <div class="detail-item mb-3">
+                        <label class="detail-label">Email</label>
+                        <div class="detail-value">
+                            <a href="mailto:{{ expense.vendor_email }}" class="text-primary">
+                                {{ expense.vendor_email }}
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if expense.vendor_phone %}
+                    <div class="detail-item">
+                        <label class="detail-label">Phone</label>
+                        <div class="detail-value">
+                            <a href="tel:{{ expense.vendor_phone }}" class="text-primary">
+                                {{ expense.vendor_phone }}
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Receipt Image -->
+            {% if expense.receipt_image %}
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <h6 class="mb-0"><i class="fas fa-image me-2"></i>Receipt</h6>
+                </div>
+                <div class="admin-card-body text-center">
+                    <img src="{{ expense.receipt_image.url }}" alt="Receipt" class="img-fluid rounded" style="max-height: 300px;">
+                    <div class="mt-2">
+                        <a href="{{ expense.receipt_image.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-external-link-alt me-1"></i>View Full Size
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Invoice File -->
+            {% if expense.invoice_file %}
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <h6 class="mb-0"><i class="fas fa-file-pdf me-2"></i>Invoice File</h6>
+                </div>
+                <div class="admin-card-body text-center">
+                    <div class="file-preview mb-3">
+                        <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                    </div>
+                    <a href="{{ expense.invoice_file.url }}" target="_blank" class="btn btn-outline-primary">
+                        <i class="fas fa-download me-1"></i>Download Invoice
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Metadata -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Metadata</h6>
+                </div>
+                <div class="admin-card-body">
+                    <div class="detail-item mb-3">
+                        <label class="detail-label">Created At</label>
+                        <div class="detail-value">
+                            {{ expense.created_at|date:"F d, Y g:i A" }}
+                        </div>
+                    </div>
+                    <div class="detail-item mb-3">
+                        <label class="detail-label">Last Updated</label>
+                        <div class="detail-value">
+                            {{ expense.updated_at|date:"F d, Y g:i A" }}
+                        </div>
+                    </div>
+                    {% if expense.created_by %}
+                    <div class="detail-item">
+                        <label class="detail-label">Created By</label>
+                        <div class="detail-value">{{ expense.created_by.get_full_name|default:expense.created_by.email }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.detail-item {
+    margin-bottom: 1rem;
+}
+
+.detail-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.detail-value {
+    font-size: 1rem;
+    color: #333;
+}
+
+.detail-value.amount {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #28a745;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+
+.admin-card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.file-preview {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+}
+</style>
+{% endblock %}

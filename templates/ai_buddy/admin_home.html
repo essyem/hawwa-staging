@@ -1,0 +1,472 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+
+{% block title %}AI Buddy - Your Personal Postpartum Companion{% endblock %}
+
+{% block page_title %}AI Buddy{% endblock %}
+{% block page_subtitle %}Your personal postpartum companion, here to support you 24/7{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+<li class="breadcrumb-item active">AI Buddy</li>
+{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-admin-primary" data-bs-toggle="modal" data-bs-target="#newConversationModal">
+    <i class="fas fa-comments me-2"></i>Start New Chat
+</button>
+<button class="btn btn-admin-secondary ms-2" onclick="askAIQuestion()">
+    <i class="fas fa-question-circle me-2"></i>Quick Question
+</button>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ai-bubble {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 25px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .ai-bubble::before {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 20px;
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 10px solid #764ba2;
+    }
+    
+    .wellness-metric {
+        background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .metric-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .wellness-insight {
+        background: #f8f9fa;
+        border-left: 4px solid #28a745;
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+    }
+    
+    .conversation-card {
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+        margin-bottom: 1rem;
+    }
+    
+    .conversation-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .quick-action-btn {
+        background: white;
+        border: 2px solid #667eea;
+        color: #667eea;
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+        margin: 0.25rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .quick-action-btn:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .conversation-starter {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 15px;
+        padding: 0.75rem 1rem;
+        margin: 0.5rem 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .conversation-starter:hover {
+        background: rgba(255,255,255,0.2);
+        transform: scale(1.02);
+    }
+    
+    .recommendation-card {
+        border-left: 4px solid #667eea;
+        background: #f8f9ff;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- AI Buddy Daily Message -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="ai-bubble">
+            <div class="d-flex align-items-start">
+                <div class="me-3">
+                    <div class="bg-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="fas fa-heart text-primary fa-lg"></i>
+                    </div>
+                </div>
+                <div class="flex-grow-1">
+                    <h5 class="mb-2">{{ ai_profile.buddy_name|default:"Your AI Buddy" }} says:</h5>
+                    <p class="mb-3">{{ daily_message|default:"Welcome back! I'm here to support you on your postpartum journey. How are you feeling today?" }}</p>
+                    
+                    <!-- Quick conversation starters -->
+                    <div class="d-flex flex-wrap">
+                        <div class="conversation-starter" onclick="startQuickConversation('wellness', 'How am I doing today?')">
+                            <i class="fas fa-heart-pulse me-2"></i>Check my wellness
+                        </div>
+                        <div class="conversation-starter" onclick="startQuickConversation('emotional', 'I need emotional support')">
+                            <i class="fas fa-comments me-2"></i>Need support
+                        </div>
+                        <div class="conversation-starter" onclick="startQuickConversation('general', 'I have a question')">
+                            <i class="fas fa-question-circle me-2"></i>Ask a question
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Enhanced Wellness Overview -->
+    <div class="col-md-4 mb-4">
+        <div class="admin-card h-100">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-heart text-danger me-2"></i>
+                    Wellness Overview
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                <!-- Wellness Insights -->
+                {% if wellness_insights.status != 'no_data' %}
+                <div class="wellness-insight">
+                    <h6>Mood Trend</h6>
+                    <span>{{ wellness_insights.mood_trend|title }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <div class="wellness-metric">
+                            <div class="metric-value">{{ wellness_stats.mood_avg|floatformat:1|default:"-" }}/10</div>
+                            <div class="metric-label">Avg Mood</div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="wellness-metric" style="background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);">
+                            <div class="metric-value">{{ wellness_stats.energy_avg|floatformat:1|default:"-" }}/10</div>
+                            <div class="metric-label">Avg Energy</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="wellness-metric" style="background: linear-gradient(45deg, #43e97b 0%, #38f9d7 100%);">
+                            <div class="metric-value">{{ wellness_stats.sleep_hours|floatformat:1|default:"-" }}h</div>
+                            <div class="metric-label">Avg Sleep</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="wellness-metric" style="background: linear-gradient(45deg, #fa709a 0%, #fee140 100%);">
+                            <div class="metric-value">{{ wellness_stats.total_entries|default:"0" }}</div>
+                            <div class="metric-label">Entries</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="{% url 'ai_buddy:wellness_tracking' %}" class="btn btn-admin-primary btn-sm w-100">
+                        <i class="fas fa-chart-line me-1"></i>
+                        View Full Wellness Report
+                    </a>
+                    <button class="btn btn-admin-secondary btn-sm w-100 mt-2" onclick="getPersonalizedInsights()">
+                        <i class="fas fa-magic me-1"></i>
+                        Get AI Insights
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Conversations -->
+    <div class="col-md-8 mb-4">
+        <div class="admin-card h-100">
+            <div class="admin-card-header d-flex justify-content-between align-items-center">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-comments text-primary me-2"></i>
+                    Recent Conversations
+                </h5>
+                <a href="#" class="btn btn-sm btn-admin-primary" data-bs-toggle="modal" data-bs-target="#newConversationModal">
+                    New Chat
+                </a>
+            </div>
+            <div class="admin-card-body">
+                {% if conversations %}
+                    {% for conversation in conversations %}
+                    <div class="conversation-card admin-card">
+                        <div class="admin-card-body py-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h6 class="mb-1">{{ conversation.title }}</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        {{ conversation.updated_at|timesince }} ago
+                                    </small>
+                                    {% if conversation.last_message %}
+                                    <p class="mb-0 mt-1 text-muted small">
+                                        {{ conversation.last_message|truncatechars:80 }}
+                                    </p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <span class="badge bg-primary">{{ conversation.message_count }} messages</span>
+                                    <a href="{% url 'ai_buddy:conversation_detail' conversation.id %}" 
+                                       class="btn btn-sm btn-admin-primary ms-2">
+                                        Continue
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No conversations yet</h6>
+                        <p class="text-muted">Start your first conversation with your AI buddy!</p>
+                        <button class="btn btn-admin-primary" data-bs-toggle="modal" data-bs-target="#newConversationModal">
+                            <i class="fas fa-plus me-2"></i>
+                            Start First Chat
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Recommendations & Quick Actions -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-lightbulb text-warning me-2"></i>
+                    AI Care Recommendations
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                {% if recommendations %}
+                    {% for recommendation in recommendations %}
+                    <div class="recommendation-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">{{ recommendation.title }}</h6>
+                                <p class="mb-2 text-muted">{{ recommendation.description }}</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-tag me-1"></i>
+                                    {{ recommendation.category|title }} • 
+                                    Priority: {{ recommendation.priority|title }}
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-{{ recommendation.priority }}">
+                                    {{ recommendation.get_priority_display }}
+                                </span>
+                                <br>
+                                <small class="text-muted">{{ recommendation.created_at|timesince }} ago</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-lightbulb fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-2">No recommendations yet. Start tracking your wellness to get personalized suggestions!</p>
+                        <button class="btn btn-admin-primary" onclick="getSmartRecommendations()">
+                            <i class="fas fa-wand-magic-sparkles me-2"></i>
+                            Generate AI Recommendations
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="col-md-4">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-bolt text-warning me-2"></i>
+                    Quick Actions
+                </h5>
+            </div>
+            <div class="admin-card-body text-center">
+                <button class="quick-action-btn w-100 mb-2" onclick="askAIQuestion()">
+                    <i class="fas fa-question-circle me-2"></i> Ask {{ ai_profile.buddy_name|default:"AI Buddy" }}
+                </button>
+                <button class="quick-action-btn w-100 mb-2" onclick="window.location.href='{% url 'ai_buddy:wellness_tracking' %}'">
+                    <i class="fas fa-heart-pulse me-2"></i> Track Wellness
+                </button>
+                <button class="quick-action-btn w-100 mb-2" onclick="getServiceRecommendations()">
+                    <i class="fas fa-spa me-2"></i> Find Services
+                </button>
+                <button class="quick-action-btn w-100" onclick="window.location.href='{% url 'ai_buddy:profile_settings' %}'">
+                    <i class="fas fa-cog me-2"></i> AI Settings
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals (same as original) -->
+<!-- Quick Question Modal -->
+<div class="modal fade" id="quickQuestionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ask {{ ai_profile.buddy_name|default:"Your AI Buddy" }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="quickQuestion" class="form-label">What would you like to know?</label>
+                    <textarea class="form-control" id="quickQuestion" rows="3" placeholder="Type your question here..."></textarea>
+                </div>
+                <div id="aiResponse" class="ai-response-box" style="display: none;">
+                    <div class="alert alert-info">
+                        <i class="fas fa-robot"></i>
+                        <strong>{{ ai_profile.buddy_name|default:"AI Buddy" }}:</strong>
+                        <div id="responseText"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-admin-primary" onclick="submitQuestion()">
+                    <i class="fas fa-paper-plane"></i> Ask
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Conversation Modal -->
+<div class="modal fade" id="newConversationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Start New Conversation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newConversationForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="conversationTitle" class="form-label">Conversation Title</label>
+                        <input type="text" class="form-control" id="conversationTitle" 
+                               placeholder="e.g., Sleep concerns, Feeding questions, General chat">
+                    </div>
+                    <div class="mb-3">
+                        <label for="initialMessage" class="form-label">Your first message</label>
+                        <textarea class="form-control" id="initialMessage" rows="3" 
+                                  placeholder="Hi! I have a question about..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-admin-primary" id="createConversationBtn">
+                    <i class="fas fa-comments me-2"></i>
+                    Start Conversation
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// AI Buddy JavaScript Functions (same as original but with updated styles)
+function startQuickConversation(type, message) {
+    // Placeholder - implement with actual URLs
+    adminUtils.showNotification(`Starting ${type} conversation: ${message}`, 'info');
+}
+
+function askAIQuestion() {
+    $('#quickQuestionModal').modal('show');
+}
+
+function submitQuestion() {
+    const question = document.getElementById('quickQuestion').value.trim();
+    if (!question) {
+        adminUtils.showNotification('Please enter a question', 'warning');
+        return;
+    }
+    
+    // Placeholder implementation
+    document.getElementById('responseText').textContent = "This is a sample AI response. Integration with actual AI service would go here.";
+    document.getElementById('aiResponse').style.display = 'block';
+}
+
+function getPersonalizedInsights() {
+    adminUtils.showNotification('Getting personalized insights...', 'info');
+}
+
+function getSmartRecommendations() {
+    adminUtils.showNotification('Generating smart recommendations...', 'info');
+}
+
+function getServiceRecommendations() {
+    window.location.href = '/services/?ai_recommended=true';
+}
+
+// Modal initialization
+document.addEventListener('DOMContentLoaded', function() {
+    const createBtn = document.getElementById('createConversationBtn');
+    if (createBtn) {
+        createBtn.addEventListener('click', function() {
+            const title = document.getElementById('conversationTitle').value.trim();
+            const message = document.getElementById('initialMessage').value.trim();
+            
+            if (!title || !message) {
+                adminUtils.showNotification('Please fill in both the title and your message.', 'warning');
+                return;
+            }
+            
+            adminUtils.showNotification('Creating conversation...', 'info');
+            bootstrap.Modal.getInstance(document.getElementById('newConversationModal')).hide();
+        });
+    }
+});
+</script>
+{% endblock %}

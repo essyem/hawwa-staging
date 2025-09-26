@@ -1,0 +1,159 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}{% if object %}Edit Expense{% else %}Add Expense{% endif %} - Hawwa Admin{% endblock %}
+
+{% block page_title %}{% if object %}Edit Expense{% else %}Add Expense{% endif %}{% endblock %}
+{% block page_subtitle %}{% if object %}Update expense details{% else %}Record a new business expense{% endif %}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'financial:dashboard' %}">Financial</a></li>
+<li class="breadcrumb-item"><a href="{% url 'financial:expense_list' %}">Expenses</a></li>
+<li class="breadcrumb-item active">{% if object %}Edit{% else %}Add{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-receipt me-2"></i>
+                        {% if object %}Edit Expense{% else %}Add New Expense{% endif %}
+                    </h6>
+                </div>
+                <div class="admin-card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row g-3">
+                            <!-- Description -->
+                            <div class="col-md-12">
+                                <label class="form-label fw-medium">Description *</label>
+                                {{ form.description|add_class:"form-control" }}
+                                {% if form.description.help_text %}
+                                    <div class="form-text">{{ form.description.help_text }}</div>
+                                {% endif %}
+                                {% if form.description.errors %}
+                                    <div class="text-danger small">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Amount and Date -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Amount (QAR) *</label>
+                                {{ form.amount|add_class:"form-control" }}
+                                {% if form.amount.errors %}
+                                    <div class="text-danger small">{{ form.amount.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Expense Date *</label>
+                                {{ form.expense_date|add_class:"form-control" }}
+                                {% if form.expense_date.errors %}
+                                    <div class="text-danger small">{{ form.expense_date.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Category -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Category</label>
+                                {{ form.category|add_class:"form-select" }}
+                                {% if form.category.errors %}
+                                    <div class="text-danger small">{{ form.category.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Receipt Image -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Receipt Image</label>
+                                {{ form.receipt_image|add_class:"form-control" }}
+                                {% if form.receipt_image.help_text %}
+                                    <div class="form-text">{{ form.receipt_image.help_text }}</div>
+                                {% endif %}
+                                {% if form.receipt_image.errors %}
+                                    <div class="text-danger small">{{ form.receipt_image.errors }}</div>
+                                {% endif %}
+                                {% if object and object.receipt_image %}
+                                    <div class="mt-2">
+                                        <small class="text-muted">Current: </small>
+                                        <a href="{{ object.receipt_image.url }}" target="_blank" class="text-primary">
+                                            View current receipt
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Notes -->
+                            <div class="col-md-12">
+                                <label class="form-label fw-medium">Notes</label>
+                                {{ form.notes|add_class:"form-control" }}
+                                {% if form.notes.help_text %}
+                                    <div class="form-text">{{ form.notes.help_text }}</div>
+                                {% endif %}
+                                {% if form.notes.errors %}
+                                    <div class="text-danger small">{{ form.notes.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Fields marked with * are required
+                            </div>
+                            <div>
+                                <a href="{% url 'financial:expense_list' %}" class="btn btn-outline-secondary me-2">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>
+                                    {% if object %}Update Expense{% else %}Save Expense{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-label {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 0.75rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+}
+
+.text-danger.small {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+</style>
+{% endblock %}

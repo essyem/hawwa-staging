@@ -1,0 +1,4 @@
+<!-- STUB: two_factor/_wizard_forms.html -->
+{% block wizard_forms %}
+<form method="post">{% csrf_token %}{{ wizard.management_form }}{{ wizard.form.as_p }}<button type="submit">Next</button></form>
+{% endblock %}

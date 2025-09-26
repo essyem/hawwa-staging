@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Two-factor login</h2>
+
+  {# If this is a formtools wizard, include its management form to avoid ManagementForm missing errors #}
+  <form method="post">
+    {% csrf_token %}
+    {# include either wizard.management_form or management_form for compatibility #}
+    {% if wizard %}
+      {{ wizard.management_form }}
+    {% elif management_form %}
+      {{ management_form }}
+    {% endif %}
+
+    {# Fallback hidden inputs to satisfy formtools/formset ManagementForm validations when not present #}
+    <input type="hidden" name="current_step" value="{{ wizard.current_step|default:'' }}" />
+    <input type="hidden" name="form-TOTAL_FORMS" value="0" />
+    <input type="hidden" name="form-INITIAL_FORMS" value="0" />
+    <input type="hidden" name="form-MIN_NUM_FORMS" value="0" />
+    <input type="hidden" name="form-MAX_NUM_FORMS" value="0" />
+
+    {% if form %}
+      <div class="card mb-4">
+        <div class="card-body">
+          {{ form|crispy }}
+          <div class="d-grid mt-2">
+            <button class="btn btn-primary">Sign in</button>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <p>If you have username and password, please use the <a href="{% url 'login' %}">standard login page</a>.</p>
+    {% endif %}
+
+    {% if otp_required or not form %}
+      {% include 'accounts/two_factor_otp_required.html' %}
+    {% endif %}
+  </form>
+
+</div>
+{% endblock %}

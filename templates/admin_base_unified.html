@@ -1,0 +1,737 @@
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load user_extras %}
+<!DOCTYPE html>
+<html lang="{% get_current_language as LANGUAGE_CODE %}{{ LANGUAGE_CODE }}" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Hawwa Admin - {% endblock %}Hawwa Wellness</title>
+    
+    <!-- Keep the same CSS as landing page -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/qatar-theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/site.css' %}">
+    
+    <!-- Admin-specific enhancements -->
+    <link rel="stylesheet" href="{% static 'css/admin-styles.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+    
+    <!-- Admin Layout Enhancements -->
+    <style>
+        /* Admin layout adjustments */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        
+        .admin-content-wrapper {
+            display: flex;
+            flex: 1;
+        }
+        
+        .admin-sidebar {
+            width: 280px;
+            min-height: calc(100vh - 80px); /* Account for admin header only */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+            display: block !important; /* Force display */
+        }
+        
+        .admin-sidebar.collapsed {
+            width: 70px;
+        }
+        
+        .admin-main-content {
+            flex: 1;
+            background: #f8f9fa;
+            min-height: calc(100vh - 80px); /* Account for admin header only */
+        }
+        
+        /* Sidebar styles */
+        .nav-section {
+            margin-bottom: 1rem;
+        }
+        
+        .nav-section-header {
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.7);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-toggle {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background-color 0.2s;
+        }
+        
+        .nav-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffd700;
+            border-left-color: #ffd700;
+            transform: translateX(2px);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 215, 0, 0.15);
+            color: #ffd700;
+            border-left-color: #ffd700;
+        }
+        
+        .nav-submenu {
+            background-color: rgba(0, 0, 0, 0.1);
+            padding-left: 1rem;
+        }
+        
+        /* Ensure collapse elements are visible when they should be */
+        .collapse.show {
+            display: block !important;
+        }
+        
+        .collapse {
+            transition: height 0.3s ease;
+        }
+        
+        .nav-submenu .nav-link {
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            margin-left: 0;
+            border-radius: 4px;
+            color: rgba(255, 255, 255, 0.9) !important;
+            display: block;
+        }
+        
+        .nav-submenu .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.15) !important;
+            color: #ffd700 !important;
+        }
+        
+        .nav-submenu .nav-link.active {
+            background-color: rgba(255, 215, 0, 0.2) !important;
+            color: #ffd700 !important;
+            border-left: 2px solid #ffd700;
+        }
+        
+        .toggle-icon {
+            transition: transform 0.2s;
+        }
+        
+        .collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                position: fixed;
+                left: -280px;
+                width: 280px;
+                height: 100vh;
+                top: 0;
+                z-index: 1050;
+                display: block !important;
+            }
+            
+            .admin-sidebar.show {
+                left: 0;
+            }
+            
+            .admin-main-content {
+                width: 100%;
+            }
+            
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1040;
+                display: none;
+            }
+            
+            .sidebar-overlay.show {
+                display: block;
+            }
+        }
+        
+        /* Content padding adjustments */
+        .admin-content {
+            padding: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-content {
+                padding: 1rem;
+            }
+        }
+        
+        /* Admin Header Styles */
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-logo {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .admin-logo i {
+            color: #ffd700;
+        }
+        
+        .admin-header-actions .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        
+        .admin-header-actions .dropdown-item {
+            padding: 8px 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .admin-header-actions .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: #495057;
+        }
+        
+        .admin-header-actions .btn-outline-light {
+            border-color: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .admin-header-actions .btn-outline-light:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Admin Footer Styles */
+                .admin-footer {
+            background: linear-gradient(135deg, #2c5282 0%, #2b4a6b 100%);
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 0;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-footer a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .admin-footer a:hover {
+            color: #ffd700;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                min-height: calc(100vh - 80px);
+            }
+            
+            .admin-main-content {
+                min-height: calc(100vh - 80px);
+            }
+        }
+    </style>
+</head>
+<body class="admin-layout">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center py-3">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-light d-md-none me-3" id="sidebar-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="admin-logo">
+                        <i class="fas fa-spa text-white me-2"></i>
+                        <span class="text-white fw-bold">Hawwa Admin Portal</span>
+                    </div>
+                </div>
+                <div class="admin-header-actions">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-2"></i>
+                                {{ user.get_full_name|default:user.email }}
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                    <i class="fas fa-user me-2"></i>Profile
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:security_settings' %}">
+                                    <i class="fas fa-shield-alt me-2"></i>Security
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'core:home' %}">
+                                    <i class="fas fa-home me-2"></i>Main Site
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    {% block messages %}
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endblock %}
+
+    <div class="admin-content-wrapper">
+        <!-- Mobile Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        
+        <!-- Admin Sidebar -->
+        {% if user.is_authenticated %}
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="p-3">
+                <!-- Admin Navigation -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i class="fas fa-tachometer-alt me-2"></i>
+                        Dashboard
+                    </div>
+                    <div class="nav-links">
+                        <a href="{% url 'core:home' %}" class="nav-link">
+                            <i class="fas fa-home me-2"></i>
+                            <span class="nav-text">Home</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Financial Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Financial
+                    </div>
+                    <div class="nav-links">
+                        <button class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#financialNav">
+                            <div>
+                                <i class="fas fa-coins"></i>
+                                <span class="nav-text ms-2">Financial</span>
+                            </div>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </button>
+                        <div class="collapse show" id="financialNav">
+                            <div class="nav-submenu">
+                                {% url 'financial:overview' as financial_dashboard_url %}
+                                {% if financial_dashboard_url %}
+                                    <a href="{{ financial_dashboard_url }}" class="nav-link">
+                                        <i class="fas fa-chart-pie"></i>
+                                        <span class="nav-text">Dashboard</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'financial:invoice_list' as invoice_list_url %}
+                                {% if invoice_list_url %}
+                                    <a href="{{ invoice_list_url }}" class="nav-link">
+                                        <i class="fas fa-file-invoice"></i>
+                                        <span class="nav-text">Invoices</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'financial:payment_list' as payment_list_url %}
+                                {% if payment_list_url %}
+                                    <a href="{{ payment_list_url }}" class="nav-link">
+                                        <i class="fas fa-credit-card"></i>
+                                        <span class="nav-text">Payments</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'financial:expense_list' as expense_list_url %}
+                                {% if expense_list_url %}
+                                    <a href="{{ expense_list_url }}" class="nav-link">
+                                        <i class="fas fa-receipt"></i>
+                                        <span class="nav-text">Expenses</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'financial:reports' as reports_url %}
+                                {% if reports_url %}
+                                    <a href="{{ reports_url }}" class="nav-link">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <span class="nav-text">Reports</span>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vendors Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i class="fas fa-store me-2"></i>
+                        Vendors
+                    </div>
+                    <div class="nav-links">
+                        <button class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#vendorsNav">
+                            <div>
+                                <i class="fas fa-handshake"></i>
+                                <span class="nav-text ms-2">Vendors</span>
+                            </div>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </button>
+                        <div class="collapse show" id="vendorsNav">
+                            <div class="nav-submenu">
+                                {% url 'vendors:dashboard' as vendor_dashboard_url %}
+                                {% if vendor_dashboard_url %}
+                                    <a href="{{ vendor_dashboard_url }}" class="nav-link">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        <span class="nav-text">Dashboard</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'vendors:profile' as vendor_profile_url %}
+                                {% if vendor_profile_url %}
+                                    <a href="{{ vendor_profile_url }}" class="nav-link">
+                                        <i class="fas fa-user-tie"></i>
+                                        <span class="nav-text">Profile</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'vendors:services' as vendor_services_url %}
+                                {% if vendor_services_url %}
+                                    <a href="{{ vendor_services_url }}" class="nav-link">
+                                        <i class="fas fa-concierge-bell"></i>
+                                        <span class="nav-text">Services</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'vendors:bookings' as vendor_bookings_url %}
+                                {% if vendor_bookings_url %}
+                                    <a href="{{ vendor_bookings_url }}" class="nav-link">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <span class="nav-text">Bookings</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'vendors:analytics' as vendor_analytics_url %}
+                                {% if vendor_analytics_url %}
+                                    <a href="{{ vendor_analytics_url }}" class="nav-link">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span class="nav-text">Analytics</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'vendors:availability' as vendor_availability_url %}
+                                {% if vendor_availability_url %}
+                                    <a href="{{ vendor_availability_url }}" class="nav-link">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span class="nav-text">Availability</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'vendors:documents' as vendor_documents_url %}
+                                {% if vendor_documents_url %}
+                                    <a href="{{ vendor_documents_url }}" class="nav-link">
+                                        <i class="fas fa-file-alt"></i>
+                                        <span class="nav-text">Documents</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'vendors:payments' as vendor_payments_url %}
+                                {% if vendor_payments_url %}
+                                    <a href="{{ vendor_payments_url }}" class="nav-link">
+                                        <i class="fas fa-credit-card"></i>
+                                        <span class="nav-text">Payments</span>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Services Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i class="fas fa-spa me-2"></i>
+                        Services
+                    </div>
+                    <div class="nav-links">
+                        <button class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#servicesNav">
+                            <div>
+                                <i class="fas fa-concierge-bell"></i>
+                                <span class="nav-text ms-2">Services</span>
+                            </div>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </button>
+                        <div class="collapse" id="servicesNav">
+                            <div class="nav-submenu">
+                                <a href="{% url 'services:service_list' %}" class="nav-link">
+                                    <i class="fas fa-list"></i>
+                                    <span class="nav-text">All Services</span>
+                                </a>
+                                <a href="{% url 'services:accommodation_list' %}" class="nav-link">
+                                    <i class="fas fa-bed"></i>
+                                    <span class="nav-text">Accommodations</span>
+                                </a>
+                                <a href="{% url 'services:homecare_list' %}" class="nav-link">
+                                    <i class="fas fa-home"></i>
+                                    <span class="nav-text">Home Care</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bookings Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i class="fas fa-calendar me-2"></i>
+                        Bookings
+                    </div>
+                    <div class="nav-links">
+                        <button class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#bookingsNav">
+                            <div>
+                                <i class="fas fa-calendar-check"></i>
+                                <span class="nav-text ms-2">Bookings</span>
+                            </div>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </button>
+                        <div class="collapse" id="bookingsNav">
+                            <div class="nav-submenu">
+                                <a href="{% url 'bookings:booking_dashboard' %}" class="nav-link">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span class="nav-text">Dashboard</span>
+                                </a>
+                                <a href="{% url 'bookings:booking_list' %}" class="nav-link">
+                                    <i class="fas fa-list"></i>
+                                    <span class="nav-text">All Bookings</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Buddy Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i class="fas fa-robot me-2"></i>
+                        AI Assistant
+                    </div>
+                    <div class="nav-links">
+                        <a href="{% url 'ai_buddy:home' %}" class="nav-link">
+                            <i class="fas fa-robot"></i>
+                            <span class="nav-text">AI Buddy</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Analytics Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Analytics
+                    </div>
+                    <div class="nav-links">
+                        <button class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#analyticsNav">
+                            <div>
+                                <i class="fas fa-chart-pie"></i>
+                                <span class="nav-text ms-2">Analytics</span>
+                            </div>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </button>
+                        <div class="collapse" id="analyticsNav">
+                            <div class="nav-submenu">
+                                <a href="{% url 'analytics:dashboard' %}" class="nav-link">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span class="nav-text">Dashboard</span>
+                                </a>
+                                <a href="{% url 'reporting:dashboard' %}" class="nav-link">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span class="nav-text">Reports</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HR Management Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i class="fas fa-users me-2"></i>
+                        HR Management
+                    </div>
+                    <div class="nav-links">
+                        <button class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#hrmsNav">
+                            <div>
+                                <i class="fas fa-users-cog"></i>
+                                <span class="nav-text ms-2">HRMS</span>
+                            </div>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </button>
+                        <div class="collapse" id="hrmsNav">
+                            <div class="nav-submenu">
+                                <a href="{% url 'hrms:dashboard' %}" class="nav-link">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span class="nav-text">Dashboard</span>
+                                </a>
+                                <a href="{% url 'hrms:employee_list' %}" class="nav-link">
+                                    <i class="fas fa-users"></i>
+                                    <span class="nav-text">Employees</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Administration Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i class="fas fa-cog me-2"></i>
+                        Administration
+                    </div>
+                    <div class="nav-links">
+                        <button class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#adminNav">
+                            <div>
+                                <i class="fas fa-tools"></i>
+                                <span class="nav-text ms-2">Admin</span>
+                            </div>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </button>
+                        <div class="collapse" id="adminNav">
+                            <div class="nav-submenu">
+                                <a href="{% url 'admin_dashboard:dashboard' %}" class="nav-link">
+                                    <i class="fas fa-sliders-h"></i>
+                                    <span class="nav-text">System Settings</span>
+                                </a>
+                                <a href="{% url 'admin_dashboard:user_management' %}" class="nav-link">
+                                    <i class="fas fa-user-cog"></i>
+                                    <span class="nav-text">User Management</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        {% endif %}
+
+        <!-- Main Content Area -->
+        <main class="admin-main-content">
+            <div class="admin-content">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Simple Admin Footer -->
+        <!-- Footer -->
+    <footer class="admin-footer text-center py-3">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <small>&copy; {% now "Y" %} HAWWA Admin Portal. All rights reserved. | Version 2.0</small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Use the same JS as landing page -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/qatar-theme.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    <!-- Admin-specific JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sidebar toggle for mobile
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const adminSidebar = document.getElementById('adminSidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebarToggle && adminSidebar) {
+                sidebarToggle.addEventListener('click', function() {
+                    adminSidebar.classList.toggle('show');
+                    if (sidebarOverlay) {
+                        sidebarOverlay.classList.toggle('show');
+                    }
+                });
+            }
+
+            // Auto-collapse navigation sections on mobile only
+            if (window.innerWidth <= 768) {
+                const collapseElements = document.querySelectorAll('.collapse.show');
+                collapseElements.forEach(element => {
+                    // Only collapse sections that aren't vendors or financial for mobile
+                    if (!element.id.includes('vendors') && !element.id.includes('financial')) {
+                        element.classList.remove('show');
+                    }
+                });
+            }
+            
+            // Close mobile sidebar when clicking overlay or outside
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', function() {
+                    adminSidebar.classList.remove('show');
+                    sidebarOverlay.classList.remove('show');
+                });
+            }
+            
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth <= 768 && adminSidebar && sidebarOverlay) {
+                    const isClickInsideSidebar = adminSidebar.contains(event.target);
+                    const isClickOnToggle = sidebarToggle && sidebarToggle.contains(event.target);
+                    
+                    if (!isClickInsideSidebar && !isClickOnToggle && adminSidebar.classList.contains('show')) {
+                        adminSidebar.classList.remove('show');
+                        sidebarOverlay.classList.remove('show');
+                    }
+                }
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

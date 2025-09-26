@@ -1,0 +1,105 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+
+{% block title %}Financial Module - Hawwa Admin{% endblock %}
+
+{% block page_title %}Financial Dashboard{% endblock %}
+{% block page_subtitle %}Welcome to the enhanced Financial Management System{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+<li class="breadcrumb-item active">Financial</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="admin-card">
+            <div class="admin-card-body text-center py-5">
+                <i class="fas fa-chart-line fa-4x text-primary mb-4"></i>
+                <h2 class="mb-3">Financial Management System</h2>
+                <p class="text-muted mb-4">
+                    Your comprehensive financial dashboard with Microsoft Exchange Admin inspired design is ready!
+                </p>
+                
+                <div class="row g-3 justify-content-center">
+                    <div class="col-md-3">
+                        <a href="#" class="btn btn-admin-primary w-100 py-3">
+                            <i class="fas fa-tachometer-alt fa-2x mb-2"></i>
+                            <br>Dashboard
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="#" class="btn btn-admin-primary w-100 py-3">
+                            <i class="fas fa-file-invoice fa-2x mb-2"></i>
+                            <br>Invoices
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="#" class="btn btn-admin-primary w-100 py-3">
+                            <i class="fas fa-credit-card fa-2x mb-2"></i>
+                            <br>Payments
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="#" class="btn btn-admin-primary w-100 py-3">
+                            <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                            <br>Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-4">
+    <div class="col-lg-4">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">Enhanced Sidebar</h5>
+            </div>
+            <div class="admin-card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Microsoft Exchange Admin inspired design</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Collapsible navigation sections</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Responsive sidebar with mobile support</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Unified base template across all apps</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">Financial Templates</h5>
+            </div>
+            <div class="admin-card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Enriched financial dashboard</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Advanced invoice management</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Payment tracking system</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Comprehensive reporting</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">Modern UI Features</h5>
+            </div>
+            <div class="admin-card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Interactive charts and graphs</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Real-time data updates</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Advanced filtering and search</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Mobile-first responsive design</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
