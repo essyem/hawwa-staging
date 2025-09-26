@@ -121,9 +121,9 @@ class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['status', 'booking_date']
+    filterset_fields = ['status', 'start_date']
     search_fields = ['booking_number', 'note']
-    ordering_fields = ['booking_date', 'created_at']
+    ordering_fields = ['start_date', 'created_at']
     
     def get_queryset(self):
         """Return bookings for current user or all bookings for staff"""

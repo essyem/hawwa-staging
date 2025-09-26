@@ -88,3 +88,22 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self):
         """Return the short name for the user."""
         return self.first_name
+
+
+class EmailOTP(models.Model):
+    """One-time codes sent via email for verification or login."""
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='email_otps')
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    used = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [models.Index(fields=['user', 'created_at'])]
+
+    def is_valid(self, expiry_seconds=300):
+        from django.utils import timezone
+        return (not self.used) and (timezone.now() - self.created_at).total_seconds() <= expiry_seconds
+
+    def mark_used(self):
+        self.used = True
+        self.save(update_fields=['used'])

@@ -103,9 +103,9 @@
                     <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="avatar d-inline-flex me-2">
-                            {{ user.first_name|first|default:user.email|first|upper }}
+                            {{ user|user_initial }}
                         </div>
-                        <span class="d-none d-lg-inline">{{ user.get_full_name|default:user.email }}</span>
+                        <span class="d-none d-lg-inline">{{ user|user_display_name }}</span>
                         <span class="d-inline d-lg-none">{% trans "Profile" %}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">

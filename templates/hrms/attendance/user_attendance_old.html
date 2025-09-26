@@ -166,8 +166,8 @@
                     <!-- Employee Info -->
                     <div class="employee-info">
                         <h5><i class="fas fa-user"></i> Employee Information</h5>
-                        <p><strong>Name:</strong> <span id="employee-name">{{ user.get_full_name|default:user.username }}</span></p>
-                        <p><strong>Employee ID:</strong> <span id="employee-id">{% if employee_profile %}{{ employee_profile.employee_id }}{% else %}{{ user.username }}{% endif %}</span></p>
+                        <p><strong>Name:</strong> <span id="employee-name">{{ user.get_full_name|default:user.email }}</span></p>
+                        <p><strong>Employee ID:</strong> <span id="employee-id">{% if employee_profile %}{{ employee_profile.employee_id }}{% else %}{{ user.email }}{% endif %}</span></p>
                         <p><strong>Department:</strong> <span id="employee-dept">{% if employee_profile and employee_profile.department %}{{ employee_profile.department.name }}{% else %}Not Set{% endif %}</span></p>
                     </div>
                     

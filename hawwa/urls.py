@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from importlib import import_module
 from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
@@ -32,15 +33,15 @@ urlpatterns = [
     # Admin URLs
     path('admin/', admin.site.urls),
     path('hawwa-admin/', hawwa_admin_site.urls),  # Enhanced admin
-    
+
     # Global auth URLs (for convenience)
     path('login/', accounts_views.LoginView.as_view(), name='login'),
     path('logout/', accounts_views.logout_view, name='logout'),
     path('register/', accounts_views.RegisterView.as_view(), name='register'),
-    
+
     # Core URLs
     path('', include('core.urls', namespace='core')),
-    
+
     # App URLs
     path('accounts/', include('accounts.urls', namespace='accounts')),
     path('services/', include('services.urls', namespace='services')),
@@ -53,16 +54,32 @@ urlpatterns = [
     path('reporting/', include('reporting.urls', namespace='reporting')),
     path('analytics/', include('analytics.urls', namespace='analytics')),
     path('hrms/', include('hrms.urls', namespace='hrms')),
-    
+    path('financial/', include('financial.urls', namespace='financial')),
+
     # API URLs
     path('api/v1/', include('api.urls')),
     path('api/', include('core.api_urls')),
     # Change management API
     path('api/change-management/', include('change_management.urls')),
-    
+
     # i18n URLs for language switching
     path('i18n/', include('django.conf.urls.i18n')),
 ]
+
+# If two_factor is installed, its urls define patterns like 'account/login/',
+# 'account/two_factor/setup/' etc. Import and extend urlpatterns directly.
+try:
+    tf_urls = import_module('two_factor.urls')
+    if hasattr(tf_urls, 'urlpatterns'):
+        patterns = tf_urls.urlpatterns
+        # two_factor's urlpatterns may be a tuple (patterns_list, app_name)
+        if isinstance(patterns, tuple):
+            urlpatterns += list(patterns[0])
+        else:
+            urlpatterns += list(patterns)
+except Exception:
+    # If two_factor import fails, continue without raising to allow other checks to run
+    pass
 
 # Serve media files in development
 if settings.DEBUG:

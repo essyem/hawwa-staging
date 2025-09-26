@@ -34,4 +34,10 @@ urlpatterns = [
     path('profile/legacy/', views.ProfileView.as_view(), name='profile_legacy'),
     # Wishlist endpoint (AJAX)
     path('add-to-wishlist/', views.add_to_wishlist, name='add_to_wishlist'),
+
+    # Email OTP flows
+    path('verify/email/', views.SendEmailOTPView.as_view(), name='email_verify'),
+    path('verify/email/sent/', views.EmailVerificationSentView.as_view(), name='email_verification_sent'),
+    path('verify/email/confirm/', views.VerifyEmailOTPView.as_view(), name='verify_email_otp'),
+    path('verify/email/resend/', views.ResendEmailOTPView.as_view(), name='resend_email_otp'),
 ]

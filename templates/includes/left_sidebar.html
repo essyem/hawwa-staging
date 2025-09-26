@@ -1,5 +1,5 @@
 {% comment %}Left sidebar wrapper — includes shared left_sidebar_content and provides desktop fixed layout.{% endcomment %}
-{% load safe_urls i18n %}
+{% load safe_urls i18n user_extras %}
 {% if user.is_authenticated %}
 <aside id="left-sidebar" class="left-sidebar d-none d-lg-block bg-light border-end" style="width:220px; position:fixed; top:56px; bottom:0; overflow:auto; padding-top:1rem; z-index:1000;">
     <div class="sidebar-inner">
@@ -12,7 +12,7 @@
             {# Avatar/profile at the top #}
             <li class="mb-2 text-center">
                 <a href="{% url 'accounts:profile' %}" class="d-inline-block p-2" title="Profile">
-                    <div class="avatar-small rounded-circle bg-primary text-white" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;">{{ user.first_name|first|default:user.email|first|upper }}</div>
+                    <div class="avatar-small rounded-circle bg-primary text-white" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;">{{ user|user_initial }}</div>
                 </a>
             </li>
             {# Flatten first N items from HAWWA_SIDEBAR_APPS into mini-strip icons #}

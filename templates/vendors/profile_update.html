@@ -1,4 +1,529 @@
-{% extends 'base/base.html' %}
+{% extends 'vendors/vendors_base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Update Profile - Hawwa{% endblock %}
+
+{% block page_title %}Update Business Profile{% endblock %}
+{% block page_subtitle %}Manage your business information and settings{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'vendors:dashboard' %}">Vendor Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'vendors:profile_detail' %}">Profile</a></li>
+<li class="breadcrumb-item active">Update</li>
+{% endblock %}
+
+{% block admin_header_actions %}
+<div class="header-actions">
+    <a href="{% url 'vendors:profile_detail' %}" class="btn btn-outline-primary">
+        <i class="fas fa-eye me-2"></i>View Profile
+    </a>
+</div>
+{% endblock %}
+
 {% block content %}
-<h1>Placeholder: vendors/profile_update.html</h1>
+<div class="admin-container">
+    <!-- Profile Update Form -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <form method="post" enctype="multipart/form-data" class="profile-update-form">
+                {% csrf_token %}
+                
+                <!-- Business Information Card -->
+                <div class="admin-card mb-4">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title mb-0">
+                            <i class="fas fa-building me-2"></i>Business Information
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="{{ form.business_name.id_for_label }}" class="form-label required">Business Name</label>
+                                {{ form.business_name }}
+                                {% if form.business_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.business_name.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.business_type.id_for_label }}" class="form-label required">Business Type</label>
+                                {{ form.business_type }}
+                                {% if form.business_type.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.business_type.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.business_license.id_for_label }}" class="form-label">Business License</label>
+                                {{ form.business_license }}
+                                {% if form.business_license.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.business_license.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Enter your business registration or license number</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.tax_id.id_for_label }}" class="form-label">Tax ID</label>
+                                {{ form.tax_id }}
+                                {% if form.tax_id.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.tax_id.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Your business tax identification number</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information Card -->
+                <div class="admin-card mb-4">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title mb-0">
+                            <i class="fas fa-address-book me-2"></i>Contact Information
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="{{ form.business_phone.id_for_label }}" class="form-label required">Business Phone</label>
+                                {{ form.business_phone }}
+                                {% if form.business_phone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.business_phone.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.business_email.id_for_label }}" class="form-label required">Business Email</label>
+                                {{ form.business_email }}
+                                {% if form.business_email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.business_email.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.website.id_for_label }}" class="form-label">Website</label>
+                                {{ form.website }}
+                                {% if form.website.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.website.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Include https:// in your website URL</div>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label for="{{ form.service_areas.id_for_label }}" class="form-label required">Service Areas</label>
+                                {{ form.service_areas }}
+                                {% if form.service_areas.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.service_areas.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">List the areas where you provide services (cities, regions, etc.)</div>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">Business Description</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.description.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Describe your business, services, and what makes you unique</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings & Preferences Card -->
+                <div class="admin-card mb-4">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title mb-0">
+                            <i class="fas fa-cog me-2"></i>Settings & Preferences
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="settings-grid">
+                            <div class="form-group">
+                                <div class="form-check form-switch">
+                                    {{ form.auto_accept_bookings }}
+                                    <label class="form-check-label" for="{{ form.auto_accept_bookings.id_for_label }}">
+                                        <strong>Auto Accept Bookings</strong>
+                                        <div class="form-text">Automatically accept new booking requests</div>
+                                    </label>
+                                </div>
+                                {% if form.auto_accept_bookings.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.auto_accept_bookings.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="form-check form-switch">
+                                    {{ form.notification_email }}
+                                    <label class="form-check-label" for="{{ form.notification_email.id_for_label }}">
+                                        <strong>Email Notifications</strong>
+                                        <div class="form-text">Receive booking updates via email</div>
+                                    </label>
+                                </div>
+                                {% if form.notification_email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.notification_email.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="form-check form-switch">
+                                    {{ form.notification_sms }}
+                                    <label class="form-check-label" for="{{ form.notification_sms.id_for_label }}">
+                                        <strong>SMS Notifications</strong>
+                                        <div class="form-text">Receive booking updates via SMS</div>
+                                    </label>
+                                </div>
+                                {% if form.notification_sms.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.notification_sms.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <div class="form-actions d-flex justify-content-between align-items-center">
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <a href="{% url 'vendors:profile_detail' %}" class="btn btn-outline-secondary btn-lg ms-3">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                            <div class="text-muted">
+                                <small><i class="fas fa-info-circle me-1"></i>Changes will be reviewed before becoming active</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sidebar with Help and Tips -->
+        <div class="col-lg-4">
+            <!-- Profile Tips -->
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Profile Tips
+                    </h5>
+                </div>
+                <div class="admin-card-body">
+                    <div class="tips-list">
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fas fa-check-circle text-success"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Complete Profile</strong>
+                                <p class="mb-0">Fill out all sections to increase customer trust and booking rates.</p>
+                            </div>
+                        </div>
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fas fa-camera text-info"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Add Photos</strong>
+                                <p class="mb-0">Upload high-quality photos of your work and business to attract more customers.</p>
+                            </div>
+                        </div>
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fas fa-star text-warning"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Get Verified</strong>
+                                <p class="mb-0">Upload your business documents to get verified and build customer confidence.</p>
+                            </div>
+                        </div>
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fas fa-clock text-primary"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Keep Updated</strong>
+                                <p class="mb-0">Regular updates to your profile help maintain visibility in search results.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="admin-card-body">
+                    <div class="quick-actions">
+                        <a href="{% url 'vendors:documents' %}" class="btn btn-outline-info w-100 mb-2">
+                            <i class="fas fa-upload me-2"></i>Upload Documents
+                        </a>
+                        <a href="{% url 'vendors:services' %}" class="btn btn-outline-primary w-100 mb-2">
+                            <i class="fas fa-list me-2"></i>Manage Services
+                        </a>
+                        <a href="{% url 'vendors:availability' %}" class="btn btn-outline-success w-100 mb-2">
+                            <i class="fas fa-calendar me-2"></i>Set Availability
+                        </a>
+                        <a href="{% url 'vendors:analytics' %}" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-chart-bar me-2"></i>View Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Status -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Profile Status
+                    </h5>
+                </div>
+                <div class="admin-card-body">
+                    <div class="status-info">
+                        <div class="status-item d-flex align-items-center justify-content-between">
+                            <span>Current Status</span>
+                            <span class="badge bg-{% if vendor_profile.status == 'active' %}success{% elif vendor_profile.status == 'pending' %}warning{% else %}danger{% endif %}">
+                                {{ vendor_profile.get_status_display }}
+                            </span>
+                        </div>
+                        <div class="status-item d-flex align-items-center justify-content-between">
+                            <span>Profile Verified</span>
+                            <span class="badge bg-{% if vendor_profile.verified %}success{% else %}secondary{% endif %}">
+                                {{ vendor_profile.verified|yesno:"Yes,No" }}
+                            </span>
+                        </div>
+                        <div class="status-item d-flex align-items-center justify-content-between">
+                            <span>Documents</span>
+                            <span class="badge bg-info">{{ vendor_profile.documents.count }}</span>
+                        </div>
+                        <div class="status-item d-flex align-items-center justify-content-between">
+                            <span>Total Services</span>
+                            <span class="badge bg-primary">{{ vendor_profile.services.count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-grid .form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.form-text {
+    font-size: 0.825rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+
+.form-check-input {
+    width: 3rem;
+    height: 1.5rem;
+    border-radius: 1rem;
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.form-check-label {
+    cursor: pointer;
+    margin-left: 0.75rem;
+}
+
+.tips-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #0d6efd;
+}
+
+.tip-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.tip-content p {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.quick-actions .btn {
+    text-align: left;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+.status-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.status-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.status-item:last-child {
+    border-bottom: none;
+}
+
+.form-actions {
+    padding: 1.5rem 0;
+}
+
+.profile-update-form .admin-card-body {
+    padding: 2rem;
+}
+
+/* Textarea styling */
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+    
+    .profile-update-form .admin-card-body {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation feedback
+    const form = document.querySelector('.profile-update-form');
+    const inputs = form.querySelectorAll('.form-control, .form-select');
+    
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            this.classList.add('was-validated');
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('was-validated')) {
+                this.setCustomValidity('');
+                this.classList.toggle('is-valid', this.checkValidity());
+                this.classList.toggle('is-invalid', !this.checkValidity());
+            }
+        });
+    });
+    
+    // Auto-save draft functionality (optional)
+    const saveBtn = document.querySelector('button[type="submit"]');
+    let originalText = saveBtn.innerHTML;
+    
+    form.addEventListener('submit', function() {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+        
+        setTimeout(() => {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalText;
+        }, 2000);
+    });
+});
+</script>
 {% endblock %}

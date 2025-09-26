@@ -189,6 +189,17 @@ class Booking(models.Model):
     def can_be_modified(self):
         """Check if booking can be modified"""
         return self.status in ['draft', 'pending'] and self.start_date > timezone.now().date()
+
+    # Backwards compatibility: some code and templates expect booking_date/booking_time
+    @property
+    def booking_date(self):
+        """Alias for start_date for legacy callers"""
+        return self.start_date
+
+    @property
+    def booking_time(self):
+        """Alias for start_time for legacy callers"""
+        return self.start_time
     
     def send_confirmation_email(self):
         """Send booking confirmation email to client"""

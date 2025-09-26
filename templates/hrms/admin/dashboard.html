@@ -23,7 +23,7 @@
 <h4>Recent Payslips</h4>
 <ul class="list-group">
     {% for slip in recent_payslips %}
-    <li class="list-group-item">{{ slip.employee.user.username }} – {{ slip.month|date:"F Y" }} – {{ slip.net_pay }}</li>
+    <li class="list-group-item">{{ slip.employee.user.get_full_name|default:slip.employee.user.email }} – {{ slip.month|date:"F Y" }} – {{ slip.net_pay }}</li>
     {% empty %}
     <li class="list-group-item">No payslips found.</li>
     {% endfor %}

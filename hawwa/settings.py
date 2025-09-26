@@ -36,9 +36,10 @@ else:
 # Set `HAWWA_ENV=production` or `DJANGO_PRODUCTION=1` in your production env.
 _is_prod = os.environ.get('HAWWA_ENV', '').lower() == 'production' or os.environ.get('DJANGO_PRODUCTION') in ('1', 'true', 'True')
 DEBUG = not _is_prod
+DBEBUG = True
 
 # Hosts allowed. Use environment variable to override in production.
-ALLOWED_HOSTS = os.environ.get('HAWWA_ALLOWED_HOSTS', '127.0.0.1,localhost,192.168.100.2').split(',')
+ALLOWED_HOSTS = os.environ.get('HAWWA_ALLOWED_HOSTS', '127.0.0.1,localhost,192.168.100.2,hawwawellness.com,www.hawwawellness.com').split(',')
 
 # Production security defaults (applied when in production mode)
 if _is_prod:
@@ -79,6 +80,12 @@ THIRD_PARTY_APPS = [
     'corsheaders',
     'django_extensions',
     'import_export',
+    # Two-factor authentication and OTP
+    'django_otp',
+    'django_otp.plugins.otp_totp',
+    'django_otp.plugins.otp_static',
+    'two_factor',
+    'phonenumber_field',
 ]
 
 LOCAL_APPS = [
@@ -103,6 +110,9 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # django-otp middleware should be early so authentication can use OTP
+    'django_otp.middleware.OTPMiddleware',
+    'hawwa.middleware.request_id.RequestIDMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -131,6 +141,7 @@ TEMPLATES = [
                     'django.contrib.auth.context_processors.auth',
                     'django.contrib.messages.context_processors.messages',
                     'hawwa.context_processors.hawwa_settings',
+                    'core.context_processors.app_title',
                 ],
             'builtins': [
                 'crispy_forms.templatetags.crispy_forms_tags',
@@ -198,6 +209,27 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
+# Default sidebar configuration: a list of sections. Each section is a dict with
+# title and items: {"title": "Apps", "items": [{"label":"Services", "url_name":"services:service_list"}, ...]}
+# Projects can override this in their environment-specific settings.
+HAWWA_SIDEBAR_APPS = [
+    {
+        'title': 'Main',
+        'items': [
+            {'label': 'Home', 'url_name': 'core:home', 'icon': 'fas fa-home'},
+            {'label': 'Services', 'url_name': 'services:service_list', 'icon': 'fas fa-spa'},
+            {'label': 'Bookings', 'url_name': 'bookings:booking_dashboard', 'icon': 'fas fa-calendar-check'},
+        ]
+    },
+    {
+        'title': 'Productivity',
+        'items': [
+            {'label': 'AI Buddy', 'url_name': 'ai_buddy:home', 'icon': 'fas fa-robot'},
+            {'label': 'Vendors', 'url_name': 'vendors:dashboard', 'icon': 'fas fa-store'},
+        ]
+    }
+]
+
 # Currency Configuration
 DEFAULT_CURRENCY = 'QAR'
 CURRENCY_SYMBOL = 'QAR'
@@ -242,27 +274,65 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
+            'format': '[%(levelname)s] %(asctime)s %(name)s %(message)s [request_id=%(request_id)s ip=%(ip)s url=%(url)s]',
         },
         'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
+            'format': '%(levelname)s %(message)s',
+        },
+        'json': {
+            'format': '{"level": "%(levelname)s", "time": "%(asctime)s", "name": "%(name)s", "message": "%(message)s", "request_id": "%(request_id)s", "ip": "%(ip)s", "url": "%(url)s"}',
+        },
+    },
+    'filters': {
+        'request_context': {
+            '()': 'hawwa.logging_filters.RequestContextFilter',
         },
     },
     'handlers': {
         'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': LOGS_DIR / 'django_debug.log',
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'hawwa_app.log',
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 7,
             'formatter': 'verbose',
+            'filters': ['request_context'],
+        },
+        'django_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'django_debug.log',
+            'maxBytes': 20 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'verbose',
+            'filters': ['request_context'],
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            'filters': ['request_context'],
         },
     },
     'loggers': {
+        '': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+        },
         'django': {
-            'handlers': ['file'],
+            'handlers': ['django_file'],
             'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
+        },
+        'gunicorn.error': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'gunicorn.access': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': False,
         },
     },
 }
@@ -320,3 +390,28 @@ CORS_ALLOWED_ORIGINS = [
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# Cache configuration
+# Production recommendation: use a shared Redis cache so that background workers
+# and multiple web processes share rate-limiting and session data. Set
+# `REDIS_URL` (e.g. redis://:password@redis-host:6379/1) in the environment.
+# This example uses `django-redis` (install with `pip install django-redis`) and
+# exposes a `default` cache. `django-ratelimit` also benefits from a shared
+# cache backend (use the `default` cache or configure `RATELIMIT_CACHE`).
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1')
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_URL,
+        'OPTIONS': {
+            # Use the recommended client class
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            # Optional: set a prefix to avoid collisions
+            'KEY_PREFIX': os.environ.get('HAWWA_CACHE_KEY_PREFIX', 'hawwa'),
+        }
+    }
+}
+
+# Optional: tell django-ratelimit which cache alias to use (defaults to settings.CACHES['default']).
+# RATELIMIT_USE_CACHE = 'default'

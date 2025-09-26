@@ -31,6 +31,28 @@ def is_admin_user(user):
     return user.is_authenticated and (user.is_staff or user.user_type == 'ADMIN')
 
 
+@login_required
+def admin_dashboard_simple(request):
+    """Simple admin dashboard view for testing"""
+    context = {
+        'total_users': 147,
+        'total_revenue': '12,450',
+        'active_sessions': 89,
+        'wellness_entries': 1234,
+        'pending_invoices': 7,
+        'overdue_payments': 3,
+        'active_conversations': 23,
+        'daily_messages': 156,
+    }
+    return render(request, 'admin_dashboard.html', context)
+
+
+@login_required
+def system_test(request):
+    """System integration test page"""
+    return render(request, 'system_test.html')
+
+
 class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     """Main admin dashboard with comprehensive platform overview"""
     template_name = 'admin_dashboard/dashboard.html'
@@ -124,7 +146,7 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         
         for i in range(30):
             date = (thirty_days_ago + timedelta(days=i)).date()
-            count = Booking.objects.filter(booking_date=date).count()
+            count = Booking.objects.filter(start_date=date).count()
             daily_bookings.append({
                 'date': date.strftime('%Y-%m-%d'),
                 'count': count
@@ -177,8 +199,8 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             
             revenue = Booking.objects.filter(
                 status='completed',
-                booking_date__gte=month_start.date(),
-                booking_date__lte=month_end.date()
+                start_date__gte=month_start.date(),
+                start_date__lte=month_end.date()
             ).aggregate(total=Sum('service__price'))['total'] or 0
             
             monthly_revenue.append({
@@ -346,7 +368,7 @@ class BookingManagementView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         date_range = self.request.GET.get('date_range')
         if date_range:
             if date_range == 'today':
-                queryset = queryset.filter(booking_date=timezone.now().date())
+                queryset = queryset.filter(start_date=timezone.now().date())
             elif date_range == 'week':
                 week_ago = timezone.now() - timedelta(days=7)
                 queryset = queryset.filter(created_at__gte=week_ago)
@@ -463,7 +485,7 @@ def admin_analytics_api(request):
     booking_trends = []
     for i in range(30):
         date = timezone.now().date() - timedelta(days=i)
-        bookings = Booking.objects.filter(booking_date=date).count()
+        bookings = Booking.objects.filter(start_date=date).count()
         booking_trends.append({
             'date': date.strftime('%Y-%m-%d'),
             'bookings': bookings
@@ -474,11 +496,11 @@ def admin_analytics_api(request):
     for i in range(12):
         month_start = timezone.now().replace(day=1) - timedelta(days=i*30)
         month_end = (month_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
-        
+
         revenue = Booking.objects.filter(
             status='completed',
-            booking_date__gte=month_start.date(),
-            booking_date__lte=month_end.date()
+            start_date__gte=month_start.date(),
+            start_date__lte=month_end.date()
         ).aggregate(total=Sum('service__price'))['total'] or 0
         
         revenue_trends.append({

@@ -125,11 +125,11 @@ class ProfileDashboardView(LoginRequiredMixin, TemplateView):
         """Get upcoming bookings for the user"""
         return Booking.objects.filter(
             user=user,
-            booking_date__gte=timezone.now().date(),
+            start_date__gte=timezone.now().date(),
             status__in=['pending', 'confirmed']
         ).select_related(
             'service', 'service__vendor_profile__user'
-        ).order_by('booking_date', 'booking_time')[:5]
+        ).order_by('start_date', 'start_time')[:5]
     
     def _get_ai_buddy_stats(self, user):
         """Get AI buddy and wellness statistics"""

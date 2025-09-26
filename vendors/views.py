@@ -46,7 +46,7 @@ def vendor_dashboard(request):
         }
     )
     
-    # Get recent bookings for this vendor's services
+    # Get vendor's services
     vendor_services = Service.objects.filter(
         Q(description__icontains=vendor_profile.business_name) |
         Q(name__icontains=vendor_profile.business_name.split()[0])  # Match first word of business name
@@ -80,6 +80,12 @@ def vendor_dashboard(request):
         status__in=['confirmed', 'pending'],
         start_date__gte=timezone.now().date()
     ).order_by('start_date')[:5]
+    
+    # Update vendor profile stats
+    vendor_profile.total_bookings = total_bookings
+    vendor_profile.completed_bookings = completed_bookings
+    vendor_profile.average_rating = round(avg_rating, 1) if avg_rating else 0
+    vendor_profile.save()
     
     context = {
         'vendor_profile': vendor_profile,

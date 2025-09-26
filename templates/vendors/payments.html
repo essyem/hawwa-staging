@@ -1,4 +1,482 @@
-{% extends 'base/base.html' %}
+{% extends 'vendors/vendors_base.html' %}
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}Payment Management - {% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'vendors:dashboard' %}">Vendor Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Payments</li>
+    </ol>
+</nav>
+{% endblock %}
+
 {% block content %}
-<h1>Placeholder: vendors/payments.html</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h4 mb-0">
+        <i class="fas fa-credit-card text-primary me-2"></i>
+        Payment Management
+    </h2>
+    <div class="btn-group" role="group">
+        <button class="btn btn-outline-primary" onclick="downloadReport('earnings')">
+            <i class="fas fa-download"></i> Earnings Report
+        </button>
+        <button class="btn btn-outline-success" onclick="requestPayout()">
+            <i class="fas fa-money-bill-wave"></i> Request Payout
+        </button>
+    </div>
+</div>
+
+<!-- Payment Summary Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-success bg-gradient rounded-3 p-3">
+                            <i class="fas fa-dollar-sign text-white fa-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="fw-bold fs-4 text-success">${{ total_earnings|floatformat:2 }}</div>
+                        <div class="text-muted small">Total Earnings</div>
+                        <div class="small text-success">
+                            <i class="fas fa-arrow-up"></i> +15% this month
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-warning bg-gradient rounded-3 p-3">
+                            <i class="fas fa-clock text-white fa-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="fw-bold fs-4 text-warning">${{ pending_payments|floatformat:2 }}</div>
+                        <div class="text-muted small">Pending Payments</div>
+                        <div class="small text-muted">
+                            Processing within 2-3 days
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-info bg-gradient rounded-3 p-3">
+                            <i class="fas fa-chart-line text-white fa-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="fw-bold fs-4 text-info">${{ total_earnings|add:pending_payments|floatformat:0|div:30|floatformat:0 }}</div>
+                        <div class="text-muted small">Avg Daily Earnings</div>
+                        <div class="small text-info">
+                            Based on last 30 days
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-primary bg-gradient rounded-3 p-3">
+                            <i class="fas fa-percentage text-white fa-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="fw-bold fs-4 text-primary">85%</div>
+                        <div class="text-muted small">Commission Rate</div>
+                        <div class="small text-muted">
+                            Platform takes 15%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Earnings Chart -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-0">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+                <i class="fas fa-chart-area text-primary me-2"></i>
+                Earnings Overview
+            </h6>
+            <div class="btn-group btn-group-sm" role="group">
+                <button class="btn btn-outline-secondary active" onclick="changeChartPeriod('7d')">7 Days</button>
+                <button class="btn btn-outline-secondary" onclick="changeChartPeriod('30d')">30 Days</button>
+                <button class="btn btn-outline-secondary" onclick="changeChartPeriod('90d')">90 Days</button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <canvas id="earningsChart" height="80"></canvas>
+    </div>
+</div>
+
+<!-- Payment History -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-0">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+                <i class="fas fa-history text-primary me-2"></i>
+                Payment History
+            </h6>
+            <div class="d-flex align-items-center">
+                <div class="input-group input-group-sm me-3" style="width: 200px;">
+                    <input type="text" class="form-control" placeholder="Search payments..." id="searchPayments">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <select class="form-select form-select-sm" style="width: auto;" onchange="filterPayments(this.value)">
+                    <option value="">All Status</option>
+                    <option value="completed">Completed</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="paymentsTable">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Commission</th>
+                        <th>Net Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr class="payment-row" data-status="{{ payment.status }}">
+                        <td>
+                            <span class="font-monospace small">#{{ payment.id|stringformat:"06d" }}</span>
+                        </td>
+                        <td>{{ payment.created_date|date:"M d, Y" }}</td>
+                        <td>
+                            <div class="fw-bold">{{ payment.description|default:"Service Payment" }}</div>
+                            <small class="text-muted">Booking #{{ payment.booking_id|default:"N/A" }}</small>
+                        </td>
+                        <td class="fw-bold">${{ payment.amount|floatformat:2 }}</td>
+                        <td class="text-muted">${{ payment.amount|mul:0.15|floatformat:2 }}</td>
+                        <td class="fw-bold text-success">${{ payment.amount|mul:0.85|floatformat:2 }}</td>
+                        <td>
+                            {% if payment.status == 'completed' %}
+                                <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
+                            {% elif payment.status == 'pending' %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning">Pending</span>
+                            {% elif payment.status == 'failed' %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger">Failed</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ payment.status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button class="btn btn-outline-primary" onclick="viewPaymentDetail({{ payment.id }})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="downloadReceipt({{ payment.id }})">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="fas fa-credit-card fa-2x mb-3 d-block opacity-50"></i>
+                            No payments found. Complete some bookings to see your earnings here.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Settings -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-0">
+        <h6 class="mb-0">
+            <i class="fas fa-cog text-primary me-2"></i>
+            Payment Settings
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <h6 class="text-primary mb-3">Payout Method</h6>
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Bank Account</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-university"></i>
+                            </span>
+                            <select class="form-select">
+                                <option>Select Bank Account</option>
+                                <option>QNB ****1234</option>
+                                <option>ADCB ****5678</option>
+                                <option>Add New Account</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payout Schedule</label>
+                        <select class="form-select">
+                            <option>Weekly (Recommended)</option>
+                            <option>Bi-weekly</option>
+                            <option>Monthly</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Minimum Payout Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" value="100" min="50" max="1000">
+                        </div>
+                        <div class="form-text">Minimum: $50, Maximum: $1,000</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </form>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <h6 class="text-primary mb-3">Tax Information</h6>
+                <div class="list-group">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">Tax ID Number</div>
+                            <small class="text-muted">Required for tax reporting</small>
+                        </div>
+                        <button class="btn btn-outline-primary btn-sm">Update</button>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">Tax Documents</div>
+                            <small class="text-muted">Download your tax forms</small>
+                        </div>
+                        <button class="btn btn-outline-secondary btn-sm">Download</button>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">Tax Withholding</div>
+                            <small class="text-muted">Current rate: 0%</small>
+                        </div>
+                        <button class="btn btn-outline-info btn-sm">Configure</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Detail Modal -->
+<div class="modal fade" id="paymentDetailModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Payment Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="paymentDetailContent">
+                <!-- Payment details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="downloadReceipt()">Download Receipt</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initialize earnings chart
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('earningsChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Daily Earnings',
+                data: [120, 190, 300, 500, 200, 300, 450],
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value;
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Earnings: $' + context.parsed.y;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+
+// Payment management functions
+function changeChartPeriod(period) {
+    // Update chart based on selected period
+    const buttons = document.querySelectorAll('.btn-group-sm button');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // Implementation for changing chart data
+    console.log('Changing chart period to:', period);
+}
+
+function filterPayments(status) {
+    const rows = document.querySelectorAll('.payment-row');
+    rows.forEach(row => {
+        if (!status || row.dataset.status === status) {
+            row.style.display = 'table-row';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function viewPaymentDetail(paymentId) {
+    // Load payment details via AJAX
+    const modalContent = document.getElementById('paymentDetailContent');
+    modalContent.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('paymentDetailModal'));
+    modal.show();
+    
+    // Simulate loading payment details
+    setTimeout(() => {
+        modalContent.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Transaction ID:</strong><br>
+                    <span class="font-monospace">#${String(paymentId).padStart(6, '0')}</span>
+                </div>
+                <div class="col-md-6">
+                    <strong>Status:</strong><br>
+                    <span class="badge bg-success">Completed</span>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Amount:</strong> $150.00<br>
+                    <strong>Commission:</strong> $22.50<br>
+                    <strong>Net Amount:</strong> <span class="text-success fw-bold">$127.50</span>
+                </div>
+                <div class="col-md-6">
+                    <strong>Date:</strong> ${new Date().toLocaleDateString()}<br>
+                    <strong>Method:</strong> Bank Transfer<br>
+                    <strong>Reference:</strong> BNK123456789
+                </div>
+            </div>
+        `;
+    }, 1000);
+}
+
+function downloadReceipt(paymentId) {
+    // Implementation for downloading payment receipt
+    alert(`Downloading receipt for payment #${paymentId}`);
+}
+
+function downloadReport(type) {
+    // Implementation for downloading earnings report
+    alert(`Downloading ${type} report...`);
+}
+
+function requestPayout() {
+    const currentBalance = parseFloat('{{ pending_payments|default:"0" }}');
+    if (currentBalance < 50) {
+        alert('Minimum payout amount is $50. Your current balance: $' + currentBalance.toFixed(2));
+        return;
+    }
+    
+    if (confirm(`Request payout of $${currentBalance.toFixed(2)}?`)) {
+        // Implementation for requesting payout
+        alert('Payout request submitted! You will receive the funds within 2-3 business days.');
+    }
+}
+
+// Search functionality
+document.getElementById('searchPayments').addEventListener('keyup', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#paymentsTable tbody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            row.style.display = 'table-row';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}

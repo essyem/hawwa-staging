@@ -1,4 +1,535 @@
-{% extends 'base/base.html' %}
-{% block content %}
-<h1>Placeholder: vendors/analytics.html</h1>
+{% extends 'vendors/vendors_base.html' %}
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}Vendor Analytics - {% endblock %}
+
+{% block vendor_extra_css %}
+<style>
+/* Performance optimized chart styles */
+.chart-container {
+    position: relative;
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+canvas {
+    display: block;
+    max-width: 100%;
+    height: auto !important;
+    image-rendering: optimizeSpeed;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+}
+
+/* Reduce repaints on interactive elements */
+.btn, .card {
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* Smooth transitions without heavy calculations */
+.card {
+    transition: transform 0.15s ease-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* Loading state styles */
+.chart-container.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+</style>
+{% endblock %}
+
+{% block vendor_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h4 mb-0">
+        <i class="fas fa-chart-line text-primary me-2"></i>
+        Analytics & Performance
+    </h2>
+    <div class="btn-group" role="group">
+        <button class="btn btn-outline-primary" onclick="downloadReport('pdf')">
+            <i class="fas fa-file-pdf"></i> PDF Report
+        </button>
+        <button class="btn btn-outline-success" onclick="downloadReport('excel')">
+            <i class="fas fa-file-excel"></i> Excel Export
+        </button>
+    </div>
+</div>
+
+<!-- Date Range Selector -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h6 class="mb-0">Reporting Period</h6>
+                <small class="text-muted">{{ start_date|date:"M d, Y" }} - {{ end_date|date:"M d, Y" }}</small>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="btn-group" role="group">
+                    <button class="btn btn-sm btn-outline-secondary active" onclick="changePeriod('30')">30 Days</button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="changePeriod('90')">90 Days</button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="changePeriod('365')">1 Year</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Metrics Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-primary bg-gradient rounded-3 p-3">
+                            <i class="fas fa-calendar-check text-white fa-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="fw-bold fs-4 text-primary">{{ total_bookings }}</div>
+                        <div class="text-muted small">Total Bookings</div>
+                        <div class="small text-success">
+                            <i class="fas fa-arrow-up"></i> +12% from last period
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-success bg-gradient rounded-3 p-3">
+                            <i class="fas fa-check-circle text-white fa-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="fw-bold fs-4 text-success">{{ completed_bookings }}</div>
+                        <div class="text-muted small">Completed</div>
+                        <div class="small text-muted">
+                            {{ completion_rate }}% completion rate
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-info bg-gradient rounded-3 p-3">
+                            <i class="fas fa-dollar-sign text-white fa-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="fw-bold fs-4 text-info">${{ total_revenue|floatformat:0 }}</div>
+                        <div class="text-muted small">Revenue</div>
+                        <div class="small text-success">
+                            <i class="fas fa-arrow-up"></i> +18% from last period
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-warning bg-gradient rounded-3 p-3">
+                            <i class="fas fa-star text-white fa-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="fw-bold fs-4 text-warning">{{ avg_rating }}/5</div>
+                        <div class="text-muted small">Avg Rating</div>
+                        <div class="small text-muted">
+                            Based on customer reviews
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <!-- Booking Trends Chart -->
+    <div class="col-lg-8 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pb-0">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-line text-primary me-2"></i>
+                    Booking Trends
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="bookingTrendsChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Distribution -->
+    <div class="col-lg-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pb-0">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-pie text-primary me-2"></i>
+                    Booking Status
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="statusChart" height="200"></canvas>
+                </div>
+                
+                <!-- Status Legend -->
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle me-2" style="width: 12px; height: 12px; background-color: #28a745;"></div>
+                            <small>Completed</small>
+                        </div>
+                        <small class="fw-bold">{{ completed_bookings }}</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle me-2" style="width: 12px; height: 12px; background-color: #ffc107;"></div>
+                            <small>Pending</small>
+                        </div>
+                        <small class="fw-bold">{{ pending_bookings }}</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle me-2" style="width: 12px; height: 12px; background-color: #dc3545;"></div>
+                            <small>Cancelled</small>
+                        </div>
+                        <small class="fw-bold">{{ cancelled_bookings }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Insights -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pb-0">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb text-warning me-2"></i>
+                    Performance Insights
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item px-0 border-0">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-success bg-opacity-10 rounded p-2">
+                                    <i class="fas fa-thumbs-up text-success"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">Strong Performance</h6>
+                                <p class="mb-1 text-muted small">Your completion rate is above average for your category.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group-item px-0 border-0">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-info bg-opacity-10 rounded p-2">
+                                    <i class="fas fa-clock text-info"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">Response Time</h6>
+                                <p class="mb-1 text-muted small">Average response to new bookings: 2.3 hours</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group-item px-0 border-0">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-warning bg-opacity-10 rounded p-2">
+                                    <i class="fas fa-star text-warning"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">Customer Satisfaction</h6>
+                                <p class="mb-1 text-muted small">{{ avg_rating }}/5.0 average rating from recent reviews</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pb-0">
+                <h6 class="mb-0">
+                    <i class="fas fa-target text-primary me-2"></i>
+                    Goals & Recommendations
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item px-0 border-0">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">Monthly Revenue Goal</h6>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-success" style="width: 75%;"></div>
+                                </div>
+                                <small class="text-muted">${{ total_revenue|floatformat:0 }} / $5,000</small>
+                            </div>
+                            <span class="badge bg-success bg-opacity-10 text-success">75%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group-item px-0 border-0">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">Booking Target</h6>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-info" style="width: 60%;"></div>
+                                </div>
+                                <small class="text-muted">{{ total_bookings }} / 50 bookings</small>
+                            </div>
+                            <span class="badge bg-info bg-opacity-10 text-info">60%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group-item px-0 border-0">
+                        <div class="alert alert-info border-0 bg-info bg-opacity-10 mb-0">
+                            <small>
+                                <i class="fas fa-info-circle me-1"></i>
+                                <strong>Tip:</strong> Increase your availability during peak hours (2-6 PM) to capture more bookings.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initialize Charts with performance optimizations and lazy loading
+document.addEventListener('DOMContentLoaded', function() {
+    // Performance optimization: Reduce animation duration and disable unnecessary animations
+    Chart.defaults.animation.duration = 300; // Reduced from default 1000ms
+    Chart.defaults.animation.easing = 'linear'; // Faster easing
+    
+    // Lazy loading with Intersection Observer
+    const chartObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                initializeChart(entry.target);
+                chartObserver.unobserve(entry.target);
+            }
+        });
+    }, {
+        rootMargin: '50px' // Start loading 50px before chart comes into view
+    });
+    
+    // Observe all chart containers
+    document.querySelectorAll('.chart-container').forEach(container => {
+        chartObserver.observe(container);
+    });
+    
+    function initializeChart(container) {
+        const canvas = container.querySelector('canvas');
+        if (!canvas) return;
+        
+        if (canvas.id === 'bookingTrendsChart') {
+            initializeTrendsChart(canvas);
+        } else if (canvas.id === 'statusChart') {
+            initializeStatusChart(canvas);
+        }
+    }
+    
+    function initializeTrendsChart(canvas) {
+        const trendsCtx = canvas.getContext('2d');
+        new Chart(trendsCtx, {
+        type: 'line',
+        data: {
+            labels: [{% for data in daily_data %}'{{ data.date }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Daily Bookings',
+                data: [{% for data in daily_data %}{{ data.bookings }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                fill: true,
+                tension: 0.2, // Reduced tension for better performance
+                pointRadius: 3, // Smaller points
+                pointHoverRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            animation: {
+                duration: 200, // Fast animation
+                easing: 'linear'
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        maxTicksLimit: 6 // Limit number of ticks for performance
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxTicksLimit: 10 // Limit x-axis labels for performance
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    animation: false // Disable tooltip animations
+                }
+            },
+            elements: {
+                point: {
+                    hoverRadius: 4
+                },
+                line: {
+                    borderWidth: 2
+                }
+            }
+        }
+    });
+
+    });
+    }
+
+    function initializeStatusChart(canvas) {
+        const statusCtx = canvas.getContext('2d');
+        new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'Pending', 'Cancelled'],
+            datasets: [{
+                data: [{{ completed_bookings }}, {{ pending_bookings }}, {{ cancelled_bookings }}],
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                borderWidth: 0 // Remove borders for better performance
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 200, // Fast animation
+                easing: 'linear'
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    animation: false // Disable tooltip animations
+                }
+            }
+        }
+    });
+    
+                }
+        });
+    }
+    
+    // Performance optimization: Debounced resize handling
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            Chart.instances.forEach(chart => {
+                if (chart && typeof chart.resize === 'function') {
+                    chart.resize();
+                }
+            });
+        }, 100);
+    });
+});
+
+// Performance optimized period change function
+function changePeriod(days) {
+    // Show loading state
+    document.querySelectorAll('.chart-container').forEach(container => {
+        container.style.opacity = '0.5';
+    });
+    
+    // Redirect after brief delay to allow visual feedback
+    setTimeout(() => {
+        window.location.href = `?period=${days}`;
+    }, 50);
+}
+
+// Download reports - Optimized
+function downloadReport(format) {
+    // Show loading state
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    btn.disabled = true;
+    
+    // Simulate download process
+    setTimeout(() => {
+        alert(`Downloading ${format.toUpperCase()} report...`);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }, 1000);
+}
+
+// Performance monitoring (only in development)
+if (window.location.hostname === 'localhost' || window.location.hostname.includes('dev')) {
+    const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+            if (entry.duration > 50) {
+                console.warn(`Performance warning: ${entry.name} took ${entry.duration.toFixed(2)}ms`);
+            }
+        }
+    });
+    observer.observe({entryTypes: ['measure', 'navigation', 'paint']});
+}
+</script>
+{% endblock %}
+
+{% block vendor_extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}

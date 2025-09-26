@@ -6,6 +6,8 @@ app_name = 'admin_dashboard'
 urlpatterns = [
     # Main dashboard
     path('', views.AdminDashboardView.as_view(), name='dashboard'),
+    path('simple/', views.admin_dashboard_simple, name='simple_dashboard'),
+    path('test/', views.system_test, name='system_test'),
     
     # User management
     path('users/', views.UserManagementView.as_view(), name='user_management'),

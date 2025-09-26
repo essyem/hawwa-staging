@@ -329,3 +329,19 @@ class ProfileForm(forms.ModelForm):
             if isinstance(field.widget, forms.CheckboxInput):
                 css_class = 'form-check-input'
             field.widget.attrs.update({'class': css_class})
+
+
+# Forms for email OTP flows
+class EmailOTPRequestForm(forms.Form):
+    email = forms.EmailField(label=_('Email'), widget=forms.EmailInput(attrs={'class': 'form-control'}))
+
+
+class EmailOTPVerifyForm(forms.Form):
+    email = forms.EmailField(label=_('Email'), widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    code = forms.CharField(label=_('One-time code'), max_length=6, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    def clean_code(self):
+        data = self.cleaned_data['code']
+        if not data.isdigit():
+            raise forms.ValidationError(_('Code should contain only digits'))
+        return data

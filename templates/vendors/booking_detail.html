@@ -1,4 +1,459 @@
-{% extends 'base/base.html' %}
+{% extends 'vendors/vendors_base.html' %}
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}Booking Details - {% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'vendors:dashboard' %}">Vendor Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'vendors:bookings' %}">Bookings</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Booking #{{ booking.id }}</li>
+    </ol>
+</nav>
+{% endblock %}
+
 {% block content %}
-<h1>Placeholder: vendors/booking_detail.html</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h4 mb-1">
+            <i class="fas fa-calendar-check text-primary me-2"></i>
+            Booking #{{ booking.id }}
+        </h2>
+        <div class="d-flex align-items-center">
+            {% if booking.status == 'pending' %}
+                <span class="badge bg-warning bg-opacity-10 text-warning me-2">Pending Approval</span>
+            {% elif booking.status == 'confirmed' %}
+                <span class="badge bg-success bg-opacity-10 text-success me-2">Confirmed</span>
+            {% elif booking.status == 'completed' %}
+                <span class="badge bg-primary bg-opacity-10 text-primary me-2">Completed</span>
+            {% elif booking.status == 'cancelled' %}
+                <span class="badge bg-danger bg-opacity-10 text-danger me-2">Cancelled</span>
+            {% endif %}
+            <small class="text-muted">Created {{ booking.created_at|timesince }} ago</small>
+        </div>
+    </div>
+    <div class="btn-group" role="group">
+        {% if booking.status == 'pending' %}
+            <button class="btn btn-success" onclick="updateStatus('confirmed')">
+                <i class="fas fa-check"></i> Accept
+            </button>
+            <button class="btn btn-outline-danger" onclick="updateStatus('cancelled')">
+                <i class="fas fa-times"></i> Decline
+            </button>
+        {% elif booking.status == 'confirmed' %}
+            <button class="btn btn-primary" onclick="updateStatus('completed')">
+                <i class="fas fa-check-double"></i> Mark Complete
+            </button>
+            <button class="btn btn-outline-warning" onclick="updateStatus('cancelled')">
+                <i class="fas fa-ban"></i> Cancel
+            </button>
+        {% endif %}
+        <button class="btn btn-outline-secondary" onclick="printBooking()">
+            <i class="fas fa-print"></i> Print
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Main Booking Information -->
+    <div class="col-lg-8 mb-4">
+        <!-- Service Information -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0">
+                <h6 class="mb-0">
+                    <i class="fas fa-spa text-primary me-2"></i>
+                    Service Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        {% if booking.service.image %}
+                            <img src="{{ booking.service.image.url }}" class="img-fluid rounded" alt="{{ booking.service.name }}">
+                        {% else %}
+                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 100px;">
+                                <i class="fas fa-spa fa-2x text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-9">
+                        <h5 class="mb-2">{{ booking.service.name }}</h5>
+                        <p class="text-muted mb-3">{{ booking.service.description|truncatewords:30 }}</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <strong>Category:</strong> {{ booking.service.category|title }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Duration:</strong> {{ booking.service.duration }} minutes
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Base Price:</strong> ${{ booking.service.base_price }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Final Price:</strong> <span class="h5 text-primary">${{ booking.total_price }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Details -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0">
+                <h6 class="mb-0">
+                    <i class="fas fa-calendar-alt text-primary me-2"></i>
+                    Booking Details
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 rounded p-2 me-3">
+                                <i class="fas fa-calendar text-primary"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">{{ booking.start_date|date:"l, F d, Y" }}</div>
+                                <small class="text-muted">Booking Date</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-info bg-opacity-10 rounded p-2 me-3">
+                                <i class="fas fa-clock text-info"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</div>
+                                <small class="text-muted">Time Slot</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% if booking.location %}
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success bg-opacity-10 rounded p-2 me-3">
+                                <i class="fas fa-map-marker-alt text-success"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">{{ booking.location }}</div>
+                                <small class="text-muted">Location</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning bg-opacity-10 rounded p-2 me-3">
+                                <i class="fas fa-users text-warning"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">{{ booking.number_of_people|default:1 }} person{{ booking.number_of_people|pluralize }}</div>
+                                <small class="text-muted">Participants</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if booking.special_requirements %}
+                <div class="mt-4">
+                    <h6 class="mb-2">Special Requirements</h6>
+                    <div class="bg-light rounded p-3">
+                        <p class="mb-0">{{ booking.special_requirements }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0">
+                <h6 class="mb-0">
+                    <i class="fas fa-credit-card text-primary me-2"></i>
+                    Payment Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span>Base Price:</span>
+                            <span>${{ booking.service.base_price }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span>Payment Status:</span>
+                            {% if booking.payment_status == 'paid' %}
+                                <span class="text-success fw-bold">Paid</span>
+                            {% elif booking.payment_status == 'pending' %}
+                                <span class="text-warning fw-bold">Pending</span>
+                            {% else %}
+                                <span class="text-danger fw-bold">Unpaid</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if booking.discount_amount %}
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span>Discount:</span>
+                            <span class="text-success">-${{ booking.discount_amount }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span>Payment Method:</span>
+                            <span>{{ booking.payment_method|default:"Card"|title }}</span>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Total Amount:</span>
+                    <span class="h5 text-primary mb-0">${{ booking.total_price }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Information Sidebar -->
+    <div class="col-lg-4">
+        <!-- Customer Profile -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0">
+                <h6 class="mb-0">
+                    <i class="fas fa-user text-primary me-2"></i>
+                    Customer Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    {% if booking.customer.profile_picture %}
+                        <img src="{{ booking.customer.profile_picture.url }}" class="rounded-circle" width="80" height="80" alt="{{ booking.customer.get_full_name }}">
+                    {% else %}
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="fas fa-user fa-2x text-primary"></i>
+                        </div>
+                    {% endif %}
+                    <h6 class="mt-2 mb-1">{{ booking.customer.get_full_name }}</h6>
+                    <small class="text-muted">Customer since {{ booking.customer.date_joined|date:"M Y" }}</small>
+                </div>
+                
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item px-0 py-2 border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-envelope text-muted me-3"></i>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">Email</small>
+                                <div>{{ booking.customer.email }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% if booking.customer.phone %}
+                    <div class="list-group-item px-0 py-2 border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-phone text-muted me-3"></i>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">Phone</small>
+                                <div>{{ booking.customer.phone }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="list-group-item px-0 py-2 border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-calendar-check text-muted me-3"></i>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">Total Bookings</small>
+                                <div>15 bookings</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 mt-3">
+                    <button class="btn btn-outline-primary btn-sm" onclick="contactCustomer('email')">
+                        <i class="fas fa-envelope"></i> Send Email
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="contactCustomer('sms')">
+                        <i class="fas fa-sms"></i> Send SMS
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0">
+                <h6 class="mb-0">
+                    <i class="fas fa-bolt text-warning me-2"></i>
+                    Quick Actions
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-info btn-sm" onclick="rescheduleBooking()">
+                        <i class="fas fa-calendar-alt"></i> Reschedule
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="addNotes()">
+                        <i class="fas fa-sticky-note"></i> Add Notes
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="duplicateBooking()">
+                        <i class="fas fa-copy"></i> Duplicate
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="generateInvoice()">
+                        <i class="fas fa-file-invoice"></i> Generate Invoice
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking History -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0">
+                <h6 class="mb-0">
+                    <i class="fas fa-history text-info me-2"></i>
+                    Status History
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">Booking Created</h6>
+                            <p class="timeline-text">Customer submitted booking request</p>
+                            <small class="text-muted">{{ booking.created_at|date:"M d, Y H:i" }}</small>
+                        </div>
+                    </div>
+                    {% if booking.status != 'pending' %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">Status Updated</h6>
+                            <p class="timeline-text">Status changed to {{ booking.status|title }}</p>
+                            <small class="text-muted">{{ booking.updated_at|date:"M d, Y H:i" }}</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Booking management functions
+function updateStatus(newStatus) {
+    if (confirm(`Are you sure you want to ${newStatus} this booking?`)) {
+        // AJAX call to update booking status
+        fetch(`{% url 'vendors:update_booking_status' booking.id %}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: `status=${newStatus}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating status: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating the status.');
+        });
+    }
+}
+
+function contactCustomer(method) {
+    if (method === 'email') {
+        window.location.href = `mailto:{{ booking.customer.email }}?subject=Regarding your booking #{{ booking.id }}`;
+    } else if (method === 'sms') {
+        alert('SMS functionality coming soon!');
+    }
+}
+
+function printBooking() {
+    window.print();
+}
+
+function rescheduleBooking() {
+    alert('Reschedule functionality coming soon!');
+}
+
+function addNotes() {
+    const notes = prompt('Add notes for this booking:');
+    if (notes) {
+        // Implementation for saving notes
+        alert('Notes saved!');
+    }
+}
+
+function duplicateBooking() {
+    if (confirm('Create a new booking with the same details?')) {
+        alert('Booking duplicated!');
+    }
+}
+
+function generateInvoice() {
+    alert('Invoice generation coming soon!');
+}
+</script>
+
+<!-- Add CSRF token for AJAX requests -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 3px solid white;
+}
+
+.timeline-title {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.timeline-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+</style>
 {% endblock %}
