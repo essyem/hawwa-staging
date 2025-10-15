@@ -450,7 +450,7 @@
 <script>
 function verifyUser(userId) {
     if (confirm('Are you sure you want to verify this user?')) {
-    fetch('{% url "admin_dashboard:update_user_status" %}', {
+        fetch('{% url "admin_dashboard:user_action" %}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -478,7 +478,7 @@ function verifyUser(userId) {
 
 function activateUser(userId) {
     if (confirm('Are you sure you want to activate this user?')) {
-    fetch('{% url "admin_dashboard:update_user_status" %}', {
+        fetch('{% url "admin_dashboard:user_action" %}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -506,7 +506,7 @@ function activateUser(userId) {
 
 function deactivateUser(userId) {
     if (confirm('Are you sure you want to deactivate this user? This will prevent them from logging in.')) {
-    fetch('{% url "admin_dashboard:update_user_status" %}', {
+        fetch('{% url "admin_dashboard:user_action" %}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
