@@ -839,6 +839,17 @@
             function expandRelevantSection() {
                 const currentPath = window.location.pathname;
                 
+                // Debug info for production troubleshooting (only if needed)
+                if (currentPath.includes('/hrms/') && window.location.hostname.includes('staging')) {
+                    // Add visual indicator for debugging if needed
+                    setTimeout(() => {
+                        const hrmsBtn = document.querySelector('[data-bs-target="#hrmsNav"]');
+                        if (hrmsBtn && !document.getElementById('hrmsNav').classList.contains('show')) {
+                            hrmsBtn.style.backgroundColor = '#ff4444'; // Red background if auto-expand failed
+                        }
+                    }, 1000);
+                }
+                
                 // Define URL patterns for each section
                 const sectionMappings = {
                     'financialNav': ['/financial/', '/invoice/', '/payment/', '/expense/'],
@@ -883,6 +894,14 @@
             
             // Apply smart navigation
             expandRelevantSection();
+            
+            // Force expand HRMS section if on HRMS page (production fallback)
+            if (window.location.pathname.includes('/hrms/')) {
+                const hrmsSection = document.getElementById('hrmsNav');
+                if (hrmsSection) {
+                    hrmsSection.classList.add('show');
+                }
+            }
             
             // Close mobile sidebar when clicking overlay or outside
             if (sidebarOverlay) {
