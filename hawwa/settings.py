@@ -273,7 +273,7 @@ for _app in LOCAL_APPS:
     icon = icon_map.get(_app, 'fas fa-folder')
     _apps_section['items'].append({'label': label, 'url_name': default_url, 'icon': icon})
 
-# Add a dedicated HRMS section with common CRUD pages and sensible default perms
+# Add a dedicated HRMS section with comprehensive modules
 HRMS_SIDEBAR = {
     'title': 'HRMS',
     'items': [
@@ -283,9 +283,14 @@ HRMS_SIDEBAR = {
         {'label': 'Positions', 'url_name': 'hrms:position_list', 'icon': 'fas fa-briefcase', 'perm': 'hrms.view_position'},
         {'label': 'Leaves', 'url_name': 'hrms:leave_list', 'icon': 'fas fa-calendar-minus', 'perm': 'hrms.view_leaveapplication'},
         {'label': 'Attendance', 'url_name': 'hrms:attendance_dashboard', 'icon': 'fas fa-clock', 'perm': 'hrms.view_attendancerecord'},
+        {'label': 'Time & Attendance', 'url_name': 'hrms:user_attendance', 'icon': 'fas fa-user-clock', 'perm': None},
+        {'label': 'Work Schedules', 'url_name': 'hrms:schedule_list', 'icon': 'fas fa-calendar-week', 'perm': 'hrms.view_workschedule'},
         {'label': 'Payroll', 'url_name': 'hrms:payroll_dashboard', 'icon': 'fas fa-money-bill-wave', 'perm': 'hrms.view_payroll'},
-        {'label': 'Training', 'url_name': 'hrms:training_programs', 'icon': 'fas fa-graduation-cap', 'perm': 'hrms.view_trainingprogram'},
+        {'label': 'Training', 'url_name': 'hrms:training_dashboard', 'icon': 'fas fa-graduation-cap', 'perm': 'hrms.view_trainingprogram'},
+        {'label': 'Performance', 'url_name': 'hrms:performance_dashboard', 'icon': 'fas fa-star', 'perm': 'hrms.view_performancereview'},
         {'label': 'Reports', 'url_name': 'hrms:reports', 'icon': 'fas fa-chart-bar', 'perm': 'hrms.view_report'},
+        {'label': 'Analytics', 'url_name': 'hrms:analytics_dashboard', 'icon': 'fas fa-chart-line', 'perm': 'hrms.view_analytics'},
+        {'label': 'Vendor Integration', 'url_name': 'hrms:vendor_integration_dashboard', 'icon': 'fas fa-handshake', 'perm': 'hrms.view_vendorstaff'},
     ]
 }
 
