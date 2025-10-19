@@ -39,7 +39,7 @@ DEBUG = not _is_prod
 DBEBUG = True
 
 # Hosts allowed. Use environment variable to override in production.
-ALLOWED_HOSTS = os.environ.get('HAWWA_ALLOWED_HOSTS', '127.0.0.1,localhost,192.168.100.2,hawwawellness.com,www.hawwawellness.com').split(',')
+ALLOWED_HOSTS = os.environ.get('HAWWA_ALLOWED_HOSTS', '127.0.0.1,localhost,192.168.100.2,hawwawellness.com,www.hawwawellness.com,staging.hawwa.online').split(',')
 
 # Production security defaults (applied when in production mode)
 if _is_prod:
@@ -104,6 +104,7 @@ LOCAL_APPS = [
     'financial',
     'hrms',
     'change_management',
+    'docpool',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -156,13 +157,14 @@ WSGI_APPLICATION = 'hawwa.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 '''
 # Database configuration for development
 DATABASES = {
@@ -179,7 +181,7 @@ DATABASES = {
         }
     }
 }
-
+'''
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -214,14 +216,6 @@ USE_TZ = True
 # Projects can override this in their environment-specific settings.
 HAWWA_SIDEBAR_APPS = [
     {
-        'title': 'Main',
-        'items': [
-            {'label': 'Home', 'url_name': 'core:home', 'icon': 'fas fa-home'},
-            {'label': 'Services', 'url_name': 'services:service_list', 'icon': 'fas fa-spa'},
-            {'label': 'Bookings', 'url_name': 'bookings:booking_dashboard', 'icon': 'fas fa-calendar-check'},
-        ]
-    },
-    {
         'title': 'Productivity',
         'items': [
             {'label': 'AI Buddy', 'url_name': 'ai_buddy:home', 'icon': 'fas fa-robot'},
@@ -229,6 +223,63 @@ HAWWA_SIDEBAR_APPS = [
         ]
     }
 ]
+
+# Ensure all local apps are discoverable in the sidebar. This generates a
+# lightweight "Apps" section with a default URL naming convention of
+# <app>:dashboard when not explicitly configured above. We skip internal
+# framework apps like `accounts` and `core` here because they are represented
+# elsewhere or use different entry points.
+_sidebar_apps = {item.get('url_name').split(':')[0] for section in HAWWA_SIDEBAR_APPS for item in section.get('items', []) if item.get('url_name')}
+_apps_section = {'title': 'Apps', 'items': []}
+for _app in LOCAL_APPS:
+    if _app in ('accounts', 'core'):
+        continue
+    if _app in _sidebar_apps:
+        # already represented
+        continue
+    # friendly label and a reasonable default url_name
+    label = _app.replace('_', ' ').title()
+    default_url = f"{_app}:dashboard"
+    # choose a simple icon per app where sensible, otherwise use folder
+    icon_map = {
+        'hrms': 'fas fa-users',
+        'bookings': 'fas fa-calendar-check',
+        'services': 'fas fa-spa',
+        'vendors': 'fas fa-store',
+        'ai_buddy': 'fas fa-robot',
+        'wellness': 'fas fa-heart',
+        'payments': 'fas fa-credit-card',
+        'reporting': 'fas fa-chart-bar',
+        'admin_dashboard': 'fas fa-cogs',
+        'operations': 'fas fa-tools',
+        'analytics': 'fas fa-chart-line',
+        'financial': 'fas fa-wallet',
+        'change_management': 'fas fa-exchange-alt',
+    }
+    icon = icon_map.get(_app, 'fas fa-folder')
+    _apps_section['items'].append({'label': label, 'url_name': default_url, 'icon': icon})
+
+# Add a dedicated HRMS section with common CRUD pages and sensible default perms
+HRMS_SIDEBAR = {
+    'title': 'HRMS',
+    'items': [
+        {'label': 'Dashboard', 'url_name': 'hrms:dashboard', 'icon': 'fas fa-tachometer-alt', 'perm': None},
+        {'label': 'Employees', 'url_name': 'hrms:employee_list', 'icon': 'fas fa-user-friends', 'perm': 'hrms.view_employeeprofile'},
+        {'label': 'Departments', 'url_name': 'hrms:department_list', 'icon': 'fas fa-sitemap', 'perm': 'hrms.view_department'},
+        {'label': 'Positions', 'url_name': 'hrms:position_list', 'icon': 'fas fa-briefcase', 'perm': 'hrms.view_position'},
+        {'label': 'Leaves', 'url_name': 'hrms:leave_list', 'icon': 'fas fa-calendar-minus', 'perm': 'hrms.view_leaveapplication'},
+        {'label': 'Attendance', 'url_name': 'hrms:attendance_dashboard', 'icon': 'fas fa-clock', 'perm': 'hrms.view_attendancerecord'},
+        {'label': 'Payroll', 'url_name': 'hrms:payroll_dashboard', 'icon': 'fas fa-money-bill-wave', 'perm': 'hrms.view_payroll'},
+        {'label': 'Training', 'url_name': 'hrms:training_programs', 'icon': 'fas fa-graduation-cap', 'perm': 'hrms.view_trainingprogram'},
+        {'label': 'Reports', 'url_name': 'hrms:reports', 'icon': 'fas fa-chart-bar', 'perm': 'hrms.view_report'},
+    ]
+}
+
+# Prepend HRMS section so it appears before the generic Apps section
+HAWWA_SIDEBAR_APPS.insert(0, HRMS_SIDEBAR)
+
+if _apps_section['items']:
+    HAWWA_SIDEBAR_APPS.append(_apps_section)
 
 # Currency Configuration
 DEFAULT_CURRENCY = 'QAR'
@@ -307,6 +358,15 @@ LOGGING = {
             'formatter': 'verbose',
             'filters': ['request_context'],
         },
+        'django_error_file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'django_error.log',
+            'maxBytes': 20 * 1024 * 1024,
+            'backupCount': 10,
+            'formatter': 'verbose',
+            'filters': ['request_context'],
+        },
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
@@ -320,8 +380,14 @@ LOGGING = {
             'level': 'INFO',
         },
         'django': {
-            'handlers': ['django_file'],
+            'handlers': ['django_file', 'django_error_file'],
             'level': 'DEBUG',
+            'propagate': False,
+        },
+        # Capture request/exception errors into a dedicated error log file
+        'django.request': {
+            'handlers': ['django_error_file'],
+            'level': 'ERROR',
             'propagate': False,
         },
         'gunicorn.error': {
@@ -342,11 +408,41 @@ ADMIN_SITE_HEADER = "Hawwa Admin"
 ADMIN_SITE_TITLE = "Hawwa Admin Portal"
 ADMIN_INDEX_TITLE = "Welcome to Hawwa Administration"
 
+# ===================================================================
+# EMAIL SETTINGS
+# ===================================================================
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False').lower() == 'true'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', '30'))
+
+# Default email addresses
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@trendzapps.com')
+SERVER_EMAIL = os.environ.get('SERVER_EMAIL', 'noreply@trendzapps.com')
+EMAIL_SUBJECT_PREFIX = os.environ.get('EMAIL_SUBJECT_PREFIX', '[Trendz] ')
+
+# Specific email addresses for different functions
+REGISTRATION_EMAIL = os.environ.get('REGISTRATION_EMAIL', 'noreply@trendzapps.com')
+SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL', 'support@trendzapps.com')
+DEMO_EMAIL = os.environ.get('DEMO_EMAIL', 'hello@trendzapps.com')
+SALES_EMAIL = os.environ.get('SALES_EMAIL', 'hello@trendzapps.com')
+
+# ===================================================================
+# COMPANY INFORMATION
+# ===================================================================
+COMPANY_NAME = os.environ.get('COMPANY_NAME', 'Hawwa Wellness')
+
 # Custom application settings
 HAWWA_SETTINGS = {
-    'COMPANY_NAME': 'Hawwa LLC',
-    'SUPPORT_EMAIL': os.environ.get('HAWWA_SUPPORT_EMAIL', 'hello@hawwawellness.com'),
-    'PHONE_NUMBER': os.environ.get('HAWWA_PHONE_NUMBER', '+974 7212 6440'),
+    'COMPANY_NAME': COMPANY_NAME,
+    'SUPPORT_EMAIL': os.environ.get('SUPPORT_EMAIL', 'hello@trendzapps.com'),
+    'PHONE_NUMBER': os.environ.get('PHONE_NUMBER', '+974 7212 6440'),
+    'DEMO_EMAIL': DEMO_EMAIL,
+    'SALES_EMAIL': SALES_EMAIL,
 }
 
 # Authentication

@@ -21,6 +21,7 @@
     
     <!-- Admin-specific enhancements -->
     <link rel="stylesheet" href="{% static 'css/admin-styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/header_footer_tight.css' %}">
     
     {% block extra_css %}{% endblock %}
     
@@ -41,7 +42,7 @@
         .admin-sidebar {
             width: 280px;
             min-height: calc(100vh - 80px); /* Account for admin header only */
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2c5282 0%, #2b4a6b 100%);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -149,15 +150,19 @@
         }
         
         .toggle-icon {
-            transition: transform 0.2s;
+            transition: transform 0.3s ease;
         }
         
-        .collapsed .toggle-icon {
-            transform: rotate(-90deg);
+        .nav-toggle[aria-expanded="true"] .toggle-icon {
+            transform: rotate(180deg);
         }
         
-        /* Mobile responsive */
-        @media (max-width: 768px) {
+        .nav-toggle[aria-expanded="false"] .toggle-icon {
+            transform: rotate(0deg);
+        }
+        
+        /* Mobile responsive - Only apply to very small screens */
+        @media (max-width: 576px) {
             .admin-sidebar {
                 position: fixed;
                 left: -280px;
@@ -183,6 +188,43 @@
                 width: 100%;
                 height: 100%;
                 background: rgba(0, 0, 0, 0.5);
+            }
+        }
+        
+        /* Force desktop layout for staging and production */
+        @media (min-width: 769px) {
+            .admin-sidebar {
+                position: sticky !important;
+                left: 0 !important;
+                width: 280px !important;
+                display: block !important;
+                transform: none !important;
+            }
+            
+            .admin-main-content {
+                width: calc(100% - 280px) !important;
+                margin-left: 0 !important;
+            }
+            
+            .sidebar-overlay {
+                display: none !important;
+            }
+        }
+        
+        /* Additional override for very specific staging environment */
+        body.staging-layout .admin-sidebar,
+        body.production-layout .admin-sidebar {
+            position: sticky !important;
+            left: 0 !important;
+            width: 280px !important;
+            display: block !important;
+            transform: none !important;
+        }
+        
+        body.staging-layout .admin-main-content,
+        body.production-layout .admin-main-content {
+            width: calc(100% - 280px) !important;
+            margin-left: 0 !important;
                 z-index: 1040;
                 display: none;
             }
@@ -197,7 +239,7 @@
             padding: 2rem;
         }
         
-        @media (max-width: 768px) {
+        @media (max-width: 576px) {
             .admin-content {
                 padding: 1rem;
             }
@@ -205,7 +247,7 @@
         
         /* Admin Header Styles */
         .admin-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2c5282 0%, #2b4a6b 100%);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             position: sticky;
             top: 0;
@@ -268,7 +310,7 @@
             color: #ffd700;
         }
         
-        @media (max-width: 768px) {
+        @media (max-width: 576px) {
             .admin-sidebar {
                 min-height: calc(100vh - 80px);
             }
@@ -279,48 +321,9 @@
         }
     </style>
 </head>
-<body class="admin-layout">
-    <!-- Admin Header -->
-    <header class="admin-header">
-        <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center py-3">
-                <div class="d-flex align-items-center">
-                    <button class="btn btn-outline-light d-md-none me-3" id="sidebar-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="admin-logo">
-                        <i class="fas fa-spa text-white me-2"></i>
-                        <span class="text-white fw-bold">Hawwa Admin Portal</span>
-                    </div>
-                </div>
-                <div class="admin-header-actions">
-                    {% if user.is_authenticated %}
-                        <div class="dropdown">
-                            <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
-                                <i class="fas fa-user me-2"></i>
-                                {{ user.get_full_name|default:user.email }}
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
-                                    <i class="fas fa-user me-2"></i>Profile
-                                </a></li>
-                                <li><a class="dropdown-item" href="{% url 'accounts:security_settings' %}">
-                                    <i class="fas fa-shield-alt me-2"></i>Security
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'core:home' %}">
-                                    <i class="fas fa-home me-2"></i>Main Site
-                                </a></li>
-                                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                </a></li>
-                            </ul>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </header>
+<body class="admin-layout{% if 'staging.hawwa.online' in request.get_host %} staging-layout{% elif 'hawwawellness.com' in request.get_host %} production-layout{% endif %}">
+    <!-- Unified site header -->
+    {% include 'includes/header.html' %}
     
     {% block messages %}
     {% if messages %}
@@ -371,7 +374,7 @@
                             </div>
                             <i class="fas fa-chevron-down toggle-icon"></i>
                         </button>
-                        <div class="collapse show" id="financialNav">
+                        <div class="collapse" id="financialNav">
                             <div class="nav-submenu">
                                 {% url 'financial:overview' as financial_dashboard_url %}
                                 {% if financial_dashboard_url %}
@@ -427,7 +430,7 @@
                             </div>
                             <i class="fas fa-chevron-down toggle-icon"></i>
                         </button>
-                        <div class="collapse show" id="vendorsNav">
+                        <div class="collapse" id="vendorsNav">
                             <div class="nav-submenu">
                                 {% url 'vendors:dashboard' as vendor_dashboard_url %}
                                 {% if vendor_dashboard_url %}
@@ -595,6 +598,100 @@
                     </div>
                 </div>
 
+                <!-- Change Management Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i class="fas fa-code-branch me-2"></i>
+                        Change Management
+                    </div>
+                    <div class="nav-links">
+                        <button class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#changeNav">
+                            <div>
+                                <i class="fas fa-code-branch"></i>
+                                <span class="nav-text ms-2">Change Management</span>
+                            </div>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </button>
+                        <div class="collapse" id="changeNav">
+                            <div class="nav-submenu">
+                                <a href="{% url 'change_management:dashboard' %}" class="nav-link">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span class="nav-text">Dashboard</span>
+                                </a>
+                                <a href="{% url 'change_management:change_list' %}" class="nav-link">
+                                    <i class="fas fa-code-branch"></i>
+                                    <span class="nav-text">Change Requests</span>
+                                </a>
+                                <a href="{% url 'change_management:incident_list' %}" class="nav-link">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span class="nav-text">Incidents</span>
+                                </a>
+                                <a href="{% url 'change_management:lead_list' %}" class="nav-link">
+                                    <i class="fas fa-user-plus"></i>
+                                    <span class="nav-text">Leads</span>
+                                </a>
+                                <a href="{% url 'change_management:role_list' %}" class="nav-link">
+                                    <i class="fas fa-user-shield"></i>
+                                    <span class="nav-text">Roles</span>
+                                </a>
+                                <a href="{% url 'change_management:activity_list' %}" class="nav-link">
+                                    <i class="fas fa-history"></i>
+                                    <span class="nav-text">Activity Log</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document Pool Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i class="fas fa-folder-open me-2"></i>
+                        Document Pool
+                    </div>
+                    <div class="nav-links">
+                        <button class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#docpoolNav">
+                            <div>
+                                <i class="fas fa-folder-open"></i>
+                                <span class="nav-text ms-2">Document Pool</span>
+                            </div>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </button>
+                        <div class="collapse" id="docpoolNav">
+                            <div class="nav-submenu">
+                                {% url 'docpool:document_list' as docpool_list_url %}
+                                {% if docpool_list_url %}
+                                    <a href="{{ docpool_list_url }}" class="nav-link">
+                                        <i class="fas fa-list"></i>
+                                        <span class="nav-text">All Documents</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'docpool:document_upload' as docpool_upload_url %}
+                                {% if docpool_upload_url %}
+                                    <a href="{{ docpool_upload_url }}" class="nav-link">
+                                        <i class="fas fa-plus-circle"></i>
+                                        <span class="nav-text">Upload Document</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'docpool:search_analytics' as docpool_analytics_url %}
+                                {% if docpool_analytics_url %}
+                                    <a href="{{ docpool_analytics_url }}" class="nav-link">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span class="nav-text">Analytics</span>
+                                    </a>
+                                {% endif %}
+                                {% url 'docpool:reference_list' as docpool_ref_url %}
+                                {% if docpool_ref_url %}
+                                    <a href="{{ docpool_ref_url }}" class="nav-link">
+                                        <i class="fas fa-hashtag"></i>
+                                        <span class="nav-text">References</span>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- HR Management Section -->
                 <div class="nav-section">
                     <div class="nav-section-header">
@@ -664,17 +761,8 @@
         </main>
     </div>
 
-    <!-- Simple Admin Footer -->
-        <!-- Footer -->
-    <footer class="admin-footer text-center py-3">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
-                    <small>&copy; {% now "Y" %} HAWWA Admin Portal. All rights reserved. | Version 2.0</small>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <!-- Unified site footer -->
+    {% include 'base/footer.html' %}
 
     <!-- Use the same JS as landing page -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -699,16 +787,54 @@
                 });
             }
 
-            // Auto-collapse navigation sections on mobile only
-            if (window.innerWidth <= 768) {
-                const collapseElements = document.querySelectorAll('.collapse.show');
-                collapseElements.forEach(element => {
-                    // Only collapse sections that aren't vendors or financial for mobile
-                    if (!element.id.includes('vendors') && !element.id.includes('financial')) {
-                        element.classList.remove('show');
+            // Smart Navigation: Auto-expand relevant section based on current URL
+            function expandRelevantSection() {
+                const currentPath = window.location.pathname;
+                
+                // Define URL patterns for each section
+                const sectionMappings = {
+                    'financialNav': ['/financial/', '/invoice/', '/payment/', '/expense/'],
+                    'vendorsNav': ['/vendors/'],
+                    'servicesNav': ['/services/', '/accommodation/', '/homecare/'],
+                    'bookingsNav': ['/bookings/'],
+                    'analyticsNav': ['/analytics/', '/reporting/'],
+                    'changeNav': ['/change-management/', '/change/', '/incident/', '/lead/', '/role/', '/activity/'],
+                    'docpoolNav': ['/docpool/'],
+                    'hrmsNav': ['/hrms/', '/employee/'],
+                    'adminNav': ['/admin-dashboard/', '/user-management/']
+                };
+                
+                // First, ensure all sections are collapsed
+                Object.keys(sectionMappings).forEach(sectionId => {
+                    const section = document.getElementById(sectionId);
+                    if (section) {
+                        section.classList.remove('show');
                     }
                 });
+                
+                // Find and expand the matching section
+                for (const [sectionId, patterns] of Object.entries(sectionMappings)) {
+                    if (patterns.some(pattern => currentPath.includes(pattern))) {
+                        const section = document.getElementById(sectionId);
+                        if (section) {
+                            section.classList.add('show');
+                            
+                            // Also highlight active nav links in the expanded section
+                            const navLinks = section.querySelectorAll('.nav-link');
+                            navLinks.forEach(link => {
+                                link.classList.remove('active');
+                                if (link.href && currentPath.includes(new URL(link.href).pathname)) {
+                                    link.classList.add('active');
+                                }
+                            });
+                        }
+                        break;
+                    }
+                }
             }
+            
+            // Apply smart navigation
+            expandRelevantSection();
             
             // Close mobile sidebar when clicking overlay or outside
             if (sidebarOverlay) {
@@ -728,6 +854,17 @@
                         sidebarOverlay.classList.remove('show');
                     }
                 }
+            });
+            
+            // Enhanced nav toggle behavior with rotation animation
+            const navToggles = document.querySelectorAll('.nav-toggle');
+            navToggles.forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    const icon = this.querySelector('.toggle-icon');
+                    if (icon) {
+                        icon.style.transform = icon.style.transform === 'rotate(180deg)' ? 'rotate(0deg)' : 'rotate(180deg)';
+                    }
+                });
             });
         });
     </script>
