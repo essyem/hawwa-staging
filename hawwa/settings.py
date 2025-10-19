@@ -32,11 +32,25 @@ else:
     # Development fallback only
     SECRET_KEY = 'django-insecure-wuy_yg&5m5=b3%dvz@!(c(!_@+w@slo^b-svc67pt$o!okv+9f'
 
-# Toggle production mode with an environment variable.
-# Set `HAWWA_ENV=production` or `DJANGO_PRODUCTION=1` in your production env.
-_is_prod = os.environ.get('HAWWA_ENV', '').lower() == 'production' or os.environ.get('DJANGO_PRODUCTION') in ('1', 'true', 'True')
+# Auto-detect environment based on multiple indicators
+# 1. Explicit environment variables (HAWWA_ENV, DJANGO_PRODUCTION)
+# 2. Presence of gunicorn/uwsgi (production WSGI servers)
+# 3. Running as a service (systemd)
+# 4. Development server indicators
+_explicit_prod = os.environ.get('HAWWA_ENV', '').lower() in ('production', 'staging') or os.environ.get('DJANGO_PRODUCTION') in ('1', 'true', 'True')
+_has_wsgi_server = any(name in os.environ.get('SERVER_SOFTWARE', '') for name in ['gunicorn', 'uwsgi'])
+_is_service = os.environ.get('INVOCATION_ID') is not None  # systemd service
+_is_dev_server = 'runserver' in sys.argv or 'manage.py' in sys.argv[0] if sys.argv else False
+
+# Production if explicitly set OR running under WSGI server OR running as service (but not if dev server)
+_is_prod = (_explicit_prod or _has_wsgi_server or _is_service) and not _is_dev_server
 DEBUG = not _is_prod
-DBEBUG = True
+
+# Always show debug info in console for development
+if DEBUG:
+    print(f"🚀 Hawwa Development Mode - DEBUG={DEBUG}")
+else:
+    print(f"🌐 Hawwa Production Mode - DEBUG={DEBUG} (Environment: {os.environ.get('HAWWA_ENV', 'auto-detected')})")
 
 # Hosts allowed. Use environment variable to override in production.
 ALLOWED_HOSTS = os.environ.get('HAWWA_ALLOWED_HOSTS', '127.0.0.1,localhost,192.168.100.2,hawwawellness.com,www.hawwawellness.com,staging.hawwa.online').split(',')
