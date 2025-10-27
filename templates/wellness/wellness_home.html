@@ -1,10 +1,60 @@
-{% extends 'base.html' %}
+{% extends 'wellness/wellness_base.html' %}
 {% load static %}
 {% load i18n %}
 
 {% block title %}{% trans "Wellness - Hawwa Postpartum Care" %}{% endblock %}
 
-{% block content %}
+{% block wellness_content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Wellness Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-heart text-primary"></i>
+                {% trans "Wellness Programs" %}
+            </h1>
+            <p class="text-muted mb-0">{% trans "Comprehensive wellness and recovery programs for mothers" %}</p>
+        </div>
+        <div>
+            <a href="{% url 'wellness:program_list' %}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-list"></i> {% trans "All Programs" %}
+            </a>
+            <a href="{% url 'wellness:user_enrollments' %}" class="btn btn-primary">
+                <i class="fas fa-user-check"></i> {% trans "My Enrollments" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Wellness Navigation Tabs -->
+    <div class="wellness-nav">
+        <ul class="nav nav-pills p-3">
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'wellness:wellness_home' %}">
+                    <i class="fas fa-home"></i> {% trans "Home" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'wellness:program_list' %}">
+                    <i class="fas fa-dumbbell"></i> {% trans "Programs" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'wellness:session_list' %}">
+                    <i class="fas fa-calendar-alt"></i> {% trans "Sessions" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'wellness:user_enrollments' %}">
+                    <i class="fas fa-user-check"></i> {% trans "My Enrollments" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'wellness:category_list' %}">
+                    <i class="fas fa-tags"></i> {% trans "Categories" %}
+                </a>
+            </li>
+        </ul>
+    </div>
 <!-- Hero Section -->
 <section class="py-5 bg-light">
     <div class="container">

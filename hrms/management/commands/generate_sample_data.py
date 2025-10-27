@@ -2,7 +2,7 @@ import random
 from datetime import date, timedelta
 from decimal import Decimal
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from faker import Faker
 from hrms.models import (
@@ -291,12 +291,14 @@ class Command(BaseCommand):
             username = f"{first_name.lower()}.{last_name.lower()}{i}"[:30]
             email = f"{username}@ifccqatar.com"
             
+            User = get_user_model()
+            # Use email as unique identifier for custom user model
+            user_email = email
             user = User.objects.create_user(
-                username=username,
-                email=email,
+                email=user_email,
                 password='password123',
                 first_name=first_name,
-                last_name=last_name
+                last_name=last_name,
             )
             
             # Select position and department
@@ -389,6 +391,7 @@ class Command(BaseCommand):
             ('MGMT401', 'Strategic Management', 'Leadership & Management', 'seminar', 'expert', 32),
         ]
         
+        User = get_user_model()
         # Get an admin user for created_by field
         admin_user = User.objects.filter(is_superuser=True).first()
         if not admin_user:
@@ -426,6 +429,7 @@ class Command(BaseCommand):
             
         # Create payroll periods for the last 3 months
         current_date = timezone.now().date()
+        User = get_user_model()
         admin_user = User.objects.filter(is_superuser=True).first()
         if not admin_user:
             admin_user = User.objects.first()

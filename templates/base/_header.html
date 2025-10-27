@@ -1,17 +1,2 @@
-{% load i18n %}
-{% load static %}
-<!-- Accessible skip link and header partial -->
-<a class="skip-link sr-only-focusable" href="#main-content">{% trans "Skip to main content" %}</a>
-
-<header>
-    <div class="header-top bg-transparent">
-        <div class="container d-flex justify-content-between align-items-center py-2">
-            <!-- Brand (kept minimal here; navbar contains the full brand) -->
-            <a class="d-inline-block site-logo" href="{% url 'core:home' %}">
-                <img src="{% static 'images/logo-small.png' %}" alt="{% trans "Hawwa logo" %}" height="40"/>
-            </a>
-            <!-- Include navbar for consistency across templates -->
-            {% include 'base/navbar.html' %}
-        </div>
-    </div>
-</header>
+{% comment %} Delegate to the canonical site header to avoid duplicated markup {% endcomment %}
+{% include 'includes/header.html' %}

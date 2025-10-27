@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'hrms/base.html' %}
 {% load static %}
 
 {% block title %}Clock In/Out - HRMS{% endblock %}
@@ -158,7 +158,7 @@
                     <div class="col-md-8 mx-auto">
                         <!-- Current Time -->
                         <div class="time-display" id="currentTime">--:--:--</div>
-                        <div class="date-display" id="currentDate">{{ today|date:"l, F d, Y" }}</div>
+                        <div class="date-display" id="currentDate">{% now "l, F d, Y" %}</div>
 
                         <!-- Employee Info -->
                         <div class="mb-3">

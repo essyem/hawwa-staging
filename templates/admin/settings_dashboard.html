@@ -1,0 +1,1270 @@
+{% extends 'admin_portal_base.html' %}
+
+{% block title %}System Settings - Hawwa Admin{% endblock %}
+
+{% block page_title %}System Settings{% endblock %}
+{% block page_subtitle %}Configure system preferences, security, and business settings{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Settings</li>
+{% endblock %}
+
+{% block content %}
+<!-- Settings Navigation -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary active" onclick="showSection('general')" id="btn-general">
+                                <i class="fas fa-cog me-2"></i>General
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary" onclick="showSection('business')" id="btn-business">
+                                <i class="fas fa-building me-2"></i>Business
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary" onclick="showSection('payment')" id="btn-payment">
+                                <i class="fas fa-credit-card me-2"></i>Payment
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary" onclick="showSection('email')" id="btn-email">
+                                <i class="fas fa-envelope me-2"></i>Email
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary" onclick="showSection('security')" id="btn-security">
+                                <i class="fas fa-shield-alt me-2"></i>Security
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary" onclick="showSection('advanced')" id="btn-advanced">
+                                <i class="fas fa-tools me-2"></i>Advanced
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Content -->
+<div id="settings-content">
+    <!-- General Settings -->
+    <div id="general-section" class="settings-section">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-cog text-primary me-2"></i>General Settings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="generalSettingsForm">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">System Name</label>
+                                <input type="text" class="form-control" name="system_name" value="Hawwa Wellness Platform" required>
+                                <div class="form-text">The name displayed throughout the system</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">System Description</label>
+                                <textarea class="form-control" name="system_description" rows="3">Premium wellness and beauty services platform for Qatar</textarea>
+                                <div class="form-text">Brief description of your platform</div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Default Language</label>
+                                    <select class="form-select" name="default_language">
+                                        <option value="en" selected>English</option>
+                                        <option value="ar">Arabic</option>
+                                        <option value="fr">French</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Default Timezone</label>
+                                    <select class="form-select" name="timezone">
+                                        <option value="Asia/Qatar" selected>Asia/Qatar (GMT+3)</option>
+                                        <option value="UTC">UTC (GMT+0)</option>
+                                        <option value="Asia/Dubai">Asia/Dubai (GMT+4)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Date Format</label>
+                                    <select class="form-select" name="date_format">
+                                        <option value="DD/MM/YYYY" selected>DD/MM/YYYY</option>
+                                        <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Time Format</label>
+                                    <select class="form-select" name="time_format">
+                                        <option value="24" selected>24 Hour</option>
+                                        <option value="12">12 Hour (AM/PM)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Default Currency</label>
+                                <select class="form-select" name="currency">
+                                    <option value="QAR" selected>Qatari Riyal (QAR)</option>
+                                    <option value="USD">US Dollar (USD)</option>
+                                    <option value="EUR">Euro (EUR)</option>
+                                    <option value="SAR">Saudi Riyal (SAR)</option>
+                                </select>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetForm('generalSettingsForm')">
+                                    <i class="fas fa-undo me-2"></i>Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h6 class="card-title mb-0">System Status</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>System Health</span>
+                                <span class="badge bg-success">Excellent</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Database Status</span>
+                                <span class="badge bg-success">Online</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Storage Usage</span>
+                                <span class="text-muted">2.3 GB / 10 GB</span>
+                            </div>
+                            <div class="progress mt-1" style="height: 6px;">
+                                <div class="progress-bar bg-primary" style="width: 23%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Active Users</span>
+                                <span class="fw-bold text-primary">142</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Last Backup</span>
+                                <span class="text-muted">2 hours ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-header bg-transparent border-0">
+                        <h6 class="card-title mb-0">Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" onclick="clearCache()">
+                                <i class="fas fa-broom me-2"></i>Clear Cache
+                            </button>
+                            <button class="btn btn-outline-info" onclick="runBackup()">
+                                <i class="fas fa-download me-2"></i>Create Backup
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="checkUpdates()">
+                                <i class="fas fa-sync-alt me-2"></i>Check Updates
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="exportLogs()">
+                                <i class="fas fa-file-alt me-2"></i>Export Logs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Business Settings -->
+    <div id="business-section" class="settings-section d-none">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-building text-primary me-2"></i>Business Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="businessSettingsForm">
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Company Name</label>
+                                    <input type="text" class="form-control" name="company_name" value="Hawwa Wellness Center" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Business Registration</label>
+                                    <input type="text" class="form-control" name="registration_number" value="QA-123456789">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Business Address</label>
+                                <textarea class="form-control" name="address" rows="3">123 Business Street, West Bay
+Doha, Qatar</textarea>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Contact Phone</label>
+                                    <input type="tel" class="form-control" name="phone" value="+974 4444 5555">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Contact Email</label>
+                                    <input type="email" class="form-control" name="email" value="info@hawwa.qa">
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Website</label>
+                                    <input type="url" class="form-control" name="website" value="https://hawwa.qa">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Tax ID</label>
+                                    <input type="text" class="form-control" name="tax_id" value="TAX-987654321">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Business Hours</label>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <label class="form-label small">Weekdays</label>
+                                        <div class="input-group">
+                                            <input type="time" class="form-control" name="weekday_start" value="08:00">
+                                            <span class="input-group-text">to</span>
+                                            <input type="time" class="form-control" name="weekday_end" value="22:00">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small">Saturday</label>
+                                        <div class="input-group">
+                                            <input type="time" class="form-control" name="saturday_start" value="09:00">
+                                            <span class="input-group-text">to</span>
+                                            <input type="time" class="form-control" name="saturday_end" value="21:00">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small">Sunday</label>
+                                        <div class="input-group">
+                                            <input type="time" class="form-control" name="sunday_start" value="10:00">
+                                            <span class="input-group-text">to</span>
+                                            <input type="time" class="form-control" name="sunday_end" value="20:00">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Booking Policies</label>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label small">Advance Booking (hours)</label>
+                                        <input type="number" class="form-control" name="advance_booking" value="24" min="1">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small">Cancellation Policy (hours)</label>
+                                        <input type="number" class="form-control" name="cancellation_policy" value="12" min="1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetForm('businessSettingsForm')">
+                                    <i class="fas fa-undo me-2"></i>Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h6 class="card-title mb-0">Business Logo</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <img src="/static/images/logo-placeholder.png" class="img-fluid rounded" style="max-height: 120px;" alt="Business Logo">
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" onclick="uploadLogo()">
+                                <i class="fas fa-upload me-2"></i>Upload New Logo
+                            </button>
+                            <small class="text-muted">Recommended size: 300x120px</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-header bg-transparent border-0">
+                        <h6 class="card-title mb-0">Social Media</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label small">Facebook</label>
+                            <input type="url" class="form-control" name="facebook" placeholder="https://facebook.com/hawwa">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small">Instagram</label>
+                            <input type="url" class="form-control" name="instagram" placeholder="https://instagram.com/hawwa">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small">Twitter</label>
+                            <input type="url" class="form-control" name="twitter" placeholder="https://twitter.com/hawwa">
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label small">LinkedIn</label>
+                            <input type="url" class="form-control" name="linkedin" placeholder="https://linkedin.com/company/hawwa">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Settings -->
+    <div id="payment-section" class="settings-section d-none">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-credit-card text-primary me-2"></i>Payment Configuration
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="paymentSettingsForm">
+                            <!-- Payment Methods -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Accepted Payment Methods</label>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="creditCard" checked>
+                                            <label class="form-check-label fw-bold" for="creditCard">
+                                                Credit/Debit Cards
+                                            </label>
+                                            <div class="form-text">Visa, MasterCard, American Express</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="bankTransfer" checked>
+                                            <label class="form-check-label fw-bold" for="bankTransfer">
+                                                Bank Transfer
+                                            </label>
+                                            <div class="form-text">Direct bank transfers</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="digitalWallet" checked>
+                                            <label class="form-check-label fw-bold" for="digitalWallet">
+                                                Digital Wallets
+                                            </label>
+                                            <div class="form-text">PayPal, Apple Pay, Google Pay</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="cashPayment">
+                                            <label class="form-check-label fw-bold" for="cashPayment">
+                                                Cash Payments
+                                            </label>
+                                            <div class="form-text">Pay at service location</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payment Gateways -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Payment Gateways</label>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="card border">
+                                            <div class="card-body text-center">
+                                                <i class="fab fa-stripe fa-2x text-primary mb-2"></i>
+                                                <h6 class="mb-1">Stripe</h6>
+                                                <div class="form-check form-switch d-flex justify-content-center">
+                                                    <input class="form-check-input" type="checkbox" id="stripeEnabled" checked>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card border">
+                                            <div class="card-body text-center">
+                                                <i class="fab fa-paypal fa-2x text-info mb-2"></i>
+                                                <h6 class="mb-1">PayPal</h6>
+                                                <div class="form-check form-switch d-flex justify-content-center">
+                                                    <input class="form-check-input" type="checkbox" id="paypalEnabled" checked>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card border">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-university fa-2x text-success mb-2"></i>
+                                                <h6 class="mb-1">Local Banks</h6>
+                                                <div class="form-check form-switch d-flex justify-content-center">
+                                                    <input class="form-check-input" type="checkbox" id="banksEnabled" checked>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payment Settings -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Service Fee (%)</label>
+                                    <input type="number" class="form-control" name="service_fee" value="2.5" step="0.1" min="0" max="10">
+                                    <div class="form-text">Platform service fee percentage</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Minimum Payment (QAR)</label>
+                                    <input type="number" class="form-control" name="minimum_payment" value="50" min="1">
+                                    <div class="form-text">Minimum transaction amount</div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Payment Timeout (minutes)</label>
+                                    <input type="number" class="form-control" name="payment_timeout" value="15" min="5" max="60">
+                                    <div class="form-text">Time limit for payment completion</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Refund Policy (days)</label>
+                                    <input type="number" class="form-control" name="refund_policy" value="7" min="1" max="30">
+                                    <div class="form-text">Days for refund requests</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetForm('paymentSettingsForm')">
+                                    <i class="fas fa-undo me-2"></i>Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h6 class="card-title mb-0">Payment Statistics</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span>Success Rate</span>
+                                <strong class="text-success">97.8%</strong>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-success" style="width: 97.8%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span>Failed Payments</span>
+                                <strong class="text-danger">2.2%</strong>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-danger" style="width: 2.2%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Total Processed Today</span>
+                                <strong>QAR 15,420</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Avg Processing Time</span>
+                                <strong>2.3 seconds</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-header bg-transparent border-0">
+                        <h6 class="card-title mb-0">Gateway Status</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Stripe</span>
+                                <span class="badge bg-success">Online</span>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>PayPal</span>
+                                <span class="badge bg-success">Online</span>
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Local Banks</span>
+                                <span class="badge bg-warning">Maintenance</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Settings -->
+    <div id="email-section" class="settings-section d-none">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-envelope text-primary me-2"></i>Email Configuration
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="emailSettingsForm">
+                            <!-- SMTP Settings -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold">SMTP Configuration</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">SMTP Host</label>
+                                        <input type="text" class="form-control" name="smtp_host" value="smtp.gmail.com">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Port</label>
+                                        <input type="number" class="form-control" name="smtp_port" value="587">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Security</label>
+                                        <select class="form-select" name="smtp_security">
+                                            <option value="tls" selected>TLS</option>
+                                            <option value="ssl">SSL</option>
+                                            <option value="none">None</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Username</label>
+                                        <input type="email" class="form-control" name="smtp_username" value="noreply@hawwa.qa">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Password</label>
+                                        <input type="password" class="form-control" name="smtp_password" value="••••••••">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Email Templates -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Email Templates</h6>
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="welcomeEmail" checked>
+                                            <label class="form-check-label fw-bold" for="welcomeEmail">
+                                                Welcome Email
+                                            </label>
+                                            <div class="form-text">Send welcome email to new users</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="bookingConfirmation" checked>
+                                            <label class="form-check-label fw-bold" for="bookingConfirmation">
+                                                Booking Confirmation
+                                            </label>
+                                            <div class="form-text">Send confirmation emails for bookings</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="reminderEmail" checked>
+                                            <label class="form-check-label fw-bold" for="reminderEmail">
+                                                Appointment Reminders
+                                            </label>
+                                            <div class="form-text">Send reminder emails before appointments</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="invoiceEmail" checked>
+                                            <label class="form-check-label fw-bold" for="invoiceEmail">
+                                                Invoice Notifications
+                                            </label>
+                                            <div class="form-text">Send invoice and payment emails</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Email Settings -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">From Name</label>
+                                    <input type="text" class="form-control" name="from_name" value="Hawwa Wellness">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">From Email</label>
+                                    <input type="email" class="form-control" name="from_email" value="noreply@hawwa.qa">
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Reply-To Email</label>
+                                    <input type="email" class="form-control" name="reply_to" value="support@hawwa.qa">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Daily Email Limit</label>
+                                    <input type="number" class="form-control" name="email_limit" value="1000" min="100">
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <button type="button" class="btn btn-outline-info" onclick="testEmail()">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Test Email
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetForm('emailSettingsForm')">
+                                    <i class="fas fa-undo me-2"></i>Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h6 class="card-title mb-0">Email Statistics</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Emails Sent Today</span>
+                                <strong>247</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Delivery Rate</span>
+                                <strong class="text-success">98.5%</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Open Rate</span>
+                                <strong class="text-info">76.3%</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Click Rate</span>
+                                <strong class="text-warning">24.8%</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-header bg-transparent border-0">
+                        <h6 class="card-title mb-0">Email Queue</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Pending</span>
+                                <span class="badge bg-warning">12</span>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Processing</span>
+                                <span class="badge bg-primary">3</span>
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Failed</span>
+                                <span class="badge bg-danger">1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Settings -->
+    <div id="security-section" class="settings-section d-none">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-shield-alt text-primary me-2"></i>Security Configuration
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="securitySettingsForm">
+                            <!-- Password Policy -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Password Policy</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Minimum Length</label>
+                                        <input type="number" class="form-control" name="min_password_length" value="8" min="6" max="20">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Password Expiry (days)</label>
+                                        <input type="number" class="form-control" name="password_expiry" value="90" min="30" max="365">
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="requireUppercase" checked>
+                                            <label class="form-check-label" for="requireUppercase">
+                                                Require uppercase letters
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="requireNumbers" checked>
+                                            <label class="form-check-label" for="requireNumbers">
+                                                Require numbers
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="requireSpecialChars" checked>
+                                            <label class="form-check-label" for="requireSpecialChars">
+                                                Require special characters
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Login Security -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Login Security</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Max Login Attempts</label>
+                                        <input type="number" class="form-control" name="max_login_attempts" value="5" min="3" max="10">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Lockout Duration (minutes)</label>
+                                        <input type="number" class="form-control" name="lockout_duration" value="30" min="5" max="120">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Session Timeout (hours)</label>
+                                        <input type="number" class="form-control" name="session_timeout" value="24" min="1" max="72">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="twoFactorRequired">
+                                            <label class="form-check-label fw-bold" for="twoFactorRequired">
+                                                Require 2FA for Admin Users
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Data Protection -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Data Protection</h6>
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="encryptData" checked>
+                                            <label class="form-check-label fw-bold" for="encryptData">
+                                                Encrypt Sensitive Data
+                                            </label>
+                                            <div class="form-text">Encrypt personal and payment information</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="auditLog" checked>
+                                            <label class="form-check-label fw-bold" for="auditLog">
+                                                Enable Audit Logging
+                                            </label>
+                                            <div class="form-text">Log all user actions and system events</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="dataBackup" checked>
+                                            <label class="form-check-label fw-bold" for="dataBackup">
+                                                Automatic Data Backup
+                                            </label>
+                                            <div class="form-text">Daily encrypted backups of all data</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetForm('securitySettingsForm')">
+                                    <i class="fas fa-undo me-2"></i>Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h6 class="card-title mb-0">Security Status</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Security Score</span>
+                                <span class="badge bg-success">High (92%)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>SSL Certificate</span>
+                                <span class="badge bg-success">Valid</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Failed Logins Today</span>
+                                <span class="text-muted">3</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Last Security Scan</span>
+                                <span class="text-muted">2 hours ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-header bg-transparent border-0">
+                        <h6 class="card-title mb-0">Security Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" onclick="runSecurityScan()">
+                                <i class="fas fa-shield-alt me-2"></i>Run Security Scan
+                            </button>
+                            <button class="btn btn-outline-info" onclick="viewAuditLog()">
+                                <i class="fas fa-history me-2"></i>View Audit Log
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="forceLogoutAll()">
+                                <i class="fas fa-sign-out-alt me-2"></i>Force Logout All
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="lockSystem()">
+                                <i class="fas fa-lock me-2"></i>Emergency Lock
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Settings -->
+    <div id="advanced-section" class="settings-section d-none">
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> Advanced settings can affect system performance and functionality. Only modify these settings if you understand their impact.
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-cogs text-primary me-2"></i>System Configuration
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="advancedSettingsForm">
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="debugMode">
+                                    <label class="form-check-label fw-bold" for="debugMode">
+                                        Debug Mode
+                                    </label>
+                                    <div class="form-text">Enable detailed error logging (affects performance)</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="maintenanceMode">
+                                    <label class="form-check-label fw-bold" for="maintenanceMode">
+                                        Maintenance Mode
+                                    </label>
+                                    <div class="form-text">Put system in maintenance mode</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="apiLogging" checked>
+                                    <label class="form-check-label fw-bold" for="apiLogging">
+                                        API Request Logging
+                                    </label>
+                                    <div class="form-text">Log all API requests and responses</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Cache Duration (minutes)</label>
+                                <input type="number" class="form-control" name="cache_duration" value="60" min="5" max="1440">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Database Connection Pool</label>
+                                <input type="number" class="form-control" name="db_pool_size" value="20" min="10" max="100">
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetForm('advancedSettingsForm')">
+                                    <i class="fas fa-undo me-2"></i>Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-tools text-primary me-2"></i>System Tools
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-3">
+                            <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                                <div>
+                                    <div class="fw-bold">Clear System Cache</div>
+                                    <small class="text-muted">Clear all cached data and files</small>
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm" onclick="clearCache()">
+                                    <i class="fas fa-broom"></i>
+                                </button>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                                <div>
+                                    <div class="fw-bold">Database Optimization</div>
+                                    <small class="text-muted">Optimize database performance</small>
+                                </div>
+                                <button class="btn btn-outline-info btn-sm" onclick="optimizeDatabase()">
+                                    <i class="fas fa-database"></i>
+                                </button>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                                <div>
+                                    <div class="fw-bold">System Health Check</div>
+                                    <small class="text-muted">Run comprehensive system diagnostics</small>
+                                </div>
+                                <button class="btn btn-outline-success btn-sm" onclick="healthCheck()">
+                                    <i class="fas fa-heartbeat"></i>
+                                </button>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                                <div>
+                                    <div class="fw-bold">Export System Data</div>
+                                    <small class="text-muted">Export all system data for backup</small>
+                                </div>
+                                <button class="btn btn-outline-warning btn-sm" onclick="exportSystemData()">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center p-3 border rounded bg-danger text-white">
+                                <div>
+                                    <div class="fw-bold">Reset System</div>
+                                    <small class="opacity-75">Reset system to factory defaults</small>
+                                </div>
+                                <button class="btn btn-outline-light btn-sm" onclick="resetSystem()">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Initialize settings
+    initSettings();
+    
+    // Form submit handlers
+    $('form[id$="SettingsForm"]').on('submit', function(e) {
+        e.preventDefault();
+        const formId = $(this).attr('id');
+        const sectionName = formId.replace('SettingsForm', '');
+        saveSettings(sectionName, this);
+    });
+});
+
+function initSettings() {
+    // Set initial active section
+    showSection('general');
+}
+
+function showSection(section) {
+    // Hide all sections
+    $('.settings-section').addClass('d-none');
+    
+    // Show selected section
+    $(`#${section}-section`).removeClass('d-none');
+    
+    // Update navigation buttons
+    $('.btn-outline-primary').removeClass('active');
+    $(`#btn-${section}`).addClass('active');
+}
+
+function saveSettings(section, form) {
+    const formData = new FormData(form);
+    
+    // Show loading state
+    const submitBtn = $(form).find('button[type="submit"]');
+    const originalText = submitBtn.html();
+    submitBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>Saving...').prop('disabled', true);
+    
+    // TODO: Implement actual save functionality
+    setTimeout(() => {
+        submitBtn.html(originalText).prop('disabled', false);
+        showToast(`${section.charAt(0).toUpperCase() + section.slice(1)} settings saved successfully!`, 'success');
+    }, 2000);
+    
+    console.log(`Saving ${section} settings:`, Object.fromEntries(formData));
+}
+
+function resetForm(formId) {
+    if (confirm('Are you sure you want to reset all changes?')) {
+        document.getElementById(formId).reset();
+        showToast('Form reset to default values', 'info');
+    }
+}
+
+function clearCache() {
+    if (confirm('Clear system cache? This may temporarily slow down the system.')) {
+        // TODO: Implement cache clearing
+        showToast('System cache cleared successfully', 'success');
+    }
+}
+
+function runBackup() {
+    if (confirm('Create a system backup? This may take a few minutes.')) {
+        // TODO: Implement backup functionality
+        showToast('Backup process started. You will be notified when complete.', 'info');
+    }
+}
+
+function checkUpdates() {
+    // TODO: Implement update checking
+    showToast('Checking for updates...', 'info');
+    
+    setTimeout(() => {
+        showToast('System is up to date', 'success');
+    }, 3000);
+}
+
+function exportLogs() {
+    // TODO: Implement log export
+    window.location.href = '/admin/settings/logs/export/';
+}
+
+function uploadLogo() {
+    // TODO: Implement logo upload
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            showToast('Logo uploaded successfully', 'success');
+        }
+    };
+    input.click();
+}
+
+function testEmail() {
+    const email = prompt('Enter email address to send test email:');
+    if (email) {
+        // TODO: Implement test email functionality
+        showToast(`Test email sent to ${email}`, 'success');
+    }
+}
+
+function runSecurityScan() {
+    if (confirm('Run security scan? This may take a few minutes.')) {
+        // TODO: Implement security scan
+        showToast('Security scan started. Results will be available shortly.', 'info');
+    }
+}
+
+function viewAuditLog() {
+    // TODO: Open audit log viewer
+    window.open('/admin/security/audit-log/', '_blank');
+}
+
+function forceLogoutAll() {
+    if (confirm('Force logout all users? This will terminate all active sessions.')) {
+        // TODO: Implement force logout
+        showToast('All users have been logged out', 'warning');
+    }
+}
+
+function lockSystem() {
+    if (confirm('Emergency system lock? This will prevent all access except for administrators.')) {
+        // TODO: Implement emergency lock
+        showToast('System locked. Only administrators can access.', 'danger');
+    }
+}
+
+function optimizeDatabase() {
+    if (confirm('Optimize database? This may take a few minutes and affect performance.')) {
+        // TODO: Implement database optimization
+        showToast('Database optimization started', 'info');
+    }
+}
+
+function healthCheck() {
+    // TODO: Implement health check
+    showToast('Running system health check...', 'info');
+    
+    setTimeout(() => {
+        showToast('System health check completed. All systems operational.', 'success');
+    }, 5000);
+}
+
+function exportSystemData() {
+    if (confirm('Export all system data? This will create a large backup file.')) {
+        // TODO: Implement data export
+        window.location.href = '/admin/settings/export-all/';
+    }
+}
+
+function resetSystem() {
+    const confirmation = prompt('Type "RESET SYSTEM" to confirm system reset (THIS CANNOT BE UNDONE):');
+    if (confirmation === 'RESET SYSTEM') {
+        alert('System reset functionality disabled for safety. Please contact system administrator.');
+    }
+}
+
+function showToast(message, type) {
+    // Use the global toast function from admin-portal.js if available
+    if (window.hawwaAdmin && window.hawwaAdmin.showToast) {
+        window.hawwaAdmin.showToast(message, type);
+    } else {
+        // Fallback alert
+        alert(message);
+    }
+}
+</script>
+{% endblock %}

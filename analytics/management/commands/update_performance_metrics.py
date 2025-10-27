@@ -152,8 +152,10 @@ class Command(BaseCommand):
         """Calculate performance metrics for a vendor on a specific date"""
         
         # Date range for the day
-        start_datetime = datetime.combine(target_date, datetime.min.time())
-        end_datetime = datetime.combine(target_date, datetime.max.time())
+        start_datetime_naive = datetime.combine(target_date, datetime.min.time())
+        end_datetime_naive = datetime.combine(target_date, datetime.max.time())
+        start_datetime = timezone.make_aware(start_datetime_naive)
+        end_datetime = timezone.make_aware(end_datetime_naive)
         
         # Booking metrics for the day
         bookings_qs = Booking.objects.filter(

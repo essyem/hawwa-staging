@@ -1,0 +1,634 @@
+{% extends 'admin_portal_base.html' %}
+
+{% block title %}Admin Dashboard - Hawwa Wellness Platform{% endblock %}
+
+{% block page_title %}Dashboard Overview{% endblock %}
+{% block page_subtitle %}Welcome back, {{ request.user.get_full_name|default:request.user.username }}! Here's what's happening today.{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Dashboard</li>
+{% endblock %}
+
+{% block content %}
+<!-- Key Metrics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-lg-6 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-primary bg-gradient rounded-3 p-3">
+                            <i class="fas fa-users text-white fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-muted small">Total Clients</div>
+                        <div class="fs-4 fw-bold text-dark">{{ total_clients|default:"0" }}</div>
+                        <div class="text-success small">
+                            <i class="fas fa-arrow-up"></i> {{ new_clients_this_month|default:"0" }} this month
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-success bg-gradient rounded-3 p-3">
+                            <i class="fas fa-calendar-check text-white fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-muted small">Today's Bookings</div>
+                        <div class="fs-4 fw-bold text-dark">{{ todays_bookings|default:"0" }}</div>
+                        <div class="text-info small">
+                            {{ pending_today|default:"0" }} pending approval
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-warning bg-gradient rounded-3 p-3">
+                            <i class="fas fa-dollar-sign text-white fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-muted small">Monthly Revenue</div>
+                        <div class="fs-4 fw-bold text-dark">QAR {{ monthly_revenue|default:"0" }}</div>
+                        <div class="text-success small">
+                            <i class="fas fa-arrow-up"></i> {{ revenue_growth|default:"0" }}% from last month
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-info bg-gradient rounded-3 p-3">
+                            <i class="fas fa-spa text-white fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-muted small">Active Services</div>
+                        <div class="fs-4 fw-bold text-dark">{{ active_services|default:"0" }}</div>
+                        <div class="text-warning small">
+                            <i class="fas fa-star"></i> {{ featured_services|default:"0" }} featured
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <!-- Revenue Chart -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>Revenue Analytics
+                    </h5>
+                    <small class="text-muted">Last 12 months performance</small>
+                </div>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-primary active" onclick="changeChartPeriod('12m')">12M</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="changeChartPeriod('6m')">6M</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="changeChartPeriod('3m')">3M</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="changeChartPeriod('1m')">1M</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Distribution -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie me-2 text-success"></i>Service Categories
+                </h5>
+                <small class="text-muted">Distribution by bookings</small>
+            </div>
+            <div class="card-body">
+                <canvas id="serviceDistributionChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity & Quick Actions -->
+<div class="row g-4 mb-4">
+    <!-- Recent Activity -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-clock me-2 text-warning"></i>Recent Activity
+                </h5>
+                <a href="#" class="btn btn-outline-primary btn-sm">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for activity in recent_activities %}
+                        <div class="timeline-item mb-4">
+                            <div class="timeline-marker bg-{% if activity.type == 'booking' %}success{% elif activity.type == 'payment' %}primary{% elif activity.type == 'review' %}warning{% else %}info{% endif %}"></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ activity.title }}</h6>
+                                        <p class="text-muted mb-1">{{ activity.description }}</p>
+                                        <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
+                                    </div>
+                                    {% if activity.action_url %}
+                                        <a href="{{ activity.action_url }}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-arrow-right"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-clock text-muted fa-2x mb-3"></i>
+                            <p class="text-muted">No recent activity to display</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2 text-warning"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'core:admin_booking_create' %}" class="btn btn-success">
+                        <i class="fas fa-plus-circle me-2"></i>New Booking
+                    </a>
+                    <a href="{% url 'core:admin_service_create' %}" class="btn btn-primary">
+                        <i class="fas fa-spa me-2"></i>Add Service
+                    </a>
+                    <a href="{% url 'accounts:client_create' %}" class="btn btn-info">
+                        <i class="fas fa-user-plus me-2"></i>Add Client
+                    </a>
+                    <button type="button" class="btn btn-warning" onclick="generateReports()">
+                        <i class="fas fa-chart-bar me-2"></i>Generate Report
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="sendBulkNotifications()">
+                        <i class="fas fa-bell me-2"></i>Send Notifications
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Schedule -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-calendar-day me-2 text-info"></i>Today's Schedule
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if todays_schedule %}
+                    <div class="schedule-list" style="max-height: 300px; overflow-y: auto;">
+                        {% for appointment in todays_schedule %}
+                            <div class="d-flex align-items-center mb-3 p-2 rounded {% if appointment.status == 'CONFIRMED' %}bg-light{% endif %}">
+                                <div class="flex-shrink-0">
+                                    <div class="text-primary fw-bold">{{ appointment.scheduled_time|time:"g:i A" }}</div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="fw-bold">{{ appointment.service.name }}</div>
+                                    <small class="text-muted">{{ appointment.client.get_full_name }}</small>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span class="badge bg-{% if appointment.status == 'CONFIRMED' %}success{% elif appointment.status == 'PENDING' %}warning{% else %}secondary{% endif %} badge-sm">
+                                        {{ appointment.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'core:admin_booking_list' %}?date=today" class="btn btn-outline-primary btn-sm">
+                            View All Today's Bookings
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-check text-muted fa-2x mb-3"></i>
+                        <p class="text-muted mb-0">No appointments scheduled for today</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Grid -->
+<div class="row g-4">
+    <!-- Pending Approvals -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100 border-start border-warning border-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="card-title text-warning mb-2">
+                            <i class="fas fa-clock me-2"></i>Pending Approvals
+                        </h5>
+                        <div class="fs-3 fw-bold">{{ pending_approvals|default:"0" }}</div>
+                        <small class="text-muted">Require your attention</small>
+                    </div>
+                    <a href="{% url 'core:admin_booking_list' %}?status=PENDING" class="btn btn-outline-warning">
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Services -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100 border-start border-success border-3">
+            <div class="card-body">
+                <h5 class="card-title text-success mb-3">
+                    <i class="fas fa-trophy me-2"></i>Top Service
+                </h5>
+                {% if top_service %}
+                    <div class="fw-bold mb-1">{{ top_service.name }}</div>
+                    <small class="text-muted">{{ top_service.booking_count }} booking{{ top_service.booking_count|pluralize }} this month</small>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar bg-success" style="width: {{ top_service.percentage }}%"></div>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No bookings yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Satisfaction -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100 border-start border-info border-3">
+            <div class="card-body">
+                <h5 class="card-title text-info mb-2">
+                    <i class="fas fa-heart me-2"></i>Satisfaction Rate
+                </h5>
+                <div class="d-flex align-items-end">
+                    <div class="fs-3 fw-bold">{{ satisfaction_rate|default:"0" }}%</div>
+                    <div class="ms-2 mb-1">
+                        <div class="text-warning">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= average_rating %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">{{ total_reviews|default:"0" }} review{{ total_reviews|pluralize }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100 border-start border-primary border-3">
+            <div class="card-body">
+                <h5 class="card-title text-primary mb-2">
+                    <i class="fas fa-server me-2"></i>System Status
+                </h5>
+                <div class="mb-2">
+                    <span class="badge bg-success">All Systems Operational</span>
+                </div>
+                <small class="text-muted">
+                    Last backup: {{ last_backup_time|timesince }} ago<br>
+                    Uptime: {{ system_uptime|default:"99.9%" }}
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notifications Panel -->
+{% if notifications %}
+    <div class="row g-4 mt-2">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bell me-2 text-danger"></i>Important Notifications
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for notification in notifications %}
+                        <div class="alert alert-{% if notification.type == 'error' %}danger{% elif notification.type == 'warning' %}warning{% elif notification.type == 'success' %}success{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0 me-3">
+                                    <i class="fas fa-{% if notification.type == 'error' %}exclamation-triangle{% elif notification.type == 'warning' %}exclamation-circle{% elif notification.type == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="alert-heading">{{ notification.title }}</h6>
+                                    <p class="mb-0">{{ notification.message }}</p>
+                                    {% if notification.action_url %}
+                                        <div class="mt-2">
+                                            <a href="{{ notification.action_url }}" class="btn btn-outline-{% if notification.type == 'error' %}danger{% elif notification.type == 'warning' %}warning{% elif notification.type == 'success' %}success{% else %}info{% endif %} btn-sm">
+                                                Take Action
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #6c63ff, #e9ecef);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -34px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #6c63ff;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 3px solid #6c63ff;
+}
+
+.schedule-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.schedule-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.schedule-list::-webkit-scrollbar-thumb {
+    background: #6c63ff;
+    border-radius: 2px;
+}
+
+.card-hover {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Initialize charts
+    initRevenueChart();
+    initServiceDistributionChart();
+    
+    // Refresh data every 5 minutes
+    setInterval(refreshDashboardData, 300000);
+    
+    // Add hover effects to cards
+    $('.card').addClass('card-hover');
+});
+
+function initRevenueChart() {
+    const ctx = document.getElementById('revenueChart');
+    if (!ctx) return;
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Revenue (QAR)',
+                data: [12000, 19000, 8000, 15000, 22000, 18000, 25000, 21000, 28000, 24000, 32000, 29000],
+                borderColor: '#6c63ff',
+                backgroundColor: 'rgba(108, 99, 255, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#6c63ff',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.05)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return 'QAR ' + value.toLocaleString();
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            elements: {
+                point: {
+                    hoverRadius: 8
+                }
+            }
+        }
+    });
+}
+
+function initServiceDistributionChart() {
+    const ctx = document.getElementById('serviceDistributionChart');
+    if (!ctx) return;
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Wellness', 'Home Care', 'Accommodation', 'Mental Health', 'Nutrition'],
+            datasets: [{
+                data: [30, 25, 20, 15, 10],
+                backgroundColor: [
+                    '#6c63ff',
+                    '#28a745',
+                    '#17a2b8',
+                    '#ffc107',
+                    '#fd7e14'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+}
+
+function changeChartPeriod(period) {
+    // Update chart data based on selected period
+    $('.btn-group .btn').removeClass('active');
+    event.target.classList.add('active');
+    
+    // TODO: Fetch new data and update chart
+    console.log('Changing chart period to:', period);
+}
+
+function refreshDashboardData() {
+    // TODO: Implement AJAX call to refresh dashboard metrics
+    $.ajax({
+        url: '/admin/dashboard/refresh/',
+        method: 'GET',
+        success: function(data) {
+            // Update metrics without full page reload
+            updateDashboardMetrics(data);
+        },
+        error: function() {
+            console.log('Failed to refresh dashboard data');
+        }
+    });
+}
+
+function updateDashboardMetrics(data) {
+    // TODO: Update individual metric cards with new data
+    console.log('Updating dashboard metrics:', data);
+}
+
+function generateReports() {
+    window.location.href = '/admin/reports/';
+}
+
+function sendBulkNotifications() {
+    // TODO: Open bulk notification modal
+    console.log('Opening bulk notifications interface');
+}
+
+// Real-time notifications (if WebSocket is implemented)
+function initRealTimeUpdates() {
+    // TODO: Connect to WebSocket for real-time updates
+    if (window.WebSocket) {
+        const ws = new WebSocket('ws://localhost:8000/ws/admin/');
+        
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            handleRealTimeUpdate(data);
+        };
+    }
+}
+
+function handleRealTimeUpdate(data) {
+    switch(data.type) {
+        case 'new_booking':
+            showRealTimeNotification('New booking received!', 'success');
+            // Update booking counter
+            break;
+        case 'payment_received':
+            showRealTimeNotification('Payment received!', 'success');
+            // Update revenue counter
+            break;
+        case 'urgent_approval':
+            showRealTimeNotification('Urgent booking requires approval!', 'warning');
+            // Update pending approvals counter
+            break;
+    }
+}
+
+function showRealTimeNotification(message, type) {
+    // Create and show toast notification
+    if (window.hawwaAdmin && window.hawwaAdmin.showToast) {
+        window.hawwaAdmin.showToast(message, type);
+    }
+}
+
+// Initialize real-time updates
+// initRealTimeUpdates();
+</script>
+{% endblock %}

@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/site.css' %}">
     {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/header_footer_tight.css' %}">
 </head>
 <body>
     {% block header %}{% endblock %}
@@ -38,53 +39,7 @@
     </main>
 
     {% block footer %}
-    <footer class="footer" style="background: var(--gradient-primary); color: var(--qatar-white); padding: 3rem 0 1rem;">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <h5 class="text-white mb-3">
-                        <i class="fas fa-spa me-2"></i>{% trans "Hawwa Postpartum Care" %}
-                    </h5>
-                    <p class="text-white-50 mb-3">{% trans "Supporting mothers through their postpartum journey with personalized care, luxury services, and expert guidance." %}</p>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <h6 class="text-white mb-3">{% trans "Services" %}</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="{% url 'services:accommodation_list' %}" class="text-white-50 text-decoration-none">{% trans "Retreat Stays" %}</a></li>
-                        <li class="mb-2"><a href="{% url 'services:homecare_list' %}" class="text-white-50 text-decoration-none">{% trans "Home Care" %}</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-2 mb-4">
-                    <h6 class="text-white mb-3">{% trans "Company" %}</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="{% url 'core:home' %}" class="text-white-50 text-decoration-none">{% trans "Home" %}</a></li>
-                        <li class="mb-2"><a href="{% url 'core:about' %}" class="text-white-50 text-decoration-none">{% trans "About Us" %}</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <h6 class="text-white mb-3">{% trans "Contact Information" %}</h6>
-                    <p class="mb-2 text-white-50">
-                        <i class="fas fa-phone me-2"></i>
-                        <a href="tel:{{ HAWWA_SETTINGS.PHONE_NUMBER|default:'+97472126440'|urlencode }}" class="text-white-50 text-decoration-none">{{ HAWWA_SETTINGS.PHONE_NUMBER|default:'+974 7212 6440' }}</a>
-                    </p>
-                    <p class="mb-2 text-white-50">
-                        <i class="fas fa-envelope me-2"></i>
-                        <a href="mailto:{{ HAWWA_SETTINGS.SUPPORT_EMAIL|default:'hello@hawwawellness.com' }}" class="text-white-50 text-decoration-none">{{ HAWWA_SETTINGS.SUPPORT_EMAIL|default:'hello@hawwawellness.com' }}</a>
-                    </p>
-                </div>
-            </div>
-            <hr style="border-color: rgba(255,255,255,0.3); margin: 2rem 0 1rem;">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p class="mb-0 text-white-50">© {% now "Y" %} {% trans "Hawwa Postpartum Care. All rights reserved." %}</p>
-                    <p class="mb-0 small text-white-50">Powered by <a href="https://trendzapps.com" class="text-white-50 text-decoration-none" target="_blank" rel="noopener">TrendzApps</a></p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <small class="text-white-50">{% trans "Providing luxury postpartum care since 2024" %}</small>
-                </div>
-            </div>
-        </div>
-    </footer>
+        {% include 'base/footer.html' %}
     {% endblock %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

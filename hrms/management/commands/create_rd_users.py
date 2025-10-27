@@ -5,7 +5,8 @@ Usage: python manage.py create_rd_users
 """
 
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from hrms.models import Department, Position, EmployeeProfile, Company
@@ -185,28 +186,46 @@ class Command(BaseCommand):
     
     def create_user_and_employee(self, user_data, password, department, position, group):
         username = user_data['username']
-        
-        # Create or get user
+        User = get_user_model()
+
+        # Create or get user using email as username field for custom User model
+        email = f"{username}@company.com"
+        # Provide a default user_type for R&D users; use 'ADMIN' to grant access to staff pages
+        defaults = {
+            'first_name': user_data['first_name'],
+            'last_name': user_data['last_name'],
+            'email': email,
+            'is_staff': True,  # Give staff privileges
+            'is_active': True,
+            # If the custom User model requires 'user_type', default to 'ADMIN'
+        }
+        # If user_type is a required field on the custom User model, set it safely
+        try:
+            # don't assume attribute exists; set if allowed
+            defaults.update({'user_type': 'ADMIN'})
+        except Exception:
+            pass
+
         user, user_created = User.objects.get_or_create(
-            username=username,
-            defaults={
-                'first_name': user_data['first_name'],
-                'last_name': user_data['last_name'],
-                'email': f"{username}@company.com",
-                'is_staff': True,  # Give staff privileges
-                'is_active': True
-            }
+            email=email,
+            defaults=defaults,
         )
         
         if user_created:
             user.set_password(password)
+            # set an unusable username attr if the model has it but it's not used
+            if not getattr(user, 'username', None):
+                try:
+                    setattr(user, 'username', username)
+                except Exception:
+                    pass
             user.save()
             self.stdout.write(
-                self.style.SUCCESS(f'✅ Created user: {username}')
+                self.style.SUCCESS(f'✅ Created user: {email}')
             )
         else:
             self.stdout.write(
-                self.style.WARNING(f'👤 User already exists: {username}')
+                self.style.WARNING(f'👤 User already exists: {email}')
             )
         
         # Add user to group

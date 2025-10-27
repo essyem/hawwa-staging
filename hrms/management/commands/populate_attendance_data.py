@@ -174,7 +174,8 @@ class Command(BaseCommand):
         
         # Generate check-in time with some variation
         check_in_variation = random.randint(-20, 45)  # Minutes variation
-        check_in_time = datetime.combine(date, scheduled_start) + timedelta(minutes=check_in_variation)
+        check_in_naive = datetime.combine(date, scheduled_start) + timedelta(minutes=check_in_variation)
+        check_in_time = timezone.make_aware(check_in_naive)
         
         # Generate check-out time
         work_duration = random.uniform(7.5, 9.5)  # Hours worked

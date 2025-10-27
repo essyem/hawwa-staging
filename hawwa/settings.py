@@ -272,7 +272,6 @@ for _app in LOCAL_APPS:
     }
     icon = icon_map.get(_app, 'fas fa-folder')
     _apps_section['items'].append({'label': label, 'url_name': default_url, 'icon': icon})
-
 # Add a dedicated HRMS section with comprehensive modules
 HRMS_SIDEBAR = {
     'title': 'HRMS',

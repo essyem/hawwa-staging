@@ -1,0 +1,134 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+
+{% block title %}Analytics - HAWWA{% endblock %}
+
+{% block extra_css %}
+<!-- Analytics-specific CSS -->
+<style>
+    /* Analytics dashboard styling */
+    .analytics-nav {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    .analytics-nav .nav-link {
+        color: #666;
+        border-radius: 8px;
+        margin: 0 5px;
+        transition: all 0.3s ease;
+    }
+    .analytics-nav .nav-link:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+    }
+    .analytics-nav .nav-link.active {
+        background: #667eea;
+        color: white;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .stats-card.revenue {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    .stats-card.users {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+    .stats-card.bookings {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    .stats-card.performance {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    /* Chart containers */
+    .chart-container {
+        position: relative;
+        height: 400px;
+        width: 100%;
+    }
+    
+    /* Enhanced card styling */
+    .card {
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .analytics-nav .nav-pills {
+            flex-direction: column;
+        }
+        .analytics-nav .nav-item {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        .analytics-nav .nav-link {
+            text-align: center;
+        }
+        .chart-container {
+            height: 300px;
+        }
+    }
+</style>
+{% block analytics_extra_css %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+{% block analytics_content %}
+<!-- Content will be provided by child templates -->
+{% endblock %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Analytics-specific JavaScript
+    
+    // Force expand analytics navigation section
+    $('#analyticsNav').addClass('show');
+    $('#analyticsNav').css('display', 'block');
+    
+    // Remove active from all sidebar links first
+    $('.admin-sidebar .nav-link').removeClass('active');
+    
+    // Add active class to analytics main section
+    $('.admin-sidebar button[data-bs-target="#analyticsNav"]').addClass('active');
+    
+    // Highlight the specific analytics page we're on
+    const currentPath = window.location.pathname;
+    $('.admin-sidebar .nav-submenu a').each(function() {
+        if (this.href && this.pathname && currentPath.includes(this.pathname)) {
+            $(this).addClass('active');
+        }
+    });
+    
+    // Ensure analytics section stays expanded
+    setTimeout(function() {
+        $('#analyticsNav').addClass('show');
+        $('#analyticsNav').css('display', 'block');
+    }, 100);
+});
+</script>
+{% block analytics_extra_js %}{% endblock %}
+{% endblock %}

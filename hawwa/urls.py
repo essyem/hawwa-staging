@@ -55,12 +55,14 @@ urlpatterns = [
     path('analytics/', include('analytics.urls', namespace='analytics')),
     path('hrms/', include('hrms.urls', namespace='hrms')),
     path('financial/', include('financial.urls', namespace='financial')),
+    path('docpool/', include('docpool.urls', namespace='docpool')),
+
+    # Change Management Frontend
+    path('change-management/', include('change_management.urls', namespace='change_management')),
 
     # API URLs
     path('api/v1/', include('api.urls')),
     path('api/', include('core.api_urls')),
-    # Change management API
-    path('api/change-management/', include('change_management.urls')),
 
     # i18n URLs for language switching
     path('i18n/', include('django.conf.urls.i18n')),

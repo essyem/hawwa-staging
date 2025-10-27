@@ -1,0 +1,920 @@
+{% extends 'admin_portal_base.html' %}
+
+{% block title %}{{ user.get_full_name|default:user.username }} - User Details - Hawwa Admin{% endblock %}
+
+{% block page_title %}{{ user.get_full_name|default:user.username }}{% endblock %}
+{% block page_subtitle %}User Profile & Activity Overview{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:admin_user_list' %}">Users</a></li>
+<li class="breadcrumb-item active">{{ user.get_full_name|default:user.username }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <!-- User Profile Card -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 text-center">
+                <div class="position-relative d-inline-block">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+                    {% else %}
+                        <div class="avatar-circle bg-primary text-white mx-auto mb-3" style="width: 120px; height: 120px; line-height: 120px; font-size: 2rem;">
+                            {{ user.first_name.0|default:user.username.0 }}{{ user.last_name.0|default:"" }}
+                        </div>
+                    {% endif %}
+                    
+                    {% if user.is_active %}
+                        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-success border border-light rounded-circle">
+                            <span class="visually-hidden">Active</span>
+                        </span>
+                    {% else %}
+                        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-secondary border border-light rounded-circle">
+                            <span class="visually-hidden">Inactive</span>
+                        </span>
+                    {% endif %}
+                </div>
+                
+                <h5 class="mb-1">{{ user.get_full_name|default:user.username }}</h5>
+                <p class="text-muted mb-2">@{{ user.username }}</p>
+                
+                <div class="mb-3">
+                    {% if user.is_superuser %}
+                        <span class="badge bg-danger fs-6">Super Administrator</span>
+                    {% elif user.is_staff %}
+                        <span class="badge bg-warning fs-6">Staff Member</span>
+                    {% else %}
+                        <span class="badge bg-primary fs-6">User</span>
+                    {% endif %}
+                    
+                    {% if user.is_active %}
+                        <span class="badge bg-success fs-6 ms-1">Active</span>
+                    {% else %}
+                        <span class="badge bg-secondary fs-6 ms-1">Inactive</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'core:admin_user_edit' user.id %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </a>
+                    
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-info" onclick="resetPassword()">
+                            <i class="fas fa-key me-2"></i>Reset Password
+                        </button>
+                        
+                        <button type="button" class="btn btn-outline-secondary" onclick="managePermissions()">
+                            <i class="fas fa-shield-alt me-2"></i>Permissions
+                        </button>
+                    </div>
+                    
+                    <div class="btn-group" role="group">
+                        {% if user.is_active %}
+                            <button type="button" class="btn btn-outline-warning" onclick="suspendUser()">
+                                <i class="fas fa-ban me-2"></i>Suspend
+                            </button>
+                        {% else %}
+                            <button type="button" class="btn btn-outline-success" onclick="activateUser()">
+                                <i class="fas fa-check me-2"></i>Activate
+                            </button>
+                        {% endif %}
+                        
+                        <button type="button" class="btn btn-outline-info" onclick="loginAsUser()">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login As User
+                        </button>
+                    </div>
+                    
+                    <button type="button" class="btn btn-outline-danger" onclick="deleteUser()">
+                        <i class="fas fa-trash me-2"></i>Delete User
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Information -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-info-circle text-primary me-2"></i>Account Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="text-muted small">User ID</label>
+                    <div class="fw-bold">#{{ user.id|stringformat:"05d" }}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Email</label>
+                    <div class="fw-bold">{{ user.email }}</div>
+                    {% if user.email_verified|default:True %}
+                        <small class="badge bg-success">Verified</small>
+                    {% else %}
+                        <small class="badge bg-warning">Unverified</small>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Phone</label>
+                    <div class="fw-bold">{{ user.phone|default:"Not provided" }}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Date Joined</label>
+                    <div class="fw-bold">{{ user.date_joined|date:"M d, Y H:i" }}</div>
+                    <small class="text-muted">{{ user.date_joined|timesince }} ago</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted small">Last Login</label>
+                    {% if user.last_login %}
+                        <div class="fw-bold">{{ user.last_login|date:"M d, Y H:i" }}</div>
+                        <small class="text-muted">{{ user.last_login|timesince }} ago</small>
+                    {% else %}
+                        <div class="fw-bold text-muted">Never logged in</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-0">
+                    <label class="text-muted small">Account Status</label>
+                    <div>
+                        {% if user.is_active %}
+                            <span class="badge bg-success">Active Account</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactive Account</span>
+                        {% endif %}
+                        
+                        {% if user.password_change_required|default:False %}
+                            <span class="badge bg-warning ms-1">Password Change Required</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roles and Permissions -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-user-tag text-info me-2"></i>Roles & Permissions
+                    </h6>
+                    <button class="btn btn-outline-primary btn-sm" onclick="managePermissions()">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="text-muted small">Assigned Roles</label>
+                    <div>
+                        {% if user.is_superuser %}
+                            <span class="badge bg-danger me-1">Super Administrator</span>
+                        {% endif %}
+                        
+                        {% if user.is_staff %}
+                            <span class="badge bg-warning me-1">Staff</span>
+                        {% endif %}
+                        
+                        {% for group in user.groups.all %}
+                            <span class="badge bg-primary me-1">{{ group.name }}</span>
+                        {% endfor %}
+                        
+                        {% if not user.is_superuser and not user.is_staff and not user.groups.all %}
+                            <span class="badge bg-light text-dark">Regular User</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-0">
+                    <label class="text-muted small">Key Permissions</label>
+                    <div class="small">
+                        {% if user.is_superuser %}
+                            <div class="text-success"><i class="fas fa-check me-1"></i> Full System Access</div>
+                            <div class="text-success"><i class="fas fa-check me-1"></i> User Management</div>
+                            <div class="text-success"><i class="fas fa-check me-1"></i> System Configuration</div>
+                        {% elif user.is_staff %}
+                            <div class="text-success"><i class="fas fa-check me-1"></i> Admin Portal Access</div>
+                            <div class="text-success"><i class="fas fa-check me-1"></i> Content Management</div>
+                        {% else %}
+                            <div class="text-muted"><i class="fas fa-times me-1"></i> Limited Access</div>
+                            <div class="text-success"><i class="fas fa-check me-1"></i> Profile Management</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <!-- Tab Navigation -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0">
+                <ul class="nav nav-tabs card-header-tabs" id="userTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab">
+                            <i class="fas fa-chart-line me-2"></i>Activity
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="sessions-tab" data-bs-toggle="tab" data-bs-target="#sessions" type="button" role="tab">
+                            <i class="fas fa-desktop me-2"></i>Sessions
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="audit-tab" data-bs-toggle="tab" data-bs-target="#audit" type="button" role="tab">
+                            <i class="fas fa-history me-2"></i>Audit Log
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
+                            <i class="fas fa-shield-alt me-2"></i>Security
+                        </button>
+                    </li>
+                    {% if user.bookings.exists or user.services.exists %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="business-tab" data-bs-toggle="tab" data-bs-target="#business" type="button" role="tab">
+                            <i class="fas fa-briefcase me-2"></i>Business Data
+                        </button>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            <div class="card-body">
+                <div class="tab-content" id="userTabsContent">
+                    <!-- Activity Tab -->
+                    <div class="tab-pane fade show active" id="activity" role="tabpanel">
+                        <!-- Activity Stats -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white border-0">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-sign-in-alt fa-2x mb-2"></i>
+                                        <h4 class="mb-0">{{ user.login_count|default:0 }}</h4>
+                                        <small>Total Logins</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white border-0">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-mouse-pointer fa-2x mb-2"></i>
+                                        <h4 class="mb-0">{{ user.actions_count|default:0 }}</h4>
+                                        <small>Actions Performed</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-info text-white border-0">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-clock fa-2x mb-2"></i>
+                                        <h4 class="mb-0">{{ user.avg_session_time|default:"0" }}m</h4>
+                                        <small>Avg Session Time</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-white border-0">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-calendar-day fa-2x mb-2"></i>
+                                        <h4 class="mb-0">{{ user.days_since_last_login|default:"N/A" }}</h4>
+                                        <small>Days Since Last Login</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Activity Chart -->
+                        <div class="card border-0 bg-light mb-4">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="card-title mb-0">Login Activity (Last 30 Days)</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="activityChart" height="200"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity Timeline -->
+                        <div class="card border-0 bg-light">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="card-title mb-0">Recent Activity</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="timeline">
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-success"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">User logged in</h6>
+                                            <p class="text-muted mb-0">Accessed admin dashboard</p>
+                                            <small class="text-muted">2 hours ago</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-primary"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Profile updated</h6>
+                                            <p class="text-muted mb-0">Changed email address and phone number</p>
+                                            <small class="text-muted">1 day ago</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-info"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Password changed</h6>
+                                            <p class="text-muted mb-0">Updated account password</p>
+                                            <small class="text-muted">3 days ago</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-warning"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Account created</h6>
+                                            <p class="text-muted mb-0">User registration completed</p>
+                                            <small class="text-muted">{{ user.date_joined|timesince }} ago</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sessions Tab -->
+                    <div class="tab-pane fade" id="sessions" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0">Active Sessions</h5>
+                            <button class="btn btn-outline-danger btn-sm" onclick="terminateAllSessions()">
+                                <i class="fas fa-ban me-2"></i>Terminate All Sessions
+                            </button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Device</th>
+                                        <th>Location</th>
+                                        <th>IP Address</th>
+                                        <th>Started</th>
+                                        <th>Last Activity</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-desktop text-primary me-2"></i>
+                                                <div>
+                                                    <div class="fw-bold">Chrome on Windows</div>
+                                                    <small class="text-muted">Desktop Browser</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>Doha, Qatar</div>
+                                            <small class="text-muted">🇶🇦 Qatar</small>
+                                        </td>
+                                        <td>
+                                            <code class="small">192.168.1.100</code>
+                                        </td>
+                                        <td>
+                                            <div>Dec 15, 2024</div>
+                                            <small class="text-muted">09:30 AM</small>
+                                        </td>
+                                        <td>
+                                            <div class="text-success">Active now</div>
+                                            <small class="text-muted">Current session</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">Active</span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-outline-danger btn-sm" onclick="terminateSession('current')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-mobile-alt text-info me-2"></i>
+                                                <div>
+                                                    <div class="fw-bold">Safari on iPhone</div>
+                                                    <small class="text-muted">Mobile Browser</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>Doha, Qatar</div>
+                                            <small class="text-muted">🇶🇦 Qatar</small>
+                                        </td>
+                                        <td>
+                                            <code class="small">192.168.1.105</code>
+                                        </td>
+                                        <td>
+                                            <div>Dec 14, 2024</div>
+                                            <small class="text-muted">08:15 PM</small>
+                                        </td>
+                                        <td>
+                                            <div>2 hours ago</div>
+                                            <small class="text-muted">Last seen</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning">Idle</span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-outline-danger btn-sm" onclick="terminateSession('mobile')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Session Security Info -->
+                        <div class="alert alert-info mt-4">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-shield-alt me-2"></i>Session Security
+                            </h6>
+                            <p class="mb-2">Sessions are automatically terminated after 24 hours of inactivity for security purposes.</p>
+                            <ul class="mb-0">
+                                <li>Sessions are encrypted and secured</li>
+                                <li>Suspicious login attempts are logged and monitored</li>
+                                <li>Users can manually terminate sessions from their profile</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Audit Log Tab -->
+                    <div class="tab-pane fade" id="audit" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0">Audit Log</h5>
+                            <div class="d-flex gap-2">
+                                <select class="form-select form-select-sm" style="width: auto;">
+                                    <option>All Actions</option>
+                                    <option>Login Events</option>
+                                    <option>Profile Changes</option>
+                                    <option>Security Events</option>
+                                    <option>Data Access</option>
+                                </select>
+                                <button class="btn btn-outline-primary btn-sm" onclick="exportAuditLog()">
+                                    <i class="fas fa-download me-2"></i>Export
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Action</th>
+                                        <th>Description</th>
+                                        <th>IP Address</th>
+                                        <th>Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div>Dec 15, 2024</div>
+                                            <small class="text-muted">14:30:25</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">LOGIN</span>
+                                        </td>
+                                        <td>User logged in successfully</td>
+                                        <td><code class="small">192.168.1.100</code></td>
+                                        <td><i class="fas fa-check-circle text-success"></i></td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>
+                                            <div>Dec 15, 2024</div>
+                                            <small class="text-muted">10:15:42</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">UPDATE</span>
+                                        </td>
+                                        <td>Profile information updated</td>
+                                        <td><code class="small">192.168.1.100</code></td>
+                                        <td><i class="fas fa-check-circle text-success"></i></td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>
+                                            <div>Dec 14, 2024</div>
+                                            <small class="text-muted">20:45:18</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning">PASSWORD</span>
+                                        </td>
+                                        <td>Password changed by user</td>
+                                        <td><code class="small">192.168.1.105</code></td>
+                                        <td><i class="fas fa-check-circle text-success"></i></td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>
+                                            <div>Dec 14, 2024</div>
+                                            <small class="text-muted">18:22:33</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-danger">FAILED_LOGIN</span>
+                                        </td>
+                                        <td>Failed login attempt - invalid password</td>
+                                        <td><code class="small">203.0.113.15</code></td>
+                                        <td><i class="fas fa-times-circle text-danger"></i></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination for audit log -->
+                        <nav aria-label="Audit log pagination" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item disabled">
+                                    <span class="page-link">Previous</span>
+                                </li>
+                                <li class="page-item active">
+                                    <span class="page-link">1</span>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">2</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">3</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+
+                    <!-- Security Tab -->
+                    <div class="tab-pane fade" id="security" role="tabpanel">
+                        <div class="row g-4">
+                            <!-- Security Score -->
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-header bg-transparent border-0">
+                                        <h6 class="card-title mb-0">Security Score</h6>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <div class="position-relative d-inline-block">
+                                            <canvas id="securityScoreChart" width="120" height="120"></canvas>
+                                            <div class="position-absolute top-50 start-50 translate-middle">
+                                                <div class="h3 mb-0 text-success">85%</div>
+                                                <small class="text-muted">Good</small>
+                                            </div>
+                                        </div>
+                                        <p class="mt-3 mb-0 text-muted">Based on password strength, 2FA status, and login patterns</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Security Settings -->
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-header bg-transparent border-0">
+                                        <h6 class="card-title mb-0">Security Settings</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div>
+                                                <div class="fw-bold">Two-Factor Authentication</div>
+                                                <small class="text-muted">Extra security for login</small>
+                                            </div>
+                                            <div>
+                                                {% if user.two_factor_enabled|default:False %}
+                                                    <span class="badge bg-success">Enabled</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">Disabled</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div>
+                                                <div class="fw-bold">Email Verification</div>
+                                                <small class="text-muted">Email address verified</small>
+                                            </div>
+                                            <div>
+                                                {% if user.email_verified|default:True %}
+                                                    <span class="badge bg-success">Verified</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Unverified</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div>
+                                                <div class="fw-bold">Password Strength</div>
+                                                <small class="text-muted">Current password security</small>
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-success">Strong</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-grid">
+                                            <button class="btn btn-outline-primary" onclick="enforceSecurityUpdate()">
+                                                <i class="fas fa-shield-alt me-2"></i>Enforce Security Update
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Security Alerts -->
+                            <div class="col-12">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-header bg-transparent border-0">
+                                        <h6 class="card-title mb-0">Security Alerts</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-warning d-flex align-items-center">
+                                            <i class="fas fa-exclamation-triangle me-3"></i>
+                                            <div class="flex-grow-1">
+                                                <strong>Suspicious Login Detected</strong>
+                                                <div class="small">Login from unusual location: Dubai, UAE on Dec 13, 2024</div>
+                                            </div>
+                                            <button class="btn btn-outline-warning btn-sm ms-3">Review</button>
+                                        </div>
+                                        
+                                        <div class="alert alert-info d-flex align-items-center">
+                                            <i class="fas fa-info-circle me-3"></i>
+                                            <div class="flex-grow-1">
+                                                <strong>Password Age</strong>
+                                                <div class="small">Password was last changed 45 days ago. Consider updating for better security.</div>
+                                            </div>
+                                            <button class="btn btn-outline-info btn-sm ms-3">Update</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Business Data Tab -->
+                    {% if user.bookings.exists or user.services.exists %}
+                    <div class="tab-pane fade" id="business" role="tabpanel">
+                        <div class="row g-4">
+                            {% if user.bookings.exists %}
+                            <!-- Bookings Summary -->
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-header bg-transparent border-0">
+                                        <h6 class="card-title mb-0">Booking Activity</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <div class="text-center p-2 border rounded">
+                                                    <div class="h5 text-primary mb-0">{{ user.bookings.count }}</div>
+                                                    <small class="text-muted">Total Bookings</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="text-center p-2 border rounded">
+                                                    <div class="h5 text-success mb-0">{{ user.bookings_completed|default:0 }}</div>
+                                                    <small class="text-muted">Completed</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-3">
+                                            <a href="{% url 'core:admin_booking_list' %}?client={{ user.id }}" class="btn btn-outline-primary btn-sm">
+                                                View All Bookings
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if user.services.exists %}
+                            <!-- Services Summary -->
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-header bg-transparent border-0">
+                                        <h6 class="card-title mb-0">Service Provider</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <div class="text-center p-2 border rounded">
+                                                    <div class="h5 text-info mb-0">{{ user.services.count }}</div>
+                                                    <small class="text-muted">Services Offered</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="text-center p-2 border rounded">
+                                                    <div class="h5 text-warning mb-0">{{ user.average_rating|default:"0.0" }}</div>
+                                                    <small class="text-muted">Avg Rating</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-3">
+                                            <a href="{% url 'core:admin_vendor_detail' user.id %}" class="btn btn-outline-primary btn-sm">
+                                                View Vendor Profile
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: -31px;
+    top: 15px;
+    width: 2px;
+    height: calc(100% + 5px);
+    background-color: #dee2e6;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    // Initialize charts
+    initActivityChart();
+    initSecurityScoreChart();
+});
+
+function initActivityChart() {
+    const ctx = document.getElementById('activityChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 30}, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - (29 - i));
+                return date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+            }),
+            datasets: [{
+                label: 'Login Count',
+                data: [0, 1, 0, 2, 1, 0, 0, 3, 2, 1, 0, 1, 2, 0, 1, 0, 0, 2, 1, 3, 2, 1, 0, 0, 1, 2, 0, 1, 1, 2],
+                borderColor: '#6f42c1',
+                backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5
+                }
+            }
+        }
+    });
+}
+
+function initSecurityScoreChart() {
+    const ctx = document.getElementById('securityScoreChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [85, 15],
+                backgroundColor: ['#28a745', '#e9ecef'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: false,
+            maintainAspectRatio: true,
+            cutout: '80%',
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+function resetPassword() {
+    if (confirm('Send password reset email to this user?')) {
+        // TODO: Implement password reset functionality
+        console.log('Resetting password for user {{ user.id }}');
+    }
+}
+
+function managePermissions() {
+    // TODO: Open permissions management modal
+    console.log('Managing permissions for user {{ user.id }}');
+}
+
+function suspendUser() {
+    if (confirm('Suspend this user account? They will not be able to login.')) {
+        // TODO: Implement user suspension
+        console.log('Suspending user {{ user.id }}');
+    }
+}
+
+function activateUser() {
+    if (confirm('Activate this user account?')) {
+        // TODO: Implement user activation
+        console.log('Activating user {{ user.id }}');
+    }
+}
+
+function loginAsUser() {
+    if (confirm('Login as this user? This will log you out of your current session.')) {
+        // TODO: Implement login as user functionality
+        console.log('Logging in as user {{ user.id }}');
+    }
+}
+
+function deleteUser() {
+    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+        // TODO: Implement user deletion
+        console.log('Deleting user {{ user.id }}');
+    }
+}
+
+function terminateSession(sessionId) {
+    if (confirm('Terminate this session?')) {
+        // TODO: Implement session termination
+        console.log('Terminating session:', sessionId);
+    }
+}
+
+function terminateAllSessions() {
+    if (confirm('Terminate all sessions for this user? They will need to login again.')) {
+        // TODO: Implement all session termination
+        console.log('Terminating all sessions for user {{ user.id }}');
+    }
+}
+
+function exportAuditLog() {
+    // TODO: Implement audit log export
+    window.location.href = '/admin/users/{{ user.id }}/audit-log/export/';
+}
+
+function enforceSecurityUpdate() {
+    if (confirm('Force security update for this user? They will be required to update their password and security settings on next login.')) {
+        // TODO: Implement security enforcement
+        console.log('Enforcing security update for user {{ user.id }}');
+    }
+}
+</script>
+{% endblock %}

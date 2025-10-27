@@ -1,0 +1,814 @@
+{% extends 'admin_portal_base.html' %}
+
+{% block title %}{{ service.name }} - Service Details - Hawwa Admin{% endblock %}
+
+{% block page_title %}Service Details{% endblock %}
+{% block page_subtitle %}{{ service.name }} - Complete service information{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:admin_service_list' %}">Services</a></li>
+<li class="breadcrumb-item active">{{ service.name }}</li>
+{% endblock %}
+
+{% block content %}
+<!-- Service Header -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-start">
+                    {% if service.image %}
+                        <img src="{{ service.image.url }}" alt="{{ service.name }}" 
+                             class="rounded me-4" style="width: 100px; height: 100px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light rounded me-4 d-flex align-items-center justify-content-center" 
+                             style="width: 100px; height: 100px;">
+                            <i class="fas fa-spa text-muted fa-2x"></i>
+                        </div>
+                    {% endif %}
+                    <div class="flex-grow-1">
+                        <h2 class="mb-2">
+                            {{ service.name }}
+                            {% if service.is_featured %}
+                                <i class="fas fa-star text-warning ms-2" title="Featured Service"></i>
+                            {% endif %}
+                        </h2>
+                        <div class="mb-2">
+                            <span class="badge bg-{% if service.category == 'ACCOMMODATION' %}info{% elif service.category == 'HOMECARE' %}success{% elif service.category == 'WELLNESS' %}primary{% elif service.category == 'MENTAL_HEALTH' %}warning{% else %}secondary{% endif %} me-2">
+                                {{ service.get_category_display }}
+                            </span>
+                            {% if service.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </div>
+                        {% if service.description %}
+                            <p class="text-muted mb-0">{{ service.description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="btn-group mb-3" role="group">
+                    <a href="{% url 'core:admin_service_edit' service.pk %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Service
+                    </a>
+                    <button type="button" class="btn btn-outline-danger" 
+                            onclick="deleteService({{ service.pk }}, '{{ service.name|escapejs }}')">
+                        <i class="fas fa-trash me-2"></i>Delete
+                    </button>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted">Service ID: #{{ service.pk }}</small><br>
+                    <small class="text-muted">Created: {{ service.created_at|date:"M d, Y" }}</small><br>
+                    <small class="text-muted">Updated: {{ service.updated_at|date:"M d, Y" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Service Analytics -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="text-primary mb-3">
+                    <i class="fas fa-calendar-check fa-2x"></i>
+                </div>
+                <h4 class="fw-bold">{{ total_bookings|default:"0" }}</h4>
+                <p class="text-muted mb-0">Total Bookings</p>
+                <small class="text-success">
+                    <i class="fas fa-arrow-up"></i> {{ monthly_bookings|default:"0" }} this month
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="text-success mb-3">
+                    <i class="fas fa-star fa-2x"></i>
+                </div>
+                <h4 class="fw-bold">{{ average_rating|default:"0"|floatformat:1 }}</h4>
+                <p class="text-muted mb-0">Average Rating</p>
+                <small class="text-info">{{ review_count|default:"0" }} review{{ review_count|pluralize }}</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="text-warning mb-3">
+                    <i class="fas fa-dollar-sign fa-2x"></i>
+                </div>
+                <h4 class="fw-bold">
+                    {% if service.price %}
+                        QAR {{ service.price }}
+                    {% else %}
+                        Custom
+                    {% endif %}
+                </h4>
+                <p class="text-muted mb-0">
+                    Service Price
+                    {% if service.price_unit %}
+                        <small>/{{ service.price_unit }}</small>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="text-info mb-3">
+                    <i class="fas fa-eye fa-2x"></i>
+                </div>
+                <h4 class="fw-bold">{{ view_count|default:"0" }}</h4>
+                <p class="text-muted mb-0">Profile Views</p>
+                <small class="text-muted">{{ weekly_views|default:"0" }} this week</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Service Details Tabs -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent border-0">
+        <ul class="nav nav-tabs card-header-tabs" id="serviceDetailTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                    <i class="fas fa-info-circle me-2"></i>Overview
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bookings-tab" data-bs-toggle="tab" data-bs-target="#bookings" type="button" role="tab">
+                    <i class="fas fa-calendar me-2"></i>Bookings
+                    <span class="badge bg-primary ms-1">{{ recent_bookings.count }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
+                    <i class="fas fa-star me-2"></i>Reviews
+                    <span class="badge bg-warning ms-1">{{ recent_reviews.count }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">
+                    <i class="fas fa-chart-line me-2"></i>Analytics
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">
+                    <i class="fas fa-cog me-2"></i>Settings
+                </button>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="card-body">
+        <div class="tab-content" id="serviceDetailTabContent">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <!-- Service Information -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-info-circle text-primary me-2"></i>Service Information
+                            </h5>
+                            <div class="table-responsive">
+                                <table class="table table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <th width="30%" class="text-muted">Service Name:</th>
+                                            <td>{{ service.name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Category:</th>
+                                            <td>
+                                                <span class="badge bg-{% if service.category == 'ACCOMMODATION' %}info{% elif service.category == 'HOMECARE' %}success{% elif service.category == 'WELLNESS' %}primary{% elif service.category == 'MENTAL_HEALTH' %}warning{% else %}secondary{% endif %}">
+                                                    {{ service.get_category_display }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Description:</th>
+                                            <td>{{ service.description|default:"No description provided" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Duration:</th>
+                                            <td>
+                                                {% if service.duration %}
+                                                    {{ service.duration }} minutes
+                                                {% else %}
+                                                    Variable duration
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Location:</th>
+                                            <td>{{ service.location|default:"Multiple locations available" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Prerequisites:</th>
+                                            <td>{{ service.prerequisites|default:"None" }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Provider Information -->
+                        {% if service.provider %}
+                            <div class="mb-4">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-user-md text-success me-2"></i>Service Provider
+                                </h5>
+                                <div class="card border">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                {% if service.provider.profile_picture %}
+                                                    <img src="{{ service.provider.profile_picture.url }}" 
+                                                         class="rounded-circle" width="60" height="60">
+                                                {% else %}
+                                                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" 
+                                                         style="width: 60px; height: 60px;">
+                                                        <i class="fas fa-user text-muted"></i>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col">
+                                                <h6 class="mb-1">{{ service.provider.get_full_name }}</h6>
+                                                <p class="text-muted mb-1">{{ service.provider.email }}</p>
+                                                {% if service.provider.phone %}
+                                                    <p class="text-muted mb-0">{{ service.provider.phone }}</p>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-auto">
+                                                <a href="#" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-user me-1"></i>View Profile
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Service Features -->
+                        {% if service.features.all %}
+                            <div class="mb-4">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-check-circle text-info me-2"></i>Service Features
+                                </h5>
+                                <div class="row">
+                                    {% for feature in service.features.all %}
+                                        <div class="col-md-6 mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>{{ feature.name }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <!-- Quick Actions -->
+                        <div class="card border mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'core:admin_service_edit' service.pk %}" class="btn btn-primary">
+                                        <i class="fas fa-edit me-2"></i>Edit Service
+                                    </a>
+                                    <button type="button" class="btn btn-success" onclick="createBooking()">
+                                        <i class="fas fa-plus me-2"></i>New Booking
+                                    </button>
+                                    <button type="button" class="btn btn-info" onclick="duplicateService()">
+                                        <i class="fas fa-copy me-2"></i>Duplicate Service
+                                    </button>
+                                    {% if service.is_active %}
+                                        <button type="button" class="btn btn-warning" onclick="toggleServiceStatus()">
+                                            <i class="fas fa-pause me-2"></i>Deactivate
+                                        </button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-success" onclick="toggleServiceStatus()">
+                                            <i class="fas fa-play me-2"></i>Activate
+                                        </button>
+                                    {% endif %}
+                                    {% if service.is_featured %}
+                                        <button type="button" class="btn btn-outline-warning" onclick="toggleFeatured()">
+                                            <i class="fas fa-star-half-alt me-2"></i>Remove Featured
+                                        </button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-warning" onclick="toggleFeatured()">
+                                            <i class="fas fa-star me-2"></i>Make Featured
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Service Status -->
+                        <div class="card border mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-info-circle text-info me-2"></i>Service Status
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="text-center">
+                                            {% if service.is_active %}
+                                                <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                                                <div class="fw-bold text-success">Active</div>
+                                            {% else %}
+                                                <i class="fas fa-pause-circle text-secondary fa-2x mb-2"></i>
+                                                <div class="fw-bold text-secondary">Inactive</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-center">
+                                            {% if service.is_featured %}
+                                                <i class="fas fa-star text-warning fa-2x mb-2"></i>
+                                                <div class="fw-bold text-warning">Featured</div>
+                                            {% else %}
+                                                <i class="fas fa-star text-muted fa-2x mb-2"></i>
+                                                <div class="fw-bold text-muted">Regular</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="card border">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-clock text-secondary me-2"></i>Recent Activity
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="timeline">
+                                    <div class="timeline-item mb-3">
+                                        <div class="timeline-marker bg-success"></div>
+                                        <div class="timeline-content">
+                                            <div class="fw-bold">Service Updated</div>
+                                            <small class="text-muted">{{ service.updated_at|timesince }} ago</small>
+                                        </div>
+                                    </div>
+                                    {% if last_booking %}
+                                        <div class="timeline-item mb-3">
+                                            <div class="timeline-marker bg-primary"></div>
+                                            <div class="timeline-content">
+                                                <div class="fw-bold">New Booking</div>
+                                                <small class="text-muted">{{ last_booking.created_at|timesince }} ago</small>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    {% if last_review %}
+                                        <div class="timeline-item">
+                                            <div class="timeline-marker bg-warning"></div>
+                                            <div class="timeline-content">
+                                                <div class="fw-bold">New Review</div>
+                                                <small class="text-muted">{{ last_review.created_at|timesince }} ago</small>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bookings Tab -->
+            <div class="tab-pane fade" id="bookings" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar text-primary me-2"></i>Recent Bookings
+                    </h5>
+                    <a href="{% url 'core:admin_booking_create' %}?service={{ service.pk }}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>New Booking
+                    </a>
+                </div>
+
+                {% if recent_bookings %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Client</th>
+                                    <th>Date & Time</th>
+                                    <th>Status</th>
+                                    <th>Amount</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in recent_bookings %}
+                                    <tr>
+                                        <td><strong>#{{ booking.pk }}</strong></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if booking.client.profile_picture %}
+                                                    <img src="{{ booking.client.profile_picture.url }}" 
+                                                         class="rounded-circle me-2" width="32" height="32">
+                                                {% endif %}
+                                                {{ booking.client.get_full_name }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>{{ booking.scheduled_date|date:"M d, Y" }}</div>
+                                            <small class="text-muted">{{ booking.scheduled_time|time:"g:i A" }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{% if booking.status == 'CONFIRMED' %}success{% elif booking.status == 'PENDING' %}warning{% elif booking.status == 'CANCELLED' %}danger{% else %}secondary{% endif %}">
+                                                {{ booking.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td class="fw-bold text-success">QAR {{ booking.total_amount }}</td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'bookings:booking_detail' booking.pk %}" class="btn btn-outline-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'bookings:booking_edit' booking.pk %}" class="btn btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'core:admin_booking_list' %}?service={{ service.pk }}" class="btn btn-outline-primary">
+                            View All Bookings for This Service
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-times text-muted display-4 mb-3"></i>
+                        <h5 class="text-muted">No Bookings Yet</h5>
+                        <p class="text-muted">This service hasn't received any bookings yet.</p>
+                        <a href="{% url 'core:admin_booking_create' %}?service={{ service.pk }}" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>Create First Booking
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Reviews Tab -->
+            <div class="tab-pane fade" id="reviews" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star text-warning me-2"></i>Customer Reviews
+                    </h5>
+                    {% if average_rating %}
+                        <div class="text-end">
+                            <div class="h4 mb-0">{{ average_rating|floatformat:1 }} <i class="fas fa-star text-warning"></i></div>
+                            <small class="text-muted">Based on {{ review_count }} review{{ review_count|pluralize }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if recent_reviews %}
+                    {% for review in recent_reviews %}
+                        <div class="card border mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center">
+                                        {% if review.client.profile_picture %}
+                                            <img src="{{ review.client.profile_picture.url }}" 
+                                                 class="rounded-circle me-3" width="40" height="40">
+                                        {% endif %}
+                                        <div>
+                                            <h6 class="mb-0">{{ review.client.get_full_name }}</h6>
+                                            <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="text-warning">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= review.rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% if review.comment %}
+                                    <p class="mb-0">{{ review.comment }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <div class="text-center">
+                        <a href="#" class="btn btn-outline-primary">View All Reviews</a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-star-half-alt text-muted display-4 mb-3"></i>
+                        <h5 class="text-muted">No Reviews Yet</h5>
+                        <p class="text-muted">This service hasn't received any customer reviews yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Analytics Tab -->
+            <div class="tab-pane fade" id="analytics" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <div class="card border">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">Booking Trends</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="bookingChart" height="100"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card border">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">Performance Metrics</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">Booking Rate</span>
+                                        <span>{{ booking_rate|default:"0" }}%</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" style="width: {{ booking_rate|default:"0" }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">Customer Satisfaction</span>
+                                        <span>{{ satisfaction_rate|default:"0" }}%</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" style="width: {{ satisfaction_rate|default:"0" }}%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">Revenue Contribution</span>
+                                        <span>{{ revenue_percentage|default:"0" }}%</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" style="width: {{ revenue_percentage|default:"0" }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-pane fade" id="settings" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card border">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">Service Settings</h6>
+                            </div>
+                            <div class="card-body">
+                                <form id="serviceSettingsForm">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="isActive" 
+                                                       {% if service.is_active %}checked{% endif %}>
+                                                <label class="form-check-label" for="isActive">
+                                                    Service Active
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="isFeatured" 
+                                                       {% if service.is_featured %}checked{% endif %}>
+                                                <label class="form-check-label" for="isFeatured">
+                                                    Featured Service
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="allowOnlineBooking" 
+                                                       {% if service.allow_online_booking %}checked{% endif %}>
+                                                <label class="form-check-label" for="allowOnlineBooking">
+                                                    Allow Online Booking
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="requireApproval">
+                                                <label class="form-check-label" for="requireApproval">
+                                                    Require Approval
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>Save Settings
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card border border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Danger Zone
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted">These actions are permanent and cannot be undone.</p>
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-outline-warning" onclick="archiveService()">
+                                        <i class="fas fa-archive me-2"></i>Archive Service
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger" 
+                                            onclick="deleteService({{ service.pk }}, '{{ service.name|escapejs }}')">
+                                        <i class="fas fa-trash me-2"></i>Delete Service
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.timeline {
+    position: relative;
+    padding-left: 20px;
+}
+
+.timeline-item {
+    position: relative;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -25px;
+    top: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: -21px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Initialize analytics chart
+    initBookingChart();
+
+    // Handle settings form
+    $('#serviceSettingsForm').on('submit', function(e) {
+        e.preventDefault();
+        saveServiceSettings();
+    });
+});
+
+function initBookingChart() {
+    const ctx = document.getElementById('bookingChart');
+    if (!ctx) return;
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Bookings',
+                data: [12, 19, 8, 15, 22, 18],
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function deleteService(serviceId, serviceName) {
+    if (confirm(`Are you sure you want to delete service "${serviceName}"?\n\nThis action cannot be undone and may affect related bookings.`)) {
+        // TODO: Implement delete via AJAX
+        window.location.href = `/admin/services/${serviceId}/delete/`;
+    }
+}
+
+function duplicateService() {
+    if (confirm('Create a copy of this service?')) {
+        // TODO: Implement duplication via AJAX
+        console.log('Duplicating service {{ service.pk }}');
+    }
+}
+
+function toggleServiceStatus() {
+    // TODO: Implement status toggle via AJAX
+    const isActive = {{ service.is_active|yesno:"true,false" }};
+    const action = isActive ? 'deactivate' : 'activate';
+    
+    if (confirm(`Are you sure you want to ${action} this service?`)) {
+        console.log(`${action} service {{ service.pk }}`);
+        // Reload page after AJAX call
+        location.reload();
+    }
+}
+
+function toggleFeatured() {
+    // TODO: Implement featured toggle via AJAX
+    const isFeatured = {{ service.is_featured|yesno:"true,false" }};
+    const action = isFeatured ? 'remove from featured' : 'make featured';
+    
+    if (confirm(`Are you sure you want to ${action} this service?`)) {
+        console.log(`Toggle featured for service {{ service.pk }}`);
+        // Reload page after AJAX call
+        location.reload();
+    }
+}
+
+function archiveService() {
+    if (confirm('Archive this service?\n\nArchived services are hidden from booking but data is preserved.')) {
+        // TODO: Implement archive via AJAX
+        console.log('Archive service {{ service.pk }}');
+    }
+}
+
+function createBooking() {
+    window.location.href = '{% url "core:admin_booking_create" %}?service={{ service.pk }}';
+}
+
+function saveServiceSettings() {
+    const settings = {
+        is_active: $('#isActive').is(':checked'),
+        is_featured: $('#isFeatured').is(':checked'),
+        allow_online_booking: $('#allowOnlineBooking').is(':checked'),
+        require_approval: $('#requireApproval').is(':checked')
+    };
+    
+    // TODO: Implement settings save via AJAX
+    console.log('Saving settings:', settings);
+    
+    // Show success message
+    showToast('Service settings updated successfully', 'success');
+}
+
+function showToast(message, type) {
+    // Use the global toast function from admin-portal.js
+    if (window.hawwaAdmin && window.hawwaAdmin.showToast) {
+        window.hawwaAdmin.showToast(message, type);
+    }
+}
+</script>
+{% endblock %}

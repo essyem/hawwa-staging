@@ -1,0 +1,355 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+
+{% block title %}Advanced Search - DocPool{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .search-tips {
+        background: #f8f9fa;
+        border-left: 4px solid #007bff;
+    }
+    .operator-badge {
+        font-family: 'Courier New', monospace;
+        font-size: 0.8em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">🔍 Advanced Document Search</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'docpool:document_list' %}">Document Pool</a></li>
+                            <li class="breadcrumb-item active">Advanced Search</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="btn-group">
+                    <a href="{% url 'docpool:document_list' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Back to Documents
+                    </a>
+                    <a href="{% url 'docpool:search_analytics' %}" class="btn btn-info">
+                        <i class="fas fa-chart-bar"></i> Search Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card search-card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-search-plus"></i> Advanced Search Options
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{% url 'docpool:document_list' %}" id="advancedSearchForm">
+                        <!-- Text Search -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label class="form-label">Search Terms</label>
+                                <div class="input-group">
+                                    <input type="text" name="search" class="form-control form-control-lg" 
+                                           placeholder="Enter keywords, phrases, reference numbers..." 
+                                           value="{{ request.GET.search }}">
+                                    <button class="btn btn-outline-light" type="button" onclick="showSearchOperators()">
+                                        <i class="fas fa-question-circle"></i> Help
+                                    </button>
+                                </div>
+                                <small class="text-light mt-1">
+                                    Use quotes for exact phrases, OR/AND for operators
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Classification Filters -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label">Department</label>
+                                <select name="department" class="form-select">
+                                    <option value="">Any Department</option>
+                                    {% for dept in departments %}
+                                    <option value="{{ dept.id }}" {% if request.GET.department == dept.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ dept.code }} - {{ dept.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Document Type</label>
+                                <select name="type" class="form-select">
+                                    <option value="">Any Type</option>
+                                    {% for doc_type in document_types %}
+                                    <option value="{{ doc_type.id }}" {% if request.GET.type == doc_type.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ doc_type.code }} - {{ doc_type.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Border Classification</label>
+                                <select name="border" class="form-select">
+                                    <option value="">Any Border</option>
+                                    {% for border in borders %}
+                                    <option value="{{ border.id }}" {% if request.GET.border == border.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ border.code }} - {{ border.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Date Range -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <label class="form-label">Year</label>
+                                <select name="year" class="form-select">
+                                    <option value="">Any Year</option>
+                                    {% for year in years %}
+                                    <option value="{{ year }}" {% if request.GET.year == year|stringformat:"s" %}selected{% endif %}>
+                                        {{ year }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Month</label>
+                                <select name="month" class="form-select">
+                                    <option value="">Any Month</option>
+                                    {% for month_num, month_name in months %}
+                                    <option value="{{ month_num }}" {% if request.GET.month == month_num|stringformat:"s" %}selected{% endif %}>
+                                        {{ month_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Date From</label>
+                                <input type="date" name="date_from" class="form-control" value="{{ request.GET.date_from }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Date To</label>
+                                <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}">
+                            </div>
+                        </div>
+
+                        <!-- Additional Filters -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label">Uploaded By</label>
+                                <select name="uploaded_by" class="form-select">
+                                    <option value="">Any User</option>
+                                    {% for uploader in uploaders %}
+                                    <option value="{{ uploader.uploaded_by__id }}" 
+                                            {% if request.GET.uploaded_by == uploader.uploaded_by__id|stringformat:"s" %}selected{% endif %}>
+                                        {{ uploader.uploaded_by__first_name }} {{ uploader.uploaded_by__last_name }}
+                                        ({{ uploader.count }} docs)
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Reference Number</label>
+                                <select name="has_reference" class="form-select">
+                                    <option value="">Any</option>
+                                    <option value="yes" {% if request.GET.has_reference == 'yes' %}selected{% endif %}>
+                                        Has Reference Number
+                                    </option>
+                                    <option value="no" {% if request.GET.has_reference == 'no' %}selected{% endif %}>
+                                        No Reference Number
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">File Type</label>
+                                <select name="file_type" class="form-select">
+                                    <option value="">Any File Type</option>
+                                    <option value="pdf" {% if request.GET.file_type == 'pdf' %}selected{% endif %}>
+                                        PDF Documents
+                                    </option>
+                                    <option value="image" {% if request.GET.file_type == 'image' %}selected{% endif %}>
+                                        Images (JPG, PNG, GIF)
+                                    </option>
+                                    <option value="office" {% if request.GET.file_type == 'office' %}selected{% endif %}>
+                                        Office Documents (DOC, XLS, PPT)
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Sort Options -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Sort Results By</label>
+                                <select name="sort" class="form-select">
+                                    <option value="-uploaded_at">Newest First</option>
+                                    <option value="uploaded_at">Oldest First</option>
+                                    <option value="title">Title A-Z</option>
+                                    <option value="-title">Title Z-A</option>
+                                    <option value="-year">Year (Newest)</option>
+                                    <option value="year">Year (Oldest)</option>
+                                    <option value="department__name">Department A-Z</option>
+                                    <option value="-department__name">Department Z-A</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <div class="btn-group w-100">
+                                    <button type="submit" class="btn btn-light btn-lg">
+                                        <i class="fas fa-search"></i> Search Documents
+                                    </button>
+                                    <a href="{% url 'docpool:advanced_search' %}" class="btn btn-outline-light">
+                                        <i class="fas fa-times"></i> Clear
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Tips and History -->
+        <div class="col-lg-4">
+            <!-- Search Tips -->
+            <div class="card search-tips mb-4">
+                <div class="card-header bg-transparent">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-lightbulb text-warning"></i> Search Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h6>Search Operators:</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="operator-badge badge bg-primary">"exact phrase"</span> - Exact match</li>
+                        <li><span class="operator-badge badge bg-success">word1 AND word2</span> - Both words</li>
+                        <li><span class="operator-badge badge bg-info">word1 OR word2</span> - Either word</li>
+                        <li><span class="operator-badge badge bg-warning">-word</span> - Exclude word</li>
+                    </ul>
+                    
+                    <h6 class="mt-3">Search Fields:</h6>
+                    <ul class="small">
+                        <li>Document title and description</li>
+                        <li>Reference numbers</li>
+                        <li>Department and type names/codes</li>
+                        <li>Uploader names</li>
+                    </ul>
+                    
+                    <h6 class="mt-3">Examples:</h6>
+                    <ul class="small">
+                        <li><code>"IFCC Qatar" AND contract</code></li>
+                        <li><code>MOI OR "Ministry of Interior"</code></li>
+                        <li><code>HRD/RPT/2024*</code> (reference pattern)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Search History -->
+            {% if search_history %}
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-history"></i> Recent Searches
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for search_term in search_history %}
+                    <button class="btn btn-outline-secondary btn-sm me-1 mb-2" 
+                            onclick="document.querySelector('[name=search]').value='{{ search_term }}'; document.getElementById('advancedSearchForm').submit();">
+                        {{ search_term }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Search Operators Modal -->
+<div class="modal fade" id="searchOperatorsModal" tabindex="-1" aria-labelledby="searchOperatorsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchOperatorsModalLabel">Search Operators Guide</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Basic Operators</h6>
+                        <table class="table table-sm">
+                            <tr><td><code>"exact phrase"</code></td><td>Exact match</td></tr>
+                            <tr><td><code>word1 AND word2</code></td><td>Both words</td></tr>
+                            <tr><td><code>word1 OR word2</code></td><td>Either word</td></tr>
+                            <tr><td><code>-excluded</code></td><td>Exclude word</td></tr>
+                            <tr><td><code>prefix*</code></td><td>Starts with</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Field-Specific Search</h6>
+                        <table class="table table-sm">
+                            <tr><td><code>title:"contract"</code></td><td>In title only</td></tr>
+                            <tr><td><code>dept:HRD</code></td><td>Department code</td></tr>
+                            <tr><td><code>type:MOI</code></td><td>Document type</td></tr>
+                            <tr><td><code>ref:IFCC*</code></td><td>Reference pattern</td></tr>
+                            <tr><td><code>user:admin</code></td><td>Uploaded by user</td></tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <h6 class="mt-3">Complex Examples</h6>
+                <ul>
+                    <li><code>"IFCC Qatar" AND (contract OR agreement) -draft</code></li>
+                    <li><code>dept:HRD AND type:MOI AND "work permit"</code></li>
+                    <li><code>ref:IFCC/HRD/MOI/24* OR ref:IFCC/FIN/TAX/24*</code></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showSearchOperators() {
+    const modal = new bootstrap.Modal(document.getElementById('searchOperatorsModal'));
+    modal.show();
+}
+
+// Auto-complete for search field
+document.querySelector('[name="search"]').addEventListener('input', function() {
+    // This could be enhanced with real-time suggestions
+    console.log('Search input:', this.value);
+});
+
+// Form validation
+document.getElementById('advancedSearchForm').addEventListener('submit', function(e) {
+    const searchInput = this.querySelector('[name="search"]');
+    const hasFilters = Array.from(this.querySelectorAll('select, input[type="date"]'))
+        .some(field => field.value);
+    
+    if (!searchInput.value.trim() && !hasFilters) {
+        e.preventDefault();
+        alert('Please enter search terms or select at least one filter.');
+        searchInput.focus();
+    }
+});
+
+console.log('Advanced search page loaded! 🔍✨');
+</script>
+{% endblock %}

@@ -1,0 +1,723 @@
+{% extends 'admin_portal_base.html' %}
+
+{% block title %}Bookings Management - Hawwa Admin{% endblock %}
+
+{% block page_title %}Bookings Management{% endblock %}
+{% block page_subtitle %}Manage all service bookings and appointments{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:admin_booking_list' %}">Bookings</a></li>
+<li class="breadcrumb-item active">All Bookings</li>
+{% endblock %}
+
+{% block content %}
+<!-- Booking Stats Dashboard -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-primary bg-gradient rounded-3 p-3">
+                            <i class="fas fa-calendar-check text-white fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-muted small">Total Bookings</div>
+                        <div class="fs-4 fw-bold text-dark">{{ total_bookings|default:"0" }}</div>
+                        <div class="text-success small">
+                            <i class="fas fa-arrow-up"></i> {{ new_today|default:"0" }} today
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-warning bg-gradient rounded-3 p-3">
+                            <i class="fas fa-clock text-white fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-muted small">Pending</div>
+                        <div class="fs-4 fw-bold text-dark">{{ pending_bookings|default:"0" }}</div>
+                        <div class="text-warning small">
+                            Need attention
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-success bg-gradient rounded-3 p-3">
+                            <i class="fas fa-check-circle text-white fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-muted small">Confirmed</div>
+                        <div class="fs-4 fw-bold text-dark">{{ confirmed_bookings|default:"0" }}</div>
+                        <div class="text-success small">
+                            {{ upcoming_today|default:"0" }} today
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-info bg-gradient rounded-3 p-3">
+                            <i class="fas fa-dollar-sign text-white fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-muted small">Revenue (This Month)</div>
+                        <div class="fs-4 fw-bold text-dark">QAR {{ monthly_revenue|default:"0" }}</div>
+                        <div class="text-info small">
+                            <i class="fas fa-arrow-up"></i> {{ revenue_growth|default:"0" }}% growth
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions & Calendar -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <!-- Calendar View -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-alt me-2 text-primary"></i>Booking Calendar
+                    </h5>
+                    <small class="text-muted">Click on a date to view bookings</small>
+                </div>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-primary active" onclick="changeCalendarView('month')">Month</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="changeCalendarView('week')">Week</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="changeCalendarView('day')">Day</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="bookingCalendar" style="min-height: 400px;">
+                    <!-- Calendar will be rendered here -->
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-alt text-muted display-4 mb-3"></i>
+                        <p class="text-muted">Calendar view will be loaded here</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'core:admin_booking_create' %}" class="btn btn-success">
+                        <i class="fas fa-plus-circle me-2"></i>New Booking
+                    </a>
+                    <button type="button" class="btn btn-primary" onclick="showTodayBookings()">
+                        <i class="fas fa-calendar-day me-2"></i>Today's Appointments
+                    </button>
+                    <button type="button" class="btn btn-info" onclick="showPendingApprovals()">
+                        <i class="fas fa-clock me-2"></i>Pending Approvals
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="generateReports()">
+                        <i class="fas fa-chart-bar me-2"></i>Generate Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Schedule -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-clock text-info me-2"></i>Today's Schedule
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if todays_bookings %}
+                    <div class="timeline-today">
+                        {% for booking in todays_bookings %}
+                            <div class="timeline-item mb-3">
+                                <div class="timeline-time text-muted small">{{ booking.scheduled_time|time:"g:i A" }}</div>
+                                <div class="timeline-content">
+                                    <div class="fw-bold">{{ booking.service.name }}</div>
+                                    <div class="text-muted small">{{ booking.client.get_full_name }}</div>
+                                    <span class="badge bg-{% if booking.status == 'CONFIRMED' %}success{% elif booking.status == 'PENDING' %}warning{% else %}secondary{% endif %} badge-sm">
+                                        {{ booking.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-calendar-check text-muted fa-2x mb-2"></i>
+                        <p class="text-muted mb-0">No bookings scheduled for today</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bookings Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent border-0">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-list me-2 text-primary"></i>All Bookings
+                </h5>
+                <small class="text-muted">
+                    Showing {{ bookings.count }} booking{{ bookings.count|pluralize }}
+                    {% if is_paginated %}(Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}){% endif %}
+                </small>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex justify-content-end gap-2">
+                    <div class="input-group input-group-sm" style="max-width: 300px;">
+                        <input type="text" class="form-control" id="bookingSearch" 
+                               placeholder="Search bookings...">
+                        <button class="btn btn-outline-secondary" type="button" onclick="filterBookings()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" 
+                                data-bs-toggle="dropdown">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><h6 class="dropdown-header">Status</h6></li>
+                            <li><a class="dropdown-item filter-option" href="#" data-filter="all">All Bookings</a></li>
+                            <li><a class="dropdown-item filter-option" href="#" data-filter="PENDING">Pending</a></li>
+                            <li><a class="dropdown-item filter-option" href="#" data-filter="CONFIRMED">Confirmed</a></li>
+                            <li><a class="dropdown-item filter-option" href="#" data-filter="COMPLETED">Completed</a></li>
+                            <li><a class="dropdown-item filter-option" href="#" data-filter="CANCELLED">Cancelled</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Date Range</h6></li>
+                            <li><a class="dropdown-item filter-option" href="#" data-filter="today">Today</a></li>
+                            <li><a class="dropdown-item filter-option" href="#" data-filter="week">This Week</a></li>
+                            <li><a class="dropdown-item filter-option" href="#" data-filter="month">This Month</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" 
+                            data-bs-toggle="dropdown">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="exportBookings('pdf')">
+                            <i class="fas fa-file-pdf me-2"></i>PDF Report
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportBookings('excel')">
+                            <i class="fas fa-file-excel me-2"></i>Excel Spreadsheet
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportBookings('csv')">
+                            <i class="fas fa-file-csv me-2"></i>CSV Data
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="bookingsTable">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th width="5%">
+                            <input type="checkbox" id="selectAll" class="form-check-input">
+                        </th>
+                        <th width="10%">Booking ID</th>
+                        <th width="20%">Client</th>
+                        <th width="20%">Service</th>
+                        <th width="15%">Date & Time</th>
+                        <th width="10%" class="text-center">Status</th>
+                        <th width="10%" class="text-end">Amount</th>
+                        <th width="10%" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                        <tr class="booking-row" 
+                            data-status="{{ booking.status }}"
+                            data-service="{{ booking.service.category }}"
+                            data-date="{{ booking.scheduled_date|date:'Y-m-d' }}">
+                            <td>
+                                <input type="checkbox" class="form-check-input booking-checkbox" 
+                                       value="{{ booking.pk }}">
+                            </td>
+                            <td>
+                                <strong>#{{ booking.pk|stringformat:"05d" }}</strong>
+                                <br><small class="text-muted">{{ booking.created_at|date:"M d" }}</small>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if booking.client.profile_picture %}
+                                        <img src="{{ booking.client.profile_picture.url }}" 
+                                             class="rounded-circle me-2" width="32" height="32">
+                                    {% else %}
+                                        <div class="bg-light rounded-circle me-2 d-flex align-items-center justify-content-center" 
+                                             style="width: 32px; height: 32px;">
+                                            <i class="fas fa-user text-muted small"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold">{{ booking.client.get_full_name }}</div>
+                                        <small class="text-muted">{{ booking.client.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-bold">{{ booking.service.name }}</div>
+                                <small class="text-muted">
+                                    {% if booking.service.provider %}
+                                        by {{ booking.service.provider.get_full_name }}
+                                    {% endif %}
+                                </small>
+                                <br>
+                                <span class="badge bg-{% if booking.service.category == 'ACCOMMODATION' %}info{% elif booking.service.category == 'HOMECARE' %}success{% elif booking.service.category == 'WELLNESS' %}primary{% else %}secondary{% endif %} badge-sm">
+                                    {{ booking.service.get_category_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="fw-bold">{{ booking.scheduled_date|date:"M d, Y" }}</div>
+                                <small class="text-muted">{{ booking.scheduled_time|time:"g:i A" }}</small>
+                                {% if booking.duration %}
+                                    <br><small class="text-info">{{ booking.duration }}min</small>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-{% if booking.status == 'CONFIRMED' %}success{% elif booking.status == 'PENDING' %}warning{% elif booking.status == 'COMPLETED' %}info{% elif booking.status == 'CANCELLED' %}danger{% else %}secondary{% endif %}">
+                                    {{ booking.get_status_display }}
+                                </span>
+                                {% if booking.is_urgent %}
+                                    <br><span class="badge bg-danger badge-sm">Urgent</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="fw-bold text-success">QAR {{ booking.total_amount }}</div>
+                                {% if booking.payment_status %}
+                                    <small class="text-{% if booking.payment_status == 'PAID' %}success{% elif booking.payment_status == 'PENDING' %}warning{% else %}danger{% endif %}">
+                                        {{ booking.get_payment_status_display }}
+                                    </small>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{% url 'bookings:booking_detail' booking.pk %}" 
+                                       class="btn btn-outline-info" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'bookings:booking_edit' booking.pk %}" 
+                                       class="btn btn-outline-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if booking.status == 'PENDING' %}
+                                        <button type="button" class="btn btn-outline-success" 
+                                                title="Confirm" onclick="confirmBooking({{ booking.pk }})">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    {% endif %}
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" 
+                                                data-bs-toggle="dropdown" title="More Actions">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="sendReminder({{ booking.pk }})">
+                                                <i class="fas fa-bell me-2"></i>Send Reminder
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="rescheduleBooking({{ booking.pk }})">
+                                                <i class="fas fa-calendar me-2"></i>Reschedule
+                                            </a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#" onclick="cancelBooking({{ booking.pk }})">
+                                                <i class="fas fa-times me-2"></i>Cancel Booking
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-calendar-times display-4 d-block mb-3"></i>
+                                    <h5>No Bookings Found</h5>
+                                    <p>No bookings match your current filters.</p>
+                                    <a href="{% url 'core:admin_booking_create' %}" class="btn btn-success">
+                                        <i class="fas fa-plus-circle me-2"></i>Create First Booking
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <div class="card-footer bg-transparent">
+            <nav aria-label="Bookings pagination">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Bulk Actions Modal -->
+<div class="modal fade" id="bulkActionsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bulk Actions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Select an action for <span id="selectedBookingCount">0</span> selected booking(s):</p>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-success" onclick="bulkConfirm()">
+                        <i class="fas fa-check me-2"></i>Confirm Bookings
+                    </button>
+                    <button type="button" class="btn btn-info" onclick="bulkSendReminders()">
+                        <i class="fas fa-bell me-2"></i>Send Reminders
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="bulkReschedule()">
+                        <i class="fas fa-calendar me-2"></i>Bulk Reschedule
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="bulkExport()">
+                        <i class="fas fa-download me-2"></i>Export Selected
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="bulkCancel()">
+                        <i class="fas fa-times me-2"></i>Cancel Selected
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.timeline-today {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.timeline-item {
+    border-left: 3px solid #dee2e6;
+    padding-left: 15px;
+    position: relative;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 5px;
+    width: 8px;
+    height: 8px;
+    background: #6c63ff;
+    border-radius: 50%;
+}
+
+.badge-sm {
+    font-size: 0.7em;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Initialize calendar (placeholder - would use FullCalendar.js in real implementation)
+    initBookingCalendar();
+
+    // Search functionality
+    $('#bookingSearch').on('keyup', function() {
+        filterBookings();
+    });
+
+    // Filter functionality
+    $('.filter-option').click(function(e) {
+        e.preventDefault();
+        const filter = $(this).data('filter');
+        applyBookingFilter(filter);
+    });
+
+    // Select all functionality
+    $('#selectAll').change(function() {
+        $('.booking-checkbox').prop('checked', this.checked);
+        updateBulkActions();
+    });
+
+    $('.booking-checkbox').change(function() {
+        updateBulkActions();
+    });
+});
+
+function initBookingCalendar() {
+    // TODO: Initialize calendar with FullCalendar.js
+    // This would show bookings on a calendar interface
+    console.log('Calendar would be initialized here');
+}
+
+function changeCalendarView(view) {
+    // TODO: Change calendar view (month/week/day)
+    $('.btn-group .btn').removeClass('active');
+    event.target.classList.add('active');
+    console.log('Calendar view changed to:', view);
+}
+
+function filterBookings() {
+    const searchTerm = $('#bookingSearch').val().toLowerCase();
+    const rows = $('.booking-row');
+    
+    rows.each(function() {
+        const clientName = $(this).find('td:nth-child(3) .fw-bold').text().toLowerCase();
+        const serviceName = $(this).find('td:nth-child(4) .fw-bold').text().toLowerCase();
+        const bookingId = $(this).find('td:nth-child(2)').text().toLowerCase();
+        
+        const matches = clientName.includes(searchTerm) || 
+                       serviceName.includes(searchTerm) || 
+                       bookingId.includes(searchTerm);
+        
+        $(this).toggle(matches);
+    });
+}
+
+function applyBookingFilter(filter) {
+    const rows = $('.booking-row');
+    
+    rows.each(function() {
+        const status = $(this).data('status');
+        const date = new Date($(this).data('date'));
+        const today = new Date();
+        const weekStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
+        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        
+        let show = true;
+        
+        if (filter === 'all') {
+            show = true;
+        } else if (['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'].includes(filter)) {
+            show = status === filter;
+        } else if (filter === 'today') {
+            show = date.toDateString() === today.toDateString();
+        } else if (filter === 'week') {
+            show = date >= weekStart && date <= today;
+        } else if (filter === 'month') {
+            show = date >= monthStart && date <= today;
+        }
+        
+        $(this).toggle(show);
+    });
+}
+
+function updateBulkActions() {
+    const checkedBoxes = $('.booking-checkbox:checked');
+    $('#selectedBookingCount').text(checkedBoxes.length);
+    
+    if (checkedBoxes.length > 0) {
+        if (!$('#bulkActionsBtn').length) {
+            $('<button type="button" id="bulkActionsBtn" class="btn btn-outline-secondary ms-2" data-bs-toggle="modal" data-bs-target="#bulkActionsModal">' +
+              '<i class="fas fa-cog me-2"></i>Bulk Actions</button>')
+              .appendTo('.card-header .d-flex:last-child');
+        }
+    } else {
+        $('#bulkActionsBtn').remove();
+    }
+}
+
+function confirmBooking(bookingId) {
+    if (confirm('Confirm this booking?')) {
+        // TODO: Implement booking confirmation via AJAX
+        console.log('Confirming booking:', bookingId);
+        showToast('Booking confirmed successfully', 'success');
+        // Update row status
+        setTimeout(() => location.reload(), 1000);
+    }
+}
+
+function cancelBooking(bookingId) {
+    const reason = prompt('Please provide a reason for cancellation:');
+    if (reason) {
+        // TODO: Implement booking cancellation via AJAX
+        console.log('Cancelling booking:', bookingId, 'Reason:', reason);
+        showToast('Booking cancelled successfully', 'warning');
+        // Update row status
+        setTimeout(() => location.reload(), 1000);
+    }
+}
+
+function rescheduleBooking(bookingId) {
+    // TODO: Open reschedule modal or redirect to reschedule page
+    window.location.href = `/admin/bookings/${bookingId}/reschedule/`;
+}
+
+function sendReminder(bookingId) {
+    if (confirm('Send booking reminder to client?')) {
+        // TODO: Implement reminder sending via AJAX
+        console.log('Sending reminder for booking:', bookingId);
+        showToast('Reminder sent successfully', 'info');
+    }
+}
+
+function showTodayBookings() {
+    applyBookingFilter('today');
+}
+
+function showPendingApprovals() {
+    applyBookingFilter('PENDING');
+}
+
+function generateReports() {
+    window.location.href = '/admin/reports/bookings/';
+}
+
+function exportBookings(format) {
+    const params = new URLSearchParams();
+    params.append('format', format);
+    params.append('search', $('#bookingSearch').val());
+    
+    window.open(`/admin/bookings/export/?${params.toString()}`, '_blank');
+}
+
+// Bulk Actions
+function bulkConfirm() {
+    const selectedIds = getSelectedBookingIds();
+    if (selectedIds.length > 0 && confirm(`Confirm ${selectedIds.length} selected booking(s)?`)) {
+        // TODO: Implement bulk confirmation via AJAX
+        console.log('Bulk confirming bookings:', selectedIds);
+        $('#bulkActionsModal').modal('hide');
+        showToast('Bookings confirmed successfully', 'success');
+        setTimeout(() => location.reload(), 1000);
+    }
+}
+
+function bulkSendReminders() {
+    const selectedIds = getSelectedBookingIds();
+    if (selectedIds.length > 0 && confirm(`Send reminders for ${selectedIds.length} selected booking(s)?`)) {
+        // TODO: Implement bulk reminder sending via AJAX
+        console.log('Bulk sending reminders for bookings:', selectedIds);
+        $('#bulkActionsModal').modal('hide');
+        showToast('Reminders sent successfully', 'info');
+    }
+}
+
+function bulkReschedule() {
+    const selectedIds = getSelectedBookingIds();
+    if (selectedIds.length > 0) {
+        // TODO: Open bulk reschedule interface
+        console.log('Bulk reschedule for bookings:', selectedIds);
+        $('#bulkActionsModal').modal('hide');
+    }
+}
+
+function bulkExport() {
+    const selectedIds = getSelectedBookingIds();
+    if (selectedIds.length > 0) {
+        const params = new URLSearchParams();
+        params.append('format', 'excel');
+        params.append('bookings', selectedIds.join(','));
+        
+        window.open(`/admin/bookings/export/?${params.toString()}`, '_blank');
+        $('#bulkActionsModal').modal('hide');
+    }
+}
+
+function bulkCancel() {
+    const selectedIds = getSelectedBookingIds();
+    const reason = prompt(`Please provide a reason for cancelling ${selectedIds.length} booking(s):`);
+    
+    if (reason && selectedIds.length > 0) {
+        // TODO: Implement bulk cancellation via AJAX
+        console.log('Bulk cancelling bookings:', selectedIds, 'Reason:', reason);
+        $('#bulkActionsModal').modal('hide');
+        showToast('Bookings cancelled successfully', 'warning');
+        setTimeout(() => location.reload(), 1000);
+    }
+}
+
+function getSelectedBookingIds() {
+    return $('.booking-checkbox:checked').map(function() {
+        return this.value;
+    }).get();
+}
+
+function showToast(message, type) {
+    // Use the global toast function from admin-portal.js
+    if (window.hawwaAdmin && window.hawwaAdmin.showToast) {
+        window.hawwaAdmin.showToast(message, type);
+    }
+}
+</script>
+{% endblock %}

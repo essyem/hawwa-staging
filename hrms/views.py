@@ -1738,6 +1738,33 @@ class AttendanceDashboardView(LoginRequiredMixin, TemplateView):
         
         return context
 
+class EmployeeCheckinView(LoginRequiredMixin, TemplateView):
+    """Employee check-in/out landing page with location mapping"""
+    template_name = 'hrms/attendance/employee_checkin_landing.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get today's attendance for current user
+        today = timezone.now().date()
+        try:
+            employee = resolve_employee_profile(self.request.user)
+            today_attendance = Attendance.objects.filter(
+                employee=employee, 
+                date=today
+            ).first()
+        except:
+            employee = None
+            today_attendance = None
+        
+        context.update({
+            'employee': employee,
+            'today_attendance': today_attendance,
+            'today': today,
+        })
+        
+        return context
+
 class ClockInOutView(LoginRequiredMixin, View):
     """Handle clock in/out actions"""
     
@@ -1930,6 +1957,7 @@ class AttendanceListView(LoginRequiredMixin, ListView):
             context['departments'] = Department.objects.filter(is_active=True)
         
         context['status_choices'] = Attendance.STATUS_CHOICES
+        context['today'] = timezone.now().date()
         return context
 
 class AttendanceRequestCreateView(LoginRequiredMixin, CreateView):

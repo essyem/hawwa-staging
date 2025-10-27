@@ -1,0 +1,210 @@
+{% extends 'admin_base_unified.html' %}
+
+{% block app_name %}Accounts{% endblock %}
+{% block app_icon %}fas fa-user-shield{% endblock %}
+
+{% block nav_tabs %}
+<!-- Accounts Navigation Tabs -->
+<ul class="nav nav-tabs hawwa-nav-tabs" id="accountsTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'accounts_dashboard' %}active{% endif %}" 
+           href="#" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" 
+           type="button" role="tab" aria-controls="dashboard" aria-selected="{% if request.resolver_match.url_name == 'accounts_dashboard' %}true{% else %}false{% endif %}">
+            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'accounts_users' %}active{% endif %}" 
+           href="#" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" 
+           type="button" role="tab" aria-controls="users" aria-selected="{% if request.resolver_match.url_name == 'accounts_users' %}true{% else %}false{% endif %}">
+            <i class="fas fa-users me-2"></i>Users
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'accounts_roles' %}active{% endif %}" 
+           href="#" id="roles-tab" data-bs-toggle="tab" data-bs-target="#roles" 
+           type="button" role="tab" aria-controls="roles" aria-selected="{% if request.resolver_match.url_name == 'accounts_roles' %}true{% else %}false{% endif %}">
+            <i class="fas fa-user-tag me-2"></i>Roles & Permissions
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'accounts_profiles' %}active{% endif %}" 
+           href="#" id="profiles-tab" data-bs-toggle="tab" data-bs-target="#profiles" 
+           type="button" role="tab" aria-controls="profiles" aria-selected="{% if request.resolver_match.url_name == 'accounts_profiles' %}true{% else %}false{% endif %}">
+            <i class="fas fa-address-card me-2"></i>Profiles
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'accounts_security' %}active{% endif %}" 
+           href="#" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" 
+           type="button" role="tab" aria-controls="security" aria-selected="{% if request.resolver_match.url_name == 'accounts_security' %}true{% else %}false{% endif %}">
+            <i class="fas fa-shield-alt me-2"></i>Security
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'accounts_audit' %}active{% endif %}" 
+           href="#" id="audit-tab" data-bs-toggle="tab" data-bs-target="#audit" 
+           type="button" role="tab" aria-controls="audit" aria-selected="{% if request.resolver_match.url_name == 'accounts_audit' %}true{% else %}false{% endif %}">
+            <i class="fas fa-clipboard-list me-2"></i>Audit Logs
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'accounts_settings' %}active{% endif %}" 
+           href="#" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" 
+           type="button" role="tab" aria-controls="settings" aria-selected="{% if request.resolver_match.url_name == 'accounts_settings' %}true{% else %}false{% endif %}">
+            <i class="fas fa-cog me-2"></i>Settings
+        </a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .accounts-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .accounts-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    
+    .account-stats {
+        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .user-status-active {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .user-status-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .user-status-suspended {
+        background-color: #fff3cd;
+        color: #856404;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .role-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+    }
+    
+    .role-admin {
+        background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+    }
+    
+    .role-manager {
+        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+    }
+    
+    .role-staff {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+    
+    .role-user {
+        background: linear-gradient(135deg, #17a2b8 0%, #6610f2 100%);
+    }
+    
+    .permission-level {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+    
+    .permission-full { background-color: #28a745; }
+    .permission-read { background-color: #17a2b8; }
+    .permission-limited { background-color: #ffc107; }
+    .permission-none { background-color: #6c757d; }
+    
+    .profile-completion {
+        position: relative;
+        height: 8px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .profile-completion-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+        transition: width 0.6s ease;
+    }
+    
+    .security-score {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    
+    .security-excellent { color: #28a745; }
+    .security-good { color: #20c997; }
+    .security-fair { color: #ffc107; }
+    .security-poor { color: #dc3545; }
+    
+    .audit-action-login {
+        border-left: 4px solid #17a2b8;
+    }
+    
+    .audit-action-create {
+        border-left: 4px solid #28a745;
+    }
+    
+    .audit-action-update {
+        border-left: 4px solid #ffc107;
+    }
+    
+    .audit-action-delete {
+        border-left: 4px solid #dc3545;
+    }
+    
+    .account-metric {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .metric-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #6f42c1;
+    }
+    
+    .metric-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+</style>
+{% endblock %}

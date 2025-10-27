@@ -1,0 +1,370 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+
+{% block title %}Reference Numbers - Docpool{% endblock %}
+
+{% block extra_css %}
+<style>
+    .reference-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .reference-number {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    .stat-card {
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">Reference Numbers Management</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'docpool:document_list' %}">Document Pool</a></li>
+                            <li class="breadcrumb-item active">Reference Numbers</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="{% url 'docpool:document_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Documents
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Total References</h5>
+                            <h2 class="mb-0">{{ total_references }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-hashtag fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Used References</h5>
+                            <h2 class="mb-0">{{ used_references }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Unused References</h5>
+                            <h2 class="mb-0">{{ unused_references }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card reference-card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="fas fa-filter"></i> Reference Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-2">
+                            <label for="year" class="form-label">Year</label>
+                            <select name="year" id="year" class="form-select">
+                                <option value="">All Years</option>
+                                {% for year in years %}
+                                <option value="{{ year }}" {% if request.GET.year == year|stringformat:"s" %}selected{% endif %}>
+                                    {{ year }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="month" class="form-label">Month</label>
+                            <select name="month" id="month" class="form-select">
+                                <option value="">All Months</option>
+                                {% for month_num, month_name in months %}
+                                <option value="{{ month_num }}" {% if request.GET.month == month_num|stringformat:"s" %}selected{% endif %}>
+                                    {{ month_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="department" class="form-label">Department</label>
+                            <select name="department" id="department" class="form-select">
+                                <option value="">All Departments</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}" {% if request.GET.department == dept.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ dept.code }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="type" class="form-label">Type</label>
+                            <select name="type" id="type" class="form-select">
+                                <option value="">All Types</option>
+                                {% for doc_type in document_types %}
+                                <option value="{{ doc_type.id }}" {% if request.GET.type == doc_type.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ doc_type.code }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="used" class="form-label">Usage Status</label>
+                            <select name="used" id="used" class="form-select">
+                                <option value="">All</option>
+                                <option value="yes" {% if request.GET.used == "yes" %}selected{% endif %}>Used</option>
+                                <option value="no" {% if request.GET.used == "no" %}selected{% endif %}>Unused</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-light w-100">
+                                <i class="fas fa-search"></i> Filter
+                            </button>
+                        </div>
+                    </form>
+                    <div class="row mt-3">
+                        <div class="col-md-10">
+                            <input type="text" name="search" class="form-control" placeholder="Search reference numbers..." 
+                                   value="{{ request.GET.search }}" form="filterForm">
+                        </div>
+                        <div class="col-md-2">
+                            <a href="{% url 'docpool:reference_list' %}" class="btn btn-outline-light w-100">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reference Numbers Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list"></i> Reference Numbers 
+                        <span class="badge bg-primary">{{ references|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Reference Number</th>
+                                    <th>Department</th>
+                                    <th>Type</th>
+                                    <th>Year/Month</th>
+                                    <th>Sequence</th>
+                                    <th>Status</th>
+                                    <th>Generated</th>
+                                    <th>Created By</th>
+                                    <th>Document</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ref in references %}
+                                <tr>
+                                    <td>
+                                        <span class="reference-number badge {% if ref.is_used %}bg-success{% else %}bg-warning{% endif %}">
+                                            {{ ref.reference_number }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ ref.department.code }}</span>
+                                        <br><small>{{ ref.department.name }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ ref.document_type.code }}</span>
+                                        <br><small>{{ ref.document_type.name }}</small>
+                                    </td>
+                                    <td>
+                                        <strong>{{ ref.year }}</strong> / 
+                                        {{ ref.month|date:"F" }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ ref.sequence }}</span>
+                                    </td>
+                                    <td>
+                                        {% if ref.is_used %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check"></i> Used
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-clock"></i> Available
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ ref.created_at|date:"M d, Y H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        {% if ref.created_by %}
+                                        <small>{{ ref.created_by.get_full_name|default:ref.created_by.username }}</small>
+                                        {% else %}
+                                        <small class="text-muted">System</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if ref.is_used and ref.documents.exists %}
+                                        {% with doc=ref.documents.first %}
+                                        <a href="{% url 'docpool:document_detail' doc.pk %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-file-alt"></i> View Doc
+                                        </a>
+                                        {% endwith %}
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">
+                                        <i class="fas fa-hashtag fa-3x mb-3"></i>
+                                        <br>
+                                        No reference numbers found matching your criteria.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="References pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Reference Format Info Modal -->
+<div class="modal fade" id="formatModal" tabindex="-1" aria-labelledby="formatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formatModalLabel">Reference Number Format</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Format Structure:</h6>
+                <code>TRENDZ / [Department] / [Type] / [YearMonth][Sequence]</code>
+                
+                <h6 class="mt-3">Components:</h6>
+                <ul>
+                    <li><strong>TRENDZ:</strong> Static prefix for all references</li>
+                    <li><strong>Department:</strong> 3-letter department code (e.g., HRD, FIN, OPR)</li>
+                    <li><strong>Type:</strong> 3-letter document type code (e.g., MOI, MOL, CRA)</li>
+                    <li><strong>Year:</strong> Last 2 digits of the year (e.g., 25 for 2025)</li>
+                    <li><strong>Month:</strong> 2-digit month (e.g., 08 for August)</li>
+                    <li><strong>Sequence:</strong> 4-digit sequential number starting from 1001</li>
+                </ul>
+                
+                <h6 class="mt-3">Examples:</h6>
+                <ul>
+                    <li><code>TRENDZ/HRD/MOI/25081001</code> - First HR document for Ministry of Interior in August 2025</li>
+                    <li><code>TRENDZ/FIN/TAX/25081002</code> - Second Finance document for Tax Authority in August 2025</li>
+                    <li><code>TRENDZ/OPR/CON/25091001</code> - First Operations contract document in September 2025</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-submit form on filter changes
+$('#year, #month, #department, #type, #used').change(function() {
+    $(this).closest('form').submit();
+});
+
+// Show format info
+function showFormatInfo() {
+    $('#formatModal').modal('show');
+}
+</script>
+{% endblock %}

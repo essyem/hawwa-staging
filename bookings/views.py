@@ -299,9 +299,13 @@ def submit_booking(request, booking_id):
         )
         
         # Send confirmation email
-        booking.send_confirmation_email()
+        email_sent = booking.send_confirmation_email()
         
-        messages.success(request, _('Booking submitted successfully! We will review and confirm shortly.'))
+        if email_sent:
+            messages.success(request, _('Booking submitted successfully! Confirmation email sent. We will review and confirm shortly.'))
+        else:
+            messages.success(request, _('Booking submitted successfully! We will review and confirm shortly.'))
+            messages.warning(request, _('Note: Confirmation email could not be sent, but your booking is recorded.'))
         return redirect('bookings:booking_detail', pk=booking.pk)
     
     return render(request, 'bookings/booking_submit.html', {'booking': booking})

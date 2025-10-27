@@ -1,0 +1,796 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Document Repository - Hawwa Docpool{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .reference-badge {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+    }
+    .search-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-top: none;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+    .search-suggestion-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+    }
+    .search-suggestion-item:hover {
+        background-color: #f8f9fa;
+    }
+    .search-suggestion-type {
+        font-size: 0.8em;
+        color: #6c757d;
+        margin-right: 8px;
+    }
+    .stats-card {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+    .advanced-filters {
+        display: none;
+    }
+    .file-type-badge {
+        font-size: 0.7em;
+        padding: 2px 6px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">📁 Document Repository</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Document Pool</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="btn-group">
+                    {% if user.is_staff %}
+                    <a href="{% url 'docpool:document_upload' %}" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Upload Document
+                    </a>
+                    <a href="{% url 'docpool:reference_list' %}" class="btn btn-info">
+                        <i class="fas fa-list"></i> Reference Numbers
+                    </a>
+                    <a href="{% url 'docpool:search_analytics' %}" class="btn btn-warning">
+                        <i class="fas fa-chart-bar"></i> Analytics
+                    </a>
+                    {% endif %}
+                    <button class="btn btn-success" onclick="exportResults()">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ total_documents }}</h4>
+                    <small>Total Documents</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ file_stats.pdf }}</h4>
+                    <small>PDF Files</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ file_stats.images }}</h4>
+                    <small>Images</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ file_stats.office }}</h4>
+                    <small>Office Docs</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Search Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card filter-card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0"><i class="fas fa-search"></i> Smart Document Search</h5>
+                        <button class="btn btn-outline-light btn-sm" id="toggleAdvanced">
+                            <i class="fas fa-cogs"></i> Advanced Filters
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="searchForm">
+                        <!-- Main Search Bar -->
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <div class="position-relative">
+                                    <input type="text" name="search" id="searchInput" class="form-control form-control-lg" 
+                                           placeholder="🔍 Search by title, description, reference number, department..." 
+                                           value="{{ current_filters.search }}" autocomplete="off">
+                                    <div class="search-suggestions" id="searchSuggestions"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <select name="sort" class="form-select" onchange="this.form.submit()">
+                                    {% for value, label in sort_options %}
+                                    <option value="{{ value }}" {% if current_filters.sort == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-light w-100">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Filters -->
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-2">
+                                <select name="year" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    <option value="">All Years</option>
+                                    {% for year in years %}
+                                    <option value="{{ year }}" {% if current_filters.year == year|stringformat:"s" %}selected{% endif %}>
+                                        {{ year }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select name="month" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    <option value="">All Months</option>
+                                    {% for month_num, month_name in months %}
+                                    <option value="{{ month_num }}" {% if current_filters.month == month_num|stringformat:"s" %}selected{% endif %}>
+                                        {{ month_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select name="department" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    <option value="">All Departments</option>
+                                    {% for dept in departments %}
+                                    <option value="{{ dept.id }}" {% if current_filters.department == dept.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ dept.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select name="type" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    <option value="">All Types</option>
+                                    {% for doc_type in document_types %}
+                                    <option value="{{ doc_type.id }}" {% if current_filters.type == doc_type.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ doc_type.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select name="file_type" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    <option value="">All File Types</option>
+                                    <option value="pdf" {% if current_filters.file_type == 'pdf' %}selected{% endif %}>PDF Files</option>
+                                    <option value="image" {% if current_filters.file_type == 'image' %}selected{% endif %}>Images</option>
+                                    <option value="office" {% if current_filters.file_type == 'office' %}selected{% endif %}>Office Docs</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="{% url 'docpool:document_list' %}" class="btn btn-outline-light btn-sm w-100">
+                                    <i class="fas fa-times"></i> Clear
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Filters (Hidden by default) -->
+                        <div class="advanced-filters">
+                            <hr class="border-light">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label">Date From</label>
+                                    <input type="date" name="date_from" class="form-control form-control-sm" 
+                                           value="{{ current_filters.date_from }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Date To</label>
+                                    <input type="date" name="date_to" class="form-control form-control-sm" 
+                                           value="{{ current_filters.date_to }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Border Type</label>
+                                    <select name="border" class="form-select form-select-sm">
+                                        <option value="">All Borders</option>
+                                        {% for border in borders %}
+                                        <option value="{{ border.id }}" {% if current_filters.border == border.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ border.code }} - {{ border.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Uploaded By</label>
+                                    <select name="uploaded_by" class="form-select form-select-sm">
+                                        <option value="">Any User</option>
+                                        {% for uploader in uploaders %}
+                                        <option value="{{ uploader.uploaded_by__id }}" 
+                                                {% if current_filters.uploaded_by == uploader.uploaded_by__id|stringformat:"s" %}selected{% endif %}>
+                                            {{ uploader.uploaded_by__first_name }} {{ uploader.uploaded_by__last_name }}
+                                            ({{ uploader.count }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Has Reference</label>
+                                    <select name="has_reference" class="form-select form-select-sm">
+                                        <option value="">Any</option>
+                                        <option value="yes" {% if current_filters.has_reference == 'yes' %}selected{% endif %}>Yes</option>
+                                        <option value="no" {% if current_filters.has_reference == 'no' %}selected{% endif %}>No</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-9 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-light">
+                                        <i class="fas fa-filter"></i> Apply Advanced Filters
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Search History -->
+                    {% if search_history %}
+                    <div class="mt-3">
+                        <small class="text-light">Recent searches:</small>
+                        <div class="mt-1">
+                            {% for search_term in search_history %}
+                            <span class="badge bg-light text-dark me-1 mb-1" style="cursor: pointer;" 
+                                  onclick="document.getElementById('searchInput').value='{{ search_term }}'; document.getElementById('searchForm').submit();">
+                                {{ search_term }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Documents Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-alt"></i> Documents 
+                            <span class="badge bg-primary">{{ documents|length }}</span>
+                            {% if request.GET.search %}
+                            <span class="badge bg-success">Search Results</span>
+                            {% endif %}
+                        </h5>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" onclick="toggleView('table')" id="tableViewBtn">
+                                <i class="fas fa-table"></i> Table
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="toggleView('grid')" id="gridViewBtn">
+                                <i class="fas fa-th-large"></i> Grid
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Table View -->
+                    <div id="tableView" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Reference</th>
+                                    <th>Document</th>
+                                    <th>Details</th>
+                                    <th>Classification</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in documents %}
+                                <tr>
+                                    <td>
+                                        {% if doc.reference_number %}
+                                        <span class="badge bg-success reference-badge">
+                                            {{ doc.reference_number.reference_number }}
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-warning">No Reference</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                {% if doc.file.name|lower|slice:"-4:" == ".pdf" %}
+                                                <i class="fas fa-file-pdf fa-2x text-danger"></i>
+                                                {% elif doc.file.name|lower|slice:"-4:" in ".jpg,.png,.gif" or doc.file.name|lower|slice:"-5:" == ".jpeg" %}
+                                                <i class="fas fa-file-image fa-2x text-info"></i>
+                                                {% elif doc.file.name|lower|slice:"-4:" in ".doc,.xls,.ppt" or doc.file.name|lower|slice:"-5:" in ".docx,.xlsx,.pptx" %}
+                                                <i class="fas fa-file-word fa-2x text-primary"></i>
+                                                {% else %}
+                                                <i class="fas fa-file fa-2x text-secondary"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <a href="{% url 'docpool:document_detail' doc.pk %}" class="text-decoration-none">
+                                                    <strong>{{ doc.title }}</strong>
+                                                </a>
+                                                {% if doc.description %}
+                                                <br><small class="text-muted">{{ doc.description|truncatechars:60 }}</small>
+                                                {% endif %}
+                                                <br>
+                                                <span class="file-type-badge badge bg-light text-dark">
+                                                    {{ doc.file.name|slice:"-4:"|upper }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if doc.department %}
+                                        <span class="badge bg-info mb-1">{{ doc.department.code }}</span>
+                                        <br><small>{{ doc.department.name }}</small>
+                                        {% else %}
+                                        <span class="text-muted">No Department</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if doc.document_type %}
+                                        <span class="badge bg-secondary mb-1">{{ doc.document_type.code }}</span>
+                                        <br><small>{{ doc.document_type.name }}</small>
+                                        {% endif %}
+                                        {% if doc.border %}
+                                        <br><span class="badge bg-warning">{{ doc.border.code }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>{{ doc.year }}</strong>
+                                        {% if doc.month %}
+                                        <br><small>{{ doc.get_month_display }}</small>
+                                        {% endif %}
+                                        <br><small class="text-muted">{{ doc.uploaded_at|date:"M d, Y" }}</small>
+                                        {% if doc.uploaded_by %}
+                                        <br><small class="text-muted">by {{ doc.uploaded_by.get_full_name|default:doc.uploaded_by.username }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'docpool:document_detail' doc.pk %}" 
+                                               class="btn btn-outline-primary btn-sm" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ doc.file.url }}" target="_blank" 
+                                               class="btn btn-outline-success btn-sm" title="Download">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            <button class="btn btn-outline-info btn-sm" title="Quick Preview" 
+                                                    onclick="previewDocument('{{ doc.file.url }}', '{{ doc.title }}')">
+                                                <i class="fas fa-search-plus"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-5">
+                                        <i class="fas fa-search fa-3x mb-3"></i>
+                                        <br>
+                                        <h5>No documents found</h5>
+                                        <p>Try adjusting your search criteria or filters.</p>
+                                        {% if user.is_staff %}
+                                        <a href="{% url 'docpool:document_upload' %}" class="btn btn-primary mt-2">
+                                            <i class="fas fa-upload"></i> Upload First Document
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Grid View (Hidden by default) -->
+                    <div id="gridView" class="row" style="display: none;">
+                        {% for doc in documents %}
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    {% if doc.reference_number %}
+                                    <span class="badge bg-success reference-badge">
+                                        {{ doc.reference_number.reference_number }}
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-warning">No Ref</span>
+                                    {% endif %}
+                                    <span class="file-type-badge badge bg-light text-dark">
+                                        {{ doc.file.name|slice:"-4:"|upper }}
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center mb-3">
+                                        {% if doc.file.name|lower|slice:"-4:" == ".pdf" %}
+                                        <i class="fas fa-file-pdf fa-4x text-danger"></i>
+                                        {% elif doc.file.name|lower|slice:"-4:" in ".jpg,.png,.gif" or doc.file.name|lower|slice:"-5:" == ".jpeg" %}
+                                        <i class="fas fa-file-image fa-4x text-info"></i>
+                                        {% elif doc.file.name|lower|slice:"-4:" in ".doc,.xls,.ppt" or doc.file.name|lower|slice:"-5:" in ".docx,.xlsx,.pptx" %}
+                                        <i class="fas fa-file-word fa-4x text-primary"></i>
+                                        {% else %}
+                                        <i class="fas fa-file fa-4x text-secondary"></i>
+                                        {% endif %}
+                                    </div>
+                                    <h6 class="card-title">{{ doc.title|truncatechars:40 }}</h6>
+                                    {% if doc.description %}
+                                    <p class="card-text text-muted small">{{ doc.description|truncatechars:80 }}</p>
+                                    {% endif %}
+                                    <div class="mb-2">
+                                        {% if doc.department %}
+                                        <span class="badge bg-info">{{ doc.department.code }}</span>
+                                        {% endif %}
+                                        {% if doc.document_type %}
+                                        <span class="badge bg-secondary">{{ doc.document_type.code }}</span>
+                                        {% endif %}
+                                        {% if doc.border %}
+                                        <span class="badge bg-warning">{{ doc.border.code }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">{{ doc.uploaded_at|date:"M d, Y" }}</small>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'docpool:document_detail' doc.pk %}" 
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ doc.file.url }}" target="_blank" 
+                                               class="btn btn-outline-success btn-sm">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12 text-center text-muted py-5">
+                            <i class="fas fa-search fa-3x mb-3"></i>
+                            <h5>No documents found</h5>
+                            <p>Try adjusting your search criteria or filters.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Documents pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}">Last</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Document Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewModalLabel">Document Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="previewContent" class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enhanced Search Functionality
+let searchTimeout;
+const searchInput = document.getElementById('searchInput');
+const searchSuggestions = document.getElementById('searchSuggestions');
+
+// Search suggestions
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            searchSuggestions.style.display = 'none';
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            fetch(`{% url 'docpool:search_suggestions' %}?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    displaySearchSuggestions(data.suggestions);
+                })
+                .catch(error => {
+                    console.error('Search suggestions error:', error);
+                });
+        }, 300);
+    });
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchSuggestions.contains(e.target)) {
+            searchSuggestions.style.display = 'none';
+        }
+    });
+}
+
+function displaySearchSuggestions(suggestions) {
+    if (suggestions.length === 0) {
+        searchSuggestions.style.display = 'none';
+        return;
+    }
+    
+    const suggestionHTML = suggestions.map(suggestion => `
+        <div class="search-suggestion-item" onclick="selectSuggestion('${suggestion.text}')">
+            <span class="search-suggestion-type">[${suggestion.type}]</span>
+            ${suggestion.text}
+        </div>
+    `).join('');
+    
+    searchSuggestions.innerHTML = suggestionHTML;
+    searchSuggestions.style.display = 'block';
+}
+
+function selectSuggestion(text) {
+    searchInput.value = text;
+    searchSuggestions.style.display = 'none';
+    document.getElementById('searchForm').submit();
+}
+
+// Advanced filters toggle
+document.getElementById('toggleAdvanced').addEventListener('click', function() {
+    const advancedFilters = document.querySelector('.advanced-filters');
+    const isVisible = advancedFilters.style.display !== 'none';
+    
+    advancedFilters.style.display = isVisible ? 'none' : 'block';
+    this.innerHTML = isVisible ? 
+        '<i class="fas fa-cogs"></i> Advanced Filters' : 
+        '<i class="fas fa-eye-slash"></i> Hide Advanced';
+});
+
+// View toggle functionality
+function toggleView(viewType) {
+    const tableView = document.getElementById('tableView');
+    const gridView = document.getElementById('gridView');
+    const tableBtn = document.getElementById('tableViewBtn');
+    const gridBtn = document.getElementById('gridViewBtn');
+    
+    if (viewType === 'table') {
+        tableView.style.display = 'block';
+        gridView.style.display = 'none';
+        tableBtn.classList.add('active');
+        gridBtn.classList.remove('active');
+        localStorage.setItem('docpool_view', 'table');
+    } else {
+        tableView.style.display = 'none';
+        gridView.style.display = 'block';
+        tableBtn.classList.remove('active');
+        gridBtn.classList.add('active');
+        localStorage.setItem('docpool_view', 'grid');
+    }
+}
+
+// Restore saved view preference
+document.addEventListener('DOMContentLoaded', function() {
+    const savedView = localStorage.getItem('docpool_view') || 'table';
+    toggleView(savedView);
+});
+
+// Document preview functionality
+function previewDocument(fileUrl, title) {
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    const previewContent = document.getElementById('previewContent');
+    const modalTitle = document.getElementById('previewModalLabel');
+    
+    modalTitle.textContent = title;
+    
+    // Show loading spinner
+    previewContent.innerHTML = `
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // Determine file type and show appropriate preview
+    const fileExtension = fileUrl.split('.').pop().toLowerCase();
+    
+    if (fileExtension === 'pdf') {
+        previewContent.innerHTML = `
+            <iframe src="${fileUrl}" width="100%" height="600px" style="border: none;">
+                <p>Your browser does not support iframes. <a href="${fileUrl}" target="_blank">Click here to view the PDF</a></p>
+            </iframe>
+        `;
+    } else if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+        previewContent.innerHTML = `
+            <img src="${fileUrl}" class="img-fluid" alt="${title}" style="max-height: 600px;">
+        `;
+    } else {
+        previewContent.innerHTML = `
+            <div class="text-center p-4">
+                <i class="fas fa-file fa-5x text-muted mb-3"></i>
+                <h5>Preview not available</h5>
+                <p>This file type cannot be previewed in the browser.</p>
+                <a href="${fileUrl}" target="_blank" class="btn btn-primary">
+                    <i class="fas fa-external-link-alt"></i> Open in new tab
+                </a>
+            </div>
+        `;
+    }
+}
+
+// Export functionality
+function exportResults() {
+    const currentParams = new URLSearchParams(window.location.search);
+    currentParams.set('format', 'csv');
+    
+    const exportUrl = `{% url 'docpool:export_search' %}?${currentParams.toString()}`;
+    window.open(exportUrl, '_blank');
+}
+
+// Quick filter helpers
+function applyQuickFilter(filterType, value) {
+    const form = document.getElementById('searchForm');
+    const input = form.querySelector(`[name="${filterType}"]`);
+    if (input) {
+        input.value = value;
+        form.submit();
+    }
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl+K or Cmd+K to focus search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInput.focus();
+    }
+    
+    // Escape to clear search suggestions
+    if (e.key === 'Escape') {
+        searchSuggestions.style.display = 'none';
+    }
+});
+
+// Auto-submit on filter changes
+document.querySelectorAll('#searchForm select').forEach(select => {
+    if (select.name !== 'sort') { // Don't auto-submit on sort change
+        select.addEventListener('change', function() {
+            // Small delay to allow multiple rapid changes
+            clearTimeout(this.submitTimeout);
+            this.submitTimeout = setTimeout(() => {
+                document.getElementById('searchForm').submit();
+            }, 100);
+        });
+    }
+});
+
+// Show search tips
+function showSearchTips() {
+    alert(`Search Tips:
+    
+• Use quotes for exact phrases: "IFCC Qatar"
+• Search multiple fields: title, description, reference number
+• Use department codes: HRD, FIN, OPR
+• Search by uploader name
+• Combine with filters for better results
+    
+Keyboard Shortcuts:
+• Ctrl+K (Cmd+K on Mac): Focus search
+• Escape: Close suggestions`);
+}
+
+// Add search tips button to the page
+document.addEventListener('DOMContentLoaded', function() {
+    const searchContainer = searchInput.parentElement;
+    const tipsButton = document.createElement('button');
+    tipsButton.type = 'button';
+    tipsButton.className = 'btn btn-link btn-sm position-absolute top-50 end-0 translate-middle-y me-2';
+    tipsButton.style.zIndex = '10';
+    tipsButton.innerHTML = '<i class="fas fa-question-circle"></i>';
+    tipsButton.title = 'Search Tips';
+    tipsButton.onclick = showSearchTips;
+    
+    searchContainer.appendChild(tipsButton);
+});
+
+console.log('Enhanced DocPool search loaded successfully! 🔍');
+</script>
+{% endblock %}

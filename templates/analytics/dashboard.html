@@ -1,10 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'analytics/analytics_base.html' %}
 {% load static %}
 {% load humanize %}
+{% load i18n %}
 
-{% block title %}Analytics Dashboard - Hawwa{% endblock %}
+{% block title %}{% trans "Analytics Dashboard" %} - Hawwa{% endblock %}
 
-{% block extra_css %}
+{% block analytics_extra_css %}
 <link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" rel="stylesheet">
 <style>
     .analytics-card {
@@ -77,22 +78,53 @@
 </style>
 {% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="h3 mb-0 text-gray-800">Analytics Dashboard</h1>
-                    <p class="text-muted">Period: {{ date_range.start|date:"M j, Y" }} - {{ date_range.end|date:"M j, Y" }}</p>
-                </div>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-outline-primary" onclick="updateDateRange(7)">7 Days</button>
-                    <button class="btn btn-primary" onclick="updateDateRange(30)">30 Days</button>
-                    <button class="btn btn-outline-primary" onclick="updateDateRange(90)">90 Days</button>
-                </div>
-            </div>
+{% block analytics_content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Analytics Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-chart-line text-primary"></i>
+                {% trans "Analytics Dashboard" %}
+            </h1>
+            <p class="text-muted mb-0">{% trans "Period:" %} {{ date_range.start|date:"M j, Y" }} - {{ date_range.end|date:"M j, Y" }}</p>
         </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" onclick="updateDateRange(7)">{% trans "7 Days" %}</button>
+            <button class="btn btn-primary" onclick="updateDateRange(30)">{% trans "30 Days" %}</button>
+            <button class="btn btn-outline-primary" onclick="updateDateRange(90)">{% trans "90 Days" %}</button>
+        </div>
+    </div>
+
+    <!-- Analytics Navigation Tabs -->
+    <div class="analytics-nav">
+        <ul class="nav nav-pills p-3">
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'analytics:dashboard' %}">
+                    <i class="fas fa-tachometer-alt"></i> {% trans "Dashboard" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'analytics:trends' %}">
+                    <i class="fas fa-chart-line"></i> {% trans "Trends" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'analytics:rankings' %}">
+                    <i class="fas fa-trophy"></i> {% trans "Rankings" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'analytics:vendor_dashboard' %}">
+                    <i class="fas fa-store"></i> {% trans "Vendors" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'analytics:assignment_dashboard' %}">
+                    <i class="fas fa-tasks"></i> {% trans "Assignments" %}
+                </a>
+            </li>
+        </ul>
     </div>
 
     <!-- Platform Statistics -->

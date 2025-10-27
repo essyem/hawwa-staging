@@ -1,0 +1,224 @@
+{% extends 'change_management/change_management_base.html' %}
+{% load static %}
+
+{% block page_title %}Incidents{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="fas fa-exclamation-triangle me-2 text-danger"></i>Incidents
+            </h1>
+            <p class="text-muted mb-0">Monitor and resolve system incidents</p>
+        </div>
+        <div>
+            <button type="button" class="btn btn-change">
+                <i class="fas fa-plus me-2"></i>Report Incident
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section mb-4">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label for="severity" class="form-label fw-semibold">
+                    <i class="fas fa-filter me-1"></i>Severity
+                </label>
+                <select class="form-select" id="severity" name="severity">
+                    <option value="">All Severities</option>
+                    <option value="P1" {% if request.GET.severity == 'P1' %}selected{% endif %}>P1 - Critical</option>
+                    <option value="P2" {% if request.GET.severity == 'P2' %}selected{% endif %}>P2 - High</option>
+                    <option value="P3" {% if request.GET.severity == 'P3' %}selected{% endif %}>P3 - Medium</option>
+                    <option value="P4" {% if request.GET.severity == 'P4' %}selected{% endif %}>P4 - Low</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="resolved" class="form-label fw-semibold">
+                    <i class="fas fa-check-circle me-1"></i>Status
+                </label>
+                <select class="form-select" id="resolved" name="resolved">
+                    <option value="">All Incidents</option>
+                    <option value="false" {% if request.GET.resolved == 'false' %}selected{% endif %}>Unresolved</option>
+                    <option value="true" {% if request.GET.resolved == 'true' %}selected{% endif %}>Resolved</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="search" class="form-label fw-semibold">
+                    <i class="fas fa-search me-1"></i>Search
+                </label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ request.GET.search }}" placeholder="Search by title or details...">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-1"></i>Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card incidents">
+                <div class="stat-icon">
+                    <i class="fas fa-list"></i>
+                </div>
+                <div class="stat-number">{{ page_obj.paginator.count }}</div>
+                <div class="stat-label">Total Results</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card incidents">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="stat-number">{{ incidents|length|default:0 }}</div>
+                <div class="stat-label">This Page</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incidents List -->
+    <div class="change-card">
+        <div class="card-body">
+            {% for incident in incidents %}
+            <div class="change-item severity-{{ incident.severity|lower }}">
+                <div class="change-header">
+                    <div class="flex-grow-1">
+                        <div class="change-title">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            INC#{{ incident.id }} - {{ incident.title }}
+                        </div>
+                        <div class="change-meta">
+                            <span>
+                                <i class="fas fa-user me-1"></i>
+                                {{ incident.reporter.get_full_name|default:incident.reporter.email|default:"Unknown" }}
+                            </span>
+                            <span>
+                                <i class="fas fa-clock me-1"></i>
+                                {{ incident.created_at|date:"M d, Y g:i A" }}
+                            </span>
+                            <span>
+                                <i class="fas fa-flag me-1"></i>
+                                {{ incident.get_severity_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        {% if incident.resolved %}
+                            <span class="status-badge status-closed">
+                                <i class="fas fa-check me-1"></i>Resolved
+                            </span>
+                        {% else %}
+                            <span class="status-badge status-open">
+                                <i class="fas fa-clock me-1"></i>Open
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if incident.details %}
+                <div class="change-description">
+                    {{ incident.details|truncatewords:30 }}
+                </div>
+                {% endif %}
+
+                <div class="change-footer">
+                    <div class="d-flex align-items-center">
+                        {% if incident.reporter %}
+                        <div class="user-avatar me-2">
+                            {{ incident.reporter.get_full_name.0|default:incident.reporter.email.0|default:"?" }}
+                        </div>
+                        {% endif %}
+                        <small class="text-muted">
+                            Updated {{ incident.updated_at|timesince }} ago
+                        </small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i>View
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </button>
+                        {% if not incident.resolved %}
+                        <button type="button" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-check me-1"></i>Resolve
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-5">
+                <i class="fas fa-shield-alt fa-4x text-muted mb-3 d-block"></i>
+                <h4 class="text-muted mb-2">No Incidents Found</h4>
+                <p class="text-muted mb-4">
+                    {% if request.GET.severity or request.GET.resolved or request.GET.search %}
+                    Try adjusting your filters to see more results.
+                    {% else %}
+                    Great news! No incidents to report.
+                    {% endif %}
+                </p>
+                <button type="button" class="btn btn-change">
+                    <i class="fas fa-plus me-2"></i>Report Incident
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Incidents pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if request.GET.severity %}&severity={{ request.GET.severity }}{% endif %}{% if request.GET.resolved %}&resolved={{ request.GET.resolved }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.severity %}&severity={{ request.GET.severity }}{% endif %}{% if request.GET.resolved %}&resolved={{ request.GET.resolved }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.severity %}&severity={{ request.GET.severity }}{% endif %}{% if request.GET.resolved %}&resolved={{ request.GET.resolved }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.severity %}&severity={{ request.GET.severity }}{% endif %}{% if request.GET.resolved %}&resolved={{ request.GET.resolved }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.severity %}&severity={{ request.GET.severity }}{% endif %}{% if request.GET.resolved %}&resolved={{ request.GET.resolved }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="text-center text-muted mt-2">
+        Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

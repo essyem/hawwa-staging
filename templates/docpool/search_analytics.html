@@ -1,0 +1,365 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+
+{% block title %}Search Analytics - DocPool{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .stat-card {
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">📊 Document Search Analytics</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'docpool:document_list' %}">Document Pool</a></li>
+                            <li class="breadcrumb-item active">Analytics</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="btn-group">
+                    <a href="{% url 'docpool:document_list' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Back to Documents
+                    </a>
+                    <button class="btn btn-success" onclick="exportAnalytics()">
+                        <i class="fas fa-download"></i> Export Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-alt fa-3x mb-3"></i>
+                    <h2 class="mb-0">{{ total_documents }}</h2>
+                    <p class="mb-0">Total Documents</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-hashtag fa-3x mb-3"></i>
+                    <h2 class="mb-0">{{ documents_with_reference }}</h2>
+                    <p class="mb-0">With Reference Numbers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-month fa-3x mb-3"></i>
+                    <h2 class="mb-0">{{ documents_this_month }}</h2>
+                    <p class="mb-0">This Month</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-3x mb-3"></i>
+                    <h2 class="mb-0">{{ completion_rate }}%</h2>
+                    <p class="mb-0">Reference Completion</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Department Distribution -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-building"></i> Documents by Department
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="departmentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Type Distribution -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tags"></i> Documents by Type
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Trends -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line"></i> Upload Trends (Last 12 Months)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 400px;">
+                        <canvas id="trendsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Tables -->
+    <div class="row">
+        <!-- Department Details -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Department Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Code</th>
+                                    <th class="text-end">Documents</th>
+                                    <th class="text-end">%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dept in department_stats %}
+                                <tr>
+                                    <td>{{ dept.name }}</td>
+                                    <td><span class="badge bg-info">{{ dept.code }}</span></td>
+                                    <td class="text-end">{{ dept.doc_count }}</td>
+                                    <td class="text-end">
+                                        {% widthratio dept.doc_count total_documents 100 %}%
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type Details -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Document Type Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Code</th>
+                                    <th class="text-end">Documents</th>
+                                    <th class="text-end">%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for type in type_stats %}
+                                <tr>
+                                    <td>{{ type.name }}</td>
+                                    <td><span class="badge bg-secondary">{{ type.code }}</span></td>
+                                    <td class="text-end">{{ type.doc_count }}</td>
+                                    <td class="text-end">
+                                        {% widthratio type.doc_count total_documents 100 %}%
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Chart.js configuration
+Chart.defaults.responsive = true;
+Chart.defaults.maintainAspectRatio = false;
+
+// Department Chart
+const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+const departmentData = {{ department_stats|safe }};
+const departmentChart = new Chart(departmentCtx, {
+    type: 'doughnut',
+    data: {
+        labels: departmentData.map(d => d.code),
+        datasets: [{
+            data: departmentData.map(d => d.doc_count),
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+            ]
+        }]
+    },
+    options: {
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const dept = departmentData[context.dataIndex];
+                        return `${dept.code}: ${dept.doc_count} documents`;
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Document Type Chart
+const typeCtx = document.getElementById('typeChart').getContext('2d');
+const typeData = {{ type_stats|safe }};
+const typeChart = new Chart(typeCtx, {
+    type: 'bar',
+    data: {
+        labels: typeData.map(d => d.code),
+        datasets: [{
+            label: 'Documents',
+            data: typeData.map(d => d.doc_count),
+            backgroundColor: '#36A2EB',
+            borderColor: '#2E8BC0',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const type = typeData[context.dataIndex];
+                        return `${type.name}: ${type.doc_count} documents`;
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Monthly Trends Chart
+const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+const monthlyData = {{ monthly_stats|safe }};
+const trendsChart = new Chart(trendsCtx, {
+    type: 'line',
+    data: {
+        labels: monthlyData.map(d => {
+            const date = new Date(d.upload_month);
+            return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        }),
+        datasets: [{
+            label: 'Documents Uploaded',
+            data: monthlyData.map(d => d.count),
+            borderColor: '#4BC0C0',
+            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+// Export analytics function
+function exportAnalytics() {
+    // Create a summary report
+    const reportData = {
+        timestamp: new Date().toISOString(),
+        summary: {
+            total_documents: {{ total_documents }},
+            documents_with_reference: {{ documents_with_reference }},
+            documents_this_month: {{ documents_this_month }},
+            completion_rate: {{ completion_rate }}
+        },
+        department_stats: {{ department_stats|safe }},
+        type_stats: {{ type_stats|safe }},
+        monthly_stats: {{ monthly_stats|safe }}
+    };
+    
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `docpool_analytics_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+console.log('DocPool Analytics loaded successfully! 📊');
+</script>
+{% endblock %}

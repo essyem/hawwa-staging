@@ -1,0 +1,249 @@
+{% extends 'change_management/change_management_base.html' %}
+{% load static %}
+
+{% block page_title %}Activity Log{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="fas fa-history me-2 text-purple"></i>Activity Log
+            </h1>
+            <p class="text-muted mb-0">Track all system activities and user actions</p>
+        </div>
+        <div>
+            <button type="button" class="btn btn-outline-primary">
+                <i class="fas fa-download me-2"></i>Export Log
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section mb-4">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label for="actor" class="form-label fw-semibold">
+                    <i class="fas fa-user me-1"></i>User
+                </label>
+                <select class="form-select" id="actor" name="actor">
+                    <option value="">All Users</option>
+                    <!-- Add user options here based on available users -->
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="verb" class="form-label fw-semibold">
+                    <i class="fas fa-bolt me-1"></i>Action
+                </label>
+                <select class="form-select" id="verb" name="verb">
+                    <option value="">All Actions</option>
+                    <option value="created" {% if request.GET.verb == 'created' %}selected{% endif %}>Created</option>
+                    <option value="updated" {% if request.GET.verb == 'updated' %}selected{% endif %}>Updated</option>
+                    <option value="assigned" {% if request.GET.verb == 'assigned' %}selected{% endif %}>Assigned</option>
+                    <option value="commented" {% if request.GET.verb == 'commented' %}selected{% endif %}>Commented</option>
+                    <option value="resolved" {% if request.GET.verb == 'resolved' %}selected{% endif %}>Resolved</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="search" class="form-label fw-semibold">
+                    <i class="fas fa-search me-1"></i>Search
+                </label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ request.GET.search }}" placeholder="Search by action or target...">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-1"></i>Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card activity">
+                <div class="stat-icon">
+                    <i class="fas fa-list"></i>
+                </div>
+                <div class="stat-number">{{ page_obj.paginator.count }}</div>
+                <div class="stat-label">Total Activities</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card activity">
+                <div class="stat-icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="stat-number">{{ activities|length|default:0 }}</div>
+                <div class="stat-label">This Page</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Timeline -->
+    <div class="change-card">
+        <div class="card-body">
+            <div class="activity-timeline">
+                {% for activity in activities %}
+                <div class="timeline-item">
+                    <div class="timeline-icon 
+                        {% if 'assign' in activity.verb %}bg-warning
+                        {% elif 'comment' in activity.verb %}bg-info
+                        {% elif 'create' in activity.verb %}bg-success
+                        {% elif 'update' in activity.verb %}bg-primary
+                        {% elif 'resolve' in activity.verb %}bg-success
+                        {% else %}bg-secondary{% endif %}">
+                        {% if 'assign' in activity.verb %}
+                            <i class="fas fa-user-tag"></i>
+                        {% elif 'comment' in activity.verb %}
+                            <i class="fas fa-comment"></i>
+                        {% elif 'create' in activity.verb %}
+                            <i class="fas fa-plus"></i>
+                        {% elif 'update' in activity.verb %}
+                            <i class="fas fa-edit"></i>
+                        {% elif 'resolve' in activity.verb %}
+                            <i class="fas fa-check"></i>
+                        {% else %}
+                            <i class="fas fa-bolt"></i>
+                        {% endif %}
+                    </div>
+                    <div class="timeline-content">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="timeline-title">
+                                    {{ activity.actor.get_full_name|default:activity.actor.email|default:"System" }}
+                                    <span class="text-lowercase">{{ activity.verb }}</span>
+                                    {% if activity.target %}{{ activity.target }}{% endif %}
+                                </div>
+                                <div class="timeline-desc">
+                                    <div class="d-flex flex-wrap gap-3 mt-2">
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-bolt me-1"></i>{{ activity.verb|title }}
+                                        </span>
+                                        {% if activity.target %}
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-target me-1"></i>{{ activity.target }}
+                                        </span>
+                                        {% endif %}
+                                        {% if activity.data %}
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-info-circle me-1"></i>Has Data
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 text-lg-end">
+                                <div class="timeline-time">
+                                    <i class="fas fa-clock me-1"></i>
+                                    {{ activity.created_at|date:"M d, Y g:i A" }}
+                                </div>
+                                <small class="text-muted">
+                                    {{ activity.created_at|timesince }} ago
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Activity Details -->
+                        {% if activity.data %}
+                        <div class="mt-3 p-3 bg-light rounded">
+                            <h6 class="mb-2">
+                                <i class="fas fa-database me-1"></i>Activity Data
+                            </h6>
+                            <pre class="mb-0 small text-muted">{{ activity.data|pprint }}</pre>
+                        </div>
+                        {% endif %}
+
+                        <!-- User Avatar and Actor Info -->
+                        <div class="d-flex align-items-center mt-3">
+                            {% if activity.actor %}
+                            <div class="user-avatar me-3">
+                                {{ activity.actor.get_full_name.0|default:activity.actor.email.0|default:"?" }}
+                            </div>
+                            <div>
+                                <div class="fw-semibold">{{ activity.actor.get_full_name|default:activity.actor.email }}</div>
+                                {% if activity.actor.email and activity.actor.get_full_name %}
+                                <small class="text-muted">{{ activity.actor.email }}</small>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="user-avatar me-3 bg-secondary">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">System</div>
+                                <small class="text-muted">Automated action</small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-5">
+                    <i class="fas fa-history fa-4x text-muted mb-3 d-block"></i>
+                    <h4 class="text-muted mb-2">No Activities Found</h4>
+                    <p class="text-muted mb-4">
+                        {% if request.GET.actor or request.GET.verb or request.GET.search %}
+                        Try adjusting your filters to see more results.
+                        {% else %}
+                        Activities will appear here as users interact with the system.
+                        {% endif %}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Activities pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if request.GET.actor %}&actor={{ request.GET.actor }}{% endif %}{% if request.GET.verb %}&verb={{ request.GET.verb }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.actor %}&actor={{ request.GET.actor }}{% endif %}{% if request.GET.verb %}&verb={{ request.GET.verb }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.actor %}&actor={{ request.GET.actor }}{% endif %}{% if request.GET.verb %}&verb={{ request.GET.verb }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.actor %}&actor={{ request.GET.actor }}{% endif %}{% if request.GET.verb %}&verb={{ request.GET.verb }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.actor %}&actor={{ request.GET.actor }}{% endif %}{% if request.GET.verb %}&verb={{ request.GET.verb }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="text-center text-muted mt-2">
+        Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

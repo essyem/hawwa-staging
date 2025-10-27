@@ -1,5 +1,6 @@
 from django import template
 from django.utils.safestring import mark_safe
+from datetime import timedelta
 
 register = template.Library()
 
@@ -13,6 +14,31 @@ def div(value, arg):
         if a == 0:
             return value
         return v / a
+    except Exception:
+        return value
+
+
+@register.filter(name='mul')
+def mul(value, arg):
+    """Multiply numeric value by arg. Returns float or original value on error."""
+    try:
+        v = float(value)
+        a = float(arg)
+        return v * a
+    except Exception:
+        return value
+
+
+@register.filter(name='add_days')
+def add_days(value, arg):
+    """Add days to a date. Returns original value on error."""
+    try:
+        days = int(arg)
+        if hasattr(value, 'date'):  # datetime object
+            return value.date() + timedelta(days=days)
+        elif hasattr(value, '__add__'):  # date object
+            return value + timedelta(days=days)
+        return value
     except Exception:
         return value
 

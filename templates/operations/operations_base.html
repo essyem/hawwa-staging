@@ -1,0 +1,146 @@
+{% extends 'admin_base_unified.html' %}
+
+{% block app_name %}Operations{% endblock %}
+{% block app_icon %}fas fa-cogs{% endblock %}
+
+{% block nav_tabs %}
+<!-- Operations Navigation Tabs -->
+<ul class="nav nav-tabs hawwa-nav-tabs" id="operationsTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'operations_dashboard' %}active{% endif %}" 
+           href="#" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" 
+           type="button" role="tab" aria-controls="dashboard" aria-selected="{% if request.resolver_match.url_name == 'operations_dashboard' %}true{% else %}false{% endif %}">
+            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'operations_tasks' %}active{% endif %}" 
+           href="#" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" 
+           type="button" role="tab" aria-controls="tasks" aria-selected="{% if request.resolver_match.url_name == 'operations_tasks' %}true{% else %}false{% endif %}">
+            <i class="fas fa-tasks me-2"></i>Tasks
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'operations_workflows' %}active{% endif %}" 
+           href="#" id="workflows-tab" data-bs-toggle="tab" data-bs-target="#workflows" 
+           type="button" role="tab" aria-controls="workflows" aria-selected="{% if request.resolver_match.url_name == 'operations_workflows' %}true{% else %}false{% endif %}">
+            <i class="fas fa-project-diagram me-2"></i>Workflows
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'operations_automation' %}active{% endif %}" 
+           href="#" id="automation-tab" data-bs-toggle="tab" data-bs-target="#automation" 
+           type="button" role="tab" aria-controls="automation" aria-selected="{% if request.resolver_match.url_name == 'operations_automation' %}true{% else %}false{% endif %}">
+            <i class="fas fa-robot me-2"></i>Automation
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'operations_monitoring' %}active{% endif %}" 
+           href="#" id="monitoring-tab" data-bs-toggle="tab" data-bs-target="#monitoring" 
+           type="button" role="tab" aria-controls="monitoring" aria-selected="{% if request.resolver_match.url_name == 'operations_monitoring' %}true{% else %}false{% endif %}">
+            <i class="fas fa-chart-line me-2"></i>Monitoring
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'operations_reports' %}active{% endif %}" 
+           href="#" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" 
+           type="button" role="tab" aria-controls="reports" aria-selected="{% if request.resolver_match.url_name == 'operations_reports' %}true{% else %}false{% endif %}">
+            <i class="fas fa-file-alt me-2"></i>Reports
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'operations_settings' %}active{% endif %}" 
+           href="#" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" 
+           type="button" role="tab" aria-controls="settings" aria-selected="{% if request.resolver_match.url_name == 'operations_settings' %}true{% else %}false{% endif %}">
+            <i class="fas fa-cog me-2"></i>Settings
+        </a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .operations-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .operations-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    
+    .operations-stats {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .task-priority-high {
+        border-left: 4px solid #dc3545;
+    }
+    
+    .task-priority-medium {
+        border-left: 4px solid #ffc107;
+    }
+    
+    .task-priority-low {
+        border-left: 4px solid #28a745;
+    }
+    
+    .workflow-status-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .workflow-status-paused {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .workflow-status-stopped {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .automation-toggle {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 0.5rem 1rem;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .automation-toggle:hover {
+        background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+        transform: scale(1.05);
+    }
+    
+    .monitoring-metric {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+    
+    .metric-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+</style>
+{% endblock %}

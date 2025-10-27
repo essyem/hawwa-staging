@@ -1,0 +1,49 @@
+/* Tightened header/footer spacing to match the compact look
+   - reduces navbar paddings, logo margins, and footer height
+*/
+:root {
+  --header-min-height: 48px;
+  --header-padding-y: 0.25rem;
+  --nav-link-padding-y: 0.35rem;
+  --footer-padding-y: 0.35rem;
+}
+
+header .navbar, .admin-header {
+  min-height: var(--header-min-height);
+  padding-top: var(--header-padding-y);
+  padding-bottom: var(--header-padding-y);
+}
+
+header .navbar .navbar-brand {
+  padding-left: 0.25rem;
+  padding-right: 0.5rem;
+}
+
+header .navbar .nav-link {
+  padding-top: var(--nav-link-padding-y);
+  padding-bottom: var(--nav-link-padding-y);
+  margin-right: 0.25rem;
+}
+
+.header .avatar, .navbar .avatar, .admin-header .avatar {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+}
+
+/* compact footer */
+.footer {
+  padding-top: var(--footer-padding-y) !important;
+  padding-bottom: var(--footer-padding-y) !important;
+  font-size: 0.85rem;
+}
+
+/* reduce spacing in dropdowns */
+.dropdown-menu { padding: 0.25rem 0; }
+.dropdown-item { padding: 0.4rem 1rem; }
+
+/* smaller buttons in navbar */
+.navbar .btn { padding: 0.25rem 0.5rem; font-size: 0.9rem; }
+
+/* adjust admin footer */
+.admin-footer { padding: 0.4rem 0; font-size: 0.85rem; }

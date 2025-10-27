@@ -1,0 +1,389 @@
+{% extends 'admin_base_unified.html' %}
+
+{% block app_name %}Admin Dashboard{% endblock %}
+{% block app_icon %}fas fa-tachometer-alt{% endblock %}
+
+{% block nav_tabs %}
+<!-- Admin Dashboard Navigation Tabs -->
+<ul class="nav nav-tabs hawwa-nav-tabs" id="adminTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" 
+           href="{% url 'admin_dashboard:dashboard' %}" id="dashboard-tab" 
+           type="button" role="tab" aria-controls="dashboard" aria-selected="{% if request.resolver_match.url_name == 'admin_dashboard' %}true{% else %}false{% endif %}">
+            <i class="fas fa-home me-2"></i>Overview
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}" 
+           href="{% url 'admin_dashboard:user_management' %}" id="users-tab" 
+           type="button" role="tab" aria-controls="users" aria-selected="{% if 'user' in request.resolver_match.url_name %}true{% else %}false{% endif %}">
+            <i class="fas fa-users me-2"></i>User Management
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if 'service' in request.resolver_match.url_name %}active{% endif %}" 
+           href="#" id="services-tab" 
+           type="button" role="tab" aria-controls="services" aria-selected="{% if 'service' in request.resolver_match.url_name %}true{% else %}false{% endif %}">
+            <i class="fas fa-spa me-2"></i>Services
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if 'booking' in request.resolver_match.url_name %}active{% endif %}" 
+           href="#" id="bookings-tab" 
+           type="button" role="tab" aria-controls="bookings" aria-selected="{% if 'booking' in request.resolver_match.url_name %}true{% else %}false{% endif %}">
+            <i class="fas fa-calendar-check me-2"></i>Bookings
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if 'vendor' in request.resolver_match.url_name %}active{% endif %}" 
+           href="#" id="vendors-tab" 
+           type="button" role="tab" aria-controls="vendors" aria-selected="{% if 'vendor' in request.resolver_match.url_name %}true{% else %}false{% endif %}">
+            <i class="fas fa-store me-2"></i>Vendors
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if 'analytics' in request.resolver_match.url_name %}active{% endif %}" 
+           href="{% url 'analytics:dashboard' %}" id="analytics-tab" 
+           type="button" role="tab" aria-controls="analytics" aria-selected="{% if 'analytics' in request.resolver_match.url_name %}true{% else %}false{% endif %}">
+            <i class="fas fa-chart-line me-2"></i>Analytics
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if 'report' in request.resolver_match.url_name %}active{% endif %}" 
+           href="{% url 'reporting:dashboard' %}" id="reports-tab" 
+           type="button" role="tab" aria-controls="reports" aria-selected="{% if 'report' in request.resolver_match.url_name %}true{% else %}false{% endif %}">
+            <i class="fas fa-file-alt me-2"></i>Reports
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if 'settings' in request.resolver_match.url_name %}active{% endif %}" 
+           href="#" id="settings-tab" 
+           type="button" role="tab" aria-controls="settings" aria-selected="{% if 'settings' in request.resolver_match.url_name %}true{% else %}false{% endif %}">
+            <i class="fas fa-cog me-2"></i>Settings
+        </a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        margin-bottom: 2rem;
+    }
+    
+    .admin-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .admin-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+        border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .admin-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+        transform: rotate(45deg);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    .stat-widget {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        transition: all 0.4s ease;
+        border-left: 5px solid #667eea;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-widget::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-widget:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .stat-widget:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .stat-widget.growth { border-left-color: #28a745; }
+    .stat-widget.users { border-left-color: #007bff; }
+    .stat-widget.revenue { border-left-color: #ffc107; }
+    .stat-widget.bookings { border-left-color: #17a2b8; }
+    .stat-widget.services { border-left-color: #6f42c1; }
+    .stat-widget.vendors { border-left-color: #fd7e14; }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stat-change {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .stat-change.positive {
+        color: #28a745;
+    }
+
+    .stat-change.negative {
+        color: #dc3545;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        border-left: 5px solid #667eea;
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f8f9fa;
+    }
+
+    .chart-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .recent-activities {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        border-left: 5px solid #17a2b8;
+    }
+
+    .activity-item {
+        padding: 1rem;
+        border-bottom: 1px solid #f8f9fa;
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        margin-bottom: 0.5rem;
+    }
+
+    .activity-item:hover {
+        background: #f8f9fa;
+        transform: translateX(5px);
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        margin-right: 1rem;
+    }
+
+    .activity-icon.booking { background: linear-gradient(45deg, #17a2b8, #20c997); }
+    .activity-icon.user { background: linear-gradient(45deg, #007bff, #6610f2); }
+    .activity-icon.service { background: linear-gradient(45deg, #6f42c1, #e83e8c); }
+    .activity-icon.vendor { background: linear-gradient(45deg, #fd7e14, #ffc107); }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-desc {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-time {
+        color: #adb5bd;
+        font-size: 0.8rem;
+    }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .action-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        transition: all 0.4s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .action-card:hover::before {
+        left: 100%;
+    }
+
+    .action-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        border-color: #667eea;
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+    }
+
+    .action-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .action-title {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .action-desc {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .system-status {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        border-left: 5px solid #28a745;
+    }
+
+    .status-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .status-item:last-child {
+        border-bottom: none;
+    }
+
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+
+    .status-online { background-color: #28a745; }
+    .status-warning { background-color: #ffc107; }
+    .status-offline { background-color: #dc3545; }
+
+    .admin-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .admin-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .quick-actions {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+        
+        .admin-hero {
+            padding: 2rem 0;
+        }
+    }
+</style>
+{% endblock %}

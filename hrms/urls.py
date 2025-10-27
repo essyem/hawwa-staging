@@ -1,4 +1,5 @@
 from django.urls import path, include
+from django.views.generic import RedirectView
 from . import views
 
 app_name = 'hrms'
@@ -6,6 +7,8 @@ app_name = 'hrms'
 urlpatterns = [
     # Dashboard
     path('', views.HRMSDashboardView.as_view(), name='dashboard'),
+    # Backwards-compatible redirect: /hrms/dashboard -> /hrms/
+    path('dashboard/', RedirectView.as_view(pattern_name='hrms:dashboard', permanent=False)),
     
     # Employee Management
     path('employees/', views.EmployeeListView.as_view(), name='employee_list'),
@@ -36,6 +39,7 @@ urlpatterns = [
     
     # Attendance Management
     path('attendance/', views.AttendanceDashboardView.as_view(), name='attendance_dashboard'),
+    path('attendance/checkin/', views.EmployeeCheckinView.as_view(), name='employee_checkin'),
     path('attendance/clock/', views.ClockInOutView.as_view(), name='clock_inout'),
     path('attendance/my/', views.UserAttendanceView.as_view(), name='user_attendance'),
     path('attendance/list/', views.AttendanceListView.as_view(), name='attendance_list'),

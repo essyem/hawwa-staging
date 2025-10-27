@@ -1,7 +1,7 @@
 {% comment %}Left sidebar wrapper — includes shared left_sidebar_content and provides desktop fixed layout.{% endcomment %}
 {% load safe_urls i18n user_extras %}
 {% if user.is_authenticated %}
-<aside id="left-sidebar" class="left-sidebar d-none d-lg-block bg-light border-end" style="width:220px; position:fixed; top:56px; bottom:0; overflow:auto; padding-top:1rem; z-index:1000;">
+<aside id="left-sidebar" class="left-sidebar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-right: 1px solid rgba(255, 255, 255, 0.1);" role="navigation" aria-label="Main sidebar" data-sidebar-default-width="220">
     <div class="sidebar-inner">
         {% include 'includes/left_sidebar_content.html' %}
     </div>
@@ -37,8 +37,8 @@
     </div>
 
     <!-- Pin/Unpin button fixed near top of sidebar -->
-    <button id="hawwa-sidebar-pin" class="btn btn-sm btn-outline-secondary" aria-pressed="false" title="Pin sidebar" style="position: absolute; right: 8px; top: 8px; z-index:1101;">
-        <i id="hawwa-sidebar-pin-icon" class="fas fa-thumbtack"></i>
+    <button id="hawwa-sidebar-pin" class="btn btn-sm btn-outline-light" aria-pressed="false" aria-label="Toggle sidebar pin" title="Pin sidebar" style="position: absolute; right: 8px; top: 8px; z-index:1101;">
+        <i id="hawwa-sidebar-pin-icon" class="fas fa-thumbtack" aria-hidden="true"></i>
     </button>
 
     </aside>
@@ -80,4 +80,73 @@
     /* Pinned state: ensure pinned sidebar is visible and content margin is applied */
     :root.hawwa-sidebar-pinned #left-sidebar { transform: none; }
     :root.hawwa-sidebar-pinned main.container-fluid { margin-left: 220px; }
-</style>
+
+    /* Left sidebar styling to match header/footer */
+    #left-sidebar .nav-link {
+        color: rgba(255, 255, 255, 0.85);
+        padding: 12px 20px;
+        border-radius: 6px;
+        margin: 2px 0;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+    }
+
+    #left-sidebar .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #ffd700;
+        border-left-color: #ffd700;
+        transform: translateX(2px);
+    }
+
+    #left-sidebar .nav-link.active {
+        background-color: rgba(255, 215, 0, 0.15);
+        color: #ffd700;
+        border-left-color: #ffd700;
+    }
+
+    #left-sidebar .btn-toggle {
+        color: rgba(255, 255, 255, 0.9);
+        background: transparent;
+        border: none;
+        width: 100%;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: background-color 0.2s;
+    }
+
+    #left-sidebar .btn-toggle:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    #left-sidebar .sidebar-section .nav-link {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+        margin-left: 0;
+        border-radius: 4px;
+        color: rgba(255, 255, 255, 0.9);
+        display: block;
+    }
+
+    #left-sidebar .sidebar-section .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: #ffd700;
+    }
+
+    #left-sidebar .sidebar-section .nav-link.active {
+        background-color: rgba(255, 215, 0, 0.2);
+        color: #ffd700;
+        border-left: 2px solid #ffd700;
+    }
+
+    #left-sidebar hr {
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+{# Load HRMS sidebar assets if available. These are conservative; if files absent nothing breaks. #}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/hrms_sidebar.css' %}" />
+<script defer src="{% static 'js/hrms_sidebar.js' %}"></script>
+

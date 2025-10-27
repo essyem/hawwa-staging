@@ -1,0 +1,908 @@
+{% extends 'admin_portal_base.html' %}
+
+{% block title %}User Management - Hawwa Admin{% endblock %}
+
+{% block page_title %}User Management{% endblock %}
+{% block page_subtitle %}Manage system users, roles, and permissions{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Users</li>
+{% endblock %}
+
+{% block content %}
+<!-- User Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-0">Total Users</h6>
+                        <h3 class="mb-0">{{ user_stats.total_users|default:0 }}</h3>
+                        <small class="text-white-75">
+                            <i class="fas fa-arrow-up"></i> +8% from last month
+                        </small>
+                    </div>
+                    <div class="ms-3">
+                        <i class="fas fa-users fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-0">Active Users</h6>
+                        <h3 class="mb-0">{{ user_stats.active_users|default:0 }}</h3>
+                        <small class="text-white-75">
+                            <i class="fas fa-check-circle"></i> {{ user_stats.active_percentage|default:0 }}% of total
+                        </small>
+                    </div>
+                    <div class="ms-3">
+                        <i class="fas fa-user-check fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-0">Admin Users</h6>
+                        <h3 class="mb-0">{{ user_stats.admin_users|default:0 }}</h3>
+                        <small class="text-white-75">
+                            <i class="fas fa-shield-alt"></i> Administrative access
+                        </small>
+                    </div>
+                    <div class="ms-3">
+                        <i class="fas fa-user-shield fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-0">New This Month</h6>
+                        <h3 class="mb-0">{{ user_stats.new_users|default:0 }}</h3>
+                        <small class="text-white-75">
+                            <i class="fas fa-user-plus"></i> Recently registered
+                        </small>
+                    </div>
+                    <div class="ms-3">
+                        <i class="fas fa-user-plus fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons and Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                    <div class="d-flex flex-wrap gap-2 mb-2 mb-md-0">
+                        <a href="{% url 'core:admin_user_create' %}" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>Add New User
+                        </a>
+                        
+                        <button class="btn btn-outline-primary" onclick="inviteUsers()">
+                            <i class="fas fa-envelope me-2"></i>Send Invitations
+                        </button>
+                        
+                        <button class="btn btn-outline-info" onclick="exportUsers()">
+                            <i class="fas fa-download me-2"></i>Export Users
+                        </button>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog me-2"></i>Bulk Actions
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="bulkActivate()">
+                                    <i class="fas fa-check me-2"></i>Activate Selected</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="bulkDeactivate()">
+                                    <i class="fas fa-ban me-2"></i>Deactivate Selected</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="assignRoles()">
+                                    <i class="fas fa-user-tag me-2"></i>Assign Roles</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="resetPasswords()">
+                                    <i class="fas fa-key me-2"></i>Reset Passwords</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <div class="input-group" style="width: 300px;">
+                            <input type="text" class="form-control" placeholder="Search users..." 
+                                   id="userSearch" onkeyup="filterUsers()">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#advancedFilters">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Advanced Filters -->
+                <div class="collapse mt-3" id="advancedFilters">
+                    <div class="row g-3 p-3 bg-light rounded">
+                        <div class="col-md-3">
+                            <label class="form-label">User Role</label>
+                            <select class="form-select" id="roleFilter" onchange="filterUsers()">
+                                <option value="">All Roles</option>
+                                <option value="admin">Administrator</option>
+                                <option value="manager">Manager</option>
+                                <option value="staff">Staff</option>
+                                <option value="vendor">Vendor</option>
+                                <option value="client">Client</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label">Account Status</label>
+                            <select class="form-select" id="statusFilter" onchange="filterUsers()">
+                                <option value="">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="pending">Pending Verification</option>
+                                <option value="suspended">Suspended</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label">Last Login</label>
+                            <select class="form-select" id="loginFilter" onchange="filterUsers()">
+                                <option value="">Any Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="never">Never Logged In</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label">Registration Date</label>
+                            <select class="form-select" id="registrationFilter" onchange="filterUsers()">
+                                <option value="">Any Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="quarter">This Quarter</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent border-0">
+        <div class="d-flex align-items-center justify-content-between">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-table me-2 text-primary"></i>System Users
+            </h5>
+            
+            <div class="d-flex align-items-center gap-2">
+                <small class="text-muted">
+                    <span id="userCount">{{ users|length|default:0 }}</span> users found
+                </small>
+                
+                <div class="btn-group btn-group-sm" role="group">
+                    <input type="radio" class="btn-check" name="viewMode" id="tableView" checked>
+                    <label class="btn btn-outline-secondary" for="tableView">
+                        <i class="fas fa-list"></i>
+                    </label>
+                    
+                    <input type="radio" class="btn-check" name="viewMode" id="cardView">
+                    <label class="btn btn-outline-secondary" for="cardView">
+                        <i class="fas fa-th-large"></i>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-body p-0">
+        <!-- Table View -->
+        <div id="tableViewContent" class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="usersTable">
+                <thead class="bg-light">
+                    <tr>
+                        <th>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="name">
+                            <i class="fas fa-user me-2"></i>User
+                            <i class="fas fa-sort text-muted"></i>
+                        </th>
+                        <th class="sortable" data-sort="role">
+                            <i class="fas fa-user-tag me-2"></i>Role
+                            <i class="fas fa-sort text-muted"></i>
+                        </th>
+                        <th class="sortable" data-sort="email_verified">
+                            <i class="fas fa-envelope me-2"></i>Email Status
+                            <i class="fas fa-sort text-muted"></i>
+                        </th>
+                        <th class="sortable" data-sort="last_login">
+                            <i class="fas fa-clock me-2"></i>Last Login
+                            <i class="fas fa-sort text-muted"></i>
+                        </th>
+                        <th class="sortable" data-sort="date_joined">
+                            <i class="fas fa-calendar me-2"></i>Joined
+                            <i class="fas fa-sort text-muted"></i>
+                        </th>
+                        <th class="sortable" data-sort="is_active">
+                            <i class="fas fa-toggle-on me-2"></i>Status
+                            <i class="fas fa-sort text-muted"></i>
+                        </th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    {% for user in users %}
+                    <tr data-user-id="{{ user.id }}" class="user-row">
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input user-checkbox" type="checkbox" value="{{ user.id }}">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-primary text-white me-3" style="width: 45px; height: 45px; line-height: 45px;">
+                                    {% if user.profile_picture %}
+                                        <img src="{{ user.profile_picture.url }}" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;">
+                                    {% else %}
+                                        <span class="fw-bold">{{ user.first_name.0|default:user.username.0 }}{{ user.last_name.0|default:"" }}</span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <a href="{% url 'core:admin_user_detail' user.id %}" class="text-decoration-none fw-bold">
+                                        {% if user.first_name or user.last_name %}
+                                            {{ user.first_name }} {{ user.last_name }}
+                                        {% else %}
+                                            {{ user.username }}
+                                        {% endif %}
+                                    </a>
+                                    <div class="small text-muted">{{ user.email }}</div>
+                                    <div class="small text-muted">@{{ user.username }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if user.is_superuser %}
+                                <span class="badge bg-danger">Super Admin</span>
+                            {% elif user.is_staff %}
+                                <span class="badge bg-warning">Staff</span>
+                            {% elif user.groups.all %}
+                                {% for group in user.groups.all %}
+                                    <span class="badge bg-primary me-1">{{ group.name }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="badge bg-light text-dark">User</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.email_verified|default:True %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Verified
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Unverified
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.last_login %}
+                                <div class="fw-bold">{{ user.last_login|date:"M d, Y" }}</div>
+                                <small class="text-muted">{{ user.last_login|time:"H:i" }}</small>
+                            {% else %}
+                                <span class="text-muted">Never</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="fw-bold">{{ user.date_joined|date:"M d, Y" }}</div>
+                            <small class="text-muted">{{ user.date_joined|timesince }} ago</small>
+                        </td>
+                        <td>
+                            {% if user.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button class="btn btn-link btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{% url 'core:admin_user_detail' user.id %}">
+                                        <i class="fas fa-eye me-2"></i>View Profile</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'core:admin_user_edit' user.id %}">
+                                        <i class="fas fa-edit me-2"></i>Edit User</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#" onclick="managePermissions({{ user.id }})">
+                                        <i class="fas fa-key me-2"></i>Permissions</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="resetPassword({{ user.id }})">
+                                        <i class="fas fa-lock me-2"></i>Reset Password</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    {% if user.is_active %}
+                                        <li><a class="dropdown-item text-warning" href="#" onclick="suspendUser({{ user.id }})">
+                                            <i class="fas fa-ban me-2"></i>Suspend</a></li>
+                                    {% else %}
+                                        <li><a class="dropdown-item text-success" href="#" onclick="activateUser({{ user.id }})">
+                                            <i class="fas fa-check me-2"></i>Activate</a></li>
+                                    {% endif %}
+                                    <li><a class="dropdown-item" href="#" onclick="loginAsUser({{ user.id }})">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Login As User</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteUser({{ user.id }})">
+                                        <i class="fas fa-trash me-2"></i>Delete User</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-users fa-3x mb-3"></i>
+                                <h5>No users found</h5>
+                                <p>Start by adding your first user to the system.</p>
+                                <a href="{% url 'core:admin_user_create' %}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Add First User
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Card View -->
+        <div id="cardViewContent" class="d-none p-3">
+            <div class="row g-4" id="usersCardContainer">
+                {% for user in users %}
+                <div class="col-xl-4 col-lg-6 user-card" data-user-id="{{ user.id }}">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="avatar-circle bg-primary text-white me-3" style="width: 60px; height: 60px; line-height: 60px;">
+                                    {% if user.profile_picture %}
+                                        <img src="{{ user.profile_picture.url }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
+                                    {% else %}
+                                        <span class="fw-bold fs-5">{{ user.first_name.0|default:user.username.0 }}{{ user.last_name.0|default:"" }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">
+                                        {% if user.first_name or user.last_name %}
+                                            {{ user.first_name }} {{ user.last_name }}
+                                        {% else %}
+                                            {{ user.username }}
+                                        {% endif %}
+                                    </h6>
+                                    <small class="text-muted d-block">{{ user.email }}</small>
+                                    <small class="text-muted">@{{ user.username }}</small>
+                                    <div class="mt-2">
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                        
+                                        {% if user.is_superuser %}
+                                            <span class="badge bg-danger ms-1">Super Admin</span>
+                                        {% elif user.is_staff %}
+                                            <span class="badge bg-warning ms-1">Staff</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-link btn-sm" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="{% url 'core:admin_user_detail' user.id %}">View Profile</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'core:admin_user_edit' user.id %}">Edit User</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="managePermissions({{ user.id }})">Permissions</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="text-center p-2 bg-light rounded">
+                                        <div class="small text-muted">Last Login</div>
+                                        <div class="fw-bold small">
+                                            {% if user.last_login %}
+                                                {{ user.last_login|date:"M d" }}
+                                            {% else %}
+                                                Never
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-center p-2 bg-light rounded">
+                                        <div class="small text-muted">Joined</div>
+                                        <div class="fw-bold small">{{ user.date_joined|date:"M d, Y" }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-1">Roles:</small>
+                                {% if user.groups.all %}
+                                    {% for group in user.groups.all %}
+                                        <span class="badge bg-light text-dark me-1">{{ group.name }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="badge bg-light text-muted">No roles assigned</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-transparent border-0">
+                            <div class="d-grid gap-2 d-md-flex">
+                                <a href="{% url 'core:admin_user_detail' user.id %}" class="btn btn-outline-primary btn-sm flex-fill">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </a>
+                                <a href="{% url 'core:admin_user_edit' user.id %}" class="btn btn-outline-secondary btn-sm flex-fill">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="card-footer bg-transparent border-0">
+        <nav aria-label="Users pagination">
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">&laquo; First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Role Assignment Modal -->
+<div class="modal fade" id="roleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assign Roles</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="roleAssignmentForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Available Roles</label>
+                            <div class="border rounded p-3" style="min-height: 200px;">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="admin" id="roleAdmin">
+                                    <label class="form-check-label" for="roleAdmin">
+                                        <strong>Administrator</strong>
+                                        <div class="small text-muted">Full system access and management</div>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="manager" id="roleManager">
+                                    <label class="form-check-label" for="roleManager">
+                                        <strong>Manager</strong>
+                                        <div class="small text-muted">Manage operations and staff</div>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="staff" id="roleStaff">
+                                    <label class="form-check-label" for="roleStaff">
+                                        <strong>Staff</strong>
+                                        <div class="small text-muted">Access to assigned modules</div>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="vendor" id="roleVendor">
+                                    <label class="form-check-label" for="roleVendor">
+                                        <strong>Vendor</strong>
+                                        <div class="small text-muted">Service provider access</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Permissions Summary</label>
+                            <div class="border rounded p-3" style="min-height: 200px;">
+                                <div id="permissionsSummary">
+                                    <p class="text-muted">Select roles to see permissions</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveRoles()">
+                    <i class="fas fa-save me-2"></i>Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Reset Modal -->
+<div class="modal fade" id="passwordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reset Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This will send a password reset email to the user's registered email address.
+                </div>
+                <form id="passwordResetForm">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="forceReset">
+                            <label class="form-check-label" for="forceReset">
+                                Force password change on next login
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="notifyUser" checked>
+                            <label class="form-check-label" for="notifyUser">
+                                Send email notification to user
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" onclick="confirmPasswordReset()">
+                    <i class="fas fa-key me-2"></i>Reset Password
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Initialize user management features
+    initUserManagement();
+    
+    // Toggle between table and card view
+    $('input[name="viewMode"]').change(function() {
+        if ($(this).attr('id') === 'cardView') {
+            $('#tableViewContent').addClass('d-none');
+            $('#cardViewContent').removeClass('d-none');
+        } else {
+            $('#cardViewContent').addClass('d-none');
+            $('#tableViewContent').removeClass('d-none');
+        }
+    });
+});
+
+function initUserManagement() {
+    // Initialize sortable columns
+    $('.sortable').click(function() {
+        const column = $(this).data('sort');
+        sortUsers(column);
+    });
+    
+    // Initialize role assignment handlers
+    $('input[type="checkbox"][id^="role"]').change(function() {
+        updatePermissionsSummary();
+    });
+}
+
+function filterUsers() {
+    const searchTerm = $('#userSearch').val().toLowerCase();
+    const roleFilter = $('#roleFilter').val();
+    const statusFilter = $('#statusFilter').val();
+    const loginFilter = $('#loginFilter').val();
+    const registrationFilter = $('#registrationFilter').val();
+    
+    let visibleCount = 0;
+    
+    $('.user-row, .user-card').each(function() {
+        let isVisible = true;
+        const $row = $(this);
+        
+        // Search filter
+        if (searchTerm) {
+            const userText = $row.text().toLowerCase();
+            if (!userText.includes(searchTerm)) {
+                isVisible = false;
+            }
+        }
+        
+        // Role filter
+        if (roleFilter && isVisible) {
+            const userRoles = $row.find('.badge').text().toLowerCase();
+            if (!userRoles.includes(roleFilter)) {
+                isVisible = false;
+            }
+        }
+        
+        // Status filter
+        if (statusFilter && isVisible) {
+            const statusBadge = $row.find('.badge').first().text().toLowerCase();
+            if (statusFilter === 'active' && !statusBadge.includes('active')) {
+                isVisible = false;
+            } else if (statusFilter === 'inactive' && !statusBadge.includes('inactive')) {
+                isVisible = false;
+            }
+        }
+        
+        // Show/hide row
+        if (isVisible) {
+            $row.show();
+            visibleCount++;
+        } else {
+            $row.hide();
+        }
+    });
+    
+    $('#userCount').text(visibleCount);
+}
+
+function sortUsers(column) {
+    // TODO: Implement client-side sorting or AJAX call for server-side sorting
+    console.log('Sorting by:', column);
+}
+
+function toggleSelectAll() {
+    const isChecked = $('#selectAll').prop('checked');
+    $('.user-checkbox:visible').prop('checked', isChecked);
+}
+
+function bulkActivate() {
+    const selectedUsers = $('.user-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedUsers.length === 0) {
+        alert('Please select users to activate.');
+        return;
+    }
+    
+    if (confirm(`Activate ${selectedUsers.length} selected user(s)?`)) {
+        // TODO: Implement bulk activation functionality
+        console.log('Activating users:', selectedUsers);
+    }
+}
+
+function bulkDeactivate() {
+    const selectedUsers = $('.user-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedUsers.length === 0) {
+        alert('Please select users to deactivate.');
+        return;
+    }
+    
+    if (confirm(`Deactivate ${selectedUsers.length} selected user(s)?`)) {
+        // TODO: Implement bulk deactivation functionality
+        console.log('Deactivating users:', selectedUsers);
+    }
+}
+
+function assignRoles() {
+    const selectedUsers = $('.user-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedUsers.length === 0) {
+        alert('Please select users to assign roles.');
+        return;
+    }
+    
+    $('#roleModal').modal('show');
+}
+
+function resetPasswords() {
+    const selectedUsers = $('.user-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedUsers.length === 0) {
+        alert('Please select users to reset passwords.');
+        return;
+    }
+    
+    if (confirm(`Send password reset emails to ${selectedUsers.length} selected user(s)?`)) {
+        // TODO: Implement bulk password reset functionality
+        console.log('Resetting passwords for users:', selectedUsers);
+    }
+}
+
+function inviteUsers() {
+    // TODO: Open invite users modal
+    console.log('Opening user invitation modal');
+}
+
+function exportUsers() {
+    // TODO: Implement user export functionality
+    window.location.href = '/admin/users/export/';
+}
+
+function managePermissions(userId) {
+    // TODO: Open permissions management modal for specific user
+    console.log('Managing permissions for user:', userId);
+}
+
+function resetPassword(userId) {
+    $('#passwordModal').modal('show');
+    // Store user ID for later use
+    $('#passwordModal').data('userId', userId);
+}
+
+function activateUser(userId) {
+    if (confirm('Activate this user account?')) {
+        // TODO: Implement user activation
+        console.log('Activating user:', userId);
+    }
+}
+
+function suspendUser(userId) {
+    if (confirm('Suspend this user account? They will not be able to login.')) {
+        // TODO: Implement user suspension
+        console.log('Suspending user:', userId);
+    }
+}
+
+function loginAsUser(userId) {
+    if (confirm('Login as this user? This will log you out of your current session.')) {
+        // TODO: Implement login as user functionality
+        console.log('Logging in as user:', userId);
+    }
+}
+
+function deleteUser(userId) {
+    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+        // TODO: Implement user deletion
+        console.log('Deleting user:', userId);
+    }
+}
+
+function updatePermissionsSummary() {
+    const selectedRoles = [];
+    $('input[type="checkbox"][id^="role"]:checked').each(function() {
+        selectedRoles.push($(this).val());
+    });
+    
+    if (selectedRoles.length === 0) {
+        $('#permissionsSummary').html('<p class="text-muted">Select roles to see permissions</p>');
+        return;
+    }
+    
+    let permissionsHtml = '<div class="small">';
+    
+    selectedRoles.forEach(function(role) {
+        switch(role) {
+            case 'admin':
+                permissionsHtml += '<div class="mb-2"><strong>Administrator:</strong><br>';
+                permissionsHtml += '• Full system access<br>';
+                permissionsHtml += '• User management<br>';
+                permissionsHtml += '• System configuration<br>';
+                permissionsHtml += '• Financial reports</div>';
+                break;
+            case 'manager':
+                permissionsHtml += '<div class="mb-2"><strong>Manager:</strong><br>';
+                permissionsHtml += '• Manage bookings<br>';
+                permissionsHtml += '• View reports<br>';
+                permissionsHtml += '• Manage vendors<br>';
+                permissionsHtml += '• Staff supervision</div>';
+                break;
+            case 'staff':
+                permissionsHtml += '<div class="mb-2"><strong>Staff:</strong><br>';
+                permissionsHtml += '• Process bookings<br>';
+                permissionsHtml += '• View client information<br>';
+                permissionsHtml += '• Update service status</div>';
+                break;
+            case 'vendor':
+                permissionsHtml += '<div class="mb-2"><strong>Vendor:</strong><br>';
+                permissionsHtml += '• Manage own services<br>';
+                permissionsHtml += '• View own bookings<br>';
+                permissionsHtml += '• Update availability</div>';
+                break;
+        }
+    });
+    
+    permissionsHtml += '</div>';
+    $('#permissionsSummary').html(permissionsHtml);
+}
+
+function saveRoles() {
+    const selectedRoles = [];
+    $('input[type="checkbox"][id^="role"]:checked').each(function() {
+        selectedRoles.push($(this).val());
+    });
+    
+    // TODO: Implement role assignment
+    console.log('Saving roles:', selectedRoles);
+    $('#roleModal').modal('hide');
+}
+
+function confirmPasswordReset() {
+    const userId = $('#passwordModal').data('userId');
+    const forceReset = $('#forceReset').prop('checked');
+    const notifyUser = $('#notifyUser').prop('checked');
+    
+    // TODO: Implement password reset
+    console.log('Resetting password for user:', userId, { forceReset, notifyUser });
+    $('#passwordModal').modal('hide');
+}
+</script>
+{% endblock %}

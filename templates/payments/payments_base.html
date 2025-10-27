@@ -1,0 +1,175 @@
+{% extends 'admin_base_unified.html' %}
+
+{% block app_name %}Payments{% endblock %}
+{% block app_icon %}fas fa-credit-card{% endblock %}
+
+{% block nav_tabs %}
+<!-- Payments Navigation Tabs -->
+<ul class="nav nav-tabs hawwa-nav-tabs" id="paymentsTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'payments_dashboard' %}active{% endif %}" 
+           href="#" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" 
+           type="button" role="tab" aria-controls="dashboard" aria-selected="{% if request.resolver_match.url_name == 'payments_dashboard' %}true{% else %}false{% endif %}">
+            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'payments_transactions' %}active{% endif %}" 
+           href="#" id="transactions-tab" data-bs-toggle="tab" data-bs-target="#transactions" 
+           type="button" role="tab" aria-controls="transactions" aria-selected="{% if request.resolver_match.url_name == 'payments_transactions' %}true{% else %}false{% endif %}">
+            <i class="fas fa-exchange-alt me-2"></i>Transactions
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'payments_gateway' %}active{% endif %}" 
+           href="#" id="gateway-tab" data-bs-toggle="tab" data-bs-target="#gateway" 
+           type="button" role="tab" aria-controls="gateway" aria-selected="{% if request.resolver_match.url_name == 'payments_gateway' %}true{% else %}false{% endif %}">
+            <i class="fas fa-network-wired me-2"></i>Gateway
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'payments_refunds' %}active{% endif %}" 
+           href="#" id="refunds-tab" data-bs-toggle="tab" data-bs-target="#refunds" 
+           type="button" role="tab" aria-controls="refunds" aria-selected="{% if request.resolver_match.url_name == 'payments_refunds' %}true{% else %}false{% endif %}">
+            <i class="fas fa-undo me-2"></i>Refunds
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'payments_subscriptions' %}active{% endif %}" 
+           href="#" id="subscriptions-tab" data-bs-toggle="tab" data-bs-target="#subscriptions" 
+           type="button" role="tab" aria-controls="subscriptions" aria-selected="{% if request.resolver_match.url_name == 'payments_subscriptions' %}true{% else %}false{% endif %}">
+            <i class="fas fa-sync-alt me-2"></i>Subscriptions
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'payments_reports' %}active{% endif %}" 
+           href="#" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" 
+           type="button" role="tab" aria-controls="reports" aria-selected="{% if request.resolver_match.url_name == 'payments_reports' %}true{% else %}false{% endif %}">
+            <i class="fas fa-chart-bar me-2"></i>Reports
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if request.resolver_match.url_name == 'payments_security' %}active{% endif %}" 
+           href="#" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" 
+           type="button" role="tab" aria-controls="security" aria-selected="{% if request.resolver_match.url_name == 'payments_security' %}true{% else %}false{% endif %}">
+            <i class="fas fa-shield-alt me-2"></i>Security
+        </a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payments-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .payments-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    
+    .payment-stats {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .transaction-success {
+        border-left: 4px solid #28a745;
+        background-color: #d4edda;
+    }
+    
+    .transaction-pending {
+        border-left: 4px solid #ffc107;
+        background-color: #fff3cd;
+    }
+    
+    .transaction-failed {
+        border-left: 4px solid #dc3545;
+        background-color: #f8d7da;
+    }
+    
+    .payment-method-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .payment-method-card:hover {
+        transform: scale(1.02);
+    }
+    
+    .gateway-status-active {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .gateway-status-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .refund-amount {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #dc3545;
+    }
+    
+    .subscription-active {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+    }
+    
+    .subscription-expired {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+    }
+    
+    .payment-security-metric {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .security-score {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #28a745;
+    }
+    
+    .currency-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %}

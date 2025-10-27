@@ -12,7 +12,6 @@ from .models import (
     AccommodationService, 
     HomeCareService, 
     WellnessService, 
-    NutritionService, 
     ServiceReview,
     ServiceImage
 )
@@ -86,13 +85,17 @@ class BaseServiceAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description')
     prepopulated_fields = {'slug': ('name',)}
     inlines = [ServiceImageInline, ServiceReviewInline]
-    readonly_fields = ('created_at', 'updated_at', 'rating_display', 'slug')
+    readonly_fields = ('created_at', 'updated_at', 'rating_display')
     list_per_page = 25
     actions = [mark_as_featured, remove_featured]
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'slug', 'category', 'description', 'short_description')
+            'fields': ('name', 'category', 'description', 'short_description')
+        }),
+        ('URL & SEO', {
+            'fields': ('slug',),
+            'classes': ('collapse',)
         }),
         ('Service Details', {
             'fields': ('price', 'duration', 'image', 'status', 'featured')
@@ -161,11 +164,25 @@ class AccommodationServiceAdmin(BaseServiceAdmin):
     list_display = BaseServiceAdmin.list_display + ('capacity', 'room_type')
     list_filter = BaseServiceAdmin.list_filter + ('room_type', 'amenities')
     
-    fieldsets = BaseServiceAdmin.fieldsets[:-2] + (
-        (_('Accommodation Details'), {
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'category', 'description', 'short_description')
+        }),
+        ('URL & SEO', {
+            'fields': ('slug',),
+            'classes': ('collapse',)
+        }),
+        ('Service Details', {
+            'fields': ('price', 'duration', 'image', 'status', 'featured')
+        }),
+        ('Accommodation Details', {
             'fields': ('location', 'address', 'capacity', 'amenities', 'room_type', 'check_in_time', 'check_out_time')
         }),
-    ) + BaseServiceAdmin.fieldsets[-2:]
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        })
+    )
 
 @admin.register(HomeCareService)
 class HomeCareServiceAdmin(BaseServiceAdmin):
@@ -173,11 +190,25 @@ class HomeCareServiceAdmin(BaseServiceAdmin):
     list_display = BaseServiceAdmin.list_display + ('service_area', 'min_hours')
     list_filter = BaseServiceAdmin.list_filter + ('service_area',)
     
-    fieldsets = BaseServiceAdmin.fieldsets[:-2] + (
-        (_('Home Care Details'), {
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'category', 'description', 'short_description')
+        }),
+        ('URL & SEO', {
+            'fields': ('slug',),
+            'classes': ('collapse',)
+        }),
+        ('Service Details', {
+            'fields': ('price', 'duration', 'image', 'status', 'featured')
+        }),
+        ('Home Care Details', {
             'fields': ('service_area', 'min_hours')
         }),
-    ) + BaseServiceAdmin.fieldsets[-2:]
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        })
+    )
 
 @admin.register(WellnessService)
 class WellnessServiceAdmin(BaseServiceAdmin):
@@ -185,23 +216,27 @@ class WellnessServiceAdmin(BaseServiceAdmin):
     list_display = BaseServiceAdmin.list_display + ('service_type', 'is_virtual')
     list_filter = BaseServiceAdmin.list_filter + ('service_type', 'is_virtual')
     
-    fieldsets = BaseServiceAdmin.fieldsets[:-2] + (
-        (_('Wellness Details'), {
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'category', 'description', 'short_description')
+        }),
+        ('URL & SEO', {
+            'fields': ('slug',),
+            'classes': ('collapse',)
+        }),
+        ('Service Details', {
+            'fields': ('price', 'duration', 'image', 'status', 'featured')
+        }),
+        ('Wellness Details', {
             'fields': ('service_type', 'is_virtual')
         }),
-    ) + BaseServiceAdmin.fieldsets[-2:]
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        })
+    )
 
-@admin.register(NutritionService)
-class NutritionServiceAdmin(BaseServiceAdmin):
-    """Enhanced admin interface for NutritionService model."""
-    list_display = BaseServiceAdmin.list_display + ('is_customizable', 'delivery_available')
-    list_filter = BaseServiceAdmin.list_filter + ('dietary_options', 'is_customizable', 'delivery_available')
-    
-    fieldsets = BaseServiceAdmin.fieldsets[:-2] + (
-        (_('Nutrition Details'), {
-            'fields': ('dietary_options', 'is_customizable', 'preparation_time', 'delivery_available')
-        }),
-    ) + BaseServiceAdmin.fieldsets[-2:]
+
 
 @admin.register(ServiceReview)
 class ServiceReviewAdmin(admin.ModelAdmin):

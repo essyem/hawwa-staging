@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hawwa Admin Portal{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Hawwa Custom Styles -->
+    <link rel="stylesheet" href="{% static 'css/qatar-theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin-portal.css' %}">
+    
+    <!-- Admin Portal Styles -->
+    <style>
+        :root {
+            --hawwa-primary: #667eea;
+            --hawwa-secondary: #764ba2;
+            --hawwa-gold: #ffd700;
+            --sidebar-bg: #2f3349;
+            --sidebar-text: #b8c5d1;
+            --sidebar-hover: #3d4465;
+            --sidebar-active: #667eea;
+            --content-bg: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--content-bg);
+            margin: 0;
+            overflow-x: hidden;
+        }
+        
+        .admin-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .admin-sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--hawwa-primary) 0%, var(--hawwa-secondary) 100%);
+            color: white;
+            transition: all 0.3s ease;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 4px 0 8px rgba(0,0,0,0.1);
+        }
+        
+        .admin-sidebar.collapsed {
+            width: 70px;
+        }
+        
+        .admin-content {
+            flex: 1;
+            margin-left: 280px;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .admin-content.expanded {
+            margin-left: 70px;
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-logo {
+            width: 50px;
+            height: 50px;
+            background: var(--hawwa-gold);
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .sidebar-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .sidebar-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin: 0;
+            font-weight: 400;
+        }
+        
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+        
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-section-title {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-item {
+            margin: 0.2rem 0;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.85rem 1rem;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--hawwa-gold);
+            border-left-color: var(--hawwa-gold);
+            transform: translateX(2px);
+        }
+        
+        .nav-link.active {
+            background: rgba(255, 215, 0, 0.15);
+            color: var(--hawwa-gold);
+            border-left-color: var(--hawwa-gold);
+        }
+        
+        .nav-icon {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+            font-size: 1rem;
+        }
+        
+        .nav-text {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .nav-badge {
+            background: var(--hawwa-gold);
+            color: var(--sidebar-bg);
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .nav-arrow {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+        }
+        
+        .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] .nav-arrow {
+            transform: rotate(180deg);
+        }
+        
+        /* Submenu Styles */
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            margin: 0.2rem 0.5rem;
+            overflow: hidden;
+        }
+        
+        .nav-submenu .nav-link {
+            padding: 0.6rem 1rem 0.6rem 3rem;
+            font-size: 0.9rem;
+            border-left: none;
+            border-radius: 0;
+        }
+        
+        .nav-submenu .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: none;
+        }
+        
+        /* Top Navbar */
+        .top-navbar {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: #6c757d;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-toggle:hover {
+            background: #f8f9fa;
+            color: var(--hawwa-primary);
+        }
+        
+        .breadcrumb-nav {
+            background: white;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .breadcrumb {
+            margin: 0;
+        }
+        
+        .breadcrumb-item a {
+            color: var(--hawwa-primary);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: #6c757d;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+        }
+        
+        .page-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-subtitle {
+            color: #6c757d;
+            margin: 0;
+            font-size: 1rem;
+        }
+        
+        /* Cards and Components */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--hawwa-primary) 0%, var(--hawwa-secondary) 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 0.6rem 1.2rem;
+            font-weight: 500;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .admin-sidebar.mobile-show {
+                transform: translateX(0);
+            }
+            
+            .admin-content {
+                margin-left: 0;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Collapsed Sidebar Styles */
+        .admin-sidebar.collapsed .nav-text,
+        .admin-sidebar.collapsed .sidebar-title,
+        .admin-sidebar.collapsed .sidebar-subtitle,
+        .admin-sidebar.collapsed .nav-section-title,
+        .admin-sidebar.collapsed .nav-arrow,
+        .admin-sidebar.collapsed .nav-badge {
+            display: none;
+        }
+        
+        .admin-sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 0.85rem 0.5rem;
+        }
+        
+        .admin-sidebar.collapsed .nav-icon {
+            margin: 0;
+        }
+        
+        /* Messages and Alerts */
+        .alert {
+            border: none;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da 0%, #f1b0b7 100%);
+            color: #721c24;
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            color: #856404;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            color: #0c5460;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <nav class="admin-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-spa text-white fs-4"></i>
+                </div>
+                <h1 class="sidebar-title">HAWWA</h1>
+                <p class="sidebar-subtitle">Admin Portal</p>
+            </div>
+            
+            <div class="sidebar-nav">
+                <!-- Dashboard Section -->
+                <div class="nav-section">
+                    <div class="nav-item">
+                        <a href="{% url 'core:admin_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <span class="nav-text">Dashboard</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Service Management -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Service Management</div>
+                    
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#servicesMenu">
+                            <i class="nav-icon fas fa-spa"></i>
+                            <span class="nav-text">Services</span>
+                            <i class="nav-arrow fas fa-chevron-down"></i>
+                        </a>
+                        <div id="servicesMenu" class="nav-submenu collapse">
+                            <a href="{% url 'core:admin_service_list' %}" class="nav-link">
+                                <span class="nav-text">All Services</span>
+                            </a>
+                            <a href="{% url 'core:admin_service_create' %}" class="nav-link">
+                                <span class="nav-text">Add Service</span>
+                            </a>
+                            <a href="{% url 'core:admin_service_list' %}?category=ACCOMMODATION" class="nav-link">
+                                <span class="nav-text">Accommodations</span>
+                            </a>
+                            <a href="{% url 'core:admin_service_list' %}?category=HOMECARE" class="nav-link">
+                                <span class="nav-text">Home Care</span>
+                            </a>
+                            <a href="{% url 'core:admin_service_list' %}?category=WELLNESS" class="nav-link">
+                                <span class="nav-text">Wellness</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#bookingsMenu">
+                            <i class="nav-icon fas fa-calendar-check"></i>
+                            <span class="nav-text">Bookings</span>
+                            <i class="nav-arrow fas fa-chevron-down"></i>
+                        </a>
+                        <div id="bookingsMenu" class="nav-submenu collapse">
+                            <a href="{% url 'core:admin_booking_list' %}" class="nav-link">
+                                <span class="nav-text">All Bookings</span>
+                            </a>
+                            <a href="{% url 'core:admin_booking_create' %}" class="nav-link">
+                                <span class="nav-text">New Booking</span>
+                            </a>
+                            <a href="{% url 'core:admin_booking_list' %}?status=PENDING" class="nav-link">
+                                <span class="nav-text">Pending Approvals</span>
+                            </a>
+                            <a href="{% url 'core:admin_booking_list' %}?date=today" class="nav-link">
+                                <span class="nav-text">Today's Schedule</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Vendor Management -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Vendor Management</div>
+                    
+                    <div class="nav-item">
+                        <a href="{% url 'vendors:dashboard' %}" class="nav-link">
+                            <i class="nav-icon fas fa-store"></i>
+                            <span class="nav-text">Vendor Portal</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Financial Management -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Financial Management</div>
+                    
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#financialMenu">
+                            <i class="nav-icon fas fa-chart-line"></i>
+                            <span class="nav-text">Financial</span>
+                            <i class="nav-arrow fas fa-chevron-down"></i>
+                        </a>
+                        <div id="financialMenu" class="nav-submenu collapse">
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Dashboard</span>
+                            </a>
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Invoices</span>
+                            </a>
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Expenses</span>
+                            </a>
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Reports</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#paymentsMenu">
+                            <i class="nav-icon fas fa-credit-card"></i>
+                            <span class="nav-text">Payments</span>
+                            <i class="nav-arrow fas fa-chevron-down"></i>
+                        </a>
+                        <div id="paymentsMenu" class="nav-submenu collapse">
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Dashboard</span>
+                            </a>
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Payment Gateway</span>
+                            </a>
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Transactions</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analytics & Reports -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Analytics & Reports</div>
+                    
+                    <div class="nav-item">
+                        <a href="{% url 'analytics:dashboard' %}" class="nav-link">
+                            <i class="nav-icon fas fa-chart-pie"></i>
+                            <span class="nav-text">Analytics</span>
+                            <span class="nav-badge">New</span>
+                        </a>
+                    </div>
+                    
+                    <div class="nav-item">
+                        <a href="{% url 'reporting:dashboard' %}" class="nav-link">
+                            <i class="nav-icon fas fa-file-alt"></i>
+                            <span class="nav-text">Reports</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Human Resources -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Human Resources</div>
+                    
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#hrmsMenu">
+                            <i class="nav-icon fas fa-users"></i>
+                            <span class="nav-text">HRMS</span>
+                            <i class="nav-arrow fas fa-chevron-down"></i>
+                        </a>
+                        <div id="hrmsMenu" class="nav-submenu collapse">
+                            <a href="{% url 'hrms:dashboard' %}" class="nav-link">
+                                <span class="nav-text">Dashboard</span>
+                            </a>
+                            <a href="{% url 'hrms:employee_list' %}" class="nav-link">
+                                <span class="nav-text">Employees</span>
+                            </a>
+                            <a href="{% url 'hrms:department_list' %}" class="nav-link">
+                                <span class="nav-text">Departments</span>
+                            </a>
+                            <a href="{% url 'hrms:attendance_dashboard' %}" class="nav-link">
+                                <span class="nav-text">Attendance</span>
+                            </a>
+                            <a href="{% url 'hrms:payroll_dashboard' %}" class="nav-link">
+                                <span class="nav-text">Payroll</span>
+                            </a>
+                            <a href="{% url 'hrms:reports' %}" class="nav-link">
+                                <span class="nav-text">Reports</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Wellness & Health -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Wellness & Health</div>
+                    
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#wellnessMenu">
+                            <i class="nav-icon fas fa-heartbeat"></i>
+                            <span class="nav-text">Wellness</span>
+                            <i class="nav-arrow fas fa-chevron-down"></i>
+                        </a>
+                        <div id="wellnessMenu" class="nav-submenu collapse">
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Programs</span>
+                            </a>
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Sessions</span>
+                            </a>
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Enrollments</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Operations -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Operations</div>
+                    
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#operationsMenu">
+                            <i class="nav-icon fas fa-cogs"></i>
+                            <span class="nav-text">Operations</span>
+                            <i class="nav-arrow fas fa-chevron-down"></i>
+                        </a>
+                        <div id="operationsMenu" class="nav-submenu collapse">
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Dashboard</span>
+                            </a>
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Tasks</span>
+                            </a>
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Workflows</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI & Automation -->
+                <div class="nav-section">
+                    <div class="nav-section-title">AI & Automation</div>
+                    
+                    <div class="nav-item">
+                        <a href="{% url 'ai_buddy:home' %}" class="nav-link">
+                            <i class="nav-icon fas fa-robot"></i>
+                            <span class="nav-text">AI Buddy</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Administration -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Administration</div>
+                    
+                    <div class="nav-item">
+                        <a href="{% url 'admin_dashboard:dashboard' %}" class="nav-link">
+                            <i class="nav-icon fas fa-cog"></i>
+                            <span class="nav-text">Settings</span>
+                        </a>
+                    </div>
+                    
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#accountsMenu">
+                            <i class="nav-icon fas fa-user-shield"></i>
+                            <span class="nav-text">Accounts</span>
+                            <i class="nav-arrow fas fa-chevron-down"></i>
+                        </a>
+                        <div id="accountsMenu" class="nav-submenu collapse">
+                            <a href="{% url 'admin_dashboard:user_management' %}" class="nav-link">
+                                <span class="nav-text">User Management</span>
+                            </a>
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Roles & Permissions</span>
+                            </a>
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Profile Settings</span>
+                            </a>
+                            <a href="#" class="nav-link">
+                                <span class="nav-text">Security</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <div class="admin-content" id="content">
+            <!-- Top Navbar -->
+            <div class="top-navbar">
+                <div class="d-flex align-items-center">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <div class="ms-3">
+                        <h6 class="mb-0 text-muted">{% block page_breadcrumb %}Welcome back{% endblock %}</h6>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                    <!-- User Info -->
+                    {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            {{ user.get_full_name|default:user.email }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><h6 class="dropdown-header">Account</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                <i class="fas fa-user me-2"></i>Profile
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:security_settings' %}">
+                                <i class="fas fa-shield-alt me-2"></i>Security
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'core:home' %}">
+                                <i class="fas fa-home me-2"></i>Main Site
+                            </a></li>
+                            <li>
+                                <form action="{% url 'accounts:logout' %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Breadcrumb -->
+            {% block breadcrumb_section %}
+            <div class="breadcrumb-nav">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+                        {% block breadcrumb %}{% endblock %}
+                    </ol>
+                </nav>
+            </div>
+            {% endblock %}
+            
+            <!-- Main Content Area -->
+            <div class="main-content">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+                    {% block page_subtitle %}
+                    <p class="page-subtitle">Welcome to Hawwa Admin Portal</p>
+                    {% endblock %}
+                </div>
+                
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <!-- Page Content -->
+                {% block content %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-spa text-primary mb-3" style="font-size: 3rem;"></i>
+                                <h5 class="card-title">Welcome to Hawwa Admin Portal</h5>
+                                <p class="card-text text-muted">Select an option from the sidebar to get started with managing your wellness services.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/admin-portal.js' %}"></script>
+    <script>
+        // Sidebar toggle functionality
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+            
+            sidebar.classList.toggle('collapsed');
+            content.classList.toggle('expanded');
+        });
+        
+        // Mobile sidebar
+        if (window.innerWidth <= 768) {
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('mobile-show');
+            });
+        }
+        
+        // Auto-collapse navigation for better UX
+        document.addEventListener('DOMContentLoaded', function() {
+            // Close other menus when one is opened
+            const collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+            collapseElements.forEach(element => {
+                element.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-bs-target');
+                    const allCollapses = document.querySelectorAll('.nav-submenu.collapse');
+                    
+                    allCollapses.forEach(collapse => {
+                        if (collapse.id !== targetId.replace('#', '')) {
+                            const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+                            if (bsCollapse) {
+                                bsCollapse.hide();
+                            }
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

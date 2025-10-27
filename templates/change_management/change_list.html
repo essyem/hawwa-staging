@@ -1,58 +1,221 @@
-{% extends 'base.html' %}
-{% load i18n %}
+{% extends 'change_management/change_management_base.html' %}
+{% load static %}
 
-{% block title %}{% trans "Change Requests" %}{% endblock %}
+{% block page_title %}Change Requests{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <h1 class="mb-3">{% trans "Change Requests" %}</h1>
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="fas fa-code-branch me-2 text-success"></i>Change Requests
+            </h1>
+            <p class="text-muted mb-0">Manage and track organizational changes</p>
+        </div>
+        <div>
+            <button type="button" class="btn btn-change">
+                <i class="fas fa-plus me-2"></i>New Change Request
+            </button>
+        </div>
+    </div>
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>{% trans "ID" %}</th>
-                <th>{% trans "Title" %}</th>
-                <th>{% trans "Status" %}</th>
-                <th>{% trans "Assignee" %}</th>
-                <th>{% trans "Created" %}</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for cr in change_requests %}
-            <tr>
-                <td>{{ cr.id }}</td>
-                <td><a href="{% url 'change_management:cr_detail' cr.id %}">{{ cr.title }}</a></td>
-                <td>{{ cr.get_status_display }}</td>
-                <td>
-                    {% if cr.assignee %}
-                        {{ cr.assignee.get_full_name|default:cr.assignee.email }}
+    <!-- Filters Section -->
+    <div class="filters-section mb-4">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label for="status" class="form-label fw-semibold">
+                    <i class="fas fa-filter me-1"></i>Status
+                </label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Statuses</option>
+                    <option value="OPEN" {% if request.GET.status == 'OPEN' %}selected{% endif %}>Open</option>
+                    <option value="IN_PROGRESS" {% if request.GET.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                    <option value="MERGED" {% if request.GET.status == 'MERGED' %}selected{% endif %}>Merged</option>
+                    <option value="CLOSED" {% if request.GET.status == 'CLOSED' %}selected{% endif %}>Closed</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="priority" class="form-label fw-semibold">
+                    <i class="fas fa-sort-amount-up me-1"></i>Priority
+                </label>
+                <select class="form-select" id="priority" name="priority">
+                    <option value="">All Priorities</option>
+                    <option value="1" {% if request.GET.priority == '1' %}selected{% endif %}>Critical (1)</option>
+                    <option value="2" {% if request.GET.priority == '2' %}selected{% endif %}>High (2)</option>
+                    <option value="3" {% if request.GET.priority == '3' %}selected{% endif %}>Medium (3)</option>
+                    <option value="4" {% if request.GET.priority == '4' %}selected{% endif %}>Low (4)</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="search" class="form-label fw-semibold">
+                    <i class="fas fa-search me-1"></i>Search
+                </label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ request.GET.search }}" placeholder="Search by title or description...">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-1"></i>Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card changes">
+                <div class="stat-icon">
+                    <i class="fas fa-list"></i>
+                </div>
+                <div class="stat-number">{{ page_obj.paginator.count }}</div>
+                <div class="stat-label">Total Results</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card changes">
+                <div class="stat-icon">
+                    <i class="fas fa-folder-open"></i>
+                </div>
+                <div class="stat-number">{{ change_requests|length|default:0 }}</div>
+                <div class="stat-label">This Page</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Requests List -->
+    <div class="change-card">
+        <div class="card-body">
+            {% for cr in change_requests %}
+            <div class="change-item priority-{% if cr.priority <= 1 %}critical{% elif cr.priority == 2 %}high{% elif cr.priority == 3 %}medium{% else %}low{% endif %}" 
+                 onclick="window.location.href='{% url 'change_management:cr_detail' cr.pk %}'">
+                <div class="change-header">
+                    <div class="flex-grow-1">
+                        <div class="change-title">
+                            CR#{{ cr.id }} - {{ cr.title }}
+                        </div>
+                        <div class="change-meta">
+                            <span>
+                                <i class="fas fa-user me-1"></i>
+                                {{ cr.reporter.get_full_name|default:cr.reporter.email|default:"Unknown" }}
+                            </span>
+                            <span>
+                                <i class="fas fa-clock me-1"></i>
+                                {{ cr.created_at|date:"M d, Y g:i A" }}
+                            </span>
+                            {% if cr.assignee %}
+                            <span>
+                                <i class="fas fa-user-tag me-1"></i>
+                                {{ cr.assignee.get_full_name|default:cr.assignee.email }}
+                            </span>
+                            {% endif %}
+                            <span>
+                                <i class="fas fa-flag me-1"></i>
+                                Priority {{ cr.priority }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="status-badge status-{{ cr.status|lower }}">
+                        {{ cr.get_status_display }}
+                    </div>
+                </div>
+                
+                {% if cr.description %}
+                <div class="change-description">
+                    {{ cr.description|truncatewords:30 }}
+                </div>
+                {% endif %}
+
+                <div class="change-footer">
+                    <div class="d-flex align-items-center">
+                        {% if cr.reporter %}
+                        <div class="user-avatar me-2">
+                            {{ cr.reporter.get_full_name.0|default:cr.reporter.email.0|default:"?" }}
+                        </div>
+                        {% endif %}
+                        <small class="text-muted">
+                            Updated {{ cr.updated_at|timesince }} ago
+                        </small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'change_management:cr_detail' cr.pk %}" 
+                           class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation()">
+                            <i class="fas fa-eye me-1"></i>View
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                onclick="event.stopPropagation()">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3 d-block"></i>
+                <h4 class="text-muted mb-2">No Change Requests Found</h4>
+                <p class="text-muted mb-4">
+                    {% if request.GET.status or request.GET.priority or request.GET.search %}
+                    Try adjusting your filters to see more results.
                     {% else %}
-                        -
+                    Get started by creating your first change request.
                     {% endif %}
-                </td>
-                <td>{{ cr.created_at }}</td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="5">{% trans "No change requests found." %}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                </p>
+                <button type="button" class="btn btn-change">
+                    <i class="fas fa-plus me-2"></i>Create Change Request
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 
+    <!-- Pagination -->
     {% if is_paginated %}
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
+    <nav aria-label="Change requests pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
             {% endif %}
-            <li class="page-item disabled"><span class="page-link">{% trans "Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}</span></li>
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
             {% if page_obj.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
             {% endif %}
         </ul>
     </nav>
-    {% endif %}
 
+    <div class="text-center text-muted mt-2">
+        Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

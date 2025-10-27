@@ -1,0 +1,783 @@
+{% extends 'admin_portal_base.html' %}
+
+{% block title %}{{ booking.id|stringformat:"05d"|default:"New" }} - Booking Details - Hawwa Admin{% endblock %}
+
+{% block page_title %}Booking Details{% endblock %}
+{% block page_subtitle %}Booking #{{ booking.id|stringformat:"05d" }} - Complete appointment information{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'core:admin_booking_list' %}">Bookings</a></li>
+<li class="breadcrumb-item active">Booking #{{ booking.id|stringformat:"05d" }}</li>
+{% endblock %}
+
+{% block content %}
+<!-- Booking Header -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-start">
+                    {% if booking.client.profile_picture %}
+                        <img src="{{ booking.client.profile_picture.url }}" alt="{{ booking.client.get_full_name }}" 
+                             class="rounded-circle me-4" style="width: 80px; height: 80px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light rounded-circle me-4 d-flex align-items-center justify-content-center" 
+                             style="width: 80px; height: 80px;">
+                            <i class="fas fa-user text-muted fa-2x"></i>
+                        </div>
+                    {% endif %}
+                    <div class="flex-grow-1">
+                        <h2 class="mb-2">
+                            {{ booking.service.name }}
+                            {% if booking.is_urgent %}
+                                <span class="badge bg-danger ms-2">Urgent</span>
+                            {% endif %}
+                        </h2>
+                        <div class="mb-2">
+                            <strong>Client:</strong> {{ booking.client.get_full_name }}
+                            <span class="text-muted ms-3">{{ booking.client.email }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="badge bg-{% if booking.status == 'CONFIRMED' %}success{% elif booking.status == 'PENDING' %}warning{% elif booking.status == 'COMPLETED' %}info{% elif booking.status == 'CANCELLED' %}danger{% else %}secondary{% endif %} me-2">
+                                {{ booking.get_status_display }}
+                            </span>
+                            <span class="badge bg-{% if booking.payment_status == 'PAID' %}success{% elif booking.payment_status == 'PENDING' %}warning{% else %}danger{% endif %}">
+                                Payment: {{ booking.get_payment_status_display|default:"Pending" }}
+                            </span>
+                        </div>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-calendar me-2"></i>{{ booking.scheduled_date|date:"l, F d, Y" }} at {{ booking.scheduled_time|time:"g:i A" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="btn-group mb-3" role="group">
+                    <a href="{% url 'core:admin_booking_edit' booking.pk %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Booking
+                    </a>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" 
+                                data-bs-toggle="dropdown">
+                            Actions
+                        </button>
+                        <ul class="dropdown-menu">
+                            {% if booking.status == 'PENDING' %}
+                                <li><a class="dropdown-item" href="#" onclick="confirmBooking()">
+                                    <i class="fas fa-check text-success me-2"></i>Confirm Booking
+                                </a></li>
+                            {% endif %}
+                            <li><a class="dropdown-item" href="#" onclick="sendReminder()">
+                                <i class="fas fa-bell text-info me-2"></i>Send Reminder
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="rescheduleBooking()">
+                                <i class="fas fa-calendar text-primary me-2"></i>Reschedule
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="cancelBooking()">
+                                <i class="fas fa-times me-2"></i>Cancel Booking
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted">Booking ID: #{{ booking.pk|stringformat:"05d" }}</small><br>
+                    <small class="text-muted">Created: {{ booking.created_at|date:"M d, Y g:i A" }}</small><br>
+                    <small class="text-muted">Updated: {{ booking.updated_at|date:"M d, Y g:i A" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Details Tabs -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent border-0">
+        <ul class="nav nav-tabs card-header-tabs" id="bookingDetailTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                    <i class="fas fa-info-circle me-2"></i>Overview
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="service-tab" data-bs-toggle="tab" data-bs-target="#service" type="button" role="tab">
+                    <i class="fas fa-spa me-2"></i>Service Details
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment" type="button" role="tab">
+                    <i class="fas fa-credit-card me-2"></i>Payment
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="communication-tab" data-bs-toggle="tab" data-bs-target="#communication" type="button" role="tab">
+                    <i class="fas fa-comments me-2"></i>Communication
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                    <i class="fas fa-history me-2"></i>History
+                </button>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="card-body">
+        <div class="tab-content" id="bookingDetailTabContent">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <!-- Booking Information -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-calendar-check text-primary me-2"></i>Booking Information
+                            </h5>
+                            <div class="table-responsive">
+                                <table class="table table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <th width="30%" class="text-muted">Booking Date:</th>
+                                            <td>{{ booking.scheduled_date|date:"F d, Y" }} ({{ booking.scheduled_date|date:"l" }})</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Booking Time:</th>
+                                            <td>{{ booking.scheduled_time|time:"g:i A" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Duration:</th>
+                                            <td>{{ booking.duration|default:booking.service.duration|default:"Not specified" }} minutes</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Location:</th>
+                                            <td>{{ booking.location|default:booking.service.location|default:"To be confirmed" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Special Notes:</th>
+                                            <td>{{ booking.notes|default:"None" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Participants:</th>
+                                            <td>{{ booking.participants|default:"1" }} person(s)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Client Information -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-user text-success me-2"></i>Client Information
+                            </h5>
+                            <div class="card border">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <strong>Full Name:</strong><br>
+                                                <span>{{ booking.client.get_full_name }}</span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Email:</strong><br>
+                                                <a href="mailto:{{ booking.client.email }}" class="text-decoration-none">
+                                                    {{ booking.client.email }}
+                                                </a>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Phone:</strong><br>
+                                                {% if booking.client.phone %}
+                                                    <a href="tel:{{ booking.client.phone }}" class="text-decoration-none">
+                                                        {{ booking.client.phone }}
+                                                    </a>
+                                                {% else %}
+                                                    <span class="text-muted">Not provided</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <strong>Address:</strong><br>
+                                                <span>{{ booking.client.address|default:"Not provided" }}</span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Date of Birth:</strong><br>
+                                                <span>{{ booking.client.date_of_birth|date:"F d, Y"|default:"Not provided" }}</span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Emergency Contact:</strong><br>
+                                                <span>{{ booking.client.emergency_contact|default:"Not provided" }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <a href="#" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-user me-1"></i>View Full Profile
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <!-- Status & Actions -->
+                        <div class="card border mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-tasks text-warning me-2"></i>Status & Actions
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Booking Status</label>
+                                    <select class="form-select" id="bookingStatus" onchange="updateStatus()">
+                                        <option value="PENDING" {% if booking.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                                        <option value="CONFIRMED" {% if booking.status == 'CONFIRMED' %}selected{% endif %}>Confirmed</option>
+                                        <option value="IN_PROGRESS" {% if booking.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                                        <option value="COMPLETED" {% if booking.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                                        <option value="CANCELLED" {% if booking.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                                        <option value="NO_SHOW" {% if booking.status == 'NO_SHOW' %}selected{% endif %}>No Show</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    {% if booking.status == 'PENDING' %}
+                                        <button type="button" class="btn btn-success" onclick="confirmBooking()">
+                                            <i class="fas fa-check me-2"></i>Confirm Booking
+                                        </button>
+                                    {% endif %}
+                                    {% if booking.status in 'PENDING,CONFIRMED' %}
+                                        <button type="button" class="btn btn-primary" onclick="startService()">
+                                            <i class="fas fa-play me-2"></i>Start Service
+                                        </button>
+                                    {% endif %}
+                                    {% if booking.status == 'IN_PROGRESS' %}
+                                        <button type="button" class="btn btn-info" onclick="completeService()">
+                                            <i class="fas fa-check-circle me-2"></i>Complete Service
+                                        </button>
+                                    {% endif %}
+                                    <button type="button" class="btn btn-outline-primary" onclick="sendReminder()">
+                                        <i class="fas fa-bell me-2"></i>Send Reminder
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="rescheduleBooking()">
+                                        <i class="fas fa-calendar me-2"></i>Reschedule
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Summary -->
+                        <div class="card border mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-dollar-sign text-success me-2"></i>Payment Summary
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Service Fee:</span>
+                                    <span class="fw-bold">QAR {{ booking.service_fee|default:booking.service.price|default:"0" }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Additional Charges:</span>
+                                    <span class="fw-bold">QAR {{ booking.additional_charges|default:"0" }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Discount:</span>
+                                    <span class="fw-bold text-success">-QAR {{ booking.discount|default:"0" }}</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <span class="fw-bold">Total Amount:</span>
+                                    <span class="fw-bold fs-5 text-success">QAR {{ booking.total_amount|default:"0" }}</span>
+                                </div>
+                                <div class="mt-3">
+                                    <span class="badge bg-{% if booking.payment_status == 'PAID' %}success{% elif booking.payment_status == 'PENDING' %}warning{% else %}danger{% endif %} w-100">
+                                        {{ booking.get_payment_status_display|default:"Pending Payment" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Links -->
+                        <div class="card border">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-link text-info me-2"></i>Quick Links
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <a href="#" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-spa me-2"></i>View Service Details
+                                    </a>
+                                    <a href="#" class="btn btn-outline-success btn-sm">
+                                        <i class="fas fa-user me-2"></i>Client Profile
+                                    </a>
+                                    <a href="#" class="btn btn-outline-info btn-sm">
+                                        <i class="fas fa-calendar me-2"></i>Client's Other Bookings
+                                    </a>
+                                    <a href="#" class="btn btn-outline-warning btn-sm">
+                                        <i class="fas fa-receipt me-2"></i>Generate Invoice
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Details Tab -->
+            <div class="tab-pane fade" id="service" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card border">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        {% if booking.service.image %}
+                                            <img src="{{ booking.service.image.url }}" alt="{{ booking.service.name }}" 
+                                                 class="img-fluid rounded">
+                                        {% else %}
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                 style="height: 200px;">
+                                                <i class="fas fa-spa text-muted fa-3x"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-8">
+                                        <h4>{{ booking.service.name }}</h4>
+                                        <p class="text-muted">{{ booking.service.description|truncatewords:30 }}</p>
+                                        
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-6">
+                                                <strong>Category:</strong><br>
+                                                <span class="badge bg-primary">{{ booking.service.get_category_display }}</span>
+                                            </div>
+                                            <div class="col-6">
+                                                <strong>Duration:</strong><br>
+                                                {{ booking.service.duration|default:"Variable" }} minutes
+                                            </div>
+                                            <div class="col-6">
+                                                <strong>Price:</strong><br>
+                                                QAR {{ booking.service.price|default:"Contact for pricing" }}
+                                            </div>
+                                            <div class="col-6">
+                                                <strong>Provider:</strong><br>
+                                                {{ booking.service.provider.get_full_name|default:"Hawwa Team" }}
+                                            </div>
+                                        </div>
+                                        
+                                        <a href="#" class="btn btn-outline-primary">
+                                            <i class="fas fa-external-link-alt me-2"></i>View Full Service Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card border">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">Service Requirements</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <strong>Prerequisites:</strong><br>
+                                    <span>{{ booking.service.prerequisites|default:"None specified" }}</span>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>What to Bring:</strong><br>
+                                    <span>{{ booking.service.requirements|default:"Nothing special required" }}</span>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Preparation:</strong><br>
+                                    <span>{{ booking.service.preparation|default:"No special preparation needed" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Tab -->
+            <div class="tab-pane fade" id="payment" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card border">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">Payment Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Payment ID</th>
+                                                <th>Amount</th>
+                                                <th>Method</th>
+                                                <th>Status</th>
+                                                <th>Date</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% if booking.payments.all %}
+                                                {% for payment in booking.payments.all %}
+                                                    <tr>
+                                                        <td>#{{ payment.id }}</td>
+                                                        <td>QAR {{ payment.amount }}</td>
+                                                        <td>{{ payment.method }}</td>
+                                                        <td>
+                                                            <span class="badge bg-{% if payment.status == 'SUCCESS' %}success{% elif payment.status == 'PENDING' %}warning{% else %}danger{% endif %}">
+                                                                {{ payment.status }}
+                                                            </span>
+                                                        </td>
+                                                        <td>{{ payment.created_at|date:"M d, Y" }}</td>
+                                                        <td>
+                                                            <button class="btn btn-outline-primary btn-sm">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            {% else %}
+                                                <tr>
+                                                    <td colspan="6" class="text-center py-3">
+                                                        <div class="text-muted">
+                                                            <i class="fas fa-credit-card fa-2x mb-2"></i>
+                                                            <p>No payments recorded for this booking</p>
+                                                            <button class="btn btn-success btn-sm">
+                                                                <i class="fas fa-plus me-2"></i>Record Payment
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card border">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">Payment Actions</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-success" onclick="recordPayment()">
+                                        <i class="fas fa-plus me-2"></i>Record Payment
+                                    </button>
+                                    <button class="btn btn-primary" onclick="sendInvoice()">
+                                        <i class="fas fa-file-invoice me-2"></i>Send Invoice
+                                    </button>
+                                    <button class="btn btn-outline-warning" onclick="processRefund()">
+                                        <i class="fas fa-undo me-2"></i>Process Refund
+                                    </button>
+                                    <button class="btn btn-outline-info" onclick="sendPaymentLink()">
+                                        <i class="fas fa-link me-2"></i>Send Payment Link
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Communication Tab -->
+            <div class="tab-pane fade" id="communication" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card border">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="card-title mb-0">Communication History</h6>
+                                <button class="btn btn-primary btn-sm" onclick="sendMessage()">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Message
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="timeline-communications" style="max-height: 400px; overflow-y: auto;">
+                                    <!-- Sample communication entries -->
+                                    <div class="mb-4">
+                                        <div class="d-flex align-items-start">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-primary rounded-circle p-2">
+                                                    <i class="fas fa-envelope text-white"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <div class="bg-light rounded p-3">
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <strong>Booking Confirmation Email</strong>
+                                                        <small class="text-muted">2 hours ago</small>
+                                                    </div>
+                                                    <p class="mb-0">Confirmation email sent to {{ booking.client.email }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-center py-3">
+                                        <small class="text-muted">No additional communications yet</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card border">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">Quick Messages</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="sendTemplate('confirmation')">
+                                        <i class="fas fa-check me-2"></i>Booking Confirmation
+                                    </button>
+                                    <button class="btn btn-outline-info btn-sm" onclick="sendTemplate('reminder')">
+                                        <i class="fas fa-bell me-2"></i>Appointment Reminder
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" onclick="sendTemplate('reschedule')">
+                                        <i class="fas fa-calendar me-2"></i>Reschedule Notice
+                                    </button>
+                                    <button class="btn btn-outline-success btn-sm" onclick="sendTemplate('thankyou')">
+                                        <i class="fas fa-heart me-2"></i>Thank You Message
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Tab -->
+            <div class="tab-pane fade" id="history" role="tabpanel">
+                <div class="card border">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">Booking Timeline</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-item mb-4">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">Booking Created</h6>
+                                            <p class="text-muted mb-1">Initial booking request submitted</p>
+                                            <small class="text-muted">{{ booking.created_at|date:"M d, Y g:i A" }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if booking.confirmed_at %}
+                                <div class="timeline-item mb-4">
+                                    <div class="timeline-marker bg-primary"></div>
+                                    <div class="timeline-content">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1">Booking Confirmed</h6>
+                                                <p class="text-muted mb-1">Booking approved and confirmed</p>
+                                                <small class="text-muted">{{ booking.confirmed_at|date:"M d, Y g:i A" }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info"></div>
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">Last Updated</h6>
+                                            <p class="text-muted mb-1">Booking information modified</p>
+                                            <small class="text-muted">{{ booking.updated_at|date:"M d, Y g:i A" }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #6c63ff, #e9ecef);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -34px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #6c63ff;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 3px solid #6c63ff;
+}
+
+.timeline-communications {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.timeline-communications::-webkit-scrollbar {
+    width: 4px;
+}
+
+.timeline-communications::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.timeline-communications::-webkit-scrollbar-thumb {
+    background: #6c63ff;
+    border-radius: 2px;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateStatus() {
+    const status = document.getElementById('bookingStatus').value;
+    
+    if (confirm(`Change booking status to "${status}"?`)) {
+        // TODO: Implement AJAX call to update status
+        console.log('Updating booking status to:', status);
+        showToast('Booking status updated successfully', 'success');
+    }
+}
+
+function confirmBooking() {
+    if (confirm('Confirm this booking? The client will be notified.')) {
+        // TODO: Implement booking confirmation
+        console.log('Confirming booking {{ booking.pk }}');
+        showToast('Booking confirmed successfully', 'success');
+        setTimeout(() => location.reload(), 1000);
+    }
+}
+
+function startService() {
+    if (confirm('Mark this service as started?')) {
+        // TODO: Implement service start
+        console.log('Starting service for booking {{ booking.pk }}');
+        showToast('Service marked as started', 'info');
+    }
+}
+
+function completeService() {
+    if (confirm('Mark this service as completed?')) {
+        // TODO: Implement service completion
+        console.log('Completing service for booking {{ booking.pk }}');
+        showToast('Service marked as completed', 'success');
+    }
+}
+
+function rescheduleBooking() {
+    // TODO: Open reschedule modal or redirect to reschedule page
+    window.location.href = `/admin/bookings/{{ booking.pk }}/reschedule/`;
+}
+
+function cancelBooking() {
+    const reason = prompt('Please provide a reason for cancellation:');
+    if (reason) {
+        // TODO: Implement booking cancellation
+        console.log('Cancelling booking {{ booking.pk }}:', reason);
+        showToast('Booking cancelled successfully', 'warning');
+    }
+}
+
+function sendReminder() {
+    if (confirm('Send appointment reminder to {{ booking.client.get_full_name }}?')) {
+        // TODO: Implement reminder sending
+        console.log('Sending reminder for booking {{ booking.pk }}');
+        showToast('Reminder sent successfully', 'info');
+    }
+}
+
+function recordPayment() {
+    // TODO: Open payment recording modal
+    console.log('Opening payment recording for booking {{ booking.pk }}');
+}
+
+function sendInvoice() {
+    if (confirm('Send invoice to {{ booking.client.email }}?')) {
+        // TODO: Implement invoice sending
+        console.log('Sending invoice for booking {{ booking.pk }}');
+        showToast('Invoice sent successfully', 'success');
+    }
+}
+
+function processRefund() {
+    const amount = prompt('Enter refund amount (QAR):');
+    if (amount && !isNaN(amount)) {
+        // TODO: Implement refund processing
+        console.log('Processing refund of QAR', amount, 'for booking {{ booking.pk }}');
+        showToast('Refund processed successfully', 'success');
+    }
+}
+
+function sendPaymentLink() {
+    if (confirm('Send payment link to {{ booking.client.email }}?')) {
+        // TODO: Implement payment link sending
+        console.log('Sending payment link for booking {{ booking.pk }}');
+        showToast('Payment link sent successfully', 'info');
+    }
+}
+
+function sendMessage() {
+    // TODO: Open message composition modal
+    console.log('Opening message composer for booking {{ booking.pk }}');
+}
+
+function sendTemplate(type) {
+    if (confirm(`Send ${type} message to {{ booking.client.get_full_name }}?`)) {
+        // TODO: Implement template message sending
+        console.log('Sending template message:', type, 'for booking {{ booking.pk }}');
+        showToast('Message sent successfully', 'success');
+    }
+}
+
+function showToast(message, type) {
+    // Use the global toast function from admin-portal.js
+    if (window.hawwaAdmin && window.hawwaAdmin.showToast) {
+        window.hawwaAdmin.showToast(message, type);
+    }
+}
+</script>
+{% endblock %}

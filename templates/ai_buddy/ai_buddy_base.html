@@ -1,0 +1,158 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+
+{% block title %}AI Buddy - HAWWA{% endblock %}
+
+{% block extra_css %}
+<!-- AI Buddy-specific CSS -->
+<style>
+    /* AI Buddy dashboard styling */
+    .ai-buddy-nav {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    .ai-buddy-nav .nav-link {
+        color: #666;
+        border-radius: 8px;
+        margin: 0 5px;
+        transition: all 0.3s ease;
+    }
+    .ai-buddy-nav .nav-link:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+    }
+    .ai-buddy-nav .nav-link.active {
+        background: #667eea;
+        color: white;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .stats-card.conversations {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    .stats-card.users {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+    .stats-card.insights {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    .stats-card.ai-performance {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    /* AI-specific elements */
+    .chat-bubble {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 18px;
+        padding: 12px 18px;
+        margin: 8px 0;
+        max-width: 70%;
+        word-wrap: break-word;
+    }
+    
+    .chat-bubble.user {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        margin-left: auto;
+    }
+    
+    .ai-status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #43e97b;
+        display: inline-block;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    
+    /* Enhanced card styling */
+    .card {
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .ai-buddy-nav .nav-pills {
+            flex-direction: column;
+        }
+        .ai-buddy-nav .nav-item {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        .ai-buddy-nav .nav-link {
+            text-align: center;
+        }
+        .chat-bubble {
+            max-width: 85%;
+        }
+    }
+</style>
+{% block ai_buddy_extra_css %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+{% block ai_buddy_content %}
+<!-- Content will be provided by child templates -->
+{% endblock %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // AI Buddy-specific JavaScript
+    
+    // Force expand AI Buddy navigation section
+    $('#aiBuddyNav').addClass('show');
+    $('#aiBuddyNav').css('display', 'block');
+    
+    // Remove active from all sidebar links first
+    $('.admin-sidebar .nav-link').removeClass('active');
+    
+    // Add active class to AI Buddy main section
+    $('.admin-sidebar button[data-bs-target="#aiBuddyNav"]').addClass('active');
+    
+    // Highlight the specific AI Buddy page we're on
+    const currentPath = window.location.pathname;
+    $('.admin-sidebar .nav-submenu a').each(function() {
+        if (this.href && this.pathname && currentPath.includes(this.pathname)) {
+            $(this).addClass('active');
+        }
+    });
+    
+    // Ensure AI Buddy section stays expanded
+    setTimeout(function() {
+        $('#aiBuddyNav').addClass('show');
+        $('#aiBuddyNav').css('display', 'block');
+    }, 100);
+});
+</script>
+{% block ai_buddy_extra_js %}{% endblock %}
+{% endblock %}

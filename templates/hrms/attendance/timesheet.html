@@ -1,4 +1,981 @@
 {% extends 'hrms/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Employee Timesheet - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --hawwa-primary: #8D1538;
+        --hawwa-secondary: #A91E47;
+        --hawwa-success: #28a745;
+        --hawwa-warning: #ffc107;
+        --hawwa-danger: #dc3545;
+        --hawwa-info: #17a2b8;
+        --hawwa-light: #f8f9fa;
+        --hawwa-dark: #343a40;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    .timesheet-header {
+        background: linear-gradient(135deg, var(--hawwa-primary) 0%, var(--hawwa-secondary) 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(141, 21, 56, 0.3);
+    }
+
+    .timesheet-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .timesheet-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border-left: 4px solid var(--hawwa-primary);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card.hours-worked { border-left-color: var(--hawwa-success); }
+    .stat-card.overtime { border-left-color: var(--hawwa-warning); }
+    .stat-card.attendance-rate { border-left-color: var(--hawwa-info); }
+    .stat-card.total-days { border-left-color: var(--hawwa-primary); }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-number.success { color: var(--hawwa-success); }
+    .stat-number.warning { color: var(--hawwa-warning); }
+    .stat-number.info { color: var(--hawwa-info); }
+    .stat-number.primary { color: var(--hawwa-primary); }
+
+    .stat-label {
+        color: #6c757d;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .timesheet-filters {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid var(--hawwa-primary);
+    }
+
+    .filter-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .quick-filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+    .quick-filter-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--hawwa-primary);
+        background: transparent;
+        color: var(--hawwa-primary);
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .quick-filter-btn:hover, .quick-filter-btn.active {
+        background: var(--hawwa-primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .timesheet-table {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .table-header {
+        background: linear-gradient(135deg, var(--hawwa-primary) 0%, var(--hawwa-secondary) 100%);
+        color: white;
+        padding: 1rem;
+        font-weight: 700;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .attendance-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .attendance-table th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: var(--hawwa-dark);
+        padding: 1rem;
+        font-weight: 700;
+        text-align: center;
+        border-bottom: 2px solid #dee2e6;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .attendance-table td {
+        padding: 1rem;
+        text-align: center;
+        border-bottom: 1px solid #f8f9fa;
+        vertical-align: middle;
+        transition: all 0.3s ease;
+    }
+
+    .attendance-table tr:hover td {
+        background-color: #f8f9fa;
+    }
+
+    .date-cell {
+        font-weight: 700;
+        color: var(--hawwa-dark);
+    }
+
+    .date-cell.today {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        color: #856404;
+        font-weight: 800;
+    }
+
+    .date-cell.weekend {
+        background: linear-gradient(135deg, #f8d7da 0%, #f1b0b7 100%);
+        color: #721c24;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 25px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 80px;
+    }
+
+    .status-present {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .status-absent {
+        background: linear-gradient(135deg, #f8d7da 0%, #f1b0b7 100%);
+        color: #721c24;
+        border: 1px solid #f1b0b7;
+    }
+
+    .status-late {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .status-half-day {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    .status-remote {
+        background: linear-gradient(135deg, #e2e3e5 0%, #d6d8db 100%);
+        color: #383d41;
+        border: 1px solid #d6d8db;
+    }
+
+    .time-display {
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .time-in { color: var(--hawwa-success); }
+    .time-out { color: var(--hawwa-warning); }
+    .time-break { color: var(--hawwa-info); }
+
+    .hours-worked {
+        font-weight: 700;
+        color: var(--hawwa-primary);
+        font-size: 1.1rem;
+    }
+
+    .overtime-hours {
+        color: var(--hawwa-warning);
+        font-weight: 600;
+    }
+
+    .quick-actions {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    .action-btn {
+        display: block;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--hawwa-primary) 0%, var(--hawwa-secondary) 100%);
+        color: white;
+        border: none;
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        box-shadow: 0 5px 15px rgba(141, 21, 56, 0.4);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .action-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 25px rgba(141, 21, 56, 0.6);
+    }
+
+    .checkin-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid var(--hawwa-success);
+    }
+
+    .checkin-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .checkin-btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 15px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .checkin-btn.check-in {
+        background: linear-gradient(135deg, var(--hawwa-success) 0%, #20c997 100%);
+        color: white;
+    }
+
+    .checkin-btn.check-out {
+        background: linear-gradient(135deg, var(--hawwa-warning) 0%, #fd7e14 100%);
+        color: white;
+    }
+
+    .checkin-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .checkin-btn:disabled {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .current-status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    .current-status.checked-in {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
+        border: 2px solid #c3e6cb;
+    }
+
+    .current-status.checked-out {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        color: #856404;
+        border: 2px solid #ffeaa7;
+    }
+
+    .current-status.not-started {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        color: #0c5460;
+        border: 2px solid #bee5eb;
+    }
+
+    .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+
+    .export-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid var(--hawwa-info);
+    }
+
+    .export-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+    .export-btn {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid var(--hawwa-info);
+        background: transparent;
+        color: var(--hawwa-info);
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .export-btn:hover {
+        background: var(--hawwa-info);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .loading-spinner {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--hawwa-primary);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .filter-section {
+            grid-template-columns: 1fr;
+        }
+        
+        .attendance-table th,
+        .attendance-table td {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .quick-actions {
+            bottom: 10px;
+            right: 10px;
+        }
+        
+        .action-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h1>Placeholder: hrms/attendance/timesheet.html</h1>
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="timesheet-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-4 fw-bold mb-2">
+                        <i class="fas fa-calendar-alt me-3"></i>
+                        Employee Timesheet
+                    </h1>
+                    <p class="lead mb-0">Track your attendance, hours worked, and performance</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="text-white">
+                        <h5 class="mb-1">{{ employee.user.get_full_name|default:employee.user.username }}</h5>
+                        <p class="mb-0">{{ employee.department.name|default:"No Department" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Quick Check-in/out Section -->
+        <div class="checkin-section">
+            <h5 class="mb-3">
+                <i class="fas fa-clock text-success me-2"></i>
+                Quick Check-in/out
+            </h5>
+            
+            <!-- Current Status -->
+            <div id="current-status" class="current-status not-started">
+                <span class="status-indicator" style="background-color: #17a2b8;"></span>
+                <span id="status-text">Getting status...</span>
+            </div>
+            
+            <!-- Check-in/out Buttons -->
+            <div class="checkin-buttons">
+                <button id="checkin-btn" class="checkin-btn check-in" onclick="performQuickCheckin()" disabled>
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Check In
+                </button>
+                <button id="checkout-btn" class="checkin-btn check-out" onclick="performQuickCheckout()" disabled>
+                    <i class="fas fa-sign-out-alt me-2"></i>
+                    Check Out
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card total-days">
+                <div class="stat-number primary">{{ attendance_records|length }}</div>
+                <div class="stat-label">Total Days</div>
+            </div>
+            <div class="stat-card hours-worked">
+                <div class="stat-number success">{{ total_worked|floatformat:1 }}</div>
+                <div class="stat-label">Hours Worked</div>
+            </div>
+            <div class="stat-card overtime">
+                <div class="stat-number warning">{{ total_overtime|floatformat:1 }}</div>
+                <div class="stat-label">Overtime Hours</div>
+            </div>
+            <div class="stat-card attendance-rate">
+                <div class="stat-number info">{{ attendance_percentage }}%</div>
+                <div class="stat-label">Attendance Rate</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="timesheet-filters">
+            <h5 class="mb-3">
+                <i class="fas fa-filter text-primary me-2"></i>
+                Filter Timesheet
+            </h5>
+            
+            <form method="get" id="filterForm">
+                <div class="filter-section">
+                    <div>
+                        <label class="form-label fw-bold">From Date</label>
+                        <input type="date" name="date_from" class="form-control" 
+                               value="{{ date_from|date:'Y-m-d' }}" onchange="document.getElementById('filterForm').submit()">
+                    </div>
+                    <div>
+                        <label class="form-label fw-bold">To Date</label>
+                        <input type="date" name="date_to" class="form-control" 
+                               value="{{ date_to|date:'Y-m-d' }}" onchange="document.getElementById('filterForm').submit()">
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Apply Filter
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Quick Filter Buttons -->
+                <div class="quick-filter-buttons">
+                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('today')">Today</button>
+                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('week')">This Week</button>
+                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('month')">This Month</button>
+                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('last30')">Last 30 Days</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Timesheet Table -->
+        <div class="timesheet-table">
+            <div class="table-header">
+                <i class="fas fa-table me-2"></i>
+                Attendance Records ({{ date_from|date:'M d' }} - {{ date_to|date:'M d, Y' }})
+            </div>
+            
+            <div class="table-responsive">
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Status</th>
+                            <th>Check In</th>
+                            <th>Break Start</th>
+                            <th>Break End</th>
+                            <th>Check Out</th>
+                            <th>Scheduled</th>
+                            <th>Worked</th>
+                            <th>Overtime</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in attendance_records %}
+                        <tr>
+                            <td class="date-cell {% if record.date == today %}today{% elif record.date.weekday >= 5 %}weekend{% endif %}">
+                                {{ record.date|date:'M d' }}
+                            </td>
+                            <td class="fw-bold">{{ record.date|date:'l' }}</td>
+                            <td>
+                                <span class="status-badge status-{{ record.status }}">
+                                    {{ record.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="time-display time-in">
+                                {{ record.check_in|time:'H:i'|default:'--:--' }}
+                            </td>
+                            <td class="time-display time-break">
+                                {{ record.break_start|time:'H:i'|default:'--:--' }}
+                            </td>
+                            <td class="time-display time-break">
+                                {{ record.break_end|time:'H:i'|default:'--:--' }}
+                            </td>
+                            <td class="time-display time-out">
+                                {{ record.check_out|time:'H:i'|default:'--:--' }}
+                            </td>
+                            <td class="fw-bold">{{ record.scheduled_hours|floatformat:1 }}h</td>
+                            <td class="hours-worked">{{ record.hours_worked|floatformat:1|default:'0.0' }}h</td>
+                            <td class="overtime-hours">
+                                {% if record.overtime_hours %}
+                                    +{{ record.overtime_hours|floatformat:1 }}h
+                                {% else %}
+                                    0.0h
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    {% if record.date == today %}
+                                        <button class="btn btn-outline-primary btn-sm" 
+                                                onclick="editAttendance('{{ record.date|date:'Y-m-d' }}')" 
+                                                title="Edit Today's Attendance">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    {% endif %}
+                                    <button class="btn btn-outline-info btn-sm" 
+                                            onclick="viewDetails('{{ record.date|date:'Y-m-d' }}')" 
+                                            title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="11" class="text-center text-muted py-4">
+                                <i class="fas fa-calendar-times fs-2 mb-3 d-block"></i>
+                                No attendance records found for the selected period.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="export-section">
+            <h5 class="mb-3">
+                <i class="fas fa-download text-info me-2"></i>
+                Export Timesheet
+            </h5>
+            <p class="text-muted mb-3">Download your timesheet data in various formats</p>
+            
+            <div class="export-buttons">
+                <a href="#" class="export-btn" onclick="exportTimesheet('pdf')">
+                    <i class="fas fa-file-pdf me-2"></i>PDF Report
+                </a>
+                <a href="#" class="export-btn" onclick="exportTimesheet('excel')">
+                    <i class="fas fa-file-excel me-2"></i>Excel Spreadsheet
+                </a>
+                <a href="#" class="export-btn" onclick="exportTimesheet('csv')">
+                    <i class="fas fa-file-csv me-2"></i>CSV Data
+                </a>
+                <a href="{% url 'hrms:employee_checkin' %}" class="export-btn">
+                    <i class="fas fa-map-marker-alt me-2"></i>Location Check-in
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <button class="action-btn" onclick="refreshData()" title="Refresh Data">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+        <button class="action-btn" onclick="goToAttendance()" title="Full Attendance">
+            <i class="fas fa-calendar-check"></i>
+        </button>
+        <button class="action-btn" onclick="requestCorrection()" title="Request Correction">
+            <i class="fas fa-edit"></i>
+        </button>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p class="mb-0">Processing...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced JavaScript -->
+<script>
+    let currentAttendanceStatus = 'not-started';
+    
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCurrentStatus();
+        setupEventListeners();
+        
+        // Auto-refresh status every 30 seconds
+        setInterval(loadCurrentStatus, 30000);
+    });
+    
+    // Load current attendance status
+    function loadCurrentStatus() {
+        fetch('{% url "hrms:attendance_status_api" %}')
+            .then(response => response.json())
+            .then(data => {
+                currentAttendanceStatus = data.status || 'not-started';
+                updateStatusDisplay(data);
+                updateButtonStates();
+            })
+            .catch(error => {
+                console.error('Error loading status:', error);
+            });
+    }
+    
+    // Update status display
+    function updateStatusDisplay(data) {
+        const statusElement = document.getElementById('current-status');
+        const statusText = document.getElementById('status-text');
+        const indicator = document.querySelector('.status-indicator');
+        
+        statusElement.className = 'current-status';
+        
+        switch(currentAttendanceStatus) {
+            case 'checked-in':
+                statusElement.classList.add('checked-in');
+                statusText.textContent = `Checked in at ${data.check_in || '--:--'}`;
+                indicator.style.backgroundColor = '#28a745';
+                break;
+            case 'checked-out':
+                statusElement.classList.add('checked-out');
+                statusText.textContent = `Checked out at ${data.check_out || '--:--'}`;
+                indicator.style.backgroundColor = '#ffc107';
+                break;
+            default:
+                statusElement.classList.add('not-started');
+                statusText.textContent = 'Ready to check in';
+                indicator.style.backgroundColor = '#17a2b8';
+        }
+    }
+    
+    // Update button states
+    function updateButtonStates() {
+        const checkinBtn = document.getElementById('checkin-btn');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        
+        if (currentAttendanceStatus === 'not-started') {
+            checkinBtn.disabled = false;
+            checkoutBtn.disabled = true;
+        } else if (currentAttendanceStatus === 'checked-in') {
+            checkinBtn.disabled = true;
+            checkoutBtn.disabled = false;
+        } else {
+            checkinBtn.disabled = true;
+            checkoutBtn.disabled = true;
+        }
+    }
+    
+    // Quick check-in function
+    function performQuickCheckin() {
+        if (navigator.geolocation) {
+            showLoading(true);
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const payload = {
+                        action: 'check_in',
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+                    
+                    fetch('{% url "hrms:check_in_api" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        showLoading(false);
+                        if (data.success) {
+                            showAlert('Successfully checked in!', 'success');
+                            loadCurrentStatus();
+                            setTimeout(() => location.reload(), 2000);
+                        } else {
+                            showAlert(data.message || 'Check-in failed', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        showLoading(false);
+                        showAlert('Network error during check-in', 'error');
+                    });
+                },
+                function(error) {
+                    showLoading(false);
+                    showAlert('Location access required for check-in', 'error');
+                }
+            );
+        } else {
+            showAlert('Geolocation is not supported by this browser', 'error');
+        }
+    }
+    
+    // Quick check-out function
+    function performQuickCheckout() {
+        if (navigator.geolocation) {
+            showLoading(true);
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const payload = {
+                        action: 'check_out',
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+                    
+                    fetch('{% url "hrms:check_out_api" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        showLoading(false);
+                        if (data.success) {
+                            showAlert('Successfully checked out!', 'success');
+                            loadCurrentStatus();
+                            setTimeout(() => location.reload(), 2000);
+                        } else {
+                            showAlert(data.message || 'Check-out failed', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        showLoading(false);
+                        showAlert('Network error during check-out', 'error');
+                    });
+                },
+                function(error) {
+                    showLoading(false);
+                    showAlert('Location access required for check-out', 'error');
+                }
+            );
+        } else {
+            showAlert('Geolocation is not supported by this browser', 'error');
+        }
+    }
+    
+    // Quick filter functions
+    function setQuickFilter(period) {
+        const today = new Date();
+        let fromDate, toDate;
+        
+        switch(period) {
+            case 'today':
+                fromDate = toDate = today;
+                break;
+            case 'week':
+                const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+                const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+                fromDate = startOfWeek;
+                toDate = endOfWeek;
+                break;
+            case 'month':
+                fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                toDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                break;
+            case 'last30':
+                toDate = new Date();
+                fromDate = new Date(today.setDate(today.getDate() - 30));
+                break;
+        }
+        
+        document.querySelector('input[name="date_from"]').value = formatDate(fromDate);
+        document.querySelector('input[name="date_to"]').value = formatDate(toDate);
+        document.getElementById('filterForm').submit();
+    }
+    
+    // Format date for input
+    function formatDate(date) {
+        return date.toISOString().split('T')[0];
+    }
+    
+    // Utility functions
+    function showLoading(show) {
+        document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+    }
+    
+    function showAlert(message, type) {
+        const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-danger' : 'alert-info';
+        const alertHtml = `
+            <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
+                 style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', alertHtml);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) alert.remove();
+        }, 5000);
+    }
+    
+    function refreshData() {
+        showLoading(true);
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+    
+    function goToAttendance() {
+        window.location.href = '{% url "hrms:employee_checkin" %}';
+    }
+    
+    function requestCorrection() {
+        window.location.href = '{% url "hrms:attendance_request_create" %}';
+    }
+    
+    function editAttendance(date) {
+        showAlert('Edit attendance feature coming soon!', 'info');
+    }
+    
+    function viewDetails(date) {
+        showAlert('View details feature coming soon!', 'info');
+    }
+    
+    function exportTimesheet(format) {
+        showAlert(`Export to ${format.toUpperCase()} feature coming soon!`, 'info');
+    }
+    
+    function setupEventListeners() {
+        // Add active class to quick filter buttons
+        document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.quick-filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    }
+</script>
+
+<!-- CSRF Token -->
+{% csrf_token %}
 {% endblock %}

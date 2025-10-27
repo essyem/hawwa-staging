@@ -1,0 +1,302 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Document Repository - Hawwa Docpool{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .reference-badge {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 0.9em;
+    }
+    .stats-card {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+    .file-type-badge {
+        font-size: 0.7em;
+        padding: 2px 6px;
+    }
+    .document-card {
+        transition: transform 0.2s ease-in-out;
+    }
+    .document-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0"><i class="fas fa-folder-open text-primary"></i> Document Repository</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'docpool:document_list' %}">Document Pool</a></li>
+                            <li class="breadcrumb-item active">Documents</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="btn-group">
+                    {% if user.is_staff %}
+                    <a href="{% url 'docpool:document_upload' %}" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Upload Document
+                    </a>
+                    <a href="{% url 'docpool:reference_list' %}" class="btn btn-info">
+                        <i class="fas fa-list"></i> References
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ total_documents|default:0 }}</h4>
+                    <small>Total Documents</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ departments_count|default:0 }}</h4>
+                    <small>Departments</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ document_types_count|default:0 }}</h4>
+                    <small>Document Types</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ this_month_count|default:0 }}</h4>
+                    <small>This Month</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card filter-card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search Documents</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ request.GET.search }}" placeholder="Search title, description, keywords...">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="department" class="form-label">Department</label>
+                            <select class="form-control" id="department" name="department">
+                                <option value="">All Departments</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}" {% if request.GET.department == dept.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ dept.code }} - {{ dept.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="document_type" class="form-label">Document Type</label>
+                            <select class="form-control" id="document_type" name="document_type">
+                                <option value="">All Types</option>
+                                {% for doc_type in document_types %}
+                                <option value="{{ doc_type.id }}" {% if request.GET.document_type == doc_type.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ doc_type.code }} - {{ doc_type.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="year" class="form-label">Year</label>
+                            <select class="form-control" id="year" name="year">
+                                <option value="">All Years</option>
+                                {% for year_option in years %}
+                                <option value="{{ year_option }}" {% if request.GET.year == year_option|stringformat:"s" %}selected{% endif %}>
+                                    {{ year_option }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-light">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Documents ({{ documents.count }} found)</h5>
+                    <div>
+                        <small class="text-muted">Showing {{ documents|length }} documents</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if documents %}
+                    <div class="row">
+                        {% for document in documents %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card document-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-1">{{ document.title|truncatechars:50 }}</h6>
+                                        {% if document.file_type %}
+                                        <span class="badge bg-primary file-type-badge">{{ document.file_type|upper }}</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if document.reference_number %}
+                                    <p class="mb-1">
+                                        <span class="badge bg-dark reference-badge">{{ document.reference_number.reference_number }}</span>
+                                    </p>
+                                    {% endif %}
+                                    
+                                    <p class="card-text small text-muted mb-2">
+                                        {{ document.description|truncatechars:100|default:"No description" }}
+                                    </p>
+                                    
+                                    <div class="mb-2">
+                                        {% if document.department %}
+                                        <small class="badge bg-info">{{ document.department.code }}</small>
+                                        {% endif %}
+                                        {% if document.document_type %}
+                                        <small class="badge bg-success">{{ document.document_type.code }}</small>
+                                        {% endif %}
+                                        {% if document.border %}
+                                        <small class="badge bg-warning">{{ document.border.code }}</small>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">{{ document.uploaded_at|date:"M d, Y" }}</small>
+                                        <div class="btn-group-sm">
+                                            <a href="{% url 'docpool:document_detail' document.pk %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if document.file %}
+                                            <a href="{{ document.file.url }}" target="_blank" class="btn btn-sm btn-outline-success" download>
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if documents.has_other_pages %}
+                    <nav aria-label="Document pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if documents.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.department %}&department={{ request.GET.department }}{% endif %}{% if request.GET.document_type %}&document_type={{ request.GET.document_type }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ documents.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.department %}&department={{ request.GET.department }}{% endif %}{% if request.GET.document_type %}&document_type={{ request.GET.document_type }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}">Previous</a>
+                            </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Page {{ documents.number }} of {{ documents.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if documents.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ documents.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.department %}&department={{ request.GET.department }}{% endif %}{% if request.GET.document_type %}&document_type={{ request.GET.document_type }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ documents.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.department %}&department={{ request.GET.department }}{% endif %}{% if request.GET.document_type %}&document_type={{ request.GET.document_type }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}">Last</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No Documents Found</h4>
+                        <p class="text-muted">Try adjusting your search criteria or upload your first document.</p>
+                        {% if user.is_staff %}
+                        <a href="{% url 'docpool:document_upload' %}" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Upload First Document
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form on select change
+    const selects = document.querySelectorAll('select[name="department"], select[name="document_type"], select[name="year"]');
+    selects.forEach(function(select) {
+        select.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+    
+    // Search input enhancement
+    const searchInput = document.getElementById('search');
+    if (searchInput) {
+        let timeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                if (this.value.length >= 3 || this.value.length === 0) {
+                    this.form.submit();
+                }
+            }, 500);
+        });
+    }
+});
+</script>
+{% endblock %}

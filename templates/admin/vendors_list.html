@@ -1,0 +1,675 @@
+{% extends 'admin_portal_base.html' %}
+
+{% block title %}Vendor Management - Hawwa Admin{% endblock %}
+
+{% block page_title %}Vendor Management{% endblock %}
+{% block page_subtitle %}Manage service providers and their profiles{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Vendors</li>
+{% endblock %}
+
+{% block content %}
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-0">Total Vendors</h6>
+                        <h3 class="mb-0">{{ vendor_stats.total_vendors|default:0 }}</h3>
+                        <small class="text-white-75">
+                            <i class="fas fa-arrow-up"></i> +12% from last month
+                        </small>
+                    </div>
+                    <div class="ms-3">
+                        <i class="fas fa-users fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-0">Active Vendors</h6>
+                        <h3 class="mb-0">{{ vendor_stats.active_vendors|default:0 }}</h3>
+                        <small class="text-white-75">
+                            <i class="fas fa-check-circle"></i> {{ vendor_stats.active_percentage|default:0 }}% of total
+                        </small>
+                    </div>
+                    <div class="ms-3">
+                        <i class="fas fa-user-check fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-0">Pending Applications</h6>
+                        <h3 class="mb-0">{{ vendor_stats.pending_applications|default:0 }}</h3>
+                        <small class="text-white-75">
+                            <i class="fas fa-clock"></i> Awaiting review
+                        </small>
+                    </div>
+                    <div class="ms-3">
+                        <i class="fas fa-hourglass-half fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-0">Avg. Rating</h6>
+                        <h3 class="mb-0">{{ vendor_stats.avg_rating|default:"4.5" }}<small>/5</small></h3>
+                        <small class="text-white-75">
+                            <i class="fas fa-star"></i> {{ vendor_stats.total_reviews|default:0 }} reviews
+                        </small>
+                    </div>
+                    <div class="ms-3">
+                        <i class="fas fa-star fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                    <div class="d-flex flex-wrap gap-2 mb-2 mb-md-0">
+                        <a href="{% url 'core:admin_vendor_create' %}" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>Add New Vendor
+                        </a>
+                        
+                        <button class="btn btn-outline-primary" onclick="importVendors()">
+                            <i class="fas fa-upload me-2"></i>Import Vendors
+                        </button>
+                        
+                        <button class="btn btn-outline-secondary" onclick="exportVendors()">
+                            <i class="fas fa-download me-2"></i>Export List
+                        </button>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-outline-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog me-2"></i>Actions
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="bulkApprove()">
+                                    <i class="fas fa-check me-2"></i>Bulk Approve</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="bulkSuspend()">
+                                    <i class="fas fa-ban me-2"></i>Bulk Suspend</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="sendBulkMessage()">
+                                    <i class="fas fa-envelope me-2"></i>Send Message</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <div class="input-group" style="width: 300px;">
+                            <input type="text" class="form-control" placeholder="Search vendors..." 
+                                   id="vendorSearch" onkeyup="filterVendors()">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#advancedFilters">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Advanced Filters -->
+                <div class="collapse mt-3" id="advancedFilters">
+                    <div class="row g-3 p-3 bg-light rounded">
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="statusFilter" onchange="filterVendors()">
+                                <option value="">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="pending">Pending</option>
+                                <option value="suspended">Suspended</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label">Service Category</label>
+                            <select class="form-select" id="categoryFilter" onchange="filterVendors()">
+                                <option value="">All Categories</option>
+                                <option value="wellness">Wellness & Spa</option>
+                                <option value="beauty">Beauty & Grooming</option>
+                                <option value="fitness">Fitness & Health</option>
+                                <option value="consultation">Consultation</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label">Rating</label>
+                            <select class="form-select" id="ratingFilter" onchange="filterVendors()">
+                                <option value="">All Ratings</option>
+                                <option value="5">5 Stars</option>
+                                <option value="4">4+ Stars</option>
+                                <option value="3">3+ Stars</option>
+                                <option value="2">2+ Stars</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label">Join Date</label>
+                            <select class="form-select" id="dateFilter" onchange="filterVendors()">
+                                <option value="">Any Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="quarter">This Quarter</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vendors Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent border-0">
+        <div class="d-flex align-items-center justify-content-between">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-table me-2 text-primary"></i>Vendor Directory
+            </h5>
+            
+            <div class="d-flex align-items-center gap-2">
+                <small class="text-muted">
+                    <span id="vendorCount">{{ vendors|length|default:0 }}</span> vendors found
+                </small>
+                
+                <div class="btn-group btn-group-sm" role="group">
+                    <input type="radio" class="btn-check" name="viewMode" id="tableView" checked>
+                    <label class="btn btn-outline-secondary" for="tableView">
+                        <i class="fas fa-list"></i>
+                    </label>
+                    
+                    <input type="radio" class="btn-check" name="viewMode" id="cardView">
+                    <label class="btn btn-outline-secondary" for="cardView">
+                        <i class="fas fa-th-large"></i>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-body p-0">
+        <!-- Table View -->
+        <div id="tableViewContent" class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="vendorsTable">
+                <thead class="bg-light">
+                    <tr>
+                        <th>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="name">
+                            <i class="fas fa-user me-2"></i>Vendor
+                            <i class="fas fa-sort text-muted"></i>
+                        </th>
+                        <th class="sortable" data-sort="services">
+                            <i class="fas fa-spa me-2"></i>Services
+                            <i class="fas fa-sort text-muted"></i>
+                        </th>
+                        <th class="sortable" data-sort="rating">
+                            <i class="fas fa-star me-2"></i>Rating
+                            <i class="fas fa-sort text-muted"></i>
+                        </th>
+                        <th class="sortable" data-sort="bookings">
+                            <i class="fas fa-calendar me-2"></i>Bookings
+                            <i class="fas fa-sort text-muted"></i>
+                        </th>
+                        <th class="sortable" data-sort="revenue">
+                            <i class="fas fa-dollar-sign me-2"></i>Revenue
+                            <i class="fas fa-sort text-muted"></i>
+                        </th>
+                        <th class="sortable" data-sort="status">
+                            <i class="fas fa-toggle-on me-2"></i>Status
+                            <i class="fas fa-sort text-muted"></i>
+                        </th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="vendorsTableBody">
+                    {% for vendor in vendors %}
+                    <tr data-vendor-id="{{ vendor.id }}" class="vendor-row">
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input vendor-checkbox" type="checkbox" value="{{ vendor.id }}">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-primary text-white me-3" style="width: 40px; height: 40px; line-height: 40px;">
+                                    {% if vendor.profile_picture %}
+                                        <img src="{{ vendor.profile_picture.url }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                    {% else %}
+                                        <span class="fw-bold">{{ vendor.first_name.0 }}{{ vendor.last_name.0 }}</span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <a href="{% url 'core:admin_vendor_detail' vendor.id %}" class="text-decoration-none fw-bold">
+                                        {{ vendor.first_name }} {{ vendor.last_name }}
+                                    </a>
+                                    <div class="small text-muted">{{ vendor.email }}</div>
+                                    <div class="small text-muted">{{ vendor.phone|default:"No phone" }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small">
+                                {% for service in vendor.services.all|slice:":3" %}
+                                    <span class="badge bg-light text-dark me-1 mb-1">{{ service.name }}</span>
+                                {% endfor %}
+                                {% if vendor.services.count > 3 %}
+                                    <span class="badge bg-secondary">+{{ vendor.services.count|add:"-3" }} more</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="me-2">
+                                    {% for i in "12345"|make_list %}
+                                        {% if forloop.counter <= vendor.average_rating|floatformat:0 %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-muted"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <span class="fw-bold">{{ vendor.average_rating|floatformat:1|default:"0.0" }}</span>
+                                <small class="text-muted ms-1">({{ vendor.reviews_count|default:0 }})</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="me-2">
+                                    <div class="fw-bold">{{ vendor.bookings_this_month|default:0 }}</div>
+                                    <small class="text-muted">This month</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-success">QAR {{ vendor.revenue_this_month|default:0|floatformat:2 }}</div>
+                            <small class="text-muted">This month</small>
+                        </td>
+                        <td>
+                            {% if vendor.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% elif vendor.status == 'pending' %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% elif vendor.status == 'suspended' %}
+                                <span class="badge bg-danger">Suspended</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button class="btn btn-link btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{% url 'core:admin_vendor_detail' vendor.id %}">
+                                        <i class="fas fa-eye me-2"></i>View Details</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'core:admin_vendor_edit' vendor.id %}">
+                                        <i class="fas fa-edit me-2"></i>Edit Profile</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    {% if vendor.is_active %}
+                                        <li><a class="dropdown-item text-warning" href="#" onclick="suspendVendor({{ vendor.id }})">
+                                            <i class="fas fa-ban me-2"></i>Suspend</a></li>
+                                    {% else %}
+                                        <li><a class="dropdown-item text-success" href="#" onclick="activateVendor({{ vendor.id }})">
+                                            <i class="fas fa-check me-2"></i>Activate</a></li>
+                                    {% endif %}
+                                    <li><a class="dropdown-item" href="#" onclick="sendMessage({{ vendor.id }})">
+                                        <i class="fas fa-envelope me-2"></i>Send Message</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteVendor({{ vendor.id }})">
+                                        <i class="fas fa-trash me-2"></i>Delete</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-users fa-3x mb-3"></i>
+                                <h5>No vendors found</h5>
+                                <p>Start by adding your first vendor to the system.</p>
+                                <a href="{% url 'core:admin_vendor_create' %}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Add First Vendor
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Card View -->
+        <div id="cardViewContent" class="d-none p-3">
+            <div class="row g-4" id="vendorsCardContainer">
+                {% for vendor in vendors %}
+                <div class="col-xl-4 col-lg-6 vendor-card" data-vendor-id="{{ vendor.id }}">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="avatar-circle bg-primary text-white me-3" style="width: 60px; height: 60px; line-height: 60px;">
+                                    {% if vendor.profile_picture %}
+                                        <img src="{{ vendor.profile_picture.url }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
+                                    {% else %}
+                                        <span class="fw-bold fs-5">{{ vendor.first_name.0 }}{{ vendor.last_name.0 }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ vendor.first_name }} {{ vendor.last_name }}</h6>
+                                    <small class="text-muted">{{ vendor.email }}</small>
+                                    <div class="mt-1">
+                                        {% if vendor.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-link btn-sm" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="{% url 'core:admin_vendor_detail' vendor.id %}">View Details</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'core:admin_vendor_edit' vendor.id %}">Edit Profile</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    {% for i in "12345"|make_list %}
+                                        {% if forloop.counter <= vendor.average_rating|floatformat:0 %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-muted"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="ms-2 fw-bold">{{ vendor.average_rating|floatformat:1|default:"0.0" }}</span>
+                                    <small class="text-muted ms-1">({{ vendor.reviews_count|default:0 }} reviews)</small>
+                                </div>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="text-center p-2 bg-light rounded">
+                                        <div class="fw-bold text-primary">{{ vendor.bookings_this_month|default:0 }}</div>
+                                        <small class="text-muted">Bookings</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-center p-2 bg-light rounded">
+                                        <div class="fw-bold text-success">{{ vendor.revenue_this_month|default:0|floatformat:0 }}</div>
+                                        <small class="text-muted">QAR Revenue</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-1">Services:</small>
+                                {% for service in vendor.services.all|slice:":2" %}
+                                    <span class="badge bg-light text-dark me-1">{{ service.name }}</span>
+                                {% endfor %}
+                                {% if vendor.services.count > 2 %}
+                                    <span class="badge bg-secondary">+{{ vendor.services.count|add:"-2" }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-transparent border-0">
+                            <div class="d-grid gap-2 d-md-flex">
+                                <a href="{% url 'core:admin_vendor_detail' vendor.id %}" class="btn btn-outline-primary btn-sm flex-fill">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </a>
+                                <a href="{% url 'core:admin_vendor_edit' vendor.id %}" class="btn btn-outline-secondary btn-sm flex-fill">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="card-footer bg-transparent border-0">
+        <nav aria-label="Vendors pagination">
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">&laquo; First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Initialize vendor management features
+    initVendorManagement();
+    
+    // Toggle between table and card view
+    $('input[name="viewMode"]').change(function() {
+        if ($(this).attr('id') === 'cardView') {
+            $('#tableViewContent').addClass('d-none');
+            $('#cardViewContent').removeClass('d-none');
+        } else {
+            $('#cardViewContent').addClass('d-none');
+            $('#tableViewContent').removeClass('d-none');
+        }
+    });
+});
+
+function initVendorManagement() {
+    // Initialize sortable columns
+    $('.sortable').click(function() {
+        const column = $(this).data('sort');
+        sortVendors(column);
+    });
+}
+
+function filterVendors() {
+    const searchTerm = $('#vendorSearch').val().toLowerCase();
+    const statusFilter = $('#statusFilter').val();
+    const categoryFilter = $('#categoryFilter').val();
+    const ratingFilter = $('#ratingFilter').val();
+    const dateFilter = $('#dateFilter').val();
+    
+    let visibleCount = 0;
+    
+    $('.vendor-row, .vendor-card').each(function() {
+        let isVisible = true;
+        const $row = $(this);
+        
+        // Search filter
+        if (searchTerm) {
+            const vendorText = $row.text().toLowerCase();
+            if (!vendorText.includes(searchTerm)) {
+                isVisible = false;
+            }
+        }
+        
+        // Status filter
+        if (statusFilter && isVisible) {
+            const statusBadge = $row.find('.badge').text().toLowerCase();
+            if (!statusBadge.includes(statusFilter)) {
+                isVisible = false;
+            }
+        }
+        
+        // Show/hide row
+        if (isVisible) {
+            $row.show();
+            visibleCount++;
+        } else {
+            $row.hide();
+        }
+    });
+    
+    $('#vendorCount').text(visibleCount);
+}
+
+function sortVendors(column) {
+    // TODO: Implement client-side sorting or AJAX call for server-side sorting
+    console.log('Sorting by:', column);
+}
+
+function toggleSelectAll() {
+    const isChecked = $('#selectAll').prop('checked');
+    $('.vendor-checkbox:visible').prop('checked', isChecked);
+}
+
+function bulkApprove() {
+    const selectedVendors = $('.vendor-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedVendors.length === 0) {
+        alert('Please select vendors to approve.');
+        return;
+    }
+    
+    if (confirm(`Approve ${selectedVendors.length} selected vendor(s)?`)) {
+        // TODO: Implement bulk approve functionality
+        console.log('Approving vendors:', selectedVendors);
+    }
+}
+
+function bulkSuspend() {
+    const selectedVendors = $('.vendor-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedVendors.length === 0) {
+        alert('Please select vendors to suspend.');
+        return;
+    }
+    
+    if (confirm(`Suspend ${selectedVendors.length} selected vendor(s)?`)) {
+        // TODO: Implement bulk suspend functionality
+        console.log('Suspending vendors:', selectedVendors);
+    }
+}
+
+function sendBulkMessage() {
+    const selectedVendors = $('.vendor-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedVendors.length === 0) {
+        alert('Please select vendors to message.');
+        return;
+    }
+    
+    // TODO: Open message composition modal
+    console.log('Sending message to vendors:', selectedVendors);
+}
+
+function activateVendor(vendorId) {
+    if (confirm('Activate this vendor?')) {
+        // TODO: Implement vendor activation
+        console.log('Activating vendor:', vendorId);
+    }
+}
+
+function suspendVendor(vendorId) {
+    if (confirm('Suspend this vendor? They will not be able to accept new bookings.')) {
+        // TODO: Implement vendor suspension
+        console.log('Suspending vendor:', vendorId);
+    }
+}
+
+function sendMessage(vendorId) {
+    // TODO: Open message composition modal for specific vendor
+    console.log('Sending message to vendor:', vendorId);
+}
+
+function deleteVendor(vendorId) {
+    if (confirm('Are you sure you want to delete this vendor? This action cannot be undone.')) {
+        // TODO: Implement vendor deletion
+        console.log('Deleting vendor:', vendorId);
+    }
+}
+
+function importVendors() {
+    // TODO: Open import modal or redirect to import page
+    console.log('Opening vendor import');
+}
+
+function exportVendors() {
+    // TODO: Implement vendor export functionality
+    window.location.href = '/admin/vendors/export/';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,936 @@
+{% extends 'admin_portal_base.html' %}
+
+{% block title %}Financial Management - Hawwa Admin{% endblock %}
+
+{% block page_title %}Financial Management{% endblock %}
+{% block page_subtitle %}Comprehensive financial overview and reporting{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Financial</li>
+{% endblock %}
+
+{% block content %}
+<!-- Revenue Overview Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-0">Total Revenue</h6>
+                        <h3 class="mb-0">QAR {{ financial_stats.total_revenue|default:"0"|floatformat:2 }}</h3>
+                        <small class="text-white-75">
+                            <i class="fas fa-arrow-up"></i> +15.3% from last month
+                        </small>
+                    </div>
+                    <div class="ms-3">
+                        <i class="fas fa-chart-line fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-0">This Month</h6>
+                        <h3 class="mb-0">QAR {{ financial_stats.monthly_revenue|default:"0"|floatformat:2 }}</h3>
+                        <small class="text-white-75">
+                            <i class="fas fa-calendar"></i> {{ financial_stats.monthly_transactions|default:0 }} transactions
+                        </small>
+                    </div>
+                    <div class="ms-3">
+                        <i class="fas fa-calendar-alt fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-0">Pending Payments</h6>
+                        <h3 class="mb-0">QAR {{ financial_stats.pending_payments|default:"0"|floatformat:2 }}</h3>
+                        <small class="text-white-75">
+                            <i class="fas fa-clock"></i> {{ financial_stats.pending_count|default:0 }} invoices
+                        </small>
+                    </div>
+                    <div class="ms-3">
+                        <i class="fas fa-hourglass-half fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white-50 mb-0">Outstanding</h6>
+                        <h3 class="mb-0">QAR {{ financial_stats.outstanding_amount|default:"0"|floatformat:2 }}</h3>
+                        <small class="text-white-75">
+                            <i class="fas fa-exclamation-triangle"></i> Overdue payments
+                        </small>
+                    </div>
+                    <div class="ms-3">
+                        <i class="fas fa-exclamation-circle fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions and Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                    <div class="d-flex flex-wrap gap-2 mb-2 mb-md-0">
+                        <a href="{% url 'core:admin_invoice_create' %}" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>Create Invoice
+                        </a>
+                        
+                        <button class="btn btn-outline-primary" onclick="processPayments()">
+                            <i class="fas fa-credit-card me-2"></i>Process Payments
+                        </button>
+                        
+                        <button class="btn btn-outline-info" onclick="generateReport()">
+                            <i class="fas fa-file-alt me-2"></i>Generate Report
+                        </button>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-download me-2"></i>Export
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="exportData('excel')">
+                                    <i class="fas fa-file-excel me-2"></i>Excel</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('pdf')">
+                                    <i class="fas fa-file-pdf me-2"></i>PDF Report</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('csv')">
+                                    <i class="fas fa-file-csv me-2"></i>CSV</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <select class="form-select" id="timeRangeFilter" onchange="filterByTime()">
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month" selected>This Month</option>
+                            <option value="quarter">This Quarter</option>
+                            <option value="year">This Year</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                        
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#advancedFilters">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Advanced Filters -->
+                <div class="collapse mt-3" id="advancedFilters">
+                    <div class="row g-3 p-3 bg-light rounded">
+                        <div class="col-md-3">
+                            <label class="form-label">Payment Status</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="">All Statuses</option>
+                                <option value="paid">Paid</option>
+                                <option value="pending">Pending</option>
+                                <option value="overdue">Overdue</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label">Payment Method</label>
+                            <select class="form-select" id="paymentMethodFilter">
+                                <option value="">All Methods</option>
+                                <option value="card">Credit/Debit Card</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="cash">Cash</option>
+                                <option value="digital_wallet">Digital Wallet</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label">Amount Range</label>
+                            <select class="form-select" id="amountFilter">
+                                <option value="">Any Amount</option>
+                                <option value="0-100">QAR 0 - 100</option>
+                                <option value="100-500">QAR 100 - 500</option>
+                                <option value="500-1000">QAR 500 - 1,000</option>
+                                <option value="1000+">QAR 1,000+</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label">Service Category</label>
+                            <select class="form-select" id="categoryFilter">
+                                <option value="">All Categories</option>
+                                <option value="wellness">Wellness & Spa</option>
+                                <option value="beauty">Beauty & Grooming</option>
+                                <option value="fitness">Fitness & Health</option>
+                                <option value="consultation">Consultation</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Financial Dashboard Tabs -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent border-0">
+        <ul class="nav nav-tabs card-header-tabs" id="financialTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                    <i class="fas fa-chart-pie me-2"></i>Overview
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="invoices-tab" data-bs-toggle="tab" data-bs-target="#invoices" type="button" role="tab">
+                    <i class="fas fa-file-invoice me-2"></i>Invoices
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#payments" type="button" role="tab">
+                    <i class="fas fa-credit-card me-2"></i>Payments
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="expenses-tab" data-bs-toggle="tab" data-bs-target="#expenses" type="button" role="tab">
+                    <i class="fas fa-receipt me-2"></i>Expenses
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab">
+                    <i class="fas fa-chart-bar me-2"></i>Reports
+                </button>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="card-body">
+        <div class="tab-content" id="financialTabsContent">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                <div class="row g-4">
+                    <!-- Revenue Chart -->
+                    <div class="col-lg-8">
+                        <div class="card border-0 bg-light">
+                            <div class="card-header bg-transparent border-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="card-title mb-0">Revenue Trend</h6>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <input type="radio" class="btn-check" name="chartPeriod" id="daily" checked>
+                                        <label class="btn btn-outline-secondary" for="daily">Daily</label>
+                                        
+                                        <input type="radio" class="btn-check" name="chartPeriod" id="monthly">
+                                        <label class="btn btn-outline-secondary" for="monthly">Monthly</label>
+                                        
+                                        <input type="radio" class="btn-check" name="chartPeriod" id="yearly">
+                                        <label class="btn btn-outline-secondary" for="yearly">Yearly</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="revenueChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Methods Distribution -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 bg-light">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="card-title mb-0">Payment Methods</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="paymentMethodsChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Transactions -->
+                    <div class="col-12">
+                        <div class="card border-0 bg-light">
+                            <div class="card-header bg-transparent border-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="card-title mb-0">Recent Transactions</h6>
+                                    <a href="#" class="btn btn-outline-primary btn-sm">View All</a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="bg-white">
+                                            <tr>
+                                                <th>Transaction ID</th>
+                                                <th>Client</th>
+                                                <th>Service</th>
+                                                <th>Amount</th>
+                                                <th>Method</th>
+                                                <th>Status</th>
+                                                <th>Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>#TXN001234</strong></td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-circle bg-primary text-white me-2" style="width: 30px; height: 30px; line-height: 30px;">
+                                                            S
+                                                        </div>
+                                                        Sarah Johnson
+                                                    </div>
+                                                </td>
+                                                <td>Massage Therapy</td>
+                                                <td class="fw-bold text-success">QAR 250.00</td>
+                                                <td><i class="fab fa-cc-visa me-1"></i> Card</td>
+                                                <td><span class="badge bg-success">Completed</span></td>
+                                                <td>Dec 15, 2024</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>#TXN001233</strong></td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-circle bg-secondary text-white me-2" style="width: 30px; height: 30px; line-height: 30px;">
+                                                            M
+                                                        </div>
+                                                        Mike Ahmed
+                                                    </div>
+                                                </td>
+                                                <td>Fitness Consultation</td>
+                                                <td class="fw-bold text-success">QAR 150.00</td>
+                                                <td><i class="fas fa-university me-1"></i> Transfer</td>
+                                                <td><span class="badge bg-warning">Pending</span></td>
+                                                <td>Dec 15, 2024</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>#TXN001232</strong></td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-circle bg-info text-white me-2" style="width: 30px; height: 30px; line-height: 30px;">
+                                                            L
+                                                        </div>
+                                                        Layla Al-Rashid
+                                                    </div>
+                                                </td>
+                                                <td>Beauty Treatment</td>
+                                                <td class="fw-bold text-success">QAR 320.00</td>
+                                                <td><i class="fab fa-paypal me-1"></i> PayPal</td>
+                                                <td><span class="badge bg-success">Completed</span></td>
+                                                <td>Dec 14, 2024</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Metrics -->
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="card-title mb-0">Key Financial Metrics</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="text-center p-2 border rounded">
+                                            <div class="h5 text-primary mb-0">{{ financial_stats.avg_transaction|default:"0"|floatformat:2 }}</div>
+                                            <small class="text-muted">Avg Transaction</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-center p-2 border rounded">
+                                            <div class="h5 text-success mb-0">{{ financial_stats.collection_rate|default:"0" }}%</div>
+                                            <small class="text-muted">Collection Rate</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-center p-2 border rounded">
+                                            <div class="h5 text-info mb-0">{{ financial_stats.refund_rate|default:"0" }}%</div>
+                                            <small class="text-muted">Refund Rate</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-center p-2 border rounded">
+                                            <div class="h5 text-warning mb-0">{{ financial_stats.churn_rate|default:"0" }}%</div>
+                                            <small class="text-muted">Churn Rate</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Performing Services -->
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="card-title mb-0">Top Performing Services</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span>Massage Therapy</span>
+                                        <strong>QAR 12,450</strong>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-primary" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span>Beauty Treatments</span>
+                                        <strong>QAR 8,920</strong>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-success" style="width: 65%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span>Fitness Sessions</span>
+                                        <strong>QAR 6,780</strong>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-info" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-0">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span>Consultations</span>
+                                        <strong>QAR 4,230</strong>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-warning" style="width: 35%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoices Tab -->
+            <div class="tab-pane fade" id="invoices" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">Invoice Management</h5>
+                    <div class="d-flex gap-2">
+                        <input type="text" class="form-control" placeholder="Search invoices..." style="width: 250px;">
+                        <a href="{% url 'core:admin_invoice_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>New Invoice
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Client</th>
+                                <th>Service</th>
+                                <th>Amount</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>INV-001234</strong></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle bg-primary text-white me-2" style="width: 30px; height: 30px; line-height: 30px;">
+                                            S
+                                        </div>
+                                        <div>
+                                            <div>Sarah Johnson</div>
+                                            <small class="text-muted">sarah@email.com</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Massage Therapy Package</td>
+                                <td class="fw-bold">QAR 750.00</td>
+                                <td>Dec 20, 2024</td>
+                                <td><span class="badge bg-warning">Pending</span></td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-link btn-sm" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>View</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-paper-plane me-2"></i>Send</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- More invoice rows... -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Payments Tab -->
+            <div class="tab-pane fade" id="payments" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">Payment History</h5>
+                    <button class="btn btn-primary" onclick="processPayments()">
+                        <i class="fas fa-credit-card me-2"></i>Process Payments
+                    </button>
+                </div>
+
+                <!-- Payment Summary Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-success text-white">
+                            <div class="card-body text-center">
+                                <h5 class="mb-0">QAR 45,250</h5>
+                                <small>Processed Today</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-warning text-white">
+                            <div class="card-body text-center">
+                                <h5 class="mb-0">QAR 8,750</h5>
+                                <small>Pending Processing</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-danger text-white">
+                            <div class="card-body text-center">
+                                <h5 class="mb-0">QAR 2,100</h5>
+                                <small>Failed Payments</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-info text-white">
+                            <div class="card-body text-center">
+                                <h5 class="mb-0">QAR 1,450</h5>
+                                <small>Refunded</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Transactions Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Payment ID</th>
+                                <th>Client</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>PAY-001234</strong></td>
+                                <td>Sarah Johnson</td>
+                                <td class="fw-bold text-success">QAR 250.00</td>
+                                <td><i class="fab fa-cc-visa me-1"></i> •••• 4532</td>
+                                <td><span class="badge bg-success">Success</span></td>
+                                <td>Dec 15, 2024 14:30</td>
+                                <td>
+                                    <button class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-receipt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <!-- More payment rows... -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Expenses Tab -->
+            <div class="tab-pane fade" id="expenses" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">Business Expenses</h5>
+                    <button class="btn btn-primary" onclick="addExpense()">
+                        <i class="fas fa-plus me-2"></i>Add Expense
+                    </button>
+                </div>
+
+                <!-- Expense Categories -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-2">
+                        <div class="card border-0 bg-light text-center">
+                            <div class="card-body">
+                                <i class="fas fa-building fa-2x text-primary mb-2"></i>
+                                <h6 class="mb-1">QAR 12,500</h6>
+                                <small class="text-muted">Rent</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card border-0 bg-light text-center">
+                            <div class="card-body">
+                                <i class="fas fa-users fa-2x text-success mb-2"></i>
+                                <h6 class="mb-1">QAR 8,750</h6>
+                                <small class="text-muted">Salaries</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card border-0 bg-light text-center">
+                            <div class="card-body">
+                                <i class="fas fa-bolt fa-2x text-warning mb-2"></i>
+                                <h6 class="mb-1">QAR 2,300</h6>
+                                <small class="text-muted">Utilities</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card border-0 bg-light text-center">
+                            <div class="card-body">
+                                <i class="fas fa-shopping-cart fa-2x text-info mb-2"></i>
+                                <h6 class="mb-1">QAR 1,890</h6>
+                                <small class="text-muted">Supplies</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card border-0 bg-light text-center">
+                            <div class="card-body">
+                                <i class="fas fa-bullhorn fa-2x text-purple mb-2"></i>
+                                <h6 class="mb-1">QAR 3,200</h6>
+                                <small class="text-muted">Marketing</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card border-0 bg-light text-center">
+                            <div class="card-body">
+                                <i class="fas fa-ellipsis-h fa-2x text-secondary mb-2"></i>
+                                <h6 class="mb-1">QAR 4,560</h6>
+                                <small class="text-muted">Other</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expenses Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Vendor</th>
+                                <th>Receipt</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Dec 15, 2024</td>
+                                <td>Office Rent - December</td>
+                                <td><span class="badge bg-primary">Rent</span></td>
+                                <td class="fw-bold text-danger">QAR 12,500.00</td>
+                                <td>Property Management Co.</td>
+                                <td>
+                                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-paperclip"></i>
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-link btn-sm" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                            <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- More expense rows... -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div class="tab-pane fade" id="reports" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="card-title mb-0">Quick Reports</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-primary text-start" onclick="generateReport('revenue')">
+                                        <i class="fas fa-chart-line me-2"></i>Revenue Report
+                                    </button>
+                                    <button class="btn btn-outline-success text-start" onclick="generateReport('profit')">
+                                        <i class="fas fa-dollar-sign me-2"></i>Profit & Loss
+                                    </button>
+                                    <button class="btn btn-outline-info text-start" onclick="generateReport('cash_flow')">
+                                        <i class="fas fa-exchange-alt me-2"></i>Cash Flow
+                                    </button>
+                                    <button class="btn btn-outline-warning text-start" onclick="generateReport('tax')">
+                                        <i class="fas fa-file-alt me-2"></i>Tax Summary
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="card-title mb-0">Custom Report Builder</h6>
+                            </div>
+                            <div class="card-body">
+                                <form>
+                                    <div class="mb-3">
+                                        <label class="form-label">Report Type</label>
+                                        <select class="form-select">
+                                            <option>Financial Summary</option>
+                                            <option>Service Performance</option>
+                                            <option>Client Analysis</option>
+                                            <option>Vendor Commissions</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Date Range</label>
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <input type="date" class="form-control">
+                                            </div>
+                                            <div class="col-6">
+                                                <input type="date" class="form-control">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-file-alt me-2"></i>Generate Report
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Reports -->
+                    <div class="col-12">
+                        <div class="card border-0 bg-light">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="card-title mb-0">Recent Reports</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Report Name</th>
+                                                <th>Type</th>
+                                                <th>Generated By</th>
+                                                <th>Date</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>December Revenue Summary</td>
+                                                <td><span class="badge bg-primary">Revenue</span></td>
+                                                <td>Admin User</td>
+                                                <td>Dec 15, 2024</td>
+                                                <td>
+                                                    <a href="#" class="btn btn-outline-primary btn-sm me-1">
+                                                        <i class="fas fa-download"></i>
+                                                    </a>
+                                                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Q4 Profit & Loss</td>
+                                                <td><span class="badge bg-success">P&L</span></td>
+                                                <td>Finance Manager</td>
+                                                <td>Dec 14, 2024</td>
+                                                <td>
+                                                    <a href="#" class="btn btn-outline-primary btn-sm me-1">
+                                                        <i class="fas fa-download"></i>
+                                                    </a>
+                                                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    // Initialize charts
+    initRevenueChart();
+    initPaymentMethodsChart();
+    
+    // Initialize filters
+    initFilters();
+});
+
+function initRevenueChart() {
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Revenue',
+                data: [15000, 18000, 22000, 25000, 21000, 28000, 32000, 29000, 35000, 38000, 42000, 45000],
+                borderColor: '#6f42c1',
+                backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'QAR ' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initPaymentMethodsChart() {
+    const ctx = document.getElementById('paymentMethodsChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Credit Card', 'Bank Transfer', 'Digital Wallet', 'Cash'],
+            datasets: [{
+                data: [45, 25, 20, 10],
+                backgroundColor: [
+                    '#6f42c1',
+                    '#28a745',
+                    '#17a2b8',
+                    '#ffc107'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function initFilters() {
+    // Add event listeners for filters
+    $('#statusFilter, #paymentMethodFilter, #amountFilter, #categoryFilter').change(function() {
+        applyFilters();
+    });
+}
+
+function filterByTime() {
+    const timeRange = $('#timeRangeFilter').val();
+    console.log('Filtering by time range:', timeRange);
+    // TODO: Implement time-based filtering
+}
+
+function applyFilters() {
+    const status = $('#statusFilter').val();
+    const method = $('#paymentMethodFilter').val();
+    const amount = $('#amountFilter').val();
+    const category = $('#categoryFilter').val();
+    
+    console.log('Applying filters:', { status, method, amount, category });
+    // TODO: Implement filtering logic
+}
+
+function processPayments() {
+    console.log('Opening payment processing modal');
+    // TODO: Implement payment processing functionality
+}
+
+function generateReport(type) {
+    console.log('Generating report:', type || 'custom');
+    // TODO: Implement report generation
+}
+
+function exportData(format) {
+    console.log('Exporting data in format:', format);
+    // TODO: Implement data export functionality
+}
+
+function addExpense() {
+    console.log('Opening add expense modal');
+    // TODO: Implement expense addition functionality
+}
+</script>
+{% endblock %}

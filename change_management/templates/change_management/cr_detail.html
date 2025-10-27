@@ -1,70 +1,204 @@
+{% extends 'change_management/change_management_base.html' %}
 {% load static %}
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Change Request Detail</title>
-    <style>
-      body{font-family:Arial,Helvetica,sans-serif;max-width:900px;margin:16px}
-      .meta{color:#666;font-size:0.9em}
-      .comment-list{list-style:none;padding:0}
-      .comment-list li{padding:8px 0;border-bottom:1px solid #eee}
-      .comment-form{margin-top:12px}
-      .btn{background:#007bff;color:#fff;border:none;padding:8px 12px;border-radius:4px}
-    </style>
-  </head>
-  <body>
-    <h1>{{ cr.title }}</h1>
-    <p class="meta">Reported by: {{ cr.reporter }}{% if cr.assignee %} • Assigned to: {{ cr.assignee }}{% endif %} • Status: {{ cr.status }}</p>
-    <p>{{ cr.description }}</p>
-    <h2>Comments</h2>
-    <ul id="comments" class="comment-list">
-      {% for c in comments %}
-        <li><strong>{{ c.author }}</strong>: {{ c.text }} <span class="meta">({{ c.created_at }})</span></li>
-      {% empty %}
-        <li id="no-comments">No comments yet.</li>
-      {% endfor %}
-    </ul>
-    {% if user.is_authenticated %}
-    <div class="comment-form">
-      <h3>Add Comment</h3>
-      <form id="commentForm" method="post" action="">{% csrf_token %}
-        <textarea id="commentText" name="text" rows="4" cols="60"></textarea><br>
-        <button id="commentSubmit" class="btn" type="submit">Add comment</button>
-      </form>
-    </div>
 
-    <script>
-      // Progressive enhancement: try AJAX submit, fall back to normal POST
-      (function(){
-        const form = document.getElementById('commentForm');
-        const txt = document.getElementById('commentText');
-        const list = document.getElementById('comments');
-        form.addEventListener('submit', function(e){
-          e.preventDefault();
-          const value = txt.value.trim();
-          if(!value) return;
-          fetch('', {method:'POST', headers:{'X-Requested-With':'XMLHttpRequest','Content-Type':'application/x-www-form-urlencoded'}, body:'text='+encodeURIComponent(value)})
-          .then(r=>{
-            if(r.ok) return r.text();
-            throw new Error('Failed to post');
-          })
-          .then(()=>{
-            // add to list
-            const li = document.createElement('li');
-            li.innerHTML = '<strong>{{ user.get_full_name|escapejs }}</strong>: '+value+' <span class="meta">(just now)</span>';
-            const no = document.getElementById('no-comments'); if(no) no.remove();
-            list.insertBefore(li, list.firstChild);
-            txt.value='';
-          }).catch(function(){
-            // fallback to normal submit on failure
-            form.submit();
-          });
-        });
-      })();
-    </script>
-    {% else %}
-      <p><em>Log in to add comments.</em></p>
-    {% endif %}
-  </body>
-  </html>
+{% block page_title %}{{ cr.title }} - Change Request Detail{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-light p-3 rounded">
+            <li class="breadcrumb-item">
+                <a href="{% url 'change_management:dashboard' %}" class="text-decoration-none">
+                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'change_management:change_list' %}" class="text-decoration-none">
+                    Change Requests
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">CR#{{ cr.id }}</li>
+        </ol>
+    </nav>
+
+    <!-- Change Request Header -->
+    <div class="change-card mb-4">
+        <div class="card-body">
+            <div class="row align-items-start">
+                <div class="col-lg-8">
+                    <h1 class="h2 mb-3">
+                        <i class="fas fa-code-branch me-2 text-success"></i>
+                        {{ cr.title }}
+                    </h1>
+                    <div class="change-meta mb-3">
+                        <span class="me-3">
+                            <i class="fas fa-user me-1"></i>
+                            <strong>Reporter:</strong> {{ cr.reporter.get_full_name|default:cr.reporter.email|default:"Unknown" }}
+                        </span>
+                        {% if cr.assignee %}
+                        <span class="me-3">
+                            <i class="fas fa-user-tag me-1"></i>
+                            <strong>Assigned to:</strong> {{ cr.assignee.get_full_name|default:cr.assignee.email }}
+                        </span>
+                        {% endif %}
+                        <span class="me-3">
+                            <i class="fas fa-clock me-1"></i>
+                            <strong>Created:</strong> {{ cr.created_at|date:"M d, Y g:i A" }}
+                        </span>
+                        <span class="me-3">
+                            <i class="fas fa-edit me-1"></i>
+                            <strong>Updated:</strong> {{ cr.updated_at|date:"M d, Y g:i A" }}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <div class="status-badge status-{{ cr.status|lower }} mb-2 d-inline-block">
+                        {{ cr.get_status_display }}
+                    </div>
+                    <div class="text-muted">
+                        <small>Priority: {{ cr.priority }}</small>
+                    </div>
+                </div>
+            </div>
+
+            {% if cr.description %}
+            <div class="mt-4">
+                <h5><i class="fas fa-info-circle me-2"></i>Description</h5>
+                <div class="bg-light p-3 rounded">
+                    <p class="mb-0">{{ cr.description|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <!-- Comments Section -->
+    <div class="change-card">
+        <div class="card-header bg-transparent border-0">
+            <h5 class="mb-0">
+                <i class="fas fa-comments me-2"></i>Comments
+                <span class="badge bg-primary ms-2">{{ comments.count }}</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <div id="comments" class="mb-4">
+                {% for c in comments %}
+                <div class="comment-item mb-3 p-3 bg-light rounded">
+                    <div class="d-flex align-items-start">
+                        <div class="user-avatar me-3">
+                            {{ c.author.get_full_name.0|default:c.author.email.0|default:"?" }}
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="text-primary">{{ c.author.get_full_name|default:c.author.email|default:"Anonymous" }}</strong>
+                                <small class="text-muted">{{ c.created_at|date:"M d, Y g:i A" }}</small>
+                            </div>
+                            <p class="mb-0">{{ c.text|linebreaks }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div id="no-comments" class="text-center py-4 text-muted">
+                    <i class="fas fa-comment-slash fa-2x mb-3 d-block"></i>
+                    No comments yet. Be the first to comment!
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if user.is_authenticated %}
+            <div class="comment-form">
+                <h6 class="mb-3"><i class="fas fa-plus-circle me-2"></i>Add Comment</h6>
+                <form id="commentForm" method="post" action="">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <textarea id="commentText" name="text" class="form-control" rows="4" 
+                                  placeholder="Enter your comment here..." required></textarea>
+                    </div>
+                    <button id="commentSubmit" class="btn btn-change" type="submit">
+                        <i class="fas fa-paper-plane me-2"></i>Add Comment
+                    </button>
+                </form>
+            </div>
+
+            <script>
+                // Progressive enhancement: try AJAX submit, fall back to normal POST
+                document.addEventListener('DOMContentLoaded', function(){
+                    const form = document.getElementById('commentForm');
+                    const txt = document.getElementById('commentText');
+                    const list = document.getElementById('comments');
+                    
+                    form.addEventListener('submit', function(e){
+                        e.preventDefault();
+                        const value = txt.value.trim();
+                        if(!value) return;
+                        
+                        // Show loading state
+                        const btn = document.getElementById('commentSubmit');
+                        const originalText = btn.innerHTML;
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Posting...';
+                        btn.disabled = true;
+                        
+                        fetch('', {
+                            method:'POST', 
+                            headers:{
+                                'X-Requested-With':'XMLHttpRequest',
+                                'Content-Type':'application/x-www-form-urlencoded',
+                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                            }, 
+                            body:'text='+encodeURIComponent(value)
+                        })
+                        .then(r=>{
+                            if(r.ok) return r.json();
+                            throw new Error('Failed to post');
+                        })
+                        .then(()=>{
+                            // Add new comment to list
+                            const commentDiv = document.createElement('div');
+                            commentDiv.className = 'comment-item mb-3 p-3 bg-light rounded';
+                            commentDiv.innerHTML = `
+                                <div class="d-flex align-items-start">
+                                    <div class="user-avatar me-3">{{ user.get_full_name.0|default:user.email.0|default:"?" }}</div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <strong class="text-primary">{{ user.get_full_name|default:user.email|escapejs }}</strong>
+                                            <small class="text-muted">just now</small>
+                                        </div>
+                                        <p class="mb-0">${value.replace(/\n/g, '<br>')}</p>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            const noComments = document.getElementById('no-comments');
+                            if(noComments) noComments.remove();
+                            
+                            list.insertBefore(commentDiv, list.firstChild);
+                            txt.value = '';
+                            
+                            // Reset button
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        })
+                        .catch(function(){
+                            // Fallback to normal submit on failure
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                            form.submit();
+                        });
+                    });
+                });
+            </script>
+            {% else %}
+            <div class="text-center py-3">
+                <p class="text-muted mb-3">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    You must be logged in to add comments.
+                </p>
+                <a href="{% url 'login' %}?next={{ request.get_full_path }}" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

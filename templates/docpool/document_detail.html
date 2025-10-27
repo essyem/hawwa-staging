@@ -1,0 +1,287 @@
+{% extends 'admin_base_unified.html' %}
+{% load static %}
+
+{% block title %}{{ object.title }} - Document Detail{% endblock %}
+
+{% block extra_css %}
+<style>
+    .document-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .reference-badge {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    .info-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    .file-preview {
+        max-width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">Document Details</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'docpool:document_list' %}">Document Pool</a></li>
+                            <li class="breadcrumb-item active">{{ object.title|truncatechars:30 }}</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="{% url 'docpool:document_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Documents
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="document-header">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="mb-2">{{ object.title }}</h2>
+                        {% if object.reference_number %}
+                        <div class="mb-2">
+                            <span class="badge bg-light text-dark reference-badge">
+                                <i class="fas fa-hashtag"></i> {{ object.reference_number.reference_number }}
+                            </span>
+                        </div>
+                        {% endif %}
+                        {% if object.description %}
+                        <p class="mb-0 opacity-75">{{ object.description }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{{ object.file.url }}" class="btn btn-light btn-lg" download>
+                            <i class="fas fa-download"></i> Download File
+                        </a>
+                        {% if object.file.url|slice:"-4:" == ".pdf" %}
+                        <a href="{{ object.file.url }}" target="_blank" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-external-link-alt"></i> View PDF
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Document Information -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="fas fa-info-circle"></i> Document Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h6 class="fw-bold text-primary"><i class="fas fa-calendar"></i> Period Information</h6>
+                                <p class="mb-1"><strong>Year:</strong> {{ object.year }}</p>
+                                <p class="mb-0"><strong>Month:</strong> {{ object.get_month_display }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h6 class="fw-bold text-success"><i class="fas fa-building"></i> Department</h6>
+                                {% if object.department %}
+                                <p class="mb-1"><strong>Code:</strong> <span class="badge bg-info">{{ object.department.code }}</span></p>
+                                <p class="mb-0"><strong>Name:</strong> {{ object.department.name }}</p>
+                                {% else %}
+                                <p class="text-muted mb-0">No department assigned</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h6 class="fw-bold text-warning"><i class="fas fa-tag"></i> Document Type</h6>
+                                {% if object.document_type %}
+                                <p class="mb-1"><strong>Code:</strong> <span class="badge bg-secondary">{{ object.document_type.code }}</span></p>
+                                <p class="mb-0"><strong>Name:</strong> {{ object.document_type.name }}</p>
+                                {% else %}
+                                <p class="text-muted mb-0">No type assigned</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h6 class="fw-bold text-danger"><i class="fas fa-border-style"></i> Border Classification</h6>
+                                {% if object.border %}
+                                <p class="mb-1"><strong>Code:</strong> <span class="badge bg-warning">{{ object.border.code }}</span></p>
+                                <p class="mb-0"><strong>Name:</strong> {{ object.border.name }}</p>
+                                {% else %}
+                                <p class="text-muted mb-0">No border classification</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if object.reference_number %}
+                    <div class="info-card">
+                        <h6 class="fw-bold text-primary"><i class="fas fa-hashtag"></i> Reference Information</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Reference Number:</strong></p>
+                                <code class="reference-badge">{{ object.reference_number.reference_number }}</code>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Sequence:</strong> {{ object.reference_number.sequence }}</p>
+                                <p class="mb-0"><strong>Generated:</strong> {{ object.reference_number.created_at|date:"M d, Y H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- File Information -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="fas fa-file"></i> File Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>File Name:</strong> {{ object.file.name|slice:"20:" }}</p>
+                            <p class="mb-2"><strong>File Type:</strong> 
+                                {% if ".pdf" in object.file.name %}
+                                <span class="badge bg-danger"><i class="fas fa-file-pdf"></i> PDF</span>
+                                {% elif ".doc" in object.file.name or ".docx" in object.file.name %}
+                                <span class="badge bg-primary"><i class="fas fa-file-word"></i> Word</span>
+                                {% elif ".xls" in object.file.name or ".xlsx" in object.file.name %}
+                                <span class="badge bg-success"><i class="fas fa-file-excel"></i> Excel</span>
+                                {% elif ".jpg" in object.file.name or ".png" in object.file.name %}
+                                <span class="badge bg-info"><i class="fas fa-file-image"></i> Image</span>
+                                {% else %}
+                                <span class="badge bg-secondary"><i class="fas fa-file"></i> Document</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Upload Date:</strong> {{ object.uploaded_at|date:"F d, Y H:i" }}</p>
+                            <p class="mb-2"><strong>Uploaded By:</strong> 
+                                {{ object.uploaded_by.get_full_name|default:object.uploaded_by.username }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Sidebar -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="fas fa-tools"></i> Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ object.file.url }}" class="btn btn-primary" download>
+                            <i class="fas fa-download"></i> Download File
+                        </a>
+                        
+                        {% if object.file.url|slice:"-4:" == ".pdf" %}
+                        <a href="{{ object.file.url }}" target="_blank" class="btn btn-outline-primary">
+                            <i class="fas fa-external-link-alt"></i> View in Browser
+                        </a>
+                        {% endif %}
+                        
+                        {% if user.is_staff %}
+                        <hr>
+                        <a href="/admin/docpool/document/{{ object.pk }}/change/" class="btn btn-outline-secondary" target="_blank">
+                            <i class="fas fa-edit"></i> Edit in Admin
+                        </a>
+                        
+                        {% if object.reference_number %}
+                        <a href="/admin/docpool/referencenumber/{{ object.reference_number.pk }}/change/" class="btn btn-outline-info" target="_blank">
+                            <i class="fas fa-hashtag"></i> View Reference
+                        </a>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="fas fa-chart-bar"></i> Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="row text-center">
+                            <div class="col-12 mb-3">
+                                <h3 class="text-primary">{{ object.year }}</h3>
+                                <small class="text-muted">Document Year</small>
+                            </div>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h5 class="text-success">{{ object.get_month_display }}</h5>
+                                <small class="text-muted">Month</small>
+                            </div>
+                            <div class="col-6">
+                                {% if object.reference_number %}
+                                <h5 class="text-info">{{ object.reference_number.sequence }}</h5>
+                                <small class="text-muted">Sequence</small>
+                                {% else %}
+                                <h5 class="text-muted">-</h5>
+                                <small class="text-muted">No Ref</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Add tooltips
+    $('[title]').tooltip();
+    
+    // File type detection and icon display
+    const fileName = "{{ object.file.name }}".toLowerCase();
+    if (fileName.includes('.pdf')) {
+        $('.file-type-icon').html('<i class="fas fa-file-pdf text-danger"></i>');
+    } else if (fileName.includes('.doc')) {
+        $('.file-type-icon').html('<i class="fas fa-file-word text-primary"></i>');
+    } else if (fileName.includes('.xls')) {
+        $('.file-type-icon').html('<i class="fas fa-file-excel text-success"></i>');
+    } else if (fileName.includes('.jpg') || fileName.includes('.png')) {
+        $('.file-type-icon').html('<i class="fas fa-file-image text-info"></i>');
+    }
+});
+</script>
+{% endblock %}

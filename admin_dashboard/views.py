@@ -24,6 +24,7 @@ from bookings.models import Booking
 from services.models import Service, ServiceReview
 from vendors.models import VendorProfile
 from ai_buddy.models import WellnessTracking, Conversation, AIBuddyProfile
+from docpool.models import DocpoolDocument, DocpoolDepartment
 
 
 def is_admin_user(user):
@@ -100,6 +101,12 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         total_services = Service.objects.count()
         active_vendors = VendorProfile.objects.filter(status='active').count()
         
+        # Docpool statistics
+        total_documents = DocpoolDocument.objects.count()
+        new_documents_30d = DocpoolDocument.objects.filter(
+            uploaded_at__gte=thirty_days_ago
+        ).count()
+        
         return {
             'total_users': total_users,
             'new_users_30d': new_users_30d,
@@ -111,6 +118,10 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             
             'total_services': total_services,
             'active_vendors': active_vendors,
+            
+            'total_documents': total_documents,
+            'new_documents_30d': new_documents_30d,
+            'document_growth_rate': (new_documents_30d / max(total_documents - new_documents_30d, 1)) * 100,
         }
     
     def _get_user_stats(self):

@@ -1,93 +1,13 @@
 {% load i18n %}
-<footer class="footer">
-    <div class="container">
-        <div class="row">
-                <div class="col-md-4 mb-4">
-                <h5>
-                    <i class="fas fa-spa me-2"></i>{% trans "Hawwa Wellness" %}
-                </h5>
-                <p>{% trans "Supporting mothers through their postpartum journey with personalized care, luxury services, and expert guidance." %}</p>
-                <div class="social-links mt-3">
-                    <a href="#" class="me-3"><i class="fab fa-facebook-f fa-lg"></i></a>
-                    <a href="#" class="me-3"><i class="fab fa-twitter fa-lg"></i></a>
-                    <a href="#" class="me-3"><i class="fab fa-instagram fa-lg"></i></a>
-                    <a href="#" class="me-3"><i class="fab fa-linkedin-in fa-lg"></i></a>
-                </div>
-            </div>
-            <div class="col-md-3 mb-4">
-                <h5>{% trans "Services" %}</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2"><a href="{% url 'services:accommodation_list' %}">
-                        <i class="fas fa-bed me-1"></i>{% trans "Retreat Stays" %}</a></li>
-                    <li class="mb-2"><a href="{% url 'services:homecare_list' %}">
-                        <i class="fas fa-home me-1"></i>{% trans "Home Care" %}</a></li>
-                    <li class="mb-2"><a href="{% url 'services:wellness_list' %}">
-                        <i class="fas fa-spa me-1"></i>{% trans "Wellness Services" %}</a></li>
-                    <li class="mb-2"><a href="{% url 'services:nutrition_list' %}">
-                        <i class="fas fa-utensils me-1"></i>{% trans "Nutritional Support" %}</a></li>
-                </ul>
-            </div>
-            <div class="col-md-2 mb-4">
-                <h5>{% trans "Company" %}</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2"><a href="{% url 'core:home' %}">{% trans "Home" %}</a></li>
-                    <li class="mb-2"><a href="{% url 'core:about' %}">{% trans "About Us" %}</a></li>
-                    <li class="mb-2"><a href="{% url 'core:contact' %}">{% trans "Contact" %}</a></li>
-                    <li class="mb-2"><a href="{% url 'core:faq' %}">{% trans "FAQs" %}</a></li>
-                    <li class="mb-2"><a href="{% url 'core:terms' %}">{% trans "Terms" %}</a></li>
-                    <li class="mb-2"><a href="{% url 'core:privacy' %}">{% trans "Privacy" %}</a></li>
-                </ul>
-            </div>
-            <div class="col-md-3 mb-4">
-                <h5>{% trans "Contact Information" %}</h5>
-                <div class="contact-info">
-                    <p class="mb-2">
-                        <i class="fas fa-map-marker-alt me-2"></i>
-                        {% trans "123 Healthcare Avenue" %}<br>
-                        <span class="ms-4">{% trans "Wellness District, WD 12345" %}</span>
-                    </p>
-                    <p class="mb-2">
-                        <i class="fas fa-phone me-2"></i>
-                        {# Visible phone (tel) #}
-                        <a href="tel:{{ HAWWA_SETTINGS.PHONE_NUMBER|default:'+97472126440'|urlencode }}">{{ HAWWA_SETTINGS.PHONE_NUMBER|default:'+974 7212 6440' }}</a>
-                        {# WhatsApp link: normalize number by removing spaces and plus sign for wa.me; keep both web and mobile-capable links #}
-                        {% with raw_number=HAWWA_SETTINGS.PHONE_NUMBER|default:'+974 7212 6440' %}
-                            {% comment %}Create compact number for wa.me: remove spaces and leading +{% endcomment %}
-                            {% with compact=raw_number|cut:' ' %}
-                                {% with compact=compact|cut:'+' %}
-                                    <a class="ms-3 text-success" href="https://wa.me/{{ compact }}" target="_blank" rel="noopener">
-                                        <i class="fab fa-whatsapp fa-lg"></i>
-                                        <span class="visually-hidden">WhatsApp</span>
-                                    </a>
-                                {% endwith %}
-                            {% endwith %}
-                        {% endwith %}
-                    </p>
-                    <p class="mb-2">
-                        <i class="fas fa-envelope me-2"></i>
-                        <a href="mailto:{{ HAWWA_SETTINGS.SUPPORT_EMAIL|default:'hello@hawwawellness.com' }}">{{ HAWWA_SETTINGS.SUPPORT_EMAIL|default:'hello@hawwawellness.com' }}</a>
-                    </p>
-                    <p class="mb-0">
-                        <i class="fas fa-clock me-2"></i>
-                        {% trans "24/7 Support Available" %}
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <hr style="border-color: rgba(255,255,255,0.2); margin: 2rem 0 1rem;">
-        
+<footer class="footer bg-dark text-light py-2 border-top" style="border-color: rgba(255,255,255,0.05);">
+    <div class="container-fluid">
         <div class="row align-items-center">
             <div class="col-md-6">
-                <p class="mb-0">
-                    © {% now "Y" %} {% trans "Hawwa Postpartum Care. All rights reserved." %}
-                </p>
-                <p class="mb-0 small text-light">Powered by <a href="https://trendzapps.com" class="text-light" target="_blank" rel="noopener">TrendzApps</a></p>
+                <small class="d-block">© {% now "Y" %} Hawwa Postpartum Care. All rights reserved.</small>
+                <small class="d-block">Powered by <a href="https://trendzapps.com" class="text-light" target="_blank" rel="noopener">TrendzApps</a></small>
             </div>
-                <div class="col-md-6 text-md-end">
-                <small class="text-light">
-                    {% trans "Providing wellness & postpartum care since 2024" %}
-                </small>
+            <div class="col-md-6 text-md-end">
+                <small class="d-block">Providing wellness & postpartum care since 2024</small>
             </div>
         </div>
     </div>

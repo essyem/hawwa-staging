@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'bookings/bookings_base.html' %}
 {% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
@@ -11,7 +11,7 @@
 {% endif %}
 {% endblock %}
 
-{% block content %}
+{% block booking_content %}
 <div class="container-fluid py-4">
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
@@ -25,6 +25,42 @@
             {% endif %}
         </ol>
     </nav>
+
+    <!-- Navigation Tabs -->
+    <div class="booking-nav">
+        <ul class="nav nav-pills p-3">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'bookings:booking_dashboard' %}">
+                    <i class="fas fa-home"></i> {% trans "Dashboard" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'bookings:booking_list' %}">
+                    <i class="fas fa-calendar-check"></i> {% trans "All Bookings" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'bookings:booking_create' %}">
+                    <i class="fas fa-plus"></i> {% trans "New Booking" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'bookings:booking_list' %}?status=pending">
+                    <i class="fas fa-clock"></i> {% trans "Pending" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'bookings:booking_list' %}?status=confirmed">
+                    <i class="fas fa-check-circle"></i> {% trans "Confirmed" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'services:service_list' %}">
+                    <i class="fas fa-concierge-bell"></i> {% trans "Services" %}
+                </a>
+            </li>
+        </ul>
+    </div>
 
     <!-- Page Header -->
     <div class="row mb-4">
@@ -106,11 +142,8 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 {{ form.end_date|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form.duration_hours|as_crispy_field }}
                             </div>
                         </div>
                     </div>
@@ -124,18 +157,18 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                {{ form.client_name|as_crispy_field }}
+                                {{ form.client_email|as_crispy_field }}
                             </div>
                             <div class="col-md-6">
-                                {{ form.client_email|as_crispy_field }}
+                                {{ form.client_phone|as_crispy_field }}
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6">
-                                {{ form.client_phone|as_crispy_field }}
+                                {{ form.emergency_contact|as_crispy_field }}
                             </div>
                             <div class="col-md-6">
-                                {{ form.emergency_contact|as_crispy_field }}
+                                {{ form.emergency_phone|as_crispy_field }}
                             </div>
                         </div>
                     </div>
@@ -149,46 +182,26 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-12">
-                                {{ form.location_address|as_crispy_field }}
+                                {{ form.address|as_crispy_field }}
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6">
-                                {{ form.location_city|as_crispy_field }}
+                                {{ form.city|as_crispy_field }}
                             </div>
                             <div class="col-md-6">
-                                {{ form.location_postal_code|as_crispy_field }}
+                                {{ form.postal_code|as_crispy_field }}
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-12">
-                                {{ form.location_notes|as_crispy_field }}
+                                {{ form.special_instructions|as_crispy_field }}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Pricing (for admin users) -->
-                {% if user.is_staff %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">{% trans "Pricing" %} <small class="text-muted">({% trans "Admin Only" %})</small></h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4">
-                                {{ form.base_price|as_crispy_field }}
-                            </div>
-                            <div class="col-md-4">
-                                {{ form.discount_amount|as_crispy_field }}
-                            </div>
-                            <div class="col-md-4">
-                                {{ form.tax_amount|as_crispy_field }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
+
             </div>
 
             <!-- Sidebar -->
@@ -233,13 +246,10 @@
                                 </div>
                             </div>
                             
-                            {% if form.base_price.value %}
                             <hr>
-                            <div class="d-flex justify-content-between">
-                                <strong>{% trans "Estimated Total:" %}</strong>
-                                <strong id="summary-total">${{ form.base_price.value|floatformat:2 }}</strong>
+                            <div class="text-muted">
+                                <small>{% trans "Pricing will be calculated based on your selected service and requirements." %}</small>
                             </div>
-                            {% endif %}
                         </div>
                     </div>
                     <div class="card-footer">
@@ -322,23 +332,15 @@ $(document).ready(function() {
         const priority = $('#id_priority').val();
         $('#summary-priority').text(priority ? priority.charAt(0).toUpperCase() + priority.slice(1) : 'Normal');
         
-        // Update pricing if available
-        const basePrice = $('#id_base_price').val();
-        if (basePrice) {
-            $('#summary-total').text('$' + parseFloat(basePrice).toFixed(2));
-        }
+        // Note: Pricing will be calculated server-side based on service selection
     }
     
     // Bind events
-    $('#id_service, #id_start_date, #id_start_time, #id_priority, #id_base_price').on('change', updateSummary);
+    $('#id_service, #id_start_date, #id_start_time, #id_priority').on('change', updateSummary);
     
     // Auto-fill client info from user profile if empty
     if (!$('#id_client_email').val() && '{{ user.email }}') {
         $('#id_client_email').val('{{ user.email }}');
-    }
-    
-    if (!$('#id_client_name').val() && '{{ user.get_full_name }}') {
-        $('#id_client_name').val('{{ user.get_full_name }}');
     }
     
     // Form validation

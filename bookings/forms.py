@@ -35,6 +35,8 @@ class BookingForm(forms.ModelForm):
         }
         
     def __init__(self, *args, **kwargs):
+        # Extract user from kwargs before passing to parent
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         self.fields['service'].widget.attrs.update({'class': 'form-select'})
         
@@ -46,7 +48,7 @@ class BookingForm(forms.ModelForm):
                 self.fields[field].required = False
         
         # Auto-populate user email if available
-        if hasattr(self, 'user') and self.user.email and not self.instance.pk:
+        if self.user and self.user.email and not self.instance.pk:
             self.fields['client_email'].initial = self.user.email
             
     def clean(self):

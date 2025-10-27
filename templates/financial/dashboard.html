@@ -1,11 +1,9 @@
-{% extends 'admin_base_unified.html' %}
+{% extends 'financial/financial_base.html' %}
 {% load static %}
 {% load humanize %}
+{% load i18n %}
 
-{% block title %}Financial Dashboard - Hawwa Admin{% endblock %}
-
-{% block page_title %}Financial Dashboard{% endblock %}
-{% block page_subtitle %}Overview of your financial performance and key metrics{% endblock %}
+{% block title %}{% trans "Financial Dashboard" %} - Hawwa Admin{% endblock %}
 
 {% block breadcrumb %}
 <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
@@ -154,7 +152,58 @@
 </style>
 {% endblock %}
 
-{% block content %}
+{% block financial_content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Financial Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-chart-line text-primary"></i>
+                {% trans "Financial Dashboard" %}
+            </h1>
+            <p class="text-muted mb-0">{% trans "Overview of your financial performance and key metrics" %}</p>
+        </div>
+        <div>
+            <a href="{% url 'financial:invoice_create' %}" class="btn btn-primary me-2">
+                <i class="fas fa-plus"></i> {% trans "New Invoice" %}
+            </a>
+            <a href="{% url 'financial:expense_create' %}" class="btn btn-outline-primary">
+                <i class="fas fa-receipt"></i> {% trans "Add Expense" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Financial Navigation Tabs -->
+    <div class="financial-nav">
+        <ul class="nav nav-pills p-3">
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'financial:dashboard' %}">
+                    <i class="fas fa-tachometer-alt"></i> {% trans "Dashboard" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'financial:invoice_list' %}">
+                    <i class="fas fa-file-invoice"></i> {% trans "Invoices" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'financial:expense_list' %}">
+                    <i class="fas fa-receipt"></i> {% trans "Expenses" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'financial:payment_list' %}">
+                    <i class="fas fa-credit-card"></i> {% trans "Payments" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'financial:reports' %}">
+                    <i class="fas fa-chart-bar"></i> {% trans "Reports" %}
+                </a>
+            </li>
+        </ul>
+    </div>
+
 <!-- Key Metrics Row -->
 <div class="row g-4 mb-4">
     <div class="col-lg-3 col-md-6 col-12">
@@ -417,6 +466,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 {% endblock %}
 

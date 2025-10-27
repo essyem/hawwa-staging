@@ -1,0 +1,346 @@
+{% extends 'admin_portal_base.html' %}
+
+{% block title %}Admin Dashboard - Hawwa Admin Portal{% endblock %}
+
+{% block page_title %}Admin Dashboard{% endblock %}
+{% block page_subtitle %}Welcome to your new IFMS-style admin portal{% endblock %}
+{% block page_breadcrumb %}Admin Dashboard{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Dashboard</li>
+{% endblock %}
+
+{% block content %}
+<!-- Welcome Message -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-success border-0 shadow-sm">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle me-3 fs-4"></i>
+                <div>
+                    <h5 class="mb-1">🎉 Admin Portal Successfully Upgraded!</h5>
+                    <p class="mb-0">Your Hawwa admin portal now features the IFMS-inspired design with enhanced navigation and modern UI components.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-primary bg-gradient rounded-3 p-3">
+                            <i class="fas fa-users text-white fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-muted small">Total Users</div>
+                        <div class="fs-4 fw-bold text-dark">{{ total_users|default:"1,247" }}</div>
+                        <div class="text-success small">
+                            <i class="fas fa-arrow-up"></i> 12% this month
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-success bg-gradient rounded-3 p-3">
+                            <i class="fas fa-calendar-check text-white fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-muted small">Active Bookings</div>
+                        <div class="fs-4 fw-bold text-dark">{{ active_bookings|default:"89" }}</div>
+                        <div class="text-success small">
+                            <i class="fas fa-arrow-up"></i> 8% this week
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-warning bg-gradient rounded-3 p-3">
+                            <i class="fas fa-spa text-white fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-muted small">Services</div>
+                        <div class="fs-4 fw-bold text-dark">{{ total_services|default:"34" }}</div>
+                        <div class="text-info small">
+                            <i class="fas fa-plus"></i> 3 new this month
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-info bg-gradient rounded-3 p-3">
+                            <i class="fas fa-store text-white fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-muted small">Active Vendors</div>
+                        <div class="fs-4 fw-bold text-dark">{{ active_vendors|default:"17" }}</div>
+                        <div class="text-success small">
+                            <i class="fas fa-arrow-up"></i> 5% this month
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Features Comparison -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pb-0">
+                <h5 class="card-title mb-0">🔄 Portal Enhancement Features</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <h6 class="text-success"><i class="fas fa-check-circle me-2"></i>Enhanced Navigation</h6>
+                        <ul class="list-unstyled ms-4">
+                            <li class="text-muted"><i class="fas fa-arrow-right me-2 text-primary"></i>IFMS-inspired sidebar design</li>
+                            <li class="text-muted"><i class="fas fa-arrow-right me-2 text-primary"></i>Collapsible navigation sections</li>
+                            <li class="text-muted"><i class="fas fa-arrow-right me-2 text-primary"></i>Mobile-responsive layout</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-success"><i class="fas fa-check-circle me-2"></i>Modern UI Components</h6>
+                        <ul class="list-unstyled ms-4">
+                            <li class="text-muted"><i class="fas fa-arrow-right me-2 text-primary"></i>Enhanced cards and buttons</li>
+                            <li class="text-muted"><i class="fas fa-arrow-right me-2 text-primary"></i>Improved color scheme</li>
+                            <li class="text-muted"><i class="fas fa-arrow-right me-2 text-primary"></i>Professional gradients</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-success"><i class="fas fa-check-circle me-2"></i>Better Organization</h6>
+                        <ul class="list-unstyled ms-4">
+                            <li class="text-muted"><i class="fas fa-arrow-right me-2 text-primary"></i>Logical section grouping</li>
+                            <li class="text-muted"><i class="fas fa-arrow-right me-2 text-primary"></i>Breadcrumb navigation</li>
+                            <li class="text-muted"><i class="fas fa-arrow-right me-2 text-primary"></i>Consistent header structure</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-success"><i class="fas fa-check-circle me-2"></i>Enhanced UX</h6>
+                        <ul class="list-unstyled ms-4">
+                            <li class="text-muted"><i class="fas fa-arrow-right me-2 text-primary"></i>Smooth animations</li>
+                            <li class="text-muted"><i class="fas fa-arrow-right me-2 text-primary"></i>Hover effects</li>
+                            <li class="text-muted"><i class="fas fa-arrow-right me-2 text-primary"></i>Improved accessibility</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pb-0">
+                <h5 class="card-title mb-0">⚡ Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'services:service_list' %}" class="btn btn-outline-primary text-start">
+                        <i class="fas fa-spa me-2"></i>
+                        Manage Services
+                    </a>
+                    <a href="{% url 'bookings:booking_list' %}" class="btn btn-outline-success text-start">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        View Bookings
+                    </a>
+                    <a href="{% url 'vendors:dashboard' %}" class="btn btn-outline-warning text-start">
+                        <i class="fas fa-store me-2"></i>
+                        Vendor Portal
+                    </a>
+                    <a href="{% url 'analytics:dashboard' %}" class="btn btn-outline-info text-start">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Analytics
+                    </a>
+                    <a href="{% url 'ai_buddy:home' %}" class="btn btn-outline-secondary text-start">
+                        <i class="fas fa-robot me-2"></i>
+                        AI Buddy
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation Sections -->
+<div class="row g-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center p-4">
+                <div class="bg-primary bg-gradient rounded-3 p-3 mb-3 d-inline-block">
+                    <i class="fas fa-spa text-white fs-2"></i>
+                </div>
+                <h5 class="card-title">Service Management</h5>
+                <p class="card-text text-muted">Manage wellness services, accommodations, and care providers with the enhanced interface.</p>
+                <a href="#" class="btn btn-primary" onclick="toggleNavSection('servicesMenu')">
+                    Explore Services <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center p-4">
+                <div class="bg-success bg-gradient rounded-3 p-3 mb-3 d-inline-block">
+                    <i class="fas fa-calendar-check text-white fs-2"></i>
+                </div>
+                <h5 class="card-title">Booking System</h5>
+                <p class="card-text text-muted">Advanced booking management with real-time updates and comprehensive dashboard views.</p>
+                <a href="#" class="btn btn-success" onclick="toggleNavSection('bookingsMenu')">
+                    View Bookings <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center p-4">
+                <div class="bg-info bg-gradient rounded-3 p-3 mb-3 d-inline-block">
+                    <i class="fas fa-chart-line text-white fs-2"></i>
+                </div>
+                <h5 class="card-title">Financial Module</h5>
+                <p class="card-text text-muted">Comprehensive financial management inspired by IFMS with invoicing, payments, and reporting.</p>
+                <a href="#" class="btn btn-info" onclick="toggleNavSection('financialMenu')">
+                    Open Financial <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Status -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pb-0">
+                <h5 class="card-title mb-0">🔧 System Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <div class="text-success me-2">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Admin Portal</div>
+                                <small class="text-muted">✅ Enhanced & Active</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <div class="text-success me-2">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Database</div>
+                                <small class="text-muted">Connected (SQLite)</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <div class="text-success me-2">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Navigation</div>
+                                <small class="text-muted">IFMS-Style Active</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <div class="text-success me-2">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Templates</div>
+                                <small class="text-muted">Successfully Updated</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Function to toggle navigation sections (for demo purposes)
+    function toggleNavSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            // Collapse all other sections first
+            const allCollapses = document.querySelectorAll('.nav-submenu.collapse');
+            allCollapses.forEach(collapse => {
+                if (collapse.id !== sectionId) {
+                    const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    }
+                }
+            });
+            
+            // Toggle the target section
+            const bsCollapse = bootstrap.Collapse.getOrCreateInstance(section);
+            bsCollapse.toggle();
+            
+            // Scroll to top to see the navigation
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+    
+    // Add some interactive elements
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add pulse effect to stats cards
+        const statsCards = document.querySelectorAll('.card .bg-gradient');
+        statsCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+                this.style.transition = 'transform 0.3s ease';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    });
+</script>
+{% endblock %}

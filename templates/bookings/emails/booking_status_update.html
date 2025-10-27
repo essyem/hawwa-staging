@@ -1,1 +1,19 @@
-<p>Placeholder email template: bookings/emails/booking_status_update.html</p>
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% trans "Booking Status Update" %}</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333;">
+    <h2 style="color: #8D1538;">{% trans "Booking Status Update" %}</h2>
+    <p>{% blocktrans with booking_number=booking.booking_number %}Your booking <strong>{{ booking_number }}</strong> has been updated.{% endblocktrans %}</p>
+    <p>{% trans "Service:" %} <strong>{{ booking.service.name }}</strong></p>
+    <p>{% trans "Start Date:" %} <strong>{{ booking.start_date }}</strong></p>
+    <p>{% trans "End Date:" %} <strong>{{ booking.end_date }}</strong></p>
+    <p>{% trans "Current Status:" %} <strong>{{ booking.get_status_display }}</strong></p>
+    <hr>
+    <p>{% trans "If you have any questions about this update, please contact us." %}</p>
+    <p style="color: #8D1538;">Hawwa Wellness</p>
+</body>
+</html>

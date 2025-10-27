@@ -1,9 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'hrms/base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Employees - HRMS{% endblock %}
+{% block title %}{% trans "Employees" %} - HRMS{% endblock %}
+{% block nav_employees %}active{% endblock %}
 
-{% block content %}
+{% block main_content %}
 <div class="row">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">

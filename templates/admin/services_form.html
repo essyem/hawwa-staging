@@ -1,0 +1,611 @@
+{% extends 'admin_portal_base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit Service{% else %}New Service{% endif %} - Hawwa Admin{% endblock %}
+
+{% block page_title %}{% if form.instance.pk %}Edit Service{% else %}New Service{% endif %}{% endblock %}
+{% block page_subtitle %}{% if form.instance.pk %}Update service information{% else %}Create a new wellness service{% endif %}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'services:service_list' %}">Services</a></li>
+{% if form.instance.pk %}
+    <li class="breadcrumb-item"><a href="{% url 'core:admin_service_detail' form.instance.pk %}">{{ form.instance.name }}</a></li>
+    <li class="breadcrumb-item active">Edit</li>
+{% else %}
+    <li class="breadcrumb-item active">New Service</li>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" id="serviceForm">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Basic Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle text-primary me-2"></i>Basic Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="{{ form.name.id_for_label }}" class="form-label fw-bold">
+                                Service Name <span class="text-danger">*</span>
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Choose a clear, descriptive name for your service</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.category.id_for_label }}" class="form-label fw-bold">
+                                Category <span class="text-danger">*</span>
+                            </label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.category.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.provider.id_for_label }}" class="form-label fw-bold">
+                                Service Provider
+                            </label>
+                            {{ form.provider }}
+                            {% if form.provider.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.provider.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <a href="#" class="text-decoration-none" onclick="openProviderModal()">
+                                    <i class="fas fa-plus me-1"></i>Add New Provider
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
+                                Description
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.description.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Provide a detailed description of the service</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing & Duration -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-dollar-sign text-success me-2"></i>Pricing & Duration
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="{{ form.price.id_for_label }}" class="form-label fw-bold">
+                                Price (QAR)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">QAR</span>
+                                {{ form.price }}
+                            </div>
+                            {% if form.price.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.price.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Leave blank for custom pricing</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="{{ form.price_unit.id_for_label }}" class="form-label fw-bold">
+                                Price Unit
+                            </label>
+                            {{ form.price_unit }}
+                            {% if form.price_unit.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.price_unit.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">e.g., hour, session, day</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="{{ form.duration.id_for_label }}" class="form-label fw-bold">
+                                Duration (minutes)
+                            </label>
+                            {{ form.duration }}
+                            {% if form.duration.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.duration.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Expected service duration</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location & Requirements -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-map-marker-alt text-info me-2"></i>Location & Requirements
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="{{ form.location.id_for_label }}" class="form-label fw-bold">
+                                Service Location
+                            </label>
+                            {{ form.location }}
+                            {% if form.location.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.location.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Where is this service provided?</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="{{ form.prerequisites.id_for_label }}" class="form-label fw-bold">
+                                Prerequisites
+                            </label>
+                            {{ form.prerequisites }}
+                            {% if form.prerequisites.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.prerequisites.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Any requirements or preparations needed before the service</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Service Features</label>
+                            <div class="border rounded p-3">
+                                <div class="row g-2" id="featuresContainer">
+                                    <!-- Features will be loaded here -->
+                                </div>
+                                <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addFeature()">
+                                    <i class="fas fa-plus me-2"></i>Add Feature
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Details -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clipboard-list text-warning me-2"></i>Additional Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.max_capacity.id_for_label }}" class="form-label fw-bold">
+                                Maximum Capacity
+                            </label>
+                            {{ form.max_capacity }}
+                            {% if form.max_capacity.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.max_capacity.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Maximum number of clients per session</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.age_restriction.id_for_label }}" class="form-label fw-bold">
+                                Age Restriction
+                            </label>
+                            {{ form.age_restriction }}
+                            {% if form.age_restriction.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.age_restriction.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">e.g., 18+, All ages, 65+</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="{{ form.cancellation_policy.id_for_label }}" class="form-label fw-bold">
+                                Cancellation Policy
+                            </label>
+                            {{ form.cancellation_policy }}
+                            {% if form.cancellation_policy.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.cancellation_policy.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Service Image -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-image text-primary me-2"></i>Service Image
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if form.instance.image %}
+                            <img src="{{ form.instance.image.url }}" alt="Current image" 
+                                 class="img-fluid rounded mb-3" style="max-height: 200px;" id="imagePreview">
+                        {% else %}
+                            <div class="bg-light rounded mb-3 d-flex align-items-center justify-content-center" 
+                                 style="height: 200px;" id="imagePreview">
+                                <i class="fas fa-spa text-muted fa-3x"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.image }}
+                        {% if form.image.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.image.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-text">
+                        <small>
+                            <strong>Recommended:</strong><br>
+                            • Size: 800x600 pixels<br>
+                            • Format: JPG, PNG<br>
+                            • Max size: 5MB
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Settings -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cog text-secondary me-2"></i>Service Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        {{ form.is_active }}
+                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                            <strong>Active Service</strong>
+                            <div class="form-text">Service is available for booking</div>
+                        </label>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        {{ form.is_featured }}
+                        <label class="form-check-label" for="{{ form.is_featured.id_for_label }}">
+                            <strong>Featured Service</strong>
+                            <div class="form-text">Display prominently on website</div>
+                        </label>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        {{ form.allow_online_booking }}
+                        <label class="form-check-label" for="{{ form.allow_online_booking.id_for_label }}">
+                            <strong>Online Booking</strong>
+                            <div class="form-text">Allow customers to book online</div>
+                        </label>
+                    </div>
+
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="requireApproval">
+                        <label class="form-check-label" for="requireApproval">
+                            <strong>Require Approval</strong>
+                            <div class="form-text">Bookings need manual approval</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>
+                            {% if form.instance.pk %}Update Service{% else %}Create Service{% endif %}
+                        </button>
+                        
+                        <button type="button" class="btn btn-outline-primary" onclick="saveAsDraft()">
+                            <i class="fas fa-file-alt me-2"></i>Save as Draft
+                        </button>
+                        
+                        {% if form.instance.pk %}
+                            <a href="{% url 'core:admin_service_detail' form.instance.pk %}" class="btn btn-outline-info">
+                                <i class="fas fa-eye me-2"></i>View Service
+                            </a>
+                            
+                            <button type="button" class="btn btn-outline-secondary" onclick="duplicateService()">
+                                <i class="fas fa-copy me-2"></i>Duplicate
+                            </button>
+                        {% endif %}
+                        
+                        <a href="{% url 'services:service_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help & Tips -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>Tips for Success
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Use clear, descriptive service names
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Upload high-quality images
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Set competitive pricing
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Include detailed descriptions
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Specify clear prerequisites
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Provider Modal -->
+<div class="modal fade" id="providerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Provider</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="providerForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">First Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="first_name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="last_name" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" name="phone">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Specialization</label>
+                            <input type="text" class="form-control" name="specialization">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveProvider()">
+                    <i class="fas fa-save me-2"></i>Save Provider
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let featureCount = 0;
+
+$(document).ready(function() {
+    // Initialize form enhancements
+    initFormEnhancements();
+    
+    // Load existing features if editing
+    {% if form.instance.pk %}
+        loadExistingFeatures();
+    {% endif %}
+
+    // Image preview
+    $('#{{ form.image.id_for_label }}').change(function() {
+        previewImage(this);
+    });
+
+    // Form validation
+    $('#serviceForm').on('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+        }
+    });
+});
+
+function initFormEnhancements() {
+    // Add Bootstrap classes to form fields
+    $('input, select, textarea').addClass('form-control');
+    $('input[type="checkbox"]').removeClass('form-control').addClass('form-check-input');
+    
+    // Auto-generate slug from name (if needed)
+    $('#{{ form.name.id_for_label }}').on('input', function() {
+        // Auto-suggestion logic can be added here
+    });
+}
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $('#imagePreview').html(`<img src="${e.target.result}" class="img-fluid rounded" style="max-height: 200px;">`);
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function addFeature() {
+    featureCount++;
+    const featureHtml = `
+        <div class="col-md-6 feature-item" id="feature-${featureCount}">
+            <div class="input-group">
+                <input type="text" class="form-control" name="features[]" placeholder="Feature name">
+                <button type="button" class="btn btn-outline-danger" onclick="removeFeature(${featureCount})">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    $('#featuresContainer').append(featureHtml);
+}
+
+function removeFeature(id) {
+    $(`#feature-${id}`).remove();
+}
+
+function loadExistingFeatures() {
+    // TODO: Load existing features from backend
+    // This would be populated from the service's features
+}
+
+function validateForm() {
+    let isValid = true;
+    const requiredFields = ['{{ form.name.id_for_label }}', '{{ form.category.id_for_label }}'];
+    
+    requiredFields.forEach(function(fieldId) {
+        const field = $(`#${fieldId}`);
+        if (!field.val().trim()) {
+            field.addClass('is-invalid');
+            isValid = false;
+        } else {
+            field.removeClass('is-invalid').addClass('is-valid');
+        }
+    });
+    
+    return isValid;
+}
+
+function saveAsDraft() {
+    // Add a hidden field to indicate draft status
+    $('<input>').attr({
+        type: 'hidden',
+        name: 'save_as_draft',
+        value: 'true'
+    }).appendTo('#serviceForm');
+    
+    $('#serviceForm').submit();
+}
+
+function duplicateService() {
+    if (confirm('Create a copy of this service?')) {
+        window.location.href = '{% url "core:admin_service_create" %}?duplicate={{ form.instance.pk }}';
+    }
+}
+
+function openProviderModal() {
+    $('#providerModal').modal('show');
+}
+
+function saveProvider() {
+    const formData = new FormData($('#providerForm')[0]);
+    
+    // TODO: Implement AJAX call to save provider
+    $.ajax({
+        url: '{% url "accounts:provider_create_ajax" %}',
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(response) {
+            // Add new provider to select dropdown
+            const option = new Option(response.name, response.id, true, true);
+            $('#{{ form.provider.id_for_label }}').append(option).trigger('change');
+            
+            // Close modal and show success message
+            $('#providerModal').modal('hide');
+            showToast('Provider created successfully', 'success');
+        },
+        error: function(xhr) {
+            showToast('Error creating provider', 'error');
+        }
+    });
+}
+
+// Auto-save functionality (optional)
+let autoSaveTimer;
+function enableAutoSave() {
+    $('input, select, textarea').on('input change', function() {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(function() {
+            saveFormData();
+        }, 30000); // Auto-save every 30 seconds
+    });
+}
+
+function saveFormData() {
+    const formData = new FormData($('#serviceForm')[0]);
+    formData.append('auto_save', 'true');
+    
+    // TODO: Implement auto-save via AJAX
+    console.log('Auto-saving form data...');
+}
+
+function showToast(message, type) {
+    // Use the global toast function from admin-portal.js
+    if (window.hawwaAdmin && window.hawwaAdmin.showToast) {
+        window.hawwaAdmin.showToast(message, type);
+    }
+}
+
+// Enable auto-save on page load
+// enableAutoSave();
+</script>
+{% endblock %}

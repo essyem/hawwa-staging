@@ -203,25 +203,43 @@ class Booking(models.Model):
     
     def send_confirmation_email(self):
         """Send booking confirmation email to client"""
-        if self.client_email or self.user.email:
-            email = self.client_email or self.user.email
-            subject = f"Booking Confirmation - {self.booking_number}"
-            message = render_to_string('bookings/emails/booking_confirmation.html', {
-                'booking': self,
-                'user': self.user,
-            })
-            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+        try:
+            if self.client_email or self.user.email:
+                email = self.client_email or self.user.email
+                subject = f"Booking Confirmation - {self.booking_number}"
+                message = render_to_string('bookings/emails/booking_confirmation.html', {
+                    'booking': self,
+                    'user': self.user,
+                })
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+                return True
+        except Exception as e:
+            # Log the error but don't let it break the booking process
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to send confirmation email for booking {self.booking_number}: {e}")
+            return False
+        return False
     
     def send_status_update_email(self):
         """Send booking status update email to client"""
-        if self.client_email or self.user.email:
-            email = self.client_email or self.user.email
-            subject = f"Booking Update - {self.booking_number}"
-            message = render_to_string('bookings/emails/booking_status_update.html', {
-                'booking': self,
-                'user': self.user,
-            })
-            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+        try:
+            if self.client_email or self.user.email:
+                email = self.client_email or self.user.email
+                subject = f"Booking Update - {self.booking_number}"
+                message = render_to_string('bookings/emails/booking_status_update.html', {
+                    'booking': self,
+                    'user': self.user,
+                })
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+                return True
+        except Exception as e:
+            # Log the error but don't let it break the booking process
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to send status update email for booking {self.booking_number}: {e}")
+            return False
+        return False
 
 
 class BookingItem(models.Model):
